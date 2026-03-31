@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: word-quest-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - word-quest-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  server:
+    build: ./server
+    container_name: word-quest-server
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongodb:27017/word-quest
+      - JWT_SECRET=${JWT_SECRET:-word_quest_docker_secret_change_me}
+      - JWT_EXPIRES_IN=7d
+      - LLM_SERVICE_URL=http://llm-service:8000
+      - CORS_ORIGIN=http://localhost:3000
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - word-quest-net
+    restart: unless-stopped
+
+  # 数据库初始化（只运行一次，导入词库+测试用户）
+  seed:
+    build: ./server
+    container_name: word-quest-seed
+    command: node src/seed.js
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/word-quest
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - word-quest-net
+    restart: "no"
+
+  llm-service:
+    build: ./llm-service
+    container_name: word-quest-llm
+    ports:
+      - "8000:8000"
+    environment:
+      - ERNIE_API_KEY=${ERNIE_API_KEY:-}
+      - ERNIE_SECRET_KEY=${ERNIE_SECRET_KEY:-}
+    networks:
+      - word-quest-net
+    restart: unless-stopped
+
+  client:
+    build: ./client
+    container_name: word-quest-client
+    ports:
+      - "3000:80"
+    depends_on:
+      - server
+    networks:
+      - word-quest-net
+    restart: unless-stopped
+
+volumes:
+  mongo-data:
+
+networks:
+  word-quest-net:
+    driver: bridge

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>词汇大冒险 - Word Quest</title>
+  <link rel="icon" href="/assets/ui/favicon.ico" />
+
+  <!-- 像素字体: Press Start 2P (国内可用 CDN 镜像) -->
+  <link rel="preconnect" href="https://fonts.loli.net">
+  <link href="https://fonts.loli.net/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <!-- 备用：本地 fallback 在 CSS 中通过 font-family 链实现 -->
+
+  <!-- Sprout Lands 自带像素字体 -->
+  <style>
+    @font-face {
+      font-family: 'SproutLands';
+      src: url('/assets/sprout-lands-ui/Sprout Lands - UI Pack - Basic pack/fonts/pixelFont-7-8x14-sproutLands.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    /* 全局像素渲染优化 */
+    canvas {
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,7499 @@
+[
+  {
+    "word": "apple",
+    "phonetic": "/ˈæpəl/",
+    "meaning": "苹果",
+    "partOfSpeech": "n.",
+    "example": "I eat an apple every day.",
+    "exampleTranslation": "我每天吃一个苹果。",
+    "difficulty": 1,
+    "chapter": 1,
+    "level": 1,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "想象一个红红的苹果",
+    "category": "food"
+  },
+  {
+    "word": "bread",
+    "phonetic": "/bred/",
+    "meaning": "面包",
+    "partOfSpeech": "n.",
+    "example": "She bought some bread from the bakery.",
+    "exampleTranslation": "她从面包店买了一些面包。",
+    "difficulty": 1,
+    "chapter": 1,
+    "level": 1,
+    "synonyms": [
+      "loaf"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "bread sounds like 不来得→面包不来得赶紧买",
+    "category": "food"
+  },
+  {
+    "word": "milk",
+    "phonetic": "/mɪlk/",
+    "meaning": "牛奶",
+    "partOfSpeech": "n.",
+    "example": "Children should drink milk every day.",
+    "exampleTranslation": "孩子们应该每天喝牛奶。",
+    "difficulty": 1,
+    "chapter": 1,
+    "level": 1,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "milk→咪了咔→喝牛奶的声音",
+    "category": "food"
+  },
+  {
+    "word": "rice",
+    "phonetic": "/raɪs/",
+    "meaning": "米饭",
+    "partOfSpeech": "n.",
+    "example": "Rice is the main food in Asia.",
+    "exampleTranslation": "米饭是亚洲的主食。",
+    "difficulty": 1,
+    "chapter": 1,
+    "level": 1,
+    "synonyms": [
+      "grain"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "rice→入爱吃→人人都爱吃米饭",
+    "category": "food"
+  },
+  {
+    "word": "sugar",
+    "phonetic": "/ˈʃʊɡər/",
+    "meaning": "糖",
+    "partOfSpeech": "n.",
+    "example": "Too much sugar is bad for your health.",
+    "exampleTranslation": "太多糖对健康有害。",
+    "difficulty": 1,
+    "chapter": 1,
+    "level": 1,
+    "synonyms": [
+      "sweetener"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "sugar→书加→书上加点糖更甜蜜",
+    "category": "food"
+  },
+  {
+    "word": "chicken",
+    "phonetic": "/ˈtʃɪkɪn/",
+    "meaning": "鸡肉",
+    "partOfSpeech": "n.",
+    "example": "We had fried chicken for lunch.",
+    "exampleTranslation": "我们午餐吃了炸鸡。",
+    "difficulty": 1,
+    "chapter": 1,
+    "level": 1,
+    "synonyms": [
+      "poultry"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "chicken→吃啃→吃啃鸡肉",
+    "category": "food"
+  },
+  {
+    "word": "soup",
+    "phonetic": "/suːp/",
+    "meaning": "汤",
+    "partOfSpeech": "n.",
+    "example": "A bowl of hot soup warms you up.",
+    "exampleTranslation": "一碗热汤让你暖和起来。",
+    "difficulty": 1,
+    "chapter": 1,
+    "level": 1,
+    "synonyms": [
+      "broth"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "soup→思噢普→喝汤发出的声音",
+    "category": "food"
+  },
+  {
+    "word": "cheese",
+    "phonetic": "/tʃiːz/",
+    "meaning": "奶酪",
+    "partOfSpeech": "n.",
+    "example": "This pizza has a lot of cheese.",
+    "exampleTranslation": "这个披萨有很多奶酪。",
+    "difficulty": 1,
+    "chapter": 1,
+    "level": 1,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "拍照说cheese→奶酪让你笑",
+    "category": "food"
+  },
+  {
+    "word": "salad",
+    "phonetic": "/ˈsæləd/",
+    "meaning": "沙拉",
+    "partOfSpeech": "n.",
+    "example": "I ordered a fresh salad for dinner.",
+    "exampleTranslation": "我晚餐点了一份新鲜沙拉。",
+    "difficulty": 2,
+    "chapter": 1,
+    "level": 2,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "salad音似沙拉，直接记忆",
+    "category": "food"
+  },
+  {
+    "word": "dessert",
+    "phonetic": "/dɪˈzɜːrt/",
+    "meaning": "甜点",
+    "partOfSpeech": "n.",
+    "example": "Would you like some dessert after dinner?",
+    "exampleTranslation": "晚餐后想来点甜点吗？",
+    "difficulty": 2,
+    "chapter": 1,
+    "level": 2,
+    "synonyms": [
+      "sweet"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "dessert有两个s→甜点太好吃想吃两份",
+    "category": "food"
+  },
+  {
+    "word": "recipe",
+    "phonetic": "/ˈresɪpi/",
+    "meaning": "食谱",
+    "partOfSpeech": "n.",
+    "example": "She followed her grandmother's recipe.",
+    "exampleTranslation": "她按照奶奶的食谱做菜。",
+    "difficulty": 2,
+    "chapter": 1,
+    "level": 2,
+    "synonyms": [
+      "formula"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "re(反复)+cipe(取)→反复取用",
+    "memoryTip": "recipe→来拾匹→来拾取食谱",
+    "category": "food"
+  },
+  {
+    "word": "ingredient",
+    "phonetic": "/ɪnˈɡriːdiənt/",
+    "meaning": "配料",
+    "partOfSpeech": "n.",
+    "example": "Fresh ingredients make better food.",
+    "exampleTranslation": "新鲜的配料做出更好的食物。",
+    "difficulty": 3,
+    "chapter": 1,
+    "level": 3,
+    "synonyms": [
+      "component"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "in(进入)+gredi(走)+ent→走进去的东西",
+    "memoryTip": "进入菜里的东西就是配料",
+    "category": "food"
+  },
+  {
+    "word": "appetite",
+    "phonetic": "/ˈæpɪtaɪt/",
+    "meaning": "食欲",
+    "partOfSpeech": "n.",
+    "example": "Exercise increases your appetite.",
+    "exampleTranslation": "运动会增加你的食欲。",
+    "difficulty": 3,
+    "chapter": 1,
+    "level": 3,
+    "synonyms": [
+      "hunger"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "ap(朝向)+pet(追求)+ite→追求食物",
+    "memoryTip": "appetite→爱拍它→看到美食爱拍它",
+    "category": "food"
+  },
+  {
+    "word": "cuisine",
+    "phonetic": "/kwɪˈziːn/",
+    "meaning": "菜系",
+    "partOfSpeech": "n.",
+    "example": "French cuisine is famous worldwide.",
+    "exampleTranslation": "法国菜系闻名世界。",
+    "difficulty": 4,
+    "chapter": 1,
+    "level": 4,
+    "synonyms": [
+      "cooking"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "来自法语cuisine(厨房)",
+    "memoryTip": "cuisine→亏了人→亏了做菜的人",
+    "category": "food"
+  },
+  {
+    "word": "gourmet",
+    "phonetic": "/ˈɡʊrmeɪ/",
+    "meaning": "美食家",
+    "partOfSpeech": "n.",
+    "example": "He is a gourmet who loves fine dining.",
+    "exampleTranslation": "他是一个热爱精致美食的美食家。",
+    "difficulty": 4,
+    "chapter": 1,
+    "level": 4,
+    "synonyms": [
+      "foodie"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "来自法语gourmet(品酒师)",
+    "memoryTip": "gourmet→购没→美食家到处购买美食",
+    "category": "food"
+  },
+  {
+    "word": "nutrition",
+    "phonetic": "/njuːˈtrɪʃən/",
+    "meaning": "营养",
+    "partOfSpeech": "n.",
+    "example": "Good nutrition is essential for health.",
+    "exampleTranslation": "良好的营养对健康至关重要。",
+    "difficulty": 5,
+    "chapter": 1,
+    "level": 5,
+    "synonyms": [
+      "nourishment"
+    ],
+    "antonyms": [
+      "malnutrition"
+    ],
+    "rootAnalysis": "nutri(滋养)+tion(名词后缀)",
+    "memoryTip": "nutrition→牛吹什→牛的营养好能吹什么",
+    "category": "food"
+  },
+  {
+    "word": "head",
+    "phonetic": "/hed/",
+    "meaning": "头",
+    "partOfSpeech": "n.",
+    "example": "She shook her head in disagreement.",
+    "exampleTranslation": "她摇头表示不同意。",
+    "difficulty": 1,
+    "chapter": 1,
+    "level": 1,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "head→黑的→头发是黑的",
+    "category": "body"
+  },
+  {
+    "word": "hand",
+    "phonetic": "/hænd/",
+    "meaning": "手",
+    "partOfSpeech": "n.",
+    "example": "He raised his hand to ask a question.",
+    "exampleTranslation": "他举手提问。",
+    "difficulty": 1,
+    "chapter": 1,
+    "level": 1,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "hand→含得→手含得住东西",
+    "category": "body"
+  },
+  {
+    "word": "heart",
+    "phonetic": "/hɑːrt/",
+    "meaning": "心脏",
+    "partOfSpeech": "n.",
+    "example": "Her heart was beating fast.",
+    "exampleTranslation": "她的心脏跳得很快。",
+    "difficulty": 1,
+    "chapter": 1,
+    "level": 1,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "heart中有ear→用心去听",
+    "category": "body"
+  },
+  {
+    "word": "shoulder",
+    "phonetic": "/ˈʃoʊldər/",
+    "meaning": "肩膀",
+    "partOfSpeech": "n.",
+    "example": "He put his bag on his shoulder.",
+    "exampleTranslation": "他把包放在肩膀上。",
+    "difficulty": 2,
+    "chapter": 1,
+    "level": 2,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "shoulder→收了的→肩膀收了的包",
+    "category": "body"
+  },
+  {
+    "word": "stomach",
+    "phonetic": "/ˈstʌmək/",
+    "meaning": "胃",
+    "partOfSpeech": "n.",
+    "example": "My stomach hurts after eating too much.",
+    "exampleTranslation": "吃太多后我的胃疼。",
+    "difficulty": 2,
+    "chapter": 1,
+    "level": 2,
+    "synonyms": [
+      "belly"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "stomach→思他摸可→思考他摸胃可以吗",
+    "category": "body"
+  },
+  {
+    "word": "muscle",
+    "phonetic": "/ˈmʌsəl/",
+    "meaning": "肌肉",
+    "partOfSpeech": "n.",
+    "example": "Regular exercise builds strong muscles.",
+    "exampleTranslation": "经常锻炼能练出强壮的肌肉。",
+    "difficulty": 3,
+    "chapter": 1,
+    "level": 3,
+    "synonyms": [
+      "tissue"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "musc(小鼠)+le→肌肉像小老鼠在皮下跑",
+    "memoryTip": "muscle→马索→马的肌肉像绳索",
+    "category": "body"
+  },
+  {
+    "word": "skeleton",
+    "phonetic": "/ˈskelɪtən/",
+    "meaning": "骨骼",
+    "partOfSpeech": "n.",
+    "example": "The human skeleton has 206 bones.",
+    "exampleTranslation": "人体骨骼有206块骨头。",
+    "difficulty": 4,
+    "chapter": 1,
+    "level": 4,
+    "synonyms": [
+      "framework"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "skel(干燥)+eton→干燥的框架",
+    "memoryTip": "skeleton→死盖了疼→骨骼被盖住会疼",
+    "category": "body"
+  },
+  {
+    "word": "metabolism",
+    "phonetic": "/məˈtæbəlɪzəm/",
+    "meaning": "新陈代谢",
+    "partOfSpeech": "n.",
+    "example": "Exercise speeds up your metabolism.",
+    "exampleTranslation": "运动加速你的新陈代谢。",
+    "difficulty": 5,
+    "chapter": 1,
+    "level": 5,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "meta(变化)+bol(投)+ism→物质的变化转投",
+    "memoryTip": "meta(变)+bol(抛)→身体不断抛弃旧物质",
+    "category": "body"
+  },
+  {
+    "word": "father",
+    "phonetic": "/ˈfɑːðər/",
+    "meaning": "父亲",
+    "partOfSpeech": "n.",
+    "example": "My father works as a teacher.",
+    "exampleTranslation": "我父亲是一名教师。",
+    "difficulty": 1,
+    "chapter": 1,
+    "level": 1,
+    "synonyms": [
+      "dad"
+    ],
+    "antonyms": [
+      "mother"
+    ],
+    "rootAnalysis": "",
+    "memoryTip": "father→发热→父亲发热工作",
+    "category": "family"
+  },
+  {
+    "word": "mother",
+    "phonetic": "/ˈmʌðər/",
+    "meaning": "母亲",
+    "partOfSpeech": "n.",
+    "example": "My mother cooks delicious food.",
+    "exampleTranslation": "我母亲做的饭很好吃。",
+    "difficulty": 1,
+    "chapter": 1,
+    "level": 1,
+    "synonyms": [
+      "mom"
+    ],
+    "antonyms": [
+      "father"
+    ],
+    "rootAnalysis": "",
+    "memoryTip": "mother→妈热→妈妈热心照顾我们",
+    "category": "family"
+  },
+  {
+    "word": "brother",
+    "phonetic": "/ˈbrʌðər/",
+    "meaning": "兄弟",
+    "partOfSpeech": "n.",
+    "example": "He has two brothers and one sister.",
+    "exampleTranslation": "他有两个兄弟和一个姐妹。",
+    "difficulty": 1,
+    "chapter": 1,
+    "level": 1,
+    "synonyms": [
+      "sibling"
+    ],
+    "antonyms": [
+      "sister"
+    ],
+    "rootAnalysis": "",
+    "memoryTip": "brother→不拉热→兄弟不拉你也热情",
+    "category": "family"
+  },
+  {
+    "word": "daughter",
+    "phonetic": "/ˈdɔːtər/",
+    "meaning": "女儿",
+    "partOfSpeech": "n.",
+    "example": "Their daughter is very smart.",
+    "exampleTranslation": "他们的女儿非常聪明。",
+    "difficulty": 2,
+    "chapter": 1,
+    "level": 2,
+    "synonyms": [],
+    "antonyms": [
+      "son"
+    ],
+    "rootAnalysis": "",
+    "memoryTip": "daughter→到特→女儿到了就特别开心",
+    "category": "family"
+  },
+  {
+    "word": "nephew",
+    "phonetic": "/ˈnefjuː/",
+    "meaning": "侄子/外甥",
+    "partOfSpeech": "n.",
+    "example": "My nephew is starting school this year.",
+    "exampleTranslation": "我侄子今年开始上学。",
+    "difficulty": 3,
+    "chapter": 1,
+    "level": 3,
+    "synonyms": [],
+    "antonyms": [
+      "niece"
+    ],
+    "rootAnalysis": "nep(后代)+hew→后代男孩",
+    "memoryTip": "nephew→内服→侄子内服药",
+    "category": "family"
+  },
+  {
+    "word": "ancestor",
+    "phonetic": "/ˈænsestər/",
+    "meaning": "祖先",
+    "partOfSpeech": "n.",
+    "example": "Our ancestors came from different countries.",
+    "exampleTranslation": "我们的祖先来自不同的国家。",
+    "difficulty": 4,
+    "chapter": 1,
+    "level": 4,
+    "synonyms": [
+      "forefather"
+    ],
+    "antonyms": [
+      "descendant"
+    ],
+    "rootAnalysis": "ante(前面)+cess(走)+or→走在前面的人",
+    "memoryTip": "ancestor→安塞死他→祖先安葬在塞外",
+    "category": "family"
+  },
+  {
+    "word": "heritage",
+    "phonetic": "/ˈherɪtɪdʒ/",
+    "meaning": "遗产/传统",
+    "partOfSpeech": "n.",
+    "example": "We should protect our cultural heritage.",
+    "exampleTranslation": "我们应该保护我们的文化遗产。",
+    "difficulty": 5,
+    "chapter": 1,
+    "level": 5,
+    "synonyms": [
+      "legacy",
+      "inheritance"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "herit(继承)+age(名词后缀)→继承下来的东西",
+    "memoryTip": "heritage→嘿里踢脚→为了遗产嘿里踢脚争抢",
+    "category": "family"
+  },
+  {
+    "word": "morning",
+    "phonetic": "/ˈmɔːrnɪŋ/",
+    "meaning": "早晨",
+    "partOfSpeech": "n.",
+    "example": "I exercise every morning.",
+    "exampleTranslation": "我每天早晨锻炼。",
+    "difficulty": 1,
+    "chapter": 1,
+    "level": 1,
+    "synonyms": [
+      "dawn"
+    ],
+    "antonyms": [
+      "evening"
+    ],
+    "rootAnalysis": "",
+    "memoryTip": "morning→摸你→早晨闹钟摸你起床",
+    "category": "time"
+  },
+  {
+    "word": "tonight",
+    "phonetic": "/təˈnaɪt/",
+    "meaning": "今晚",
+    "partOfSpeech": "n.",
+    "example": "Let us go out tonight.",
+    "exampleTranslation": "今晚我们出去吧。",
+    "difficulty": 1,
+    "chapter": 1,
+    "level": 1,
+    "synonyms": [
+      "this evening"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "to(这个)+night(夜晚)",
+    "memoryTip": "to+night→到了夜晚→今晚",
+    "category": "time"
+  },
+  {
+    "word": "yesterday",
+    "phonetic": "/ˈjestərdeɪ/",
+    "meaning": "昨天",
+    "partOfSpeech": "n.",
+    "example": "I saw a movie yesterday.",
+    "exampleTranslation": "我昨天看了一部电影。",
+    "difficulty": 1,
+    "chapter": 1,
+    "level": 1,
+    "synonyms": [],
+    "antonyms": [
+      "tomorrow"
+    ],
+    "rootAnalysis": "",
+    "memoryTip": "yesterday→也是特别的→昨天也是特别的一天",
+    "category": "time"
+  },
+  {
+    "word": "schedule",
+    "phonetic": "/ˈskedʒuːl/",
+    "meaning": "日程表",
+    "partOfSpeech": "n.",
+    "example": "Check your schedule for tomorrow.",
+    "exampleTranslation": "查看你明天的日程表。",
+    "difficulty": 2,
+    "chapter": 1,
+    "level": 2,
+    "synonyms": [
+      "timetable"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "schedule→死盖住了→日程被死死盖住了",
+    "category": "time"
+  },
+  {
+    "word": "deadline",
+    "phonetic": "/ˈdedlaɪn/",
+    "meaning": "截止日期",
+    "partOfSpeech": "n.",
+    "example": "The deadline for the project is Friday.",
+    "exampleTranslation": "项目的截止日期是周五。",
+    "difficulty": 3,
+    "chapter": 1,
+    "level": 3,
+    "synonyms": [
+      "due date"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "dead(死)+line(线)→死亡线→截止线",
+    "memoryTip": "dead+line→死线→过了就死定了",
+    "category": "time"
+  },
+  {
+    "word": "punctual",
+    "phonetic": "/ˈpʌŋktʃuəl/",
+    "meaning": "准时的",
+    "partOfSpeech": "adj.",
+    "example": "He is always punctual for meetings.",
+    "exampleTranslation": "他开会总是准时的。",
+    "difficulty": 4,
+    "chapter": 1,
+    "level": 4,
+    "synonyms": [
+      "prompt",
+      "on time"
+    ],
+    "antonyms": [
+      "late",
+      "tardy"
+    ],
+    "rootAnalysis": "punct(点)+ual(形容词后缀)→踩点的",
+    "memoryTip": "punctual→胖球→胖球准时到",
+    "category": "time"
+  },
+  {
+    "word": "ephemeral",
+    "phonetic": "/ɪˈfemərəl/",
+    "meaning": "短暂的",
+    "partOfSpeech": "adj.",
+    "example": "Fame is often ephemeral.",
+    "exampleTranslation": "名声往往是短暂的。",
+    "difficulty": 5,
+    "chapter": 1,
+    "level": 5,
+    "synonyms": [
+      "transient",
+      "fleeting"
+    ],
+    "antonyms": [
+      "permanent",
+      "eternal"
+    ],
+    "rootAnalysis": "epi(在…上)+hemer(日)+al→只在一天上的",
+    "memoryTip": "ephemeral→一飞没了→短暂如飞走了",
+    "category": "time"
+  },
+  {
+    "word": "red",
+    "phonetic": "/red/",
+    "meaning": "红色的",
+    "partOfSpeech": "adj.",
+    "example": "She wore a red dress to the party.",
+    "exampleTranslation": "她穿了一条红裙子去派对。",
+    "difficulty": 1,
+    "chapter": 1,
+    "level": 1,
+    "synonyms": [
+      "crimson"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "red→热的→红色是热的颜色",
+    "category": "colors"
+  },
+  {
+    "word": "blue",
+    "phonetic": "/bluː/",
+    "meaning": "蓝色的",
+    "partOfSpeech": "adj.",
+    "example": "The sky is blue today.",
+    "exampleTranslation": "今天天空是蓝色的。",
+    "difficulty": 1,
+    "chapter": 1,
+    "level": 1,
+    "synonyms": [
+      "azure"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "blue→不鲁→蓝色天空不鲁莽",
+    "category": "colors"
+  },
+  {
+    "word": "green",
+    "phonetic": "/ɡriːn/",
+    "meaning": "绿色的",
+    "partOfSpeech": "adj.",
+    "example": "The grass is green in spring.",
+    "exampleTranslation": "春天草地是绿色的。",
+    "difficulty": 1,
+    "chapter": 1,
+    "level": 1,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "green→个林→一个森林是绿色的",
+    "category": "colors"
+  },
+  {
+    "word": "purple",
+    "phonetic": "/ˈpɜːrpəl/",
+    "meaning": "紫色的",
+    "partOfSpeech": "adj.",
+    "example": "She painted the wall purple.",
+    "exampleTranslation": "她把墙刷成了紫色。",
+    "difficulty": 2,
+    "chapter": 1,
+    "level": 2,
+    "synonyms": [
+      "violet"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "purple→婆破→婆婆穿破的紫衣服",
+    "category": "colors"
+  },
+  {
+    "word": "scarlet",
+    "phonetic": "/ˈskɑːrlɪt/",
+    "meaning": "猩红色的",
+    "partOfSpeech": "adj.",
+    "example": "Her face turned scarlet with embarrassment.",
+    "exampleTranslation": "她尴尬得脸变成了猩红色。",
+    "difficulty": 3,
+    "chapter": 1,
+    "level": 3,
+    "synonyms": [
+      "crimson",
+      "red"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "scarlet→死该了它→猩红色让人羞红脸",
+    "category": "colors"
+  },
+  {
+    "word": "turquoise",
+    "phonetic": "/ˈtɜːrkwɔɪz/",
+    "meaning": "青绿色的",
+    "partOfSpeech": "adj.",
+    "example": "The turquoise sea was beautiful.",
+    "exampleTranslation": "青绿色的大海非常美丽。",
+    "difficulty": 4,
+    "chapter": 1,
+    "level": 4,
+    "synonyms": [
+      "aqua",
+      "teal"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "来自土耳其石(Turkish stone)的颜色",
+    "memoryTip": "turquoise→土耳其石→土耳其石是青绿色",
+    "category": "colors"
+  },
+  {
+    "word": "vermilion",
+    "phonetic": "/vərˈmɪljən/",
+    "meaning": "朱红色的",
+    "partOfSpeech": "adj.",
+    "example": "The temple was painted in vermilion.",
+    "exampleTranslation": "寺庙被漆成了朱红色。",
+    "difficulty": 5,
+    "chapter": 1,
+    "level": 5,
+    "synonyms": [
+      "cinnabar"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "verm(虫)+ilion→虫子提取的红色染料",
+    "memoryTip": "vermilion→我迷恋→我迷恋朱红色",
+    "category": "colors"
+  },
+  {
+    "word": "egg",
+    "phonetic": "/eɡ/",
+    "meaning": "鸡蛋",
+    "partOfSpeech": "n.",
+    "example": "I had two eggs for breakfast.",
+    "exampleTranslation": "我早餐吃了两个鸡蛋。",
+    "difficulty": 1,
+    "chapter": 1,
+    "level": 1,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "egg→额个→额头上扣个鸡蛋",
+    "category": "food"
+  },
+  {
+    "word": "finger",
+    "phonetic": "/ˈfɪŋɡər/",
+    "meaning": "手指",
+    "partOfSpeech": "n.",
+    "example": "She pointed her finger at the map.",
+    "exampleTranslation": "她用手指指向地图。",
+    "difficulty": 1,
+    "chapter": 1,
+    "level": 1,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "finger→分个→分个手指头给你",
+    "category": "body"
+  },
+  {
+    "word": "sister",
+    "phonetic": "/ˈsɪstər/",
+    "meaning": "姐妹",
+    "partOfSpeech": "n.",
+    "example": "My sister is two years older than me.",
+    "exampleTranslation": "我姐姐比我大两岁。",
+    "difficulty": 1,
+    "chapter": 1,
+    "level": 1,
+    "synonyms": [
+      "sibling"
+    ],
+    "antonyms": [
+      "brother"
+    ],
+    "rootAnalysis": "",
+    "memoryTip": "sister→思思她→思念姐妹思思她",
+    "category": "family"
+  },
+  {
+    "word": "week",
+    "phonetic": "/wiːk/",
+    "meaning": "周",
+    "partOfSpeech": "n.",
+    "example": "There are seven days in a week.",
+    "exampleTranslation": "一周有七天。",
+    "difficulty": 1,
+    "chapter": 1,
+    "level": 1,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "week→围客→围着客人转一周",
+    "category": "time"
+  },
+  {
+    "word": "orange",
+    "phonetic": "/ˈɒrɪndʒ/",
+    "meaning": "橙色的",
+    "partOfSpeech": "adj.",
+    "example": "The sunset turned the sky orange.",
+    "exampleTranslation": "日落把天空染成了橙色。",
+    "difficulty": 1,
+    "chapter": 1,
+    "level": 1,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "orange既是橙子也是橙色",
+    "category": "colors"
+  },
+  {
+    "word": "butter",
+    "phonetic": "/ˈbʌtər/",
+    "meaning": "黄油",
+    "partOfSpeech": "n.",
+    "example": "Spread some butter on the toast.",
+    "exampleTranslation": "在吐司上涂些黄油。",
+    "difficulty": 2,
+    "chapter": 1,
+    "level": 2,
+    "synonyms": [
+      "margarine"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "butter→爸特→爸爸特别爱黄油",
+    "category": "food"
+  },
+  {
+    "word": "vinegar",
+    "phonetic": "/ˈvɪnɪɡər/",
+    "meaning": "醋",
+    "partOfSpeech": "n.",
+    "example": "Add some vinegar to the salad.",
+    "exampleTranslation": "在沙拉里加点醋。",
+    "difficulty": 3,
+    "chapter": 1,
+    "level": 3,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "vin(酒)+egar(酸)→酸酒→醋",
+    "memoryTip": "vinegar→味你个→味道给你个酸的",
+    "category": "food"
+  },
+  {
+    "word": "knee",
+    "phonetic": "/niː/",
+    "meaning": "膝盖",
+    "partOfSpeech": "n.",
+    "example": "He fell and hurt his knee.",
+    "exampleTranslation": "他摔倒伤了膝盖。",
+    "difficulty": 2,
+    "chapter": 1,
+    "level": 2,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "knee→你→你的膝盖(k不发音)",
+    "category": "body"
+  },
+  {
+    "word": "lung",
+    "phonetic": "/lʌŋ/",
+    "meaning": "肺",
+    "partOfSpeech": "n.",
+    "example": "Smoking damages your lungs.",
+    "exampleTranslation": "吸烟会损害你的肺。",
+    "difficulty": 3,
+    "chapter": 1,
+    "level": 3,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "lung→浪→肺在浪呼吸",
+    "category": "body"
+  },
+  {
+    "word": "spine",
+    "phonetic": "/spaɪn/",
+    "meaning": "脊柱",
+    "partOfSpeech": "n.",
+    "example": "Good posture protects your spine.",
+    "exampleTranslation": "良好的姿势保护你的脊柱。",
+    "difficulty": 4,
+    "chapter": 1,
+    "level": 4,
+    "synonyms": [
+      "backbone"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "spin(旋转)+e→支撑旋转的柱",
+    "memoryTip": "spine→死拼→脊柱死拼支撑身体",
+    "category": "body"
+  },
+  {
+    "word": "cousin",
+    "phonetic": "/ˈkʌzən/",
+    "meaning": "堂/表兄弟姐妹",
+    "partOfSpeech": "n.",
+    "example": "My cousin lives in another city.",
+    "exampleTranslation": "我表弟住在另一个城市。",
+    "difficulty": 2,
+    "chapter": 1,
+    "level": 2,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "cousin→靠近→堂兄弟关系靠近",
+    "category": "family"
+  },
+  {
+    "word": "spouse",
+    "phonetic": "/spaʊs/",
+    "meaning": "配偶",
+    "partOfSpeech": "n.",
+    "example": "You may bring your spouse to the party.",
+    "exampleTranslation": "你可以带你的配偶来派对。",
+    "difficulty": 3,
+    "chapter": 1,
+    "level": 3,
+    "synonyms": [
+      "partner",
+      "mate"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "spons(承诺)+e→互相承诺的人",
+    "memoryTip": "spouse→思抱思→思念拥抱思念配偶",
+    "category": "family"
+  },
+  {
+    "word": "guardian",
+    "phonetic": "/ˈɡɑːrdiən/",
+    "meaning": "监护人",
+    "partOfSpeech": "n.",
+    "example": "The guardian signed the school form.",
+    "exampleTranslation": "监护人在学校表格上签了字。",
+    "difficulty": 4,
+    "chapter": 1,
+    "level": 4,
+    "synonyms": [
+      "protector"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "guard(守卫)+ian(人)→守卫的人",
+    "memoryTip": "guardian→guard+ian→守护的人",
+    "category": "family"
+  },
+  {
+    "word": "genealogy",
+    "phonetic": "/ˌdʒiːniˈælədʒi/",
+    "meaning": "家谱学",
+    "partOfSpeech": "n.",
+    "example": "She studies genealogy as a hobby.",
+    "exampleTranslation": "她把研究家谱学当作爱好。",
+    "difficulty": 5,
+    "chapter": 1,
+    "level": 5,
+    "synonyms": [
+      "lineage"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "gene(基因/种族)+ology(学科)→研究家族的学科",
+    "memoryTip": "gene(基因)+logy(学)→基因之学→家谱学",
+    "category": "family"
+  },
+  {
+    "word": "century",
+    "phonetic": "/ˈsentʃəri/",
+    "meaning": "世纪",
+    "partOfSpeech": "n.",
+    "example": "The building is over a century old.",
+    "exampleTranslation": "这栋建筑已有一个多世纪的历史。",
+    "difficulty": 2,
+    "chapter": 1,
+    "level": 2,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "cent(百)+ury→百年→世纪",
+    "memoryTip": "century→cent(百)+ury→一百年",
+    "category": "time"
+  },
+  {
+    "word": "fortnight",
+    "phonetic": "/ˈfɔːrtnaɪt/",
+    "meaning": "两周",
+    "partOfSpeech": "n.",
+    "example": "I will return in a fortnight.",
+    "exampleTranslation": "我两周后回来。",
+    "difficulty": 3,
+    "chapter": 1,
+    "level": 3,
+    "synonyms": [
+      "two weeks"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "four+teen+night→十四个夜晚→两周",
+    "memoryTip": "fourteen nights→14晚→两周",
+    "category": "time"
+  },
+  {
+    "word": "contemporary",
+    "phonetic": "/kənˈtempəreri/",
+    "meaning": "当代的",
+    "partOfSpeech": "adj.",
+    "example": "Contemporary art is hard to understand.",
+    "exampleTranslation": "当代艺术很难理解。",
+    "difficulty": 4,
+    "chapter": 1,
+    "level": 4,
+    "synonyms": [
+      "modern",
+      "current"
+    ],
+    "antonyms": [
+      "ancient"
+    ],
+    "rootAnalysis": "con(共同)+tempor(时间)+ary→同一时间的",
+    "memoryTip": "con(共)+tempor(时)→共同时代的→当代的",
+    "category": "time"
+  },
+  {
+    "word": "perpetual",
+    "phonetic": "/pərˈpetʃuəl/",
+    "meaning": "永恒的",
+    "partOfSpeech": "adj.",
+    "example": "The region has perpetual snow.",
+    "exampleTranslation": "该地区终年积雪。",
+    "difficulty": 5,
+    "chapter": 1,
+    "level": 5,
+    "synonyms": [
+      "eternal",
+      "permanent"
+    ],
+    "antonyms": [
+      "temporary"
+    ],
+    "rootAnalysis": "per(始终)+pet(追求)+ual→始终追求的",
+    "memoryTip": "per(一直)+petual→一直持续的→永恒的",
+    "category": "time"
+  },
+  {
+    "word": "ivory",
+    "phonetic": "/ˈaɪvəri/",
+    "meaning": "象牙白的",
+    "partOfSpeech": "adj.",
+    "example": "The bride wore an ivory gown.",
+    "exampleTranslation": "新娘穿了一件象牙白的礼服。",
+    "difficulty": 3,
+    "chapter": 1,
+    "level": 3,
+    "synonyms": [
+      "cream"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "来自象牙ivory",
+    "memoryTip": "ivory→爱物理→象牙白的爱物理",
+    "category": "colors"
+  },
+  {
+    "word": "maroon",
+    "phonetic": "/məˈruːn/",
+    "meaning": "栗色的",
+    "partOfSpeech": "adj.",
+    "example": "He wore a maroon tie to work.",
+    "exampleTranslation": "他戴着栗色领带上班。",
+    "difficulty": 4,
+    "chapter": 1,
+    "level": 4,
+    "synonyms": [
+      "burgundy"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "来自法语marron(栗子)",
+    "memoryTip": "maroon→马龙→马龙穿栗色衣服",
+    "category": "colors"
+  },
+  {
+    "word": "beverage",
+    "phonetic": "/ˈbevərɪdʒ/",
+    "meaning": "饮料",
+    "partOfSpeech": "n.",
+    "example": "What beverage would you like?",
+    "exampleTranslation": "你想要什么饮料？",
+    "difficulty": 4,
+    "chapter": 1,
+    "level": 4,
+    "synonyms": [
+      "drink"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "bever(喝)+age(名词后缀)→喝的东西",
+    "memoryTip": "beverage→被我喝了脚→饮料被我喝了",
+    "category": "food"
+  },
+  {
+    "word": "gastronomy",
+    "phonetic": "/ɡæˈstrɒnəmi/",
+    "meaning": "美食学",
+    "partOfSpeech": "n.",
+    "example": "Paris is known for its gastronomy.",
+    "exampleTranslation": "巴黎以其美食学闻名。",
+    "difficulty": 5,
+    "chapter": 1,
+    "level": 5,
+    "synonyms": [
+      "culinary arts"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "gastro(胃)+nomy(学问)→关于胃的学问",
+    "memoryTip": "gastro(胃)+nomy(学)→研究胃的学问→美食学",
+    "category": "food"
+  },
+  {
+    "word": "elbow",
+    "phonetic": "/ˈelboʊ/",
+    "meaning": "肘部",
+    "partOfSpeech": "n.",
+    "example": "She rested her elbow on the table.",
+    "exampleTranslation": "她把肘部靠在桌子上。",
+    "difficulty": 2,
+    "chapter": 1,
+    "level": 2,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "el(臂)+bow(弯)→手臂弯曲处",
+    "memoryTip": "elbow→L+bow(弯)→手臂弯成L形",
+    "category": "body"
+  },
+  {
+    "word": "tendon",
+    "phonetic": "/ˈtendən/",
+    "meaning": "肌腱",
+    "partOfSpeech": "n.",
+    "example": "He injured a tendon in his leg.",
+    "exampleTranslation": "他伤了腿部的一条肌腱。",
+    "difficulty": 4,
+    "chapter": 1,
+    "level": 4,
+    "synonyms": [
+      "sinew"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "tend(伸展)+on→用来伸展的",
+    "memoryTip": "tendon→疼动→肌腱伤了疼得不能动",
+    "category": "body"
+  },
+  {
+    "word": "physiology",
+    "phonetic": "/ˌfɪziˈɒlədʒi/",
+    "meaning": "生理学",
+    "partOfSpeech": "n.",
+    "example": "She studied physiology at university.",
+    "exampleTranslation": "她在大学学习生理学。",
+    "difficulty": 5,
+    "chapter": 1,
+    "level": 5,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "physio(自然/身体)+logy(学科)→研究身体的学科",
+    "memoryTip": "physio(身体)+logy(学)→身体之学→生理学",
+    "category": "body"
+  },
+  {
+    "word": "sibling",
+    "phonetic": "/ˈsɪblɪŋ/",
+    "meaning": "兄弟姐妹",
+    "partOfSpeech": "n.",
+    "example": "Do you have any siblings?",
+    "exampleTranslation": "你有兄弟姐妹吗？",
+    "difficulty": 2,
+    "chapter": 1,
+    "level": 2,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "sib(亲属)+ling(小)→小亲属",
+    "memoryTip": "sibling→是不灵→兄弟姐妹是不是灵",
+    "category": "family"
+  },
+  {
+    "word": "milestone",
+    "phonetic": "/ˈmaɪlstoʊn/",
+    "meaning": "里程碑",
+    "partOfSpeech": "n.",
+    "example": "Graduating was a major milestone.",
+    "exampleTranslation": "毕业是一个重要的里程碑。",
+    "difficulty": 2,
+    "chapter": 1,
+    "level": 2,
+    "synonyms": [
+      "landmark"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "mile(英里)+stone(石头)→路边的标记石",
+    "memoryTip": "mile(里)+stone(碑)→里程碑",
+    "category": "time"
+  },
+  {
+    "word": "amber",
+    "phonetic": "/ˈæmbər/",
+    "meaning": "琥珀色的",
+    "partOfSpeech": "adj.",
+    "example": "The traffic light turned amber.",
+    "exampleTranslation": "交通灯变成了琥珀色。",
+    "difficulty": 2,
+    "chapter": 1,
+    "level": 2,
+    "synonyms": [
+      "golden"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "来自阿拉伯语anbar(琥珀)",
+    "memoryTip": "amber→俺吧→俺吧，琥珀色的",
+    "category": "colors"
+  },
+  {
+    "word": "indigo",
+    "phonetic": "/ˈɪndɪɡoʊ/",
+    "meaning": "靛蓝色的",
+    "partOfSpeech": "adj.",
+    "example": "The indigo sky looked stunning at dusk.",
+    "exampleTranslation": "靛蓝色的天空在黄昏时很美。",
+    "difficulty": 5,
+    "chapter": 1,
+    "level": 5,
+    "synonyms": [
+      "deep blue"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "来自印度indigo染料",
+    "memoryTip": "indigo→India go→印度来的蓝色",
+    "category": "colors"
+  },
+  {
+    "word": "noodle",
+    "phonetic": "/ˈnuːdəl/",
+    "meaning": "面条",
+    "partOfSpeech": "n.",
+    "example": "I ordered a bowl of noodles.",
+    "exampleTranslation": "我点了一碗面条。",
+    "difficulty": 2,
+    "chapter": 1,
+    "level": 2,
+    "synonyms": [
+      "pasta"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "noodle→弄斗→弄一碗面条来斗",
+    "category": "food"
+  },
+  {
+    "word": "waist",
+    "phonetic": "/weɪst/",
+    "meaning": "腰部",
+    "partOfSpeech": "n.",
+    "example": "The belt goes around your waist.",
+    "exampleTranslation": "腰带系在腰部。",
+    "difficulty": 3,
+    "chapter": 1,
+    "level": 3,
+    "synonyms": [
+      "middle"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "waist≠waste，腰部不是浪费",
+    "category": "body"
+  },
+  {
+    "word": "kinship",
+    "phonetic": "/ˈkɪnʃɪp/",
+    "meaning": "亲属关系",
+    "partOfSpeech": "n.",
+    "example": "There is a strong kinship between them.",
+    "exampleTranslation": "他们之间有很强的亲属关系。",
+    "difficulty": 5,
+    "chapter": 1,
+    "level": 5,
+    "synonyms": [
+      "relationship"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "kin(亲属)+ship(关系)→亲属关系",
+    "memoryTip": "kin(亲)+ship(关系)→亲属关系",
+    "category": "family"
+  },
+  {
+    "word": "chronic",
+    "phonetic": "/ˈkrɒnɪk/",
+    "meaning": "长期的",
+    "partOfSpeech": "adj.",
+    "example": "He suffers from chronic back pain.",
+    "exampleTranslation": "他长期背痛。",
+    "difficulty": 3,
+    "chapter": 1,
+    "level": 3,
+    "synonyms": [
+      "long-term",
+      "persistent"
+    ],
+    "antonyms": [
+      "acute"
+    ],
+    "rootAnalysis": "chron(时间)+ic(形容词后缀)→时间很长的",
+    "memoryTip": "chron(时间)+ic→时间长的→慢性的",
+    "category": "time"
+  },
+  {
+    "word": "beige",
+    "phonetic": "/beɪʒ/",
+    "meaning": "米色的",
+    "partOfSpeech": "adj.",
+    "example": "She chose beige curtains for the room.",
+    "exampleTranslation": "她为房间选了米色窗帘。",
+    "difficulty": 3,
+    "chapter": 1,
+    "level": 3,
+    "synonyms": [
+      "tan",
+      "cream"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "来自法语beige(天然羊毛色)",
+    "memoryTip": "beige→北极→北极熊是米色的",
+    "category": "colors"
+  },
+  {
+    "word": "cat",
+    "phonetic": "/kæt/",
+    "meaning": "猫",
+    "partOfSpeech": "n.",
+    "example": "The cat is sleeping on the sofa.",
+    "exampleTranslation": "猫在沙发上睡觉。",
+    "difficulty": 1,
+    "chapter": 2,
+    "level": 1,
+    "synonyms": [
+      "feline"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "cat→喀特→猫叫喀特",
+    "category": "animals"
+  },
+  {
+    "word": "dog",
+    "phonetic": "/dɒɡ/",
+    "meaning": "狗",
+    "partOfSpeech": "n.",
+    "example": "The dog is playing in the park.",
+    "exampleTranslation": "狗在公园里玩耍。",
+    "difficulty": 1,
+    "chapter": 2,
+    "level": 1,
+    "synonyms": [
+      "canine"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "dog→多个→多个狗一起玩",
+    "category": "animals"
+  },
+  {
+    "word": "bird",
+    "phonetic": "/bɜːrd/",
+    "meaning": "鸟",
+    "partOfSpeech": "n.",
+    "example": "A bird is singing in the tree.",
+    "exampleTranslation": "一只鸟在树上唱歌。",
+    "difficulty": 1,
+    "chapter": 2,
+    "level": 1,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "bird→伯德→伯德先生养鸟",
+    "category": "animals"
+  },
+  {
+    "word": "tree",
+    "phonetic": "/triː/",
+    "meaning": "树",
+    "partOfSpeech": "n.",
+    "example": "There is a big tree in the garden.",
+    "exampleTranslation": "花园里有一棵大树。",
+    "difficulty": 1,
+    "chapter": 2,
+    "level": 1,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "tree→吹→风吹树",
+    "category": "plants"
+  },
+  {
+    "word": "flower",
+    "phonetic": "/ˈflaʊər/",
+    "meaning": "花",
+    "partOfSpeech": "n.",
+    "example": "She received beautiful flowers on her birthday.",
+    "exampleTranslation": "她生日收到了美丽的花。",
+    "difficulty": 1,
+    "chapter": 2,
+    "level": 1,
+    "synonyms": [
+      "blossom"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "flower→飞落我→花飞落到我身上",
+    "category": "plants"
+  },
+  {
+    "word": "rain",
+    "phonetic": "/reɪn/",
+    "meaning": "雨",
+    "partOfSpeech": "n.",
+    "example": "The rain stopped in the afternoon.",
+    "exampleTranslation": "下午雨停了。",
+    "difficulty": 1,
+    "chapter": 2,
+    "level": 1,
+    "synonyms": [
+      "rainfall"
+    ],
+    "antonyms": [
+      "sunshine"
+    ],
+    "rootAnalysis": "",
+    "memoryTip": "rain→让→让雨来吧",
+    "category": "weather"
+  },
+  {
+    "word": "mountain",
+    "phonetic": "/ˈmaʊntɪn/",
+    "meaning": "山",
+    "partOfSpeech": "n.",
+    "example": "We climbed the mountain last weekend.",
+    "exampleTranslation": "我们上周末爬了山。",
+    "difficulty": 1,
+    "chapter": 2,
+    "level": 1,
+    "synonyms": [
+      "peak"
+    ],
+    "antonyms": [
+      "valley"
+    ],
+    "rootAnalysis": "mount(登)+ain→可以攀登的",
+    "memoryTip": "mountain→冒疼→爬山爬得冒汗疼",
+    "category": "geography"
+  },
+  {
+    "word": "ocean",
+    "phonetic": "/ˈoʊʃən/",
+    "meaning": "海洋",
+    "partOfSpeech": "n.",
+    "example": "The Pacific Ocean is the largest ocean.",
+    "exampleTranslation": "太平洋是最大的海洋。",
+    "difficulty": 1,
+    "chapter": 2,
+    "level": 1,
+    "synonyms": [
+      "sea"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "ocean→哦先→哦先看看海洋",
+    "category": "ocean"
+  },
+  {
+    "word": "fish",
+    "phonetic": "/fɪʃ/",
+    "meaning": "鱼",
+    "partOfSpeech": "n.",
+    "example": "There are many fish in the lake.",
+    "exampleTranslation": "湖里有很多鱼。",
+    "difficulty": 1,
+    "chapter": 2,
+    "level": 1,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "fish→飞市→鱼飞上市场",
+    "category": "ocean"
+  },
+  {
+    "word": "river",
+    "phonetic": "/ˈrɪvər/",
+    "meaning": "河流",
+    "partOfSpeech": "n.",
+    "example": "The river flows through the city.",
+    "exampleTranslation": "河流穿过城市。",
+    "difficulty": 1,
+    "chapter": 2,
+    "level": 1,
+    "synonyms": [
+      "stream"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "river→日我→日出映在河面上",
+    "category": "geography"
+  },
+  {
+    "word": "cloud",
+    "phonetic": "/klaʊd/",
+    "meaning": "云",
+    "partOfSpeech": "n.",
+    "example": "White clouds floated across the sky.",
+    "exampleTranslation": "白云飘过天空。",
+    "difficulty": 1,
+    "chapter": 2,
+    "level": 1,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "cloud→可老的→云可以很老的",
+    "category": "weather"
+  },
+  {
+    "word": "seed",
+    "phonetic": "/siːd/",
+    "meaning": "种子",
+    "partOfSpeech": "n.",
+    "example": "Plant the seeds in spring.",
+    "exampleTranslation": "在春天播种。",
+    "difficulty": 1,
+    "chapter": 2,
+    "level": 1,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "seed→撕得→种子撕得开种壳",
+    "category": "plants"
+  },
+  {
+    "word": "wave",
+    "phonetic": "/weɪv/",
+    "meaning": "波浪",
+    "partOfSpeech": "n.",
+    "example": "The waves crashed against the shore.",
+    "exampleTranslation": "波浪拍打着海岸。",
+    "difficulty": 1,
+    "chapter": 2,
+    "level": 1,
+    "synonyms": [
+      "swell"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "wave→歪→波浪歪歪扭扭",
+    "category": "ocean"
+  },
+  {
+    "word": "island",
+    "phonetic": "/ˈaɪlənd/",
+    "meaning": "岛屿",
+    "partOfSpeech": "n.",
+    "example": "They spent their vacation on a tropical island.",
+    "exampleTranslation": "他们在一个热带岛屿度假。",
+    "difficulty": 1,
+    "chapter": 2,
+    "level": 1,
+    "synonyms": [
+      "isle"
+    ],
+    "antonyms": [
+      "mainland"
+    ],
+    "rootAnalysis": "is(是)+land(土地)→水中的土地(s不发音)",
+    "memoryTip": "island→爱了→爱了这个岛屿",
+    "category": "geography"
+  },
+  {
+    "word": "dolphin",
+    "phonetic": "/ˈdɒlfɪn/",
+    "meaning": "海豚",
+    "partOfSpeech": "n.",
+    "example": "Dolphins are very intelligent animals.",
+    "exampleTranslation": "海豚是非常聪明的动物。",
+    "difficulty": 2,
+    "chapter": 2,
+    "level": 2,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "dolphin→到了分→海豚到了就分外开心",
+    "category": "animals"
+  },
+  {
+    "word": "eagle",
+    "phonetic": "/ˈiːɡəl/",
+    "meaning": "鹰",
+    "partOfSpeech": "n.",
+    "example": "The eagle soared high above the mountains.",
+    "exampleTranslation": "鹰在群山之上高高翱翔。",
+    "difficulty": 2,
+    "chapter": 2,
+    "level": 2,
+    "synonyms": [
+      "hawk"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "eagle→一个→一个鹰在天上飞",
+    "category": "animals"
+  },
+  {
+    "word": "bamboo",
+    "phonetic": "/ˌbæmˈbuː/",
+    "meaning": "竹子",
+    "partOfSpeech": "n.",
+    "example": "Pandas love to eat bamboo.",
+    "exampleTranslation": "熊猫喜欢吃竹子。",
+    "difficulty": 2,
+    "chapter": 2,
+    "level": 2,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "bamboo→班布→竹子班布在风中",
+    "category": "plants"
+  },
+  {
+    "word": "petal",
+    "phonetic": "/ˈpetəl/",
+    "meaning": "花瓣",
+    "partOfSpeech": "n.",
+    "example": "Rose petals fell on the ground.",
+    "exampleTranslation": "玫瑰花瓣落在地上。",
+    "difficulty": 2,
+    "chapter": 2,
+    "level": 2,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "pet(追求)+al→花追求美丽的部分",
+    "memoryTip": "petal→拍它→轻轻拍花瓣",
+    "category": "plants"
+  },
+  {
+    "word": "thunder",
+    "phonetic": "/ˈθʌndər/",
+    "meaning": "雷",
+    "partOfSpeech": "n.",
+    "example": "Thunder and lightning filled the sky.",
+    "exampleTranslation": "雷电充满了天空。",
+    "difficulty": 2,
+    "chapter": 2,
+    "level": 2,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "thunder→上的→天上的雷声",
+    "category": "weather"
+  },
+  {
+    "word": "breeze",
+    "phonetic": "/briːz/",
+    "meaning": "微风",
+    "partOfSpeech": "n.",
+    "example": "A cool breeze blew through the window.",
+    "exampleTranslation": "一阵凉风从窗户吹进来。",
+    "difficulty": 2,
+    "chapter": 2,
+    "level": 2,
+    "synonyms": [
+      "gust"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "breeze→不热死→微风吹来不热死",
+    "category": "weather"
+  },
+  {
+    "word": "valley",
+    "phonetic": "/ˈvæli/",
+    "meaning": "山谷",
+    "partOfSpeech": "n.",
+    "example": "The valley was covered with flowers.",
+    "exampleTranslation": "山谷里开满了花。",
+    "difficulty": 2,
+    "chapter": 2,
+    "level": 2,
+    "synonyms": [
+      "gorge"
+    ],
+    "antonyms": [
+      "mountain"
+    ],
+    "rootAnalysis": "val(强壮/价值)+ley→有价值的低地",
+    "memoryTip": "valley→歪了→山歪了形成山谷",
+    "category": "geography"
+  },
+  {
+    "word": "cliff",
+    "phonetic": "/klɪf/",
+    "meaning": "悬崖",
+    "partOfSpeech": "n.",
+    "example": "They stood at the edge of the cliff.",
+    "exampleTranslation": "他们站在悬崖边上。",
+    "difficulty": 2,
+    "chapter": 2,
+    "level": 2,
+    "synonyms": [
+      "bluff"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "cliff→可离否→悬崖边可以离开否",
+    "category": "geography"
+  },
+  {
+    "word": "coral",
+    "phonetic": "/ˈkɒrəl/",
+    "meaning": "珊瑚",
+    "partOfSpeech": "n.",
+    "example": "The coral reef is home to many fish.",
+    "exampleTranslation": "珊瑚礁是许多鱼的家。",
+    "difficulty": 2,
+    "chapter": 2,
+    "level": 2,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "coral→口若→珊瑚口若悬河般美丽",
+    "category": "ocean"
+  },
+  {
+    "word": "tide",
+    "phonetic": "/taɪd/",
+    "meaning": "潮汐",
+    "partOfSpeech": "n.",
+    "example": "The tide comes in and goes out twice a day.",
+    "exampleTranslation": "潮汐一天涨退两次。",
+    "difficulty": 2,
+    "chapter": 2,
+    "level": 2,
+    "synonyms": [
+      "current"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "tide→太的→太大的潮水",
+    "category": "ocean"
+  },
+  {
+    "word": "reptile",
+    "phonetic": "/ˈreptaɪl/",
+    "meaning": "爬行动物",
+    "partOfSpeech": "n.",
+    "example": "Snakes and lizards are reptiles.",
+    "exampleTranslation": "蛇和蜥蜴是爬行动物。",
+    "difficulty": 3,
+    "chapter": 2,
+    "level": 3,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "rept(爬)+ile(能…的)→能爬的",
+    "memoryTip": "reptile→热怕太→爬行动物热怕太阳",
+    "category": "animals"
+  },
+  {
+    "word": "predator",
+    "phonetic": "/ˈpredətər/",
+    "meaning": "捕食者",
+    "partOfSpeech": "n.",
+    "example": "Lions are apex predators.",
+    "exampleTranslation": "狮子是顶级捕食者。",
+    "difficulty": 3,
+    "chapter": 2,
+    "level": 3,
+    "synonyms": [
+      "hunter"
+    ],
+    "antonyms": [
+      "prey"
+    ],
+    "rootAnalysis": "pred(抓取)+ator(者)→抓取的动物",
+    "memoryTip": "predator→扑来的它→捕食者扑过来了",
+    "category": "animals"
+  },
+  {
+    "word": "blossom",
+    "phonetic": "/ˈblɒsəm/",
+    "meaning": "花",
+    "partOfSpeech": "n.",
+    "example": "Cherry blossoms bloom in spring.",
+    "exampleTranslation": "樱花在春天盛开。",
+    "difficulty": 3,
+    "chapter": 2,
+    "level": 3,
+    "synonyms": [
+      "bloom",
+      "flower"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "blossom→不老松→花开不老松",
+    "category": "plants"
+  },
+  {
+    "word": "photosynthesis",
+    "phonetic": "/ˌfoʊtoʊˈsɪnθəsɪs/",
+    "meaning": "光合作用",
+    "partOfSpeech": "n.",
+    "example": "Plants use photosynthesis to make food.",
+    "exampleTranslation": "植物利用光合作用制造食物。",
+    "difficulty": 3,
+    "chapter": 2,
+    "level": 3,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "photo(光)+synthesis(合成)→光合成",
+    "memoryTip": "photo(光)+synthesis(合成)→光合作用",
+    "category": "plants"
+  },
+  {
+    "word": "hurricane",
+    "phonetic": "/ˈhʌrɪkən/",
+    "meaning": "飓风",
+    "partOfSpeech": "n.",
+    "example": "The hurricane caused massive damage.",
+    "exampleTranslation": "飓风造成了巨大的破坏。",
+    "difficulty": 3,
+    "chapter": 2,
+    "level": 3,
+    "synonyms": [
+      "typhoon",
+      "cyclone"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "来自加勒比语Huracan(风暴之神)",
+    "memoryTip": "hurricane→喝瑞肯→飓风喝起来像瑞肯",
+    "category": "weather"
+  },
+  {
+    "word": "drought",
+    "phonetic": "/draʊt/",
+    "meaning": "干旱",
+    "partOfSpeech": "n.",
+    "example": "The drought lasted for several months.",
+    "exampleTranslation": "干旱持续了几个月。",
+    "difficulty": 3,
+    "chapter": 2,
+    "level": 3,
+    "synonyms": [
+      "dry spell"
+    ],
+    "antonyms": [
+      "flood"
+    ],
+    "rootAnalysis": "dry的名词变形",
+    "memoryTip": "drought→抓我它→干旱时抓水抓我它",
+    "category": "weather"
+  },
+  {
+    "word": "peninsula",
+    "phonetic": "/pəˈnɪnsjʊlə/",
+    "meaning": "半岛",
+    "partOfSpeech": "n.",
+    "example": "Korea is located on a peninsula.",
+    "exampleTranslation": "韩国位于一个半岛上。",
+    "difficulty": 3,
+    "chapter": 2,
+    "level": 3,
+    "synonyms": [],
+    "antonyms": [
+      "island"
+    ],
+    "rootAnalysis": "pen(几乎)+insula(岛)→几乎是岛",
+    "memoryTip": "pen(半)+insula(岛)→半岛",
+    "category": "geography"
+  },
+  {
+    "word": "volcano",
+    "phonetic": "/vɒlˈkeɪnoʊ/",
+    "meaning": "火山",
+    "partOfSpeech": "n.",
+    "example": "The volcano erupted last year.",
+    "exampleTranslation": "这座火山去年喷发了。",
+    "difficulty": 3,
+    "chapter": 2,
+    "level": 3,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "来自罗马火神Vulcan",
+    "memoryTip": "volcano→我可怒→火山我可怒了要喷发",
+    "category": "geography"
+  },
+  {
+    "word": "plankton",
+    "phonetic": "/ˈplæŋktən/",
+    "meaning": "浮游生物",
+    "partOfSpeech": "n.",
+    "example": "Whales feed on plankton.",
+    "exampleTranslation": "鲸鱼以浮游生物为食。",
+    "difficulty": 3,
+    "chapter": 2,
+    "level": 3,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "plank(漂浮)+ton→漂浮的东西",
+    "memoryTip": "plankton→飘浪可疼→浮游生物飘浪",
+    "category": "ocean"
+  },
+  {
+    "word": "submarine",
+    "phonetic": "/ˈsʌbməriːn/",
+    "meaning": "潜水艇",
+    "partOfSpeech": "n.",
+    "example": "The submarine dived deep into the ocean.",
+    "exampleTranslation": "潜水艇深入海洋。",
+    "difficulty": 3,
+    "chapter": 2,
+    "level": 3,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "sub(下面)+marine(海洋)→海下的",
+    "memoryTip": "sub(下)+marine(海)→海底的→潜水艇",
+    "category": "ocean"
+  },
+  {
+    "word": "mammal",
+    "phonetic": "/ˈmæməl/",
+    "meaning": "哺乳动物",
+    "partOfSpeech": "n.",
+    "example": "Whales are mammals, not fish.",
+    "exampleTranslation": "鲸鱼是哺乳动物，不是鱼。",
+    "difficulty": 4,
+    "chapter": 2,
+    "level": 4,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "mamm(乳房)+al→有乳房的",
+    "memoryTip": "mammal→妈妈→妈妈哺乳→哺乳动物",
+    "category": "animals"
+  },
+  {
+    "word": "hibernate",
+    "phonetic": "/ˈhaɪbərneɪt/",
+    "meaning": "冬眠",
+    "partOfSpeech": "v.",
+    "example": "Bears hibernate during winter.",
+    "exampleTranslation": "熊在冬天冬眠。",
+    "difficulty": 4,
+    "chapter": 2,
+    "level": 4,
+    "synonyms": [
+      "sleep"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "hibern(冬天)+ate(动词后缀)→过冬",
+    "memoryTip": "hibernate→害怕热→冬眠的动物害怕热",
+    "category": "animals"
+  },
+  {
+    "word": "camouflage",
+    "phonetic": "/ˈkæməflɑːʒ/",
+    "meaning": "伪装",
+    "partOfSpeech": "n.",
+    "example": "The chameleon uses camouflage to hide.",
+    "exampleTranslation": "变色龙用伪装来隐藏。",
+    "difficulty": 4,
+    "chapter": 2,
+    "level": 4,
+    "synonyms": [
+      "disguise"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "来自法语camoufler(伪装)",
+    "memoryTip": "camouflage→看某服了脚→伪装看某件衣服",
+    "category": "animals"
+  },
+  {
+    "word": "pollinate",
+    "phonetic": "/ˈpɒlɪneɪt/",
+    "meaning": "授粉",
+    "partOfSpeech": "v.",
+    "example": "Bees pollinate flowers.",
+    "exampleTranslation": "蜜蜂给花授粉。",
+    "difficulty": 4,
+    "chapter": 2,
+    "level": 4,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "pollin(花粉)+ate→传播花粉",
+    "memoryTip": "pollen(花粉)+ate→给花粉→授粉",
+    "category": "plants"
+  },
+  {
+    "word": "foliage",
+    "phonetic": "/ˈfoʊliɪdʒ/",
+    "meaning": "树叶(总称)",
+    "partOfSpeech": "n.",
+    "example": "The autumn foliage was stunning.",
+    "exampleTranslation": "秋天的树叶非常美丽。",
+    "difficulty": 4,
+    "chapter": 2,
+    "level": 4,
+    "synonyms": [
+      "leaves",
+      "greenery"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "foli(叶子)+age→叶子的集合",
+    "memoryTip": "foliage→佛力气→佛用力气吹树叶",
+    "category": "plants"
+  },
+  {
+    "word": "monsoon",
+    "phonetic": "/mɒnˈsuːn/",
+    "meaning": "季风",
+    "partOfSpeech": "n.",
+    "example": "The monsoon season brings heavy rain.",
+    "exampleTranslation": "季风季节带来大雨。",
+    "difficulty": 4,
+    "chapter": 2,
+    "level": 4,
+    "synonyms": [
+      "rainy season"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "来自阿拉伯语mawsim(季节)",
+    "memoryTip": "monsoon→满屋→季风吹得满屋都是雨",
+    "category": "weather"
+  },
+  {
+    "word": "tornado",
+    "phonetic": "/tɔːrˈneɪdoʊ/",
+    "meaning": "龙卷风",
+    "partOfSpeech": "n.",
+    "example": "The tornado destroyed several houses.",
+    "exampleTranslation": "龙卷风摧毁了几栋房屋。",
+    "difficulty": 4,
+    "chapter": 2,
+    "level": 4,
+    "synonyms": [
+      "twister"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "torn(撕裂)+ado→撕裂一切的风",
+    "memoryTip": "tornado→它拿到→龙卷风把一切都拿到天上",
+    "category": "weather"
+  },
+  {
+    "word": "plateau",
+    "phonetic": "/plæˈtoʊ/",
+    "meaning": "高原",
+    "partOfSpeech": "n.",
+    "example": "The Tibetan Plateau is very high.",
+    "exampleTranslation": "青藏高原非常高。",
+    "difficulty": 4,
+    "chapter": 2,
+    "level": 4,
+    "synonyms": [
+      "tableland"
+    ],
+    "antonyms": [
+      "valley"
+    ],
+    "rootAnalysis": "plat(平)+eau→平坦的高地",
+    "memoryTip": "plateau→平了头→山平了头就是高原",
+    "category": "geography"
+  },
+  {
+    "word": "glacier",
+    "phonetic": "/ˈɡleɪʃər/",
+    "meaning": "冰川",
+    "partOfSpeech": "n.",
+    "example": "Glaciers are melting due to global warming.",
+    "exampleTranslation": "由于全球变暖冰川正在融化。",
+    "difficulty": 4,
+    "chapter": 2,
+    "level": 4,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "glac(冰)+ier→冰的地方",
+    "memoryTip": "glacier→个累些→冰川个个又累又些",
+    "category": "geography"
+  },
+  {
+    "word": "abyss",
+    "phonetic": "/əˈbɪs/",
+    "meaning": "深渊",
+    "partOfSpeech": "n.",
+    "example": "The ocean abyss is largely unexplored.",
+    "exampleTranslation": "海洋深渊基本未被探索。",
+    "difficulty": 4,
+    "chapter": 2,
+    "level": 4,
+    "synonyms": [
+      "chasm"
+    ],
+    "antonyms": [
+      "summit"
+    ],
+    "rootAnalysis": "a(无)+byss(底)→无底→深渊",
+    "memoryTip": "abyss→额必死→掉入深渊额必死",
+    "category": "ocean"
+  },
+  {
+    "word": "reef",
+    "phonetic": "/riːf/",
+    "meaning": "礁石",
+    "partOfSpeech": "n.",
+    "example": "The ship hit a reef and sank.",
+    "exampleTranslation": "船撞上礁石沉没了。",
+    "difficulty": 4,
+    "chapter": 2,
+    "level": 4,
+    "synonyms": [
+      "shoal"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "reef→日飞→礁石上日光飞溅",
+    "category": "ocean"
+  },
+  {
+    "word": "ecosystem",
+    "phonetic": "/ˈiːkoʊsɪstəm/",
+    "meaning": "生态系统",
+    "partOfSpeech": "n.",
+    "example": "Coral reefs are delicate ecosystems.",
+    "exampleTranslation": "珊瑚礁是脆弱的生态系统。",
+    "difficulty": 5,
+    "chapter": 2,
+    "level": 5,
+    "synonyms": [
+      "biome"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "eco(生态)+system(系统)",
+    "memoryTip": "eco(生态)+system(系统)→生态系统",
+    "category": "animals"
+  },
+  {
+    "word": "endangered",
+    "phonetic": "/ɪnˈdeɪndʒərd/",
+    "meaning": "濒危的",
+    "partOfSpeech": "adj.",
+    "example": "Pandas are an endangered species.",
+    "exampleTranslation": "熊猫是濒危物种。",
+    "difficulty": 5,
+    "chapter": 2,
+    "level": 5,
+    "synonyms": [
+      "threatened"
+    ],
+    "antonyms": [
+      "thriving"
+    ],
+    "rootAnalysis": "en(使)+danger(危险)+ed→处于危险中的",
+    "memoryTip": "en+danger+ed→被置于危险中→濒危的",
+    "category": "animals"
+  },
+  {
+    "word": "biodiversity",
+    "phonetic": "/ˌbaɪoʊdaɪˈvɜːrsɪti/",
+    "meaning": "生物多样性",
+    "partOfSpeech": "n.",
+    "example": "Rainforests have high biodiversity.",
+    "exampleTranslation": "热带雨林有很高的生物多样性。",
+    "difficulty": 5,
+    "chapter": 2,
+    "level": 5,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "bio(生命)+diversity(多样性)",
+    "memoryTip": "bio(生物)+diversity(多样性)",
+    "category": "plants"
+  },
+  {
+    "word": "deciduous",
+    "phonetic": "/dɪˈsɪdʒuəs/",
+    "meaning": "落叶的",
+    "partOfSpeech": "adj.",
+    "example": "Oak trees are deciduous trees.",
+    "exampleTranslation": "橡树是落叶树。",
+    "difficulty": 5,
+    "chapter": 2,
+    "level": 5,
+    "synonyms": [],
+    "antonyms": [
+      "evergreen"
+    ],
+    "rootAnalysis": "de(向下)+cid(落)+uous→向下落的",
+    "memoryTip": "de(下)+cid(落)→往下落→落叶的",
+    "category": "plants"
+  },
+  {
+    "word": "precipitation",
+    "phonetic": "/prɪˌsɪpɪˈteɪʃən/",
+    "meaning": "降水",
+    "partOfSpeech": "n.",
+    "example": "Annual precipitation here is low.",
+    "exampleTranslation": "这里年降水量很低。",
+    "difficulty": 5,
+    "chapter": 2,
+    "level": 5,
+    "synonyms": [
+      "rainfall"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "pre(前)+cipit(头)+ation→头朝前落下→降水",
+    "memoryTip": "precipitate→降水→下雨下雪的总称",
+    "category": "weather"
+  },
+  {
+    "word": "aurora",
+    "phonetic": "/ɔːˈrɔːrə/",
+    "meaning": "极光",
+    "partOfSpeech": "n.",
+    "example": "The aurora borealis lit up the sky.",
+    "exampleTranslation": "北极光照亮了天空。",
+    "difficulty": 5,
+    "chapter": 2,
+    "level": 5,
+    "synonyms": [
+      "northern lights"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "来自罗马曙光女神Aurora",
+    "memoryTip": "aurora→奥罗拉→曙光女神奥罗拉",
+    "category": "weather"
+  },
+  {
+    "word": "archipelago",
+    "phonetic": "/ˌɑːrkɪˈpeləɡoʊ/",
+    "meaning": "群岛",
+    "partOfSpeech": "n.",
+    "example": "Indonesia is the largest archipelago.",
+    "exampleTranslation": "印度尼西亚是最大的群岛。",
+    "difficulty": 5,
+    "chapter": 2,
+    "level": 5,
+    "synonyms": [
+      "island chain"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "archi(主要)+pelago(海)→主要的海域→群岛",
+    "memoryTip": "archi+pelago→海上的一群岛→群岛",
+    "category": "geography"
+  },
+  {
+    "word": "erosion",
+    "phonetic": "/ɪˈroʊʒən/",
+    "meaning": "侵蚀",
+    "partOfSpeech": "n.",
+    "example": "Water erosion shaped the canyon.",
+    "exampleTranslation": "水的侵蚀塑造了峡谷。",
+    "difficulty": 5,
+    "chapter": 2,
+    "level": 5,
+    "synonyms": [
+      "corrosion",
+      "weathering"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "e(出)+ros(啃)+ion→啃出来→侵蚀",
+    "memoryTip": "erosion→一柔深→水一柔深地侵蚀岩石",
+    "category": "geography"
+  },
+  {
+    "word": "abyssal",
+    "phonetic": "/əˈbɪsəl/",
+    "meaning": "深海的",
+    "partOfSpeech": "adj.",
+    "example": "Abyssal creatures live in total darkness.",
+    "exampleTranslation": "深海生物生活在完全黑暗中。",
+    "difficulty": 5,
+    "chapter": 2,
+    "level": 5,
+    "synonyms": [
+      "deep-sea"
+    ],
+    "antonyms": [
+      "surface"
+    ],
+    "rootAnalysis": "abyss(深渊)+al(形容词后缀)",
+    "memoryTip": "abyss(深渊)+al→深渊般的→深海的",
+    "category": "ocean"
+  },
+  {
+    "word": "maritime",
+    "phonetic": "/ˈmærɪtaɪm/",
+    "meaning": "海洋的",
+    "partOfSpeech": "adj.",
+    "example": "Maritime trade is important for the economy.",
+    "exampleTranslation": "海洋贸易对经济很重要。",
+    "difficulty": 5,
+    "chapter": 2,
+    "level": 5,
+    "synonyms": [
+      "nautical",
+      "marine"
+    ],
+    "antonyms": [
+      "inland"
+    ],
+    "rootAnalysis": "mari(海)+time→海的时代",
+    "memoryTip": "mari(海)+time→与海有关的→海洋的",
+    "category": "ocean"
+  },
+  {
+    "word": "butterfly",
+    "phonetic": "/ˈbʌtərflaɪ/",
+    "meaning": "蝴蝶",
+    "partOfSpeech": "n.",
+    "example": "A colorful butterfly landed on the flower.",
+    "exampleTranslation": "一只彩色蝴蝶落在花上。",
+    "difficulty": 2,
+    "chapter": 2,
+    "level": 2,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "butter(黄油)+fly(飞)→像黄油般飞舞",
+    "memoryTip": "butter+fly→黄油飞→蝴蝶翅膀像黄油",
+    "category": "animals"
+  },
+  {
+    "word": "root",
+    "phonetic": "/ruːt/",
+    "meaning": "根",
+    "partOfSpeech": "n.",
+    "example": "The tree has deep roots.",
+    "exampleTranslation": "这棵树有很深的根。",
+    "difficulty": 2,
+    "chapter": 2,
+    "level": 2,
+    "synonyms": [],
+    "antonyms": [
+      "branch"
+    ],
+    "rootAnalysis": "",
+    "memoryTip": "root→入土→根入土里",
+    "category": "plants"
+  },
+  {
+    "word": "fog",
+    "phonetic": "/fɒɡ/",
+    "meaning": "雾",
+    "partOfSpeech": "n.",
+    "example": "The fog made it hard to see.",
+    "exampleTranslation": "雾让人看不清。",
+    "difficulty": 2,
+    "chapter": 2,
+    "level": 2,
+    "synonyms": [
+      "mist"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "fog→佛哥→佛哥在雾中",
+    "category": "weather"
+  },
+  {
+    "word": "desert",
+    "phonetic": "/ˈdezərt/",
+    "meaning": "沙漠",
+    "partOfSpeech": "n.",
+    "example": "The Sahara is the largest hot desert.",
+    "exampleTranslation": "撒哈拉是最大的热沙漠。",
+    "difficulty": 2,
+    "chapter": 2,
+    "level": 2,
+    "synonyms": [
+      "wasteland"
+    ],
+    "antonyms": [
+      "oasis"
+    ],
+    "rootAnalysis": "de(离开)+sert(连接)→与世隔绝的地方",
+    "memoryTip": "desert→的热→沙漠的热让人受不了",
+    "category": "geography"
+  },
+  {
+    "word": "whale",
+    "phonetic": "/weɪl/",
+    "meaning": "鲸鱼",
+    "partOfSpeech": "n.",
+    "example": "Blue whales are the largest animals.",
+    "exampleTranslation": "蓝鲸是最大的动物。",
+    "difficulty": 2,
+    "chapter": 2,
+    "level": 2,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "whale→歪了→鲸鱼尾巴歪了",
+    "category": "ocean"
+  },
+  {
+    "word": "parasite",
+    "phonetic": "/ˈpærəsaɪt/",
+    "meaning": "寄生虫",
+    "partOfSpeech": "n.",
+    "example": "Some parasites live inside animals.",
+    "exampleTranslation": "一些寄生虫生活在动物体内。",
+    "difficulty": 3,
+    "chapter": 2,
+    "level": 3,
+    "synonyms": [],
+    "antonyms": [
+      "host"
+    ],
+    "rootAnalysis": "para(旁边)+site(食物)→在旁边吃的",
+    "memoryTip": "para(旁)+site(坐)→坐在旁边吃→寄生虫",
+    "category": "animals"
+  },
+  {
+    "word": "evergreen",
+    "phonetic": "/ˈevərɡriːn/",
+    "meaning": "常绿的",
+    "partOfSpeech": "adj.",
+    "example": "Pine trees are evergreen.",
+    "exampleTranslation": "松树是常绿的。",
+    "difficulty": 3,
+    "chapter": 2,
+    "level": 3,
+    "synonyms": [
+      "perennial"
+    ],
+    "antonyms": [
+      "deciduous"
+    ],
+    "rootAnalysis": "ever(永远)+green(绿)→永远绿的",
+    "memoryTip": "ever(永远)+green(绿)→永远绿色的",
+    "category": "plants"
+  },
+  {
+    "word": "blizzard",
+    "phonetic": "/ˈblɪzərd/",
+    "meaning": "暴风雪",
+    "partOfSpeech": "n.",
+    "example": "Schools were closed due to the blizzard.",
+    "exampleTranslation": "学校因暴风雪停课。",
+    "difficulty": 3,
+    "chapter": 2,
+    "level": 3,
+    "synonyms": [
+      "snowstorm"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "blizzard→不离这→暴风雪来了不离开这里",
+    "category": "weather"
+  },
+  {
+    "word": "canyon",
+    "phonetic": "/ˈkænjən/",
+    "meaning": "峡谷",
+    "partOfSpeech": "n.",
+    "example": "The Grand Canyon is breathtaking.",
+    "exampleTranslation": "大峡谷令人叹为观止。",
+    "difficulty": 3,
+    "chapter": 2,
+    "level": 3,
+    "synonyms": [
+      "gorge",
+      "ravine"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "来自西班牙语cañón(管道)",
+    "memoryTip": "canyon→看你→看你那壮观的峡谷",
+    "category": "geography"
+  },
+  {
+    "word": "current",
+    "phonetic": "/ˈkʌrənt/",
+    "meaning": "水流/洋流",
+    "partOfSpeech": "n.",
+    "example": "Ocean currents affect the climate.",
+    "exampleTranslation": "洋流影响气候。",
+    "difficulty": 3,
+    "chapter": 2,
+    "level": 3,
+    "synonyms": [
+      "stream",
+      "flow"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "curr(跑)+ent→跑着的水",
+    "memoryTip": "current→可润特→洋流可以润泽",
+    "category": "ocean"
+  },
+  {
+    "word": "nocturnal",
+    "phonetic": "/nɒkˈtɜːrnəl/",
+    "meaning": "夜行的",
+    "partOfSpeech": "adj.",
+    "example": "Owls are nocturnal birds.",
+    "exampleTranslation": "猫头鹰是夜行性鸟类。",
+    "difficulty": 4,
+    "chapter": 2,
+    "level": 4,
+    "synonyms": [
+      "nighttime"
+    ],
+    "antonyms": [
+      "diurnal"
+    ],
+    "rootAnalysis": "noct(夜)+urnal→夜间的",
+    "memoryTip": "noct(夜)+urnal→夜晚的→夜行的",
+    "category": "animals"
+  },
+  {
+    "word": "vegetation",
+    "phonetic": "/ˌvedʒɪˈteɪʃən/",
+    "meaning": "植被",
+    "partOfSpeech": "n.",
+    "example": "The island has lush vegetation.",
+    "exampleTranslation": "这个岛有茂密的植被。",
+    "difficulty": 4,
+    "chapter": 2,
+    "level": 4,
+    "synonyms": [
+      "flora",
+      "greenery"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "veget(生长)+ation→生长的东西",
+    "memoryTip": "vegetable(蔬菜)→vegetation(植被)",
+    "category": "plants"
+  },
+  {
+    "word": "hemisphere",
+    "phonetic": "/ˈhemɪsfɪər/",
+    "meaning": "半球",
+    "partOfSpeech": "n.",
+    "example": "Australia is in the southern hemisphere.",
+    "exampleTranslation": "澳大利亚在南半球。",
+    "difficulty": 4,
+    "chapter": 2,
+    "level": 4,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "hemi(半)+sphere(球)→半球",
+    "memoryTip": "hemi(半)+sphere(球)→半球",
+    "category": "geography"
+  },
+  {
+    "word": "tributary",
+    "phonetic": "/ˈtrɪbjʊtəri/",
+    "meaning": "支流",
+    "partOfSpeech": "n.",
+    "example": "The river has many tributaries.",
+    "exampleTranslation": "这条河有许多支流。",
+    "difficulty": 4,
+    "chapter": 2,
+    "level": 4,
+    "synonyms": [
+      "branch"
+    ],
+    "antonyms": [
+      "mainstream"
+    ],
+    "rootAnalysis": "tribut(贡献)+ary→贡献水流的→支流",
+    "memoryTip": "tribute(贡献)+ary→贡献水的→支流",
+    "category": "ocean"
+  },
+  {
+    "word": "shop",
+    "phonetic": "/ʃɒp/",
+    "meaning": "商店",
+    "partOfSpeech": "n.",
+    "example": "There is a new shop on the street.",
+    "exampleTranslation": "街上有一家新商店。",
+    "difficulty": 1,
+    "chapter": 3,
+    "level": 1,
+    "synonyms": [
+      "store"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "shop→收铺→收拾店铺",
+    "category": "shopping"
+  },
+  {
+    "word": "price",
+    "phonetic": "/praɪs/",
+    "meaning": "价格",
+    "partOfSpeech": "n.",
+    "example": "The price of this shirt is too high.",
+    "exampleTranslation": "这件衬衫的价格太高了。",
+    "difficulty": 1,
+    "chapter": 3,
+    "level": 1,
+    "synonyms": [
+      "cost"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "price→拍日思→拍下来日思价格",
+    "category": "shopping"
+  },
+  {
+    "word": "money",
+    "phonetic": "/ˈmʌni/",
+    "meaning": "钱",
+    "partOfSpeech": "n.",
+    "example": "He saved a lot of money.",
+    "exampleTranslation": "他存了很多钱。",
+    "difficulty": 1,
+    "chapter": 3,
+    "level": 1,
+    "synonyms": [
+      "cash",
+      "funds"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "money→妈你→妈给你钱",
+    "category": "business"
+  },
+  {
+    "word": "work",
+    "phonetic": "/wɜːrk/",
+    "meaning": "工作",
+    "partOfSpeech": "v.",
+    "example": "She works at a hospital.",
+    "exampleTranslation": "她在医院工作。",
+    "difficulty": 1,
+    "chapter": 3,
+    "level": 1,
+    "synonyms": [
+      "labor"
+    ],
+    "antonyms": [
+      "rest"
+    ],
+    "rootAnalysis": "",
+    "memoryTip": "work→我可→我可以工作",
+    "category": "business"
+  },
+  {
+    "word": "friend",
+    "phonetic": "/frend/",
+    "meaning": "朋友",
+    "partOfSpeech": "n.",
+    "example": "He is my best friend.",
+    "exampleTranslation": "他是我最好的朋友。",
+    "difficulty": 1,
+    "chapter": 3,
+    "level": 1,
+    "synonyms": [
+      "companion",
+      "pal"
+    ],
+    "antonyms": [
+      "enemy"
+    ],
+    "rootAnalysis": "",
+    "memoryTip": "friend→福来得→朋友带来福气",
+    "category": "social"
+  },
+  {
+    "word": "party",
+    "phonetic": "/ˈpɑːrti/",
+    "meaning": "聚会",
+    "partOfSpeech": "n.",
+    "example": "We had a birthday party yesterday.",
+    "exampleTranslation": "我们昨天举办了生日聚会。",
+    "difficulty": 1,
+    "chapter": 3,
+    "level": 1,
+    "synonyms": [
+      "gathering"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "party→趴体→大家趴在一起的聚会",
+    "category": "social"
+  },
+  {
+    "word": "menu",
+    "phonetic": "/ˈmenjuː/",
+    "meaning": "菜单",
+    "partOfSpeech": "n.",
+    "example": "Can I see the menu please?",
+    "exampleTranslation": "请给我看一下菜单好吗？",
+    "difficulty": 1,
+    "chapter": 3,
+    "level": 1,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "menu→没牛→菜单上没有牛肉",
+    "category": "restaurant"
+  },
+  {
+    "word": "waiter",
+    "phonetic": "/ˈweɪtər/",
+    "meaning": "服务员",
+    "partOfSpeech": "n.",
+    "example": "The waiter brought our food quickly.",
+    "exampleTranslation": "服务员很快端上了食物。",
+    "difficulty": 1,
+    "chapter": 3,
+    "level": 1,
+    "synonyms": [
+      "server"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "wait(等待)+er→等待服务的人",
+    "memoryTip": "waiter→wait(等)+er→等候服务你的人",
+    "category": "restaurant"
+  },
+  {
+    "word": "ticket",
+    "phonetic": "/ˈtɪkɪt/",
+    "meaning": "票",
+    "partOfSpeech": "n.",
+    "example": "I bought two tickets for the movie.",
+    "exampleTranslation": "我买了两张电影票。",
+    "difficulty": 1,
+    "chapter": 3,
+    "level": 1,
+    "synonyms": [
+      "pass"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "ticket→踢客它→票被踢客踢走了",
+    "category": "travel"
+  },
+  {
+    "word": "hotel",
+    "phonetic": "/hoʊˈtel/",
+    "meaning": "酒店",
+    "partOfSpeech": "n.",
+    "example": "We stayed at a nice hotel.",
+    "exampleTranslation": "我们住在一家不错的酒店。",
+    "difficulty": 1,
+    "chapter": 3,
+    "level": 1,
+    "synonyms": [
+      "inn"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "hotel→后特→酒店后面特别好",
+    "category": "travel"
+  },
+  {
+    "word": "map",
+    "phonetic": "/mæp/",
+    "meaning": "地图",
+    "partOfSpeech": "n.",
+    "example": "I used a map to find the way.",
+    "exampleTranslation": "我用地图找路。",
+    "difficulty": 1,
+    "chapter": 3,
+    "level": 1,
+    "synonyms": [
+      "chart"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "map→马扑→马扑在地图上",
+    "category": "travel"
+  },
+  {
+    "word": "gift",
+    "phonetic": "/ɡɪft/",
+    "meaning": "礼物",
+    "partOfSpeech": "n.",
+    "example": "She gave me a birthday gift.",
+    "exampleTranslation": "她给了我一份生日礼物。",
+    "difficulty": 1,
+    "chapter": 3,
+    "level": 1,
+    "synonyms": [
+      "present"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "gift→给夫他→给丈夫一个礼物",
+    "category": "shopping"
+  },
+  {
+    "word": "discount",
+    "phonetic": "/ˈdɪskaʊnt/",
+    "meaning": "折扣",
+    "partOfSpeech": "n.",
+    "example": "The store offers a 20% discount.",
+    "exampleTranslation": "商店提供八折优惠。",
+    "difficulty": 2,
+    "chapter": 3,
+    "level": 2,
+    "synonyms": [
+      "reduction"
+    ],
+    "antonyms": [
+      "surcharge"
+    ],
+    "rootAnalysis": "dis(去掉)+count(计算)→减去部分价格",
+    "memoryTip": "dis+count→不算全价→打折",
+    "category": "shopping"
+  },
+  {
+    "word": "receipt",
+    "phonetic": "/rɪˈsiːt/",
+    "meaning": "收据",
+    "partOfSpeech": "n.",
+    "example": "Please keep your receipt.",
+    "exampleTranslation": "请保留你的收据。",
+    "difficulty": 2,
+    "chapter": 3,
+    "level": 2,
+    "synonyms": [
+      "bill"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "re(回)+ceipt(拿)→拿回的凭证",
+    "memoryTip": "receipt→日息它→收据记录日息",
+    "category": "shopping"
+  },
+  {
+    "word": "salary",
+    "phonetic": "/ˈsæləri/",
+    "meaning": "工资",
+    "partOfSpeech": "n.",
+    "example": "His salary increased this year.",
+    "exampleTranslation": "他今年工资涨了。",
+    "difficulty": 2,
+    "chapter": 3,
+    "level": 2,
+    "synonyms": [
+      "wage",
+      "pay"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "来自拉丁语sal(盐)→古罗马用盐发工资",
+    "memoryTip": "salary→撒了日→工资撒了一日",
+    "category": "business"
+  },
+  {
+    "word": "colleague",
+    "phonetic": "/ˈkɒliːɡ/",
+    "meaning": "同事",
+    "partOfSpeech": "n.",
+    "example": "My colleague helped me with the report.",
+    "exampleTranslation": "我的同事帮我写报告。",
+    "difficulty": 2,
+    "chapter": 3,
+    "level": 2,
+    "synonyms": [
+      "coworker"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "col(共同)+league(联盟)→同一联盟的人",
+    "memoryTip": "col(共同)+league(联盟)→一个联盟的→同事",
+    "category": "business"
+  },
+  {
+    "word": "polite",
+    "phonetic": "/pəˈlaɪt/",
+    "meaning": "礼貌的",
+    "partOfSpeech": "adj.",
+    "example": "She is always polite to others.",
+    "exampleTranslation": "她对别人总是很有礼貌。",
+    "difficulty": 2,
+    "chapter": 3,
+    "level": 2,
+    "synonyms": [
+      "courteous"
+    ],
+    "antonyms": [
+      "rude"
+    ],
+    "rootAnalysis": "pol(磨光)+ite→磨光的→有教养的",
+    "memoryTip": "polite→泡来特→礼貌地泡来特别好的茶",
+    "category": "social"
+  },
+  {
+    "word": "invitation",
+    "phonetic": "/ˌɪnvɪˈteɪʃən/",
+    "meaning": "邀请",
+    "partOfSpeech": "n.",
+    "example": "I received an invitation to the wedding.",
+    "exampleTranslation": "我收到了婚礼邀请。",
+    "difficulty": 2,
+    "chapter": 3,
+    "level": 2,
+    "synonyms": [
+      "request"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "in(进入)+vit(生活)+ation→邀请进入生活",
+    "memoryTip": "invite(邀请)+ation→邀请函",
+    "category": "social"
+  },
+  {
+    "word": "reserve",
+    "phonetic": "/rɪˈzɜːrv/",
+    "meaning": "预订",
+    "partOfSpeech": "v.",
+    "example": "I reserved a table for two.",
+    "exampleTranslation": "我预订了一张两人桌。",
+    "difficulty": 2,
+    "chapter": 3,
+    "level": 2,
+    "synonyms": [
+      "book"
+    ],
+    "antonyms": [
+      "cancel"
+    ],
+    "rootAnalysis": "re(回)+serve(保存)→保存回来→预留",
+    "memoryTip": "re(回)+serve(保存)→保存回来→预订",
+    "category": "restaurant"
+  },
+  {
+    "word": "appetizer",
+    "phonetic": "/ˈæpɪtaɪzər/",
+    "meaning": "开胃菜",
+    "partOfSpeech": "n.",
+    "example": "We ordered an appetizer before the main course.",
+    "exampleTranslation": "我们在主菜前点了开胃菜。",
+    "difficulty": 2,
+    "chapter": 3,
+    "level": 2,
+    "synonyms": [
+      "starter"
+    ],
+    "antonyms": [
+      "dessert"
+    ],
+    "rootAnalysis": "appetite(食欲)+izer→引起食欲的",
+    "memoryTip": "appetite(食欲)+izer→引发食欲的→开胃菜",
+    "category": "restaurant"
+  },
+  {
+    "word": "luggage",
+    "phonetic": "/ˈlʌɡɪdʒ/",
+    "meaning": "行李",
+    "partOfSpeech": "n.",
+    "example": "Please collect your luggage at the carousel.",
+    "exampleTranslation": "请在传送带领取行李。",
+    "difficulty": 2,
+    "chapter": 3,
+    "level": 2,
+    "synonyms": [
+      "baggage"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "lug(拖)+gage(物品)→拖着的物品",
+    "memoryTip": "luggage→拉个脚→拉着行李走",
+    "category": "travel"
+  },
+  {
+    "word": "passport",
+    "phonetic": "/ˈpɑːspɔːrt/",
+    "meaning": "护照",
+    "partOfSpeech": "n.",
+    "example": "You need a passport to travel abroad.",
+    "exampleTranslation": "出国旅行需要护照。",
+    "difficulty": 2,
+    "chapter": 3,
+    "level": 2,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "pass(通过)+port(港口)→通过港口的证件",
+    "memoryTip": "pass(通过)+port(港口)→通关凭证→护照",
+    "category": "travel"
+  },
+  {
+    "word": "bargain",
+    "phonetic": "/ˈbɑːrɡɪn/",
+    "meaning": "讨价还价",
+    "partOfSpeech": "v.",
+    "example": "She loves to bargain at the market.",
+    "exampleTranslation": "她喜欢在市场讨价还价。",
+    "difficulty": 3,
+    "chapter": 3,
+    "level": 3,
+    "synonyms": [
+      "negotiate",
+      "haggle"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "bargain→吧给→讨价还价吧给我便宜点",
+    "category": "shopping"
+  },
+  {
+    "word": "warranty",
+    "phonetic": "/ˈwɒrənti/",
+    "meaning": "保修",
+    "partOfSpeech": "n.",
+    "example": "The product has a two-year warranty.",
+    "exampleTranslation": "该产品有两年保修。",
+    "difficulty": 3,
+    "chapter": 3,
+    "level": 3,
+    "synonyms": [
+      "guarantee"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "warr(保证)+anty→保证",
+    "memoryTip": "warranty→我让踢→保修期内我让你踢都行",
+    "category": "shopping"
+  },
+  {
+    "word": "investment",
+    "phonetic": "/ɪnˈvestmənt/",
+    "meaning": "投资",
+    "partOfSpeech": "n.",
+    "example": "Education is a good investment.",
+    "exampleTranslation": "教育是一项好的投资。",
+    "difficulty": 3,
+    "chapter": 3,
+    "level": 3,
+    "synonyms": [
+      "venture"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "in(进入)+vest(穿衣)+ment→把钱穿进去",
+    "memoryTip": "invest→in+vest(马甲)→把钱放进马甲→投资",
+    "category": "business"
+  },
+  {
+    "word": "negotiate",
+    "phonetic": "/nɪˈɡoʊʃieɪt/",
+    "meaning": "谈判",
+    "partOfSpeech": "v.",
+    "example": "They negotiated a new contract.",
+    "exampleTranslation": "他们谈判了一份新合同。",
+    "difficulty": 3,
+    "chapter": 3,
+    "level": 3,
+    "synonyms": [
+      "discuss",
+      "bargain"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "neg(否定)+oti(闲)+ate→否定闲暇→忙于谈判",
+    "memoryTip": "negotiate→你够歇了→谈判时你够歇了快谈",
+    "category": "business"
+  },
+  {
+    "word": "etiquette",
+    "phonetic": "/ˈetɪket/",
+    "meaning": "礼仪",
+    "partOfSpeech": "n.",
+    "example": "Table etiquette varies by culture.",
+    "exampleTranslation": "餐桌礼仪因文化而异。",
+    "difficulty": 3,
+    "chapter": 3,
+    "level": 3,
+    "synonyms": [
+      "manners",
+      "protocol"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "来自法语étiquette(标签)",
+    "memoryTip": "etiquette→诶踢客→按礼仪不能踢客人",
+    "category": "social"
+  },
+  {
+    "word": "hospitality",
+    "phonetic": "/ˌhɒspɪˈtæləti/",
+    "meaning": "好客",
+    "partOfSpeech": "n.",
+    "example": "Thank you for your hospitality.",
+    "exampleTranslation": "感谢你的盛情款待。",
+    "difficulty": 3,
+    "chapter": 3,
+    "level": 3,
+    "synonyms": [
+      "warmth",
+      "welcome"
+    ],
+    "antonyms": [
+      "hostility"
+    ],
+    "rootAnalysis": "hospit(客人)+ality→对客人好的",
+    "memoryTip": "hospital(医院)→hospitality→像医院般照顾客人",
+    "category": "social"
+  },
+  {
+    "word": "gratuity",
+    "phonetic": "/ɡrəˈtjuːɪti/",
+    "meaning": "小费",
+    "partOfSpeech": "n.",
+    "example": "A gratuity of 15% is standard.",
+    "exampleTranslation": "15%的小费是标准的。",
+    "difficulty": 3,
+    "chapter": 3,
+    "level": 3,
+    "synonyms": [
+      "tip"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "grat(感恩)+uity→感恩的表示→小费",
+    "memoryTip": "grateful(感激)→gratuity→感激的表示→小费",
+    "category": "restaurant"
+  },
+  {
+    "word": "itinerary",
+    "phonetic": "/aɪˈtɪnəreri/",
+    "meaning": "行程",
+    "partOfSpeech": "n.",
+    "example": "I planned a detailed itinerary for the trip.",
+    "exampleTranslation": "我为旅行规划了详细的行程。",
+    "difficulty": 3,
+    "chapter": 3,
+    "level": 3,
+    "synonyms": [
+      "route",
+      "schedule"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "itiner(旅行)+ary→旅行计划",
+    "memoryTip": "itinerary→爱踢你拿日→行程安排爱踢你",
+    "category": "travel"
+  },
+  {
+    "word": "souvenir",
+    "phonetic": "/ˌsuːvəˈnɪər/",
+    "meaning": "纪念品",
+    "partOfSpeech": "n.",
+    "example": "She bought a souvenir from Paris.",
+    "exampleTranslation": "她从巴黎买了一个纪念品。",
+    "difficulty": 3,
+    "chapter": 3,
+    "level": 3,
+    "synonyms": [
+      "memento"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "来自法语souvenir(回忆)",
+    "memoryTip": "souvenir→思维你→纪念品让思维想起你",
+    "category": "travel"
+  },
+  {
+    "word": "commodity",
+    "phonetic": "/kəˈmɒdɪti/",
+    "meaning": "商品",
+    "partOfSpeech": "n.",
+    "example": "Oil is an important commodity.",
+    "exampleTranslation": "石油是重要的商品。",
+    "difficulty": 4,
+    "chapter": 3,
+    "level": 4,
+    "synonyms": [
+      "goods",
+      "product"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "com(共同)+mod(方式)+ity→共同使用的方式",
+    "memoryTip": "com+mod(模式)+ity→共同模式交易的→商品",
+    "category": "shopping"
+  },
+  {
+    "word": "entrepreneur",
+    "phonetic": "/ˌɒntrəprəˈnɜːr/",
+    "meaning": "企业家",
+    "partOfSpeech": "n.",
+    "example": "She is a successful entrepreneur.",
+    "exampleTranslation": "她是一位成功的企业家。",
+    "difficulty": 4,
+    "chapter": 3,
+    "level": 4,
+    "synonyms": [
+      "businessman"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "entre(之间)+pren(拿)+eur(人)→在中间经营的人",
+    "memoryTip": "enterprise(企业)→entrepreneur→经营企业的人",
+    "category": "business"
+  },
+  {
+    "word": "revenue",
+    "phonetic": "/ˈrevənjuː/",
+    "meaning": "收入",
+    "partOfSpeech": "n.",
+    "example": "The company's revenue grew by 10%.",
+    "exampleTranslation": "公司收入增长了10%。",
+    "difficulty": 4,
+    "chapter": 3,
+    "level": 4,
+    "synonyms": [
+      "income",
+      "earnings"
+    ],
+    "antonyms": [
+      "expense"
+    ],
+    "rootAnalysis": "re(回)+ven(来)+ue→回来的东西→收入",
+    "memoryTip": "re(回)+venue(来)→回来的钱→收入",
+    "category": "business"
+  },
+  {
+    "word": "diplomatic",
+    "phonetic": "/ˌdɪpləˈmætɪk/",
+    "meaning": "外交的",
+    "partOfSpeech": "adj.",
+    "example": "He gave a diplomatic response.",
+    "exampleTranslation": "他给出了一个外交式的回应。",
+    "difficulty": 4,
+    "chapter": 3,
+    "level": 4,
+    "synonyms": [
+      "tactful"
+    ],
+    "antonyms": [
+      "blunt"
+    ],
+    "rootAnalysis": "diplo(双重)+mat(垫)+ic→两面都照顾到",
+    "memoryTip": "diploma(文凭)→diplomatic→像持文凭般正式",
+    "category": "social"
+  },
+  {
+    "word": "philanthropy",
+    "phonetic": "/fɪˈlænθrəpi/",
+    "meaning": "慈善",
+    "partOfSpeech": "n.",
+    "example": "His philanthropy helped many children.",
+    "exampleTranslation": "他的慈善事业帮助了许多孩子。",
+    "difficulty": 4,
+    "chapter": 3,
+    "level": 4,
+    "synonyms": [
+      "charity"
+    ],
+    "antonyms": [
+      "misanthropy"
+    ],
+    "rootAnalysis": "phil(爱)+anthrop(人)+y→爱人的行为",
+    "memoryTip": "phil(爱)+anthrop(人)→爱人→慈善",
+    "category": "social"
+  },
+  {
+    "word": "sommelier",
+    "phonetic": "/ˌsɒməˈljeɪ/",
+    "meaning": "侍酒师",
+    "partOfSpeech": "n.",
+    "example": "The sommelier recommended a red wine.",
+    "exampleTranslation": "侍酒师推荐了一款红酒。",
+    "difficulty": 4,
+    "chapter": 3,
+    "level": 4,
+    "synonyms": [
+      "wine steward"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "来自法语somme(运送)+lier(者)",
+    "memoryTip": "sommelier→送没了也→侍酒师送酒送没了",
+    "category": "restaurant"
+  },
+  {
+    "word": "excursion",
+    "phonetic": "/ɪkˈskɜːrʃən/",
+    "meaning": "短途旅行",
+    "partOfSpeech": "n.",
+    "example": "We went on an excursion to the mountains.",
+    "exampleTranslation": "我们去山里做了短途旅行。",
+    "difficulty": 4,
+    "chapter": 3,
+    "level": 4,
+    "synonyms": [
+      "trip",
+      "outing"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "ex(出)+curs(跑)+ion→跑出去→短途旅行",
+    "memoryTip": "ex(出)+cursion(跑)→跑出去玩→短途旅行",
+    "category": "travel"
+  },
+  {
+    "word": "expedition",
+    "phonetic": "/ˌekspɪˈdɪʃən/",
+    "meaning": "探险",
+    "partOfSpeech": "n.",
+    "example": "They planned an expedition to the Arctic.",
+    "exampleTranslation": "他们计划了一次北极探险。",
+    "difficulty": 4,
+    "chapter": 3,
+    "level": 4,
+    "synonyms": [
+      "journey",
+      "voyage"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "ex(出)+ped(脚)+ition→走出去",
+    "memoryTip": "ex(出)+ped(脚)→迈步出发→探险",
+    "category": "travel"
+  },
+  {
+    "word": "consumerism",
+    "phonetic": "/kənˈsjuːmərɪzəm/",
+    "meaning": "消费主义",
+    "partOfSpeech": "n.",
+    "example": "Consumerism drives the modern economy.",
+    "exampleTranslation": "消费主义驱动着现代经济。",
+    "difficulty": 5,
+    "chapter": 3,
+    "level": 5,
+    "synonyms": [],
+    "antonyms": [
+      "minimalism"
+    ],
+    "rootAnalysis": "consume(消费)+er+ism(主义)",
+    "memoryTip": "consumer(消费者)+ism(主义)→消费主义",
+    "category": "shopping"
+  },
+  {
+    "word": "monopoly",
+    "phonetic": "/məˈnɒpəli/",
+    "meaning": "垄断",
+    "partOfSpeech": "n.",
+    "example": "The company has a monopoly on the market.",
+    "exampleTranslation": "这家公司垄断了市场。",
+    "difficulty": 5,
+    "chapter": 3,
+    "level": 5,
+    "synonyms": [
+      "dominance"
+    ],
+    "antonyms": [
+      "competition"
+    ],
+    "rootAnalysis": "mono(单一)+poly(卖)→只有一家卖→垄断",
+    "memoryTip": "mono(一)+poly(卖)→只一家卖→垄断",
+    "category": "business"
+  },
+  {
+    "word": "bureaucracy",
+    "phonetic": "/bjʊˈrɒkrəsi/",
+    "meaning": "官僚主义",
+    "partOfSpeech": "n.",
+    "example": "Too much bureaucracy slows everything down.",
+    "exampleTranslation": "过多的官僚主义减慢了一切。",
+    "difficulty": 5,
+    "chapter": 3,
+    "level": 5,
+    "synonyms": [
+      "red tape"
+    ],
+    "antonyms": [
+      "efficiency"
+    ],
+    "rootAnalysis": "bureau(办公室)+cracy(统治)→办公室统治",
+    "memoryTip": "bureau(局)+cracy(统治)→局里统治→官僚",
+    "category": "social"
+  },
+  {
+    "word": "reciprocity",
+    "phonetic": "/ˌresɪˈprɒsɪti/",
+    "meaning": "互惠",
+    "partOfSpeech": "n.",
+    "example": "Friendship is built on reciprocity.",
+    "exampleTranslation": "友谊建立在互惠基础上。",
+    "difficulty": 5,
+    "chapter": 3,
+    "level": 5,
+    "synonyms": [
+      "mutuality"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "re(回)+cipro(来回)+city→来来回回→互惠",
+    "memoryTip": "reciprocal(互惠的)→reciprocity→你来我往",
+    "category": "social"
+  },
+  {
+    "word": "connoisseur",
+    "phonetic": "/ˌkɒnəˈsɜːr/",
+    "meaning": "鉴赏家",
+    "partOfSpeech": "n.",
+    "example": "He is a connoisseur of fine wines.",
+    "exampleTranslation": "他是一位葡萄酒鉴赏家。",
+    "difficulty": 5,
+    "chapter": 3,
+    "level": 5,
+    "synonyms": [
+      "expert",
+      "aficionado"
+    ],
+    "antonyms": [
+      "amateur"
+    ],
+    "rootAnalysis": "来自法语connaître(认识)",
+    "memoryTip": "connoisseur→看你色→鉴赏家看你的成色",
+    "category": "restaurant"
+  },
+  {
+    "word": "gastronome",
+    "phonetic": "/ˈɡæstrənoʊm/",
+    "meaning": "美食家",
+    "partOfSpeech": "n.",
+    "example": "A true gastronome appreciates all cuisines.",
+    "exampleTranslation": "真正的美食家欣赏所有菜系。",
+    "difficulty": 5,
+    "chapter": 3,
+    "level": 5,
+    "synonyms": [
+      "foodie",
+      "epicure"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "gastro(胃)+nome(管理)→管理胃的人",
+    "memoryTip": "gastro(胃)+nome→管理胃的人→美食家",
+    "category": "restaurant"
+  },
+  {
+    "word": "wanderlust",
+    "phonetic": "/ˈwɒndərlʌst/",
+    "meaning": "旅行癖",
+    "partOfSpeech": "n.",
+    "example": "She has a serious wanderlust.",
+    "exampleTranslation": "她有严重的旅行癖。",
+    "difficulty": 5,
+    "chapter": 3,
+    "level": 5,
+    "synonyms": [
+      "travel bug"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "wander(漫游)+lust(渴望)→渴望漫游",
+    "memoryTip": "wander(漫游)+lust(渴望)→渴望漫游→旅行癖",
+    "category": "travel"
+  },
+  {
+    "word": "pilgrimage",
+    "phonetic": "/ˈpɪlɡrɪmɪdʒ/",
+    "meaning": "朝圣之旅",
+    "partOfSpeech": "n.",
+    "example": "They made a pilgrimage to Mecca.",
+    "exampleTranslation": "他们去麦加朝圣了。",
+    "difficulty": 5,
+    "chapter": 3,
+    "level": 5,
+    "synonyms": [
+      "journey"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "pilgrim(朝圣者)+age(行为)",
+    "memoryTip": "pilgrim(朝圣者)+age→朝圣之旅",
+    "category": "travel"
+  },
+  {
+    "word": "customer",
+    "phonetic": "/ˈkʌstəmər/",
+    "meaning": "顾客",
+    "partOfSpeech": "n.",
+    "example": "The customer is always right.",
+    "exampleTranslation": "顾客永远是对的。",
+    "difficulty": 2,
+    "chapter": 3,
+    "level": 2,
+    "synonyms": [
+      "client",
+      "buyer"
+    ],
+    "antonyms": [
+      "seller"
+    ],
+    "rootAnalysis": "custom(习惯)+er→有购买习惯的人",
+    "memoryTip": "custom(习惯)+er→常来的人→顾客",
+    "category": "shopping"
+  },
+  {
+    "word": "profit",
+    "phonetic": "/ˈprɒfɪt/",
+    "meaning": "利润",
+    "partOfSpeech": "n.",
+    "example": "The company made a good profit.",
+    "exampleTranslation": "公司获得了不错的利润。",
+    "difficulty": 3,
+    "chapter": 3,
+    "level": 3,
+    "synonyms": [
+      "earnings",
+      "gain"
+    ],
+    "antonyms": [
+      "loss"
+    ],
+    "rootAnalysis": "pro(向前)+fit(做)→向前做→获益",
+    "memoryTip": "profit→破费它→利润就是破费后的回报",
+    "category": "business"
+  },
+  {
+    "word": "compliment",
+    "phonetic": "/ˈkɒmplɪmənt/",
+    "meaning": "赞美",
+    "partOfSpeech": "n.",
+    "example": "She received many compliments on her dress.",
+    "exampleTranslation": "她的裙子受到许多赞美。",
+    "difficulty": 3,
+    "chapter": 3,
+    "level": 3,
+    "synonyms": [
+      "praise"
+    ],
+    "antonyms": [
+      "insult"
+    ],
+    "rootAnalysis": "com(完全)+pli(满)+ment→完全满意→赞美",
+    "memoryTip": "compliment→看不累闷→看你不累不闷→赞美你",
+    "category": "social"
+  },
+  {
+    "word": "reservation",
+    "phonetic": "/ˌrezərˈveɪʃən/",
+    "meaning": "预约",
+    "partOfSpeech": "n.",
+    "example": "Do you have a reservation?",
+    "exampleTranslation": "您有预约吗？",
+    "difficulty": 3,
+    "chapter": 3,
+    "level": 3,
+    "synonyms": [
+      "booking"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "reserve(保留)+ation→保留→预约",
+    "memoryTip": "reserve(保留)+ation→保留位置→预约",
+    "category": "restaurant"
+  },
+  {
+    "word": "destination",
+    "phonetic": "/ˌdestɪˈneɪʃən/",
+    "meaning": "目的地",
+    "partOfSpeech": "n.",
+    "example": "Paris is a popular tourist destination.",
+    "exampleTranslation": "巴黎是热门旅游目的地。",
+    "difficulty": 3,
+    "chapter": 3,
+    "level": 3,
+    "synonyms": [
+      "goal"
+    ],
+    "antonyms": [
+      "origin"
+    ],
+    "rootAnalysis": "destin(命运/确定)+ation→确定要去的地方",
+    "memoryTip": "destiny(命运)+ation→命运注定的地方→目的地",
+    "category": "travel"
+  },
+  {
+    "word": "auction",
+    "phonetic": "/ˈɔːkʃən/",
+    "meaning": "拍卖",
+    "partOfSpeech": "n.",
+    "example": "The painting was sold at auction.",
+    "exampleTranslation": "这幅画在拍卖会上售出。",
+    "difficulty": 4,
+    "chapter": 3,
+    "level": 4,
+    "synonyms": [
+      "sale"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "auct(增加)+ion→不断增加价格",
+    "memoryTip": "auction→奥可神→拍卖会奥妙如神",
+    "category": "shopping"
+  },
+  {
+    "word": "merger",
+    "phonetic": "/ˈmɜːrdʒər/",
+    "meaning": "合并",
+    "partOfSpeech": "n.",
+    "example": "The merger created a larger company.",
+    "exampleTranslation": "合并创建了一家更大的公司。",
+    "difficulty": 4,
+    "chapter": 3,
+    "level": 4,
+    "synonyms": [
+      "consolidation"
+    ],
+    "antonyms": [
+      "split"
+    ],
+    "rootAnalysis": "merge(合并)+er→合并的行为",
+    "memoryTip": "merge(合并)+er→两家公司合并",
+    "category": "business"
+  },
+  {
+    "word": "ambiance",
+    "phonetic": "/ˈæmbiəns/",
+    "meaning": "氛围",
+    "partOfSpeech": "n.",
+    "example": "The restaurant has a warm ambiance.",
+    "exampleTranslation": "这家餐厅氛围温馨。",
+    "difficulty": 4,
+    "chapter": 3,
+    "level": 4,
+    "synonyms": [
+      "atmosphere",
+      "mood"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "ambi(周围)+ance→周围的感觉→氛围",
+    "memoryTip": "ambient(周围的)→ambiance→周围的气氛",
+    "category": "restaurant"
+  },
+  {
+    "word": "visa",
+    "phonetic": "/ˈviːzə/",
+    "meaning": "签证",
+    "partOfSpeech": "n.",
+    "example": "You need a visa to enter the country.",
+    "exampleTranslation": "你需要签证才能入境。",
+    "difficulty": 2,
+    "chapter": 3,
+    "level": 2,
+    "synonyms": [
+      "permit"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "来自拉丁语visa(已看过的)",
+    "memoryTip": "visa→微飒→签证微微一飒就过关",
+    "category": "travel"
+  },
+  {
+    "word": "budget",
+    "phonetic": "/ˈbʌdʒɪt/",
+    "meaning": "预算",
+    "partOfSpeech": "n.",
+    "example": "We need to stay within the budget.",
+    "exampleTranslation": "我们需要控制在预算内。",
+    "difficulty": 2,
+    "chapter": 3,
+    "level": 2,
+    "synonyms": [
+      "funds"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "来自法语bougette(小皮包)",
+    "memoryTip": "budget→不急它→预算不要着急超支",
+    "category": "business"
+  },
+  {
+    "word": "toast",
+    "phonetic": "/toʊst/",
+    "meaning": "敬酒/干杯",
+    "partOfSpeech": "n.",
+    "example": "Let us raise a toast to the couple.",
+    "exampleTranslation": "让我们为这对新人干杯。",
+    "difficulty": 2,
+    "chapter": 3,
+    "level": 2,
+    "synonyms": [
+      "cheers"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "toast→头死它→干杯时举杯到头",
+    "category": "social"
+  },
+  {
+    "word": "compromise",
+    "phonetic": "/ˈkɒmprəmaɪz/",
+    "meaning": "妥协",
+    "partOfSpeech": "n.",
+    "example": "They reached a compromise on the deal.",
+    "exampleTranslation": "他们就交易达成了妥协。",
+    "difficulty": 4,
+    "chapter": 3,
+    "level": 4,
+    "synonyms": [
+      "settlement"
+    ],
+    "antonyms": [
+      "disagreement"
+    ],
+    "rootAnalysis": "com(共同)+promise(承诺)→共同承诺→妥协",
+    "memoryTip": "com(共同)+promise(承诺)→共同承诺让步→妥协",
+    "category": "social"
+  },
+  {
+    "word": "book",
+    "phonetic": "/bʊk/",
+    "meaning": "书",
+    "partOfSpeech": "n.",
+    "example": "I read a book every week.",
+    "exampleTranslation": "我每周读一本书。",
+    "difficulty": 1,
+    "chapter": 4,
+    "level": 1,
+    "synonyms": [
+      "volume"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "book→不可→好书不可错过",
+    "category": "education"
+  },
+  {
+    "word": "school",
+    "phonetic": "/skuːl/",
+    "meaning": "学校",
+    "partOfSpeech": "n.",
+    "example": "Children go to school every day.",
+    "exampleTranslation": "孩子们每天上学。",
+    "difficulty": 1,
+    "chapter": 4,
+    "level": 1,
+    "synonyms": [
+      "academy"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "来自希腊语schole(闲暇)→闲暇时学习",
+    "memoryTip": "school→死酷→学校死酷的规矩",
+    "category": "education"
+  },
+  {
+    "word": "number",
+    "phonetic": "/ˈnʌmbər/",
+    "meaning": "数字",
+    "partOfSpeech": "n.",
+    "example": "What is your phone number?",
+    "exampleTranslation": "你的电话号码是多少？",
+    "difficulty": 1,
+    "chapter": 4,
+    "level": 1,
+    "synonyms": [
+      "figure",
+      "digit"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "number→难吧→数字难吧",
+    "category": "science"
+  },
+  {
+    "word": "computer",
+    "phonetic": "/kəmˈpjuːtər/",
+    "meaning": "电脑",
+    "partOfSpeech": "n.",
+    "example": "I use a computer for work.",
+    "exampleTranslation": "我用电脑工作。",
+    "difficulty": 1,
+    "chapter": 4,
+    "level": 1,
+    "synonyms": [
+      "PC"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "compute(计算)+er→计算的机器",
+    "memoryTip": "compute(计算)+er→计算器→电脑",
+    "category": "technology"
+  },
+  {
+    "word": "phone",
+    "phonetic": "/foʊn/",
+    "meaning": "电话",
+    "partOfSpeech": "n.",
+    "example": "She is talking on the phone.",
+    "exampleTranslation": "她在打电话。",
+    "difficulty": 1,
+    "chapter": 4,
+    "level": 1,
+    "synonyms": [
+      "telephone"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "来自希腊语phone(声音)",
+    "memoryTip": "phone→佛恩→用电话感谢佛恩",
+    "category": "technology"
+  },
+  {
+    "word": "doctor",
+    "phonetic": "/ˈdɒktər/",
+    "meaning": "医生",
+    "partOfSpeech": "n.",
+    "example": "The doctor examined the patient.",
+    "exampleTranslation": "医生检查了病人。",
+    "difficulty": 1,
+    "chapter": 4,
+    "level": 1,
+    "synonyms": [
+      "physician"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "doct(教)+or→教导健康的人",
+    "memoryTip": "doctor→到可她→到医院可以找她看病",
+    "category": "medical"
+  },
+  {
+    "word": "study",
+    "phonetic": "/ˈstʌdi/",
+    "meaning": "学习",
+    "partOfSpeech": "v.",
+    "example": "She studies math every day.",
+    "exampleTranslation": "她每天学习数学。",
+    "difficulty": 1,
+    "chapter": 4,
+    "level": 1,
+    "synonyms": [
+      "learn"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "study→死大地→死在大地上学习",
+    "category": "academic"
+  },
+  {
+    "word": "test",
+    "phonetic": "/test/",
+    "meaning": "测试",
+    "partOfSpeech": "n.",
+    "example": "We have a math test tomorrow.",
+    "exampleTranslation": "我们明天有数学考试。",
+    "difficulty": 1,
+    "chapter": 4,
+    "level": 1,
+    "synonyms": [
+      "exam",
+      "quiz"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "test→特死他→考试特别要死他了",
+    "category": "academic"
+  },
+  {
+    "word": "science",
+    "phonetic": "/ˈsaɪəns/",
+    "meaning": "科学",
+    "partOfSpeech": "n.",
+    "example": "Science helps us understand the world.",
+    "exampleTranslation": "科学帮助我们理解世界。",
+    "difficulty": 1,
+    "chapter": 4,
+    "level": 1,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "sci(知道)+ence→知道的学问",
+    "memoryTip": "science→赛恩思→科学是赛恩斯先生的思想",
+    "category": "science"
+  },
+  {
+    "word": "medicine",
+    "phonetic": "/ˈmedɪsɪn/",
+    "meaning": "药",
+    "partOfSpeech": "n.",
+    "example": "Take this medicine three times a day.",
+    "exampleTranslation": "这药每天吃三次。",
+    "difficulty": 1,
+    "chapter": 4,
+    "level": 1,
+    "synonyms": [
+      "drug"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "medi(治疗)+cine→治疗用的",
+    "memoryTip": "medicine→没得心→没得心病不用吃药",
+    "category": "medical"
+  },
+  {
+    "word": "internet",
+    "phonetic": "/ˈɪntərnet/",
+    "meaning": "互联网",
+    "partOfSpeech": "n.",
+    "example": "The internet connects people worldwide.",
+    "exampleTranslation": "互联网连接全世界的人。",
+    "difficulty": 1,
+    "chapter": 4,
+    "level": 1,
+    "synonyms": [
+      "web"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "inter(互相)+net(网)→互相连接的网",
+    "memoryTip": "inter(互)+net(网)→互联网",
+    "category": "technology"
+  },
+  {
+    "word": "write",
+    "phonetic": "/raɪt/",
+    "meaning": "写",
+    "partOfSpeech": "v.",
+    "example": "Please write your name here.",
+    "exampleTranslation": "请在这里写上你的名字。",
+    "difficulty": 1,
+    "chapter": 4,
+    "level": 1,
+    "synonyms": [
+      "compose"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "write→入爱它→写作入爱它",
+    "category": "education"
+  },
+  {
+    "word": "hospital",
+    "phonetic": "/ˈhɒspɪtəl/",
+    "meaning": "医院",
+    "partOfSpeech": "n.",
+    "example": "She was taken to the hospital.",
+    "exampleTranslation": "她被送去了医院。",
+    "difficulty": 1,
+    "chapter": 4,
+    "level": 1,
+    "synonyms": [
+      "clinic"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "hospit(客人)+al→招待客人(病人)的地方",
+    "memoryTip": "hospital→好死陪他→在医院好好陪他",
+    "category": "medical"
+  },
+  {
+    "word": "question",
+    "phonetic": "/ˈkwestʃən/",
+    "meaning": "问题",
+    "partOfSpeech": "n.",
+    "example": "Do you have any questions?",
+    "exampleTranslation": "你有什么问题吗？",
+    "difficulty": 1,
+    "chapter": 4,
+    "level": 1,
+    "synonyms": [
+      "query"
+    ],
+    "antonyms": [
+      "answer"
+    ],
+    "rootAnalysis": "quest(寻找)+ion→寻找答案→问题",
+    "memoryTip": "quest(寻找)+ion→寻找答案→问题",
+    "category": "academic"
+  },
+  {
+    "word": "curriculum",
+    "phonetic": "/kəˈrɪkjʊləm/",
+    "meaning": "课程",
+    "partOfSpeech": "n.",
+    "example": "The school updated its curriculum.",
+    "exampleTranslation": "学校更新了课程。",
+    "difficulty": 2,
+    "chapter": 4,
+    "level": 2,
+    "synonyms": [
+      "syllabus"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "curr(跑)+iculum→跑的路线→课程设置",
+    "memoryTip": "curriculum→可日哭了→课程太多可日日哭了",
+    "category": "education"
+  },
+  {
+    "word": "scholarship",
+    "phonetic": "/ˈskɒlərʃɪp/",
+    "meaning": "奖学金",
+    "partOfSpeech": "n.",
+    "example": "She won a full scholarship.",
+    "exampleTranslation": "她获得了全额奖学金。",
+    "difficulty": 2,
+    "chapter": 4,
+    "level": 2,
+    "synonyms": [
+      "grant"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "scholar(学者)+ship→学者的奖励",
+    "memoryTip": "scholar(学者)+ship→学者的船→载着你去学习",
+    "category": "education"
+  },
+  {
+    "word": "experiment",
+    "phonetic": "/ɪkˈsperɪmənt/",
+    "meaning": "实验",
+    "partOfSpeech": "n.",
+    "example": "The experiment was successful.",
+    "exampleTranslation": "实验成功了。",
+    "difficulty": 2,
+    "chapter": 4,
+    "level": 2,
+    "synonyms": [
+      "trial",
+      "test"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "ex(出)+peri(尝试)+ment→尝试出来",
+    "memoryTip": "experiment→一些拍日没→做实验拍了一天",
+    "category": "science"
+  },
+  {
+    "word": "laboratory",
+    "phonetic": "/ləˈbɒrətəri/",
+    "meaning": "实验室",
+    "partOfSpeech": "n.",
+    "example": "Scientists work in the laboratory.",
+    "exampleTranslation": "科学家在实验室工作。",
+    "difficulty": 2,
+    "chapter": 4,
+    "level": 2,
+    "synonyms": [
+      "lab"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "labor(劳动)+atory(场所)→劳动的场所",
+    "memoryTip": "labor(劳动)+atory→劳动的地方→实验室",
+    "category": "science"
+  },
+  {
+    "word": "software",
+    "phonetic": "/ˈsɒftwer/",
+    "meaning": "软件",
+    "partOfSpeech": "n.",
+    "example": "We need to update the software.",
+    "exampleTranslation": "我们需要更新软件。",
+    "difficulty": 2,
+    "chapter": 4,
+    "level": 2,
+    "synonyms": [
+      "program",
+      "application"
+    ],
+    "antonyms": [
+      "hardware"
+    ],
+    "rootAnalysis": "soft(软)+ware(器具)→软器具→软件",
+    "memoryTip": "soft(软)+ware(器具)→软件",
+    "category": "technology"
+  },
+  {
+    "word": "database",
+    "phonetic": "/ˈdeɪtəbeɪs/",
+    "meaning": "数据库",
+    "partOfSpeech": "n.",
+    "example": "The database stores all customer information.",
+    "exampleTranslation": "数据库存储所有客户信息。",
+    "difficulty": 2,
+    "chapter": 4,
+    "level": 2,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "data(数据)+base(基础)→数据的基础",
+    "memoryTip": "data(数据)+base(库)→数据库",
+    "category": "technology"
+  },
+  {
+    "word": "symptom",
+    "phonetic": "/ˈsɪmptəm/",
+    "meaning": "症状",
+    "partOfSpeech": "n.",
+    "example": "Fever is a common symptom of flu.",
+    "exampleTranslation": "发烧是流感的常见症状。",
+    "difficulty": 2,
+    "chapter": 4,
+    "level": 2,
+    "synonyms": [
+      "sign",
+      "indication"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "sym(一起)+ptom(落)→一起落下的表现",
+    "memoryTip": "symptom→心扑通→有症状心扑通跳",
+    "category": "medical"
+  },
+  {
+    "word": "diagnosis",
+    "phonetic": "/ˌdaɪəɡˈnoʊsɪs/",
+    "meaning": "诊断",
+    "partOfSpeech": "n.",
+    "example": "The doctor made a diagnosis.",
+    "exampleTranslation": "医生做出了诊断。",
+    "difficulty": 2,
+    "chapter": 4,
+    "level": 2,
+    "synonyms": [
+      "assessment"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "dia(穿过)+gnos(知道)+is→穿过表象知道→诊断",
+    "memoryTip": "dia(穿过)+gnosis(认知)→看穿病情→诊断",
+    "category": "medical"
+  },
+  {
+    "word": "thesis",
+    "phonetic": "/ˈθiːsɪs/",
+    "meaning": "论文",
+    "partOfSpeech": "n.",
+    "example": "He is writing his doctoral thesis.",
+    "exampleTranslation": "他正在写博士论文。",
+    "difficulty": 2,
+    "chapter": 4,
+    "level": 2,
+    "synonyms": [
+      "dissertation"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "the(放)+sis→放出来的观点→论文",
+    "memoryTip": "thesis→the+sis→把观点放出来→论文",
+    "category": "academic"
+  },
+  {
+    "word": "hypothesis",
+    "phonetic": "/haɪˈpɒθəsɪs/",
+    "meaning": "假说",
+    "partOfSpeech": "n.",
+    "example": "The hypothesis needs to be tested.",
+    "exampleTranslation": "这个假说需要验证。",
+    "difficulty": 3,
+    "chapter": 4,
+    "level": 3,
+    "synonyms": [
+      "theory",
+      "assumption"
+    ],
+    "antonyms": [
+      "fact"
+    ],
+    "rootAnalysis": "hypo(在下面)+thesis(论点)→在下面的论点→假说",
+    "memoryTip": "hypo(下)+thesis(论点)→底层论点→假说",
+    "category": "science"
+  },
+  {
+    "word": "algorithm",
+    "phonetic": "/ˈælɡərɪðəm/",
+    "meaning": "算法",
+    "partOfSpeech": "n.",
+    "example": "The search algorithm is very efficient.",
+    "exampleTranslation": "这个搜索算法非常高效。",
+    "difficulty": 3,
+    "chapter": 4,
+    "level": 3,
+    "synonyms": [
+      "procedure"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "来自数学家al-Khwarizmi的名字",
+    "memoryTip": "algorithm→阿尔戈理→阿尔戈的算法道理",
+    "category": "technology"
+  },
+  {
+    "word": "antibiotic",
+    "phonetic": "/ˌæntɪbaɪˈɒtɪk/",
+    "meaning": "抗生素",
+    "partOfSpeech": "n.",
+    "example": "The doctor prescribed antibiotics.",
+    "exampleTranslation": "医生开了抗生素。",
+    "difficulty": 3,
+    "chapter": 4,
+    "level": 3,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "anti(反)+bio(生命)+tic→反生命(细菌)→抗生素",
+    "memoryTip": "anti(抗)+bio(生物)+tic→对抗细菌→抗生素",
+    "category": "medical"
+  },
+  {
+    "word": "pedagogy",
+    "phonetic": "/ˈpedəɡɒdʒi/",
+    "meaning": "教育学",
+    "partOfSpeech": "n.",
+    "example": "Modern pedagogy emphasizes critical thinking.",
+    "exampleTranslation": "现代教育学强调批判性思维。",
+    "difficulty": 3,
+    "chapter": 4,
+    "level": 3,
+    "synonyms": [
+      "teaching",
+      "education"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "ped(儿童)+agogy(引导)→引导儿童",
+    "memoryTip": "ped(孩子)+agogy(引导)→引导孩子→教育学",
+    "category": "education"
+  },
+  {
+    "word": "molecule",
+    "phonetic": "/ˈmɒlɪkjuːl/",
+    "meaning": "分子",
+    "partOfSpeech": "n.",
+    "example": "Water molecules consist of hydrogen and oxygen.",
+    "exampleTranslation": "水分子由氢和氧组成。",
+    "difficulty": 3,
+    "chapter": 4,
+    "level": 3,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "mole(团)+cule(小)→小团→分子",
+    "memoryTip": "mole(摩尔)+cule(小)→小摩尔→分子",
+    "category": "science"
+  },
+  {
+    "word": "encryption",
+    "phonetic": "/ɪnˈkrɪpʃən/",
+    "meaning": "加密",
+    "partOfSpeech": "n.",
+    "example": "Encryption protects your data online.",
+    "exampleTranslation": "加密保护你的在线数据。",
+    "difficulty": 3,
+    "chapter": 4,
+    "level": 3,
+    "synonyms": [
+      "coding"
+    ],
+    "antonyms": [
+      "decryption"
+    ],
+    "rootAnalysis": "en(使)+crypt(隐藏)+ion→使其隐藏→加密",
+    "memoryTip": "en+crypt(秘密)→使成秘密→加密",
+    "category": "technology"
+  },
+  {
+    "word": "vaccine",
+    "phonetic": "/ˈvæksiːn/",
+    "meaning": "疫苗",
+    "partOfSpeech": "n.",
+    "example": "The vaccine prevents the disease.",
+    "exampleTranslation": "疫苗预防这种疾病。",
+    "difficulty": 3,
+    "chapter": 4,
+    "level": 3,
+    "synonyms": [
+      "immunization"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "vacc(牛)+ine→从牛来的→疫苗(最早用牛痘)",
+    "memoryTip": "vaccine→我可信→疫苗我可以信任",
+    "category": "medical"
+  },
+  {
+    "word": "bibliography",
+    "phonetic": "/ˌbɪbliˈɒɡrəfi/",
+    "meaning": "参考文献",
+    "partOfSpeech": "n.",
+    "example": "Include a bibliography at the end of the paper.",
+    "exampleTranslation": "在论文末尾附上参考文献。",
+    "difficulty": 3,
+    "chapter": 4,
+    "level": 3,
+    "synonyms": [
+      "references"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "biblio(书)+graphy(写)→关于书的写作",
+    "memoryTip": "biblio(书)+graphy(记录)→书的记录→参考文献",
+    "category": "academic"
+  },
+  {
+    "word": "dissertation",
+    "phonetic": "/ˌdɪsərˈteɪʃən/",
+    "meaning": "学位论文",
+    "partOfSpeech": "n.",
+    "example": "She defended her dissertation successfully.",
+    "exampleTranslation": "她成功答辩了学位论文。",
+    "difficulty": 3,
+    "chapter": 4,
+    "level": 3,
+    "synonyms": [
+      "thesis"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "dissert(讨论)+ation→详细讨论→学位论文",
+    "memoryTip": "dissertation→的塞他心→论文塞满了他的心",
+    "category": "academic"
+  },
+  {
+    "word": "epistemology",
+    "phonetic": "/ɪˌpɪstɪˈmɒlədʒi/",
+    "meaning": "认识论",
+    "partOfSpeech": "n.",
+    "example": "Epistemology studies the nature of knowledge.",
+    "exampleTranslation": "认识论研究知识的本质。",
+    "difficulty": 4,
+    "chapter": 4,
+    "level": 4,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "episteme(知识)+logy(学科)→知识的学科",
+    "memoryTip": "episteme(知识)+logy(学)→知识之学→认识论",
+    "category": "education"
+  },
+  {
+    "word": "quantum",
+    "phonetic": "/ˈkwɒntəm/",
+    "meaning": "量子",
+    "partOfSpeech": "n.",
+    "example": "Quantum physics is very complex.",
+    "exampleTranslation": "量子物理非常复杂。",
+    "difficulty": 4,
+    "chapter": 4,
+    "level": 4,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "quant(多少)+um→多少的最小单位",
+    "memoryTip": "quantum→宽他们→量子世界宽他们的视野",
+    "category": "science"
+  },
+  {
+    "word": "nanotechnology",
+    "phonetic": "/ˌnænoʊtekˈnɒlədʒi/",
+    "meaning": "纳米技术",
+    "partOfSpeech": "n.",
+    "example": "Nanotechnology is used in medicine.",
+    "exampleTranslation": "纳米技术被应用于医学。",
+    "difficulty": 4,
+    "chapter": 4,
+    "level": 4,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "nano(十亿分之一)+technology(技术)",
+    "memoryTip": "nano(极小)+technology→极小技术→纳米技术",
+    "category": "technology"
+  },
+  {
+    "word": "artificial",
+    "phonetic": "/ˌɑːrtɪˈfɪʃəl/",
+    "meaning": "人工的",
+    "partOfSpeech": "adj.",
+    "example": "Artificial intelligence is changing the world.",
+    "exampleTranslation": "人工智能正在改变世界。",
+    "difficulty": 4,
+    "chapter": 4,
+    "level": 4,
+    "synonyms": [
+      "synthetic",
+      "man-made"
+    ],
+    "antonyms": [
+      "natural"
+    ],
+    "rootAnalysis": "arti(技巧)+fic(做)+ial→用技巧做的",
+    "memoryTip": "art(技术)+ficial→用技术做的→人工的",
+    "category": "technology"
+  },
+  {
+    "word": "pathology",
+    "phonetic": "/pəˈθɒlədʒi/",
+    "meaning": "病理学",
+    "partOfSpeech": "n.",
+    "example": "He specializes in pathology.",
+    "exampleTranslation": "他专攻病理学。",
+    "difficulty": 4,
+    "chapter": 4,
+    "level": 4,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "path(疾病)+ology(学科)→疾病的学科",
+    "memoryTip": "path(病)+ology(学)→研究疾病的学问",
+    "category": "medical"
+  },
+  {
+    "word": "paradigm",
+    "phonetic": "/ˈpærədaɪm/",
+    "meaning": "范式",
+    "partOfSpeech": "n.",
+    "example": "This represents a paradigm shift in science.",
+    "exampleTranslation": "这代表了科学范式的转变。",
+    "difficulty": 4,
+    "chapter": 4,
+    "level": 4,
+    "synonyms": [
+      "model",
+      "pattern"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "para(旁边)+deigm(展示)→展示在旁边的模型",
+    "memoryTip": "paradigm→趴了带母→范式趴下来带领母本",
+    "category": "academic"
+  },
+  {
+    "word": "peer",
+    "phonetic": "/pɪər/",
+    "meaning": "同行",
+    "partOfSpeech": "n.",
+    "example": "The paper was peer-reviewed.",
+    "exampleTranslation": "论文经过了同行评审。",
+    "difficulty": 4,
+    "chapter": 4,
+    "level": 4,
+    "synonyms": [
+      "equal",
+      "colleague"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "来自拉丁语par(平等)",
+    "memoryTip": "peer→皮儿→同行的皮儿一样厚",
+    "category": "academic"
+  },
+  {
+    "word": "interdisciplinary",
+    "phonetic": "/ˌɪntərdɪsɪˈplɪnəri/",
+    "meaning": "跨学科的",
+    "partOfSpeech": "adj.",
+    "example": "The program takes an interdisciplinary approach.",
+    "exampleTranslation": "该项目采用跨学科方法。",
+    "difficulty": 5,
+    "chapter": 4,
+    "level": 5,
+    "synonyms": [
+      "cross-disciplinary"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "inter(之间)+disciplin(学科)+ary→学科之间的",
+    "memoryTip": "inter(之间)+disciplinary→学科之间的",
+    "category": "education"
+  },
+  {
+    "word": "neuroscience",
+    "phonetic": "/ˈnjʊəroʊsaɪəns/",
+    "meaning": "神经科学",
+    "partOfSpeech": "n.",
+    "example": "Neuroscience studies the brain.",
+    "exampleTranslation": "神经科学研究大脑。",
+    "difficulty": 5,
+    "chapter": 4,
+    "level": 5,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "neuro(神经)+science(科学)",
+    "memoryTip": "neuro(神经)+science→神经的科学",
+    "category": "science"
+  },
+  {
+    "word": "cybersecurity",
+    "phonetic": "/ˌsaɪbərsɪˈkjʊərɪti/",
+    "meaning": "网络安全",
+    "partOfSpeech": "n.",
+    "example": "Cybersecurity is crucial for businesses.",
+    "exampleTranslation": "网络安全对企业至关重要。",
+    "difficulty": 5,
+    "chapter": 4,
+    "level": 5,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "cyber(网络)+security(安全)",
+    "memoryTip": "cyber(网络)+security(安全)→网络安全",
+    "category": "technology"
+  },
+  {
+    "word": "pandemic",
+    "phonetic": "/pænˈdemɪk/",
+    "meaning": "大流行病",
+    "partOfSpeech": "n.",
+    "example": "The pandemic changed how we work.",
+    "exampleTranslation": "大流行病改变了我们的工作方式。",
+    "difficulty": 5,
+    "chapter": 4,
+    "level": 5,
+    "synonyms": [
+      "epidemic"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "pan(全部)+dem(人民)+ic→影响全部人民的",
+    "memoryTip": "pan(全)+demic(人民)→全民的→大流行病",
+    "category": "medical"
+  },
+  {
+    "word": "empirical",
+    "phonetic": "/ɪmˈpɪrɪkəl/",
+    "meaning": "经验主义的",
+    "partOfSpeech": "adj.",
+    "example": "The study provides empirical evidence.",
+    "exampleTranslation": "该研究提供了经验证据。",
+    "difficulty": 5,
+    "chapter": 4,
+    "level": 5,
+    "synonyms": [
+      "experimental",
+      "observational"
+    ],
+    "antonyms": [
+      "theoretical"
+    ],
+    "rootAnalysis": "empir(经验)+ical→基于经验的",
+    "memoryTip": "empirical→M皮日可→经验像M的皮日可触摸",
+    "category": "academic"
+  },
+  {
+    "word": "methodology",
+    "phonetic": "/ˌmeθəˈdɒlədʒi/",
+    "meaning": "方法论",
+    "partOfSpeech": "n.",
+    "example": "The research methodology was rigorous.",
+    "exampleTranslation": "研究方法论很严谨。",
+    "difficulty": 5,
+    "chapter": 4,
+    "level": 5,
+    "synonyms": [
+      "approach",
+      "procedure"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "method(方法)+ology(学科)→方法的学科",
+    "memoryTip": "method(方法)+ology(学)→方法之学→方法论",
+    "category": "academic"
+  },
+  {
+    "word": "genome",
+    "phonetic": "/ˈdʒiːnoʊm/",
+    "meaning": "基因组",
+    "partOfSpeech": "n.",
+    "example": "The human genome has been fully mapped.",
+    "exampleTranslation": "人类基因组已被完全测序。",
+    "difficulty": 5,
+    "chapter": 4,
+    "level": 5,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "gene(基因)+ome(整体)→基因的整体",
+    "memoryTip": "gene(基因)+ome(整体)→基因组",
+    "category": "science"
+  },
+  {
+    "word": "blockchain",
+    "phonetic": "/ˈblɒktʃeɪn/",
+    "meaning": "区块链",
+    "partOfSpeech": "n.",
+    "example": "Blockchain technology ensures data security.",
+    "exampleTranslation": "区块链技术确保数据安全。",
+    "difficulty": 5,
+    "chapter": 4,
+    "level": 5,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "block(区块)+chain(链)→区块链",
+    "memoryTip": "block(区块)+chain(链)→区块串成链",
+    "category": "technology"
+  },
+  {
+    "word": "immunology",
+    "phonetic": "/ˌɪmjʊˈnɒlədʒi/",
+    "meaning": "免疫学",
+    "partOfSpeech": "n.",
+    "example": "She researches in immunology.",
+    "exampleTranslation": "她从事免疫学研究。",
+    "difficulty": 5,
+    "chapter": 4,
+    "level": 5,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "immun(免疫)+ology(学科)→免疫学",
+    "memoryTip": "immune(免疫)+ology(学)→免疫学",
+    "category": "medical"
+  },
+  {
+    "word": "plagiarism",
+    "phonetic": "/ˈpleɪdʒərɪzəm/",
+    "meaning": "抄袭",
+    "partOfSpeech": "n.",
+    "example": "Plagiarism is a serious academic offense.",
+    "exampleTranslation": "抄袭是严重的学术违规。",
+    "difficulty": 5,
+    "chapter": 4,
+    "level": 5,
+    "synonyms": [
+      "copying"
+    ],
+    "antonyms": [
+      "originality"
+    ],
+    "rootAnalysis": "plagi(偷)+arism(主义)→偷窃主义→抄袭",
+    "memoryTip": "plagiarism→抄了→学术上抄了别人的→抄袭",
+    "category": "academic"
+  },
+  {
+    "word": "tutor",
+    "phonetic": "/ˈtjuːtər/",
+    "meaning": "家教",
+    "partOfSpeech": "n.",
+    "example": "She hired a tutor for her son.",
+    "exampleTranslation": "她为儿子请了一位家教。",
+    "difficulty": 2,
+    "chapter": 4,
+    "level": 2,
+    "synonyms": [
+      "teacher",
+      "instructor"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "tut(看管)+or→看管学习的人",
+    "memoryTip": "tutor→兔特→兔子特别需要家教",
+    "category": "education"
+  },
+  {
+    "word": "gravity",
+    "phonetic": "/ˈɡrævɪti/",
+    "meaning": "重力",
+    "partOfSpeech": "n.",
+    "example": "Gravity keeps us on the ground.",
+    "exampleTranslation": "重力让我们站在地面上。",
+    "difficulty": 3,
+    "chapter": 4,
+    "level": 3,
+    "synonyms": [
+      "gravitation"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "grav(重)+ity→重的特性→重力",
+    "memoryTip": "grave(坟墓)→gravity→坟墓般沉重→重力",
+    "category": "science"
+  },
+  {
+    "word": "bandwidth",
+    "phonetic": "/ˈbændwɪdθ/",
+    "meaning": "带宽",
+    "partOfSpeech": "n.",
+    "example": "High bandwidth enables faster downloads.",
+    "exampleTranslation": "高带宽使下载更快。",
+    "difficulty": 3,
+    "chapter": 4,
+    "level": 3,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "band(带)+width(宽度)→带的宽度",
+    "memoryTip": "band(带)+width(宽)→带宽",
+    "category": "technology"
+  },
+  {
+    "word": "prescription",
+    "phonetic": "/prɪˈskrɪpʃən/",
+    "meaning": "处方",
+    "partOfSpeech": "n.",
+    "example": "You need a prescription for this medicine.",
+    "exampleTranslation": "这种药需要处方。",
+    "difficulty": 3,
+    "chapter": 4,
+    "level": 3,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "pre(预先)+script(写)+ion→预先写好的→处方",
+    "memoryTip": "pre(提前)+script(写)→提前写好→处方",
+    "category": "medical"
+  },
+  {
+    "word": "seminar",
+    "phonetic": "/ˈsemɪnɑːr/",
+    "meaning": "研讨会",
+    "partOfSpeech": "n.",
+    "example": "I attended a seminar on AI.",
+    "exampleTranslation": "我参加了一个关于AI的研讨会。",
+    "difficulty": 3,
+    "chapter": 4,
+    "level": 3,
+    "synonyms": [
+      "workshop"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "semin(种子)+ar→播种知识的→研讨会",
+    "memoryTip": "seminar→种子→播撒知识种子的研讨会",
+    "category": "academic"
+  },
+  {
+    "word": "autonomous",
+    "phonetic": "/ɔːˈtɒnəməs/",
+    "meaning": "自主的",
+    "partOfSpeech": "adj.",
+    "example": "Autonomous vehicles can drive themselves.",
+    "exampleTranslation": "自动驾驶汽车可以自己行驶。",
+    "difficulty": 4,
+    "chapter": 4,
+    "level": 4,
+    "synonyms": [
+      "self-governing",
+      "independent"
+    ],
+    "antonyms": [
+      "dependent"
+    ],
+    "rootAnalysis": "auto(自己)+nom(法律)+ous→自己立法的→自主的",
+    "memoryTip": "auto(自己)+nomous→自己管自己→自主的",
+    "category": "technology"
+  },
+  {
+    "word": "prognosis",
+    "phonetic": "/prɒɡˈnoʊsɪs/",
+    "meaning": "预后",
+    "partOfSpeech": "n.",
+    "example": "The prognosis for recovery is good.",
+    "exampleTranslation": "康复的预后良好。",
+    "difficulty": 4,
+    "chapter": 4,
+    "level": 4,
+    "synonyms": [
+      "forecast",
+      "outlook"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "pro(向前)+gnos(知道)+is→预先知道→预后",
+    "memoryTip": "pro(前)+gnosis(认知)→提前认知→预后",
+    "category": "medical"
+  },
+  {
+    "word": "accept",
+    "phonetic": "/əkˈsept/",
+    "meaning": "接受",
+    "partOfSpeech": "v.",
+    "example": "I accept your invitation.",
+    "exampleTranslation": "我接受你的邀请。",
+    "difficulty": 1,
+    "chapter": 5,
+    "level": 1,
+    "synonyms": [
+      "receive"
+    ],
+    "antonyms": [
+      "reject"
+    ],
+    "rootAnalysis": "ac(朝向)+cept(拿)→朝自己拿→接受",
+    "memoryTip": "易混词: accept(接受) vs except(除了)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "except",
+    "phonetic": "/ɪkˈsept/",
+    "meaning": "除了",
+    "partOfSpeech": "prep.",
+    "example": "Everyone came except Tom.",
+    "exampleTranslation": "除了汤姆大家都来了。",
+    "difficulty": 1,
+    "chapter": 5,
+    "level": 1,
+    "synonyms": [
+      "besides"
+    ],
+    "antonyms": [
+      "including"
+    ],
+    "rootAnalysis": "ex(出)+cept(拿)→拿出去→排除→除了",
+    "memoryTip": "易混词: except(除了) vs accept(接受)，ex-向外排除",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "affect",
+    "phonetic": "/əˈfekt/",
+    "meaning": "影响",
+    "partOfSpeech": "v.",
+    "example": "The weather affects my mood.",
+    "exampleTranslation": "天气影响我的心情。",
+    "difficulty": 1,
+    "chapter": 5,
+    "level": 1,
+    "synonyms": [
+      "influence"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "af(朝向)+fect(做)→对…做→影响",
+    "memoryTip": "易混词: affect(v.影响) vs effect(n.效果)，A=动作",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "effect",
+    "phonetic": "/ɪˈfekt/",
+    "meaning": "效果",
+    "partOfSpeech": "n.",
+    "example": "The medicine had a good effect.",
+    "exampleTranslation": "这药效果很好。",
+    "difficulty": 1,
+    "chapter": 5,
+    "level": 1,
+    "synonyms": [
+      "result",
+      "outcome"
+    ],
+    "antonyms": [
+      "cause"
+    ],
+    "rootAnalysis": "ef(出)+fect(做)→做出来的→效果",
+    "memoryTip": "易混词: effect(n.效果) vs affect(v.影响)，E=结果End",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "loose",
+    "phonetic": "/luːs/",
+    "meaning": "松的",
+    "partOfSpeech": "adj.",
+    "example": "The screw is loose.",
+    "exampleTranslation": "螺丝松了。",
+    "difficulty": 1,
+    "chapter": 5,
+    "level": 1,
+    "synonyms": [
+      "slack"
+    ],
+    "antonyms": [
+      "tight"
+    ],
+    "rootAnalysis": "",
+    "memoryTip": "易混词: loose(松的,oo像两个松洞) vs lose(丢失)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "lose",
+    "phonetic": "/luːz/",
+    "meaning": "丢失",
+    "partOfSpeech": "v.",
+    "example": "Do not lose your keys.",
+    "exampleTranslation": "别丢了钥匙。",
+    "difficulty": 1,
+    "chapter": 5,
+    "level": 1,
+    "synonyms": [
+      "misplace"
+    ],
+    "antonyms": [
+      "find"
+    ],
+    "rootAnalysis": "",
+    "memoryTip": "易混词: lose(丢失,丢了一个o) vs loose(松的)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "their",
+    "phonetic": "/ðer/",
+    "meaning": "他们的",
+    "partOfSpeech": "pron.",
+    "example": "This is their house.",
+    "exampleTranslation": "这是他们的房子。",
+    "difficulty": 1,
+    "chapter": 5,
+    "level": 1,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "易混词: their(他们的,含heir继承人) vs there(那里) vs they're(他们是)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "there",
+    "phonetic": "/ðer/",
+    "meaning": "那里",
+    "partOfSpeech": "adv.",
+    "example": "The book is over there.",
+    "exampleTranslation": "书在那里。",
+    "difficulty": 1,
+    "chapter": 5,
+    "level": 1,
+    "synonyms": [],
+    "antonyms": [
+      "here"
+    ],
+    "rootAnalysis": "",
+    "memoryTip": "易混词: there(那里,含here这里) vs their(他们的)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "quiet",
+    "phonetic": "/ˈkwaɪət/",
+    "meaning": "安静的",
+    "partOfSpeech": "adj.",
+    "example": "Please be quiet in the library.",
+    "exampleTranslation": "请在图书馆保持安静。",
+    "difficulty": 1,
+    "chapter": 5,
+    "level": 1,
+    "synonyms": [
+      "silent"
+    ],
+    "antonyms": [
+      "noisy"
+    ],
+    "rootAnalysis": "",
+    "memoryTip": "易混词: quiet(安静,qu+iet) vs quite(相当,qui+te)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "quite",
+    "phonetic": "/kwaɪt/",
+    "meaning": "相当",
+    "partOfSpeech": "adv.",
+    "example": "The movie was quite good.",
+    "exampleTranslation": "这部电影相当好。",
+    "difficulty": 1,
+    "chapter": 5,
+    "level": 1,
+    "synonyms": [
+      "rather",
+      "fairly"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "易混词: quite(相当,e在末尾) vs quiet(安静,e在中间)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "advice",
+    "phonetic": "/ədˈvaɪs/",
+    "meaning": "建议(名词)",
+    "partOfSpeech": "n.",
+    "example": "She gave me good advice.",
+    "exampleTranslation": "她给了我好的建议。",
+    "difficulty": 2,
+    "chapter": 5,
+    "level": 2,
+    "synonyms": [
+      "suggestion"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "ad(向)+vice(看)→向…看齐→建议",
+    "memoryTip": "易混词: advice(n.建议,ice冰是名词) vs advise(v.建议)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "advise",
+    "phonetic": "/ədˈvaɪz/",
+    "meaning": "建议(动词)",
+    "partOfSpeech": "v.",
+    "example": "I advise you to study harder.",
+    "exampleTranslation": "我建议你更努力学习。",
+    "difficulty": 2,
+    "chapter": 5,
+    "level": 2,
+    "synonyms": [
+      "recommend",
+      "suggest"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "ad(向)+vise(看)→帮人看方向→建议",
+    "memoryTip": "易混词: advise(v.建议,ise是动词后缀) vs advice(n.建议)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "principal",
+    "phonetic": "/ˈprɪnsɪpəl/",
+    "meaning": "校长/主要的",
+    "partOfSpeech": "n./adj.",
+    "example": "The principal announced a new rule.",
+    "exampleTranslation": "校长宣布了一条新规则。",
+    "difficulty": 2,
+    "chapter": 5,
+    "level": 2,
+    "synonyms": [
+      "main",
+      "chief"
+    ],
+    "antonyms": [
+      "minor"
+    ],
+    "rootAnalysis": "prin(第一)+cip(拿)+al→拿第一的→主要的",
+    "memoryTip": "易混词: principal(校长/主要的,pal=朋友) vs principle(原则)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "principle",
+    "phonetic": "/ˈprɪnsɪpəl/",
+    "meaning": "原则",
+    "partOfSpeech": "n.",
+    "example": "He is a man of principle.",
+    "exampleTranslation": "他是一个有原则的人。",
+    "difficulty": 2,
+    "chapter": 5,
+    "level": 2,
+    "synonyms": [
+      "rule",
+      "standard"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "prin(第一)+ciple(抓)→第一个要抓住的→原则",
+    "memoryTip": "易混词: principle(原则,ple=规则rule) vs principal(校长)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "stationary",
+    "phonetic": "/ˈsteɪʃəneri/",
+    "meaning": "静止的",
+    "partOfSpeech": "adj.",
+    "example": "The car remained stationary.",
+    "exampleTranslation": "汽车保持静止。",
+    "difficulty": 2,
+    "chapter": 5,
+    "level": 2,
+    "synonyms": [
+      "still",
+      "motionless"
+    ],
+    "antonyms": [
+      "moving"
+    ],
+    "rootAnalysis": "station(站)+ary→站着不动的",
+    "memoryTip": "易混词: stationary(静止的,a=stand) vs stationery(文具)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "stationery",
+    "phonetic": "/ˈsteɪʃəneri/",
+    "meaning": "文具",
+    "partOfSpeech": "n.",
+    "example": "I bought some stationery for school.",
+    "exampleTranslation": "我买了一些学校用的文具。",
+    "difficulty": 2,
+    "chapter": 5,
+    "level": 2,
+    "synonyms": [
+      "supplies"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "来自stationer(文具商)",
+    "memoryTip": "易混词: stationery(文具,e=eraser橡皮) vs stationary(静止的)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "complement",
+    "phonetic": "/ˈkɒmplɪmənt/",
+    "meaning": "补充",
+    "partOfSpeech": "n.",
+    "example": "Red wine is a complement to steak.",
+    "exampleTranslation": "红酒是牛排的补充搭配。",
+    "difficulty": 2,
+    "chapter": 5,
+    "level": 2,
+    "synonyms": [
+      "addition",
+      "supplement"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "com(完全)+ple(填)+ment→填满→补充",
+    "memoryTip": "易混词: complement(补充,complete完整) vs compliment(赞美)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "emigrate",
+    "phonetic": "/ˈemɪɡreɪt/",
+    "meaning": "移出(离开祖国)",
+    "partOfSpeech": "v.",
+    "example": "They emigrated from China to Canada.",
+    "exampleTranslation": "他们从中国移民到加拿大。",
+    "difficulty": 2,
+    "chapter": 5,
+    "level": 2,
+    "synonyms": [
+      "leave"
+    ],
+    "antonyms": [
+      "immigrate"
+    ],
+    "rootAnalysis": "e(出)+migr(移动)+ate→移出去",
+    "memoryTip": "易混词: emigrate(移出,e=exit出) vs immigrate(移入)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "immigrate",
+    "phonetic": "/ˈɪmɪɡreɪt/",
+    "meaning": "移入(进入新国)",
+    "partOfSpeech": "v.",
+    "example": "Many people immigrate to the US.",
+    "exampleTranslation": "许多人移民到美国。",
+    "difficulty": 2,
+    "chapter": 5,
+    "level": 2,
+    "synonyms": [
+      "move to"
+    ],
+    "antonyms": [
+      "emigrate"
+    ],
+    "rootAnalysis": "im(进入)+migr(移动)+ate→移进来",
+    "memoryTip": "易混词: immigrate(移入,im=in进入) vs emigrate(移出)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "elicit",
+    "phonetic": "/ɪˈlɪsɪt/",
+    "meaning": "引出",
+    "partOfSpeech": "v.",
+    "example": "The question elicited a strong response.",
+    "exampleTranslation": "这个问题引出了强烈的反应。",
+    "difficulty": 3,
+    "chapter": 5,
+    "level": 3,
+    "synonyms": [
+      "draw out",
+      "evoke"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "e(出)+licit(引诱)→引出来",
+    "memoryTip": "易混词: elicit(引出,e像exit出) vs illicit(非法的)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "illicit",
+    "phonetic": "/ɪˈlɪsɪt/",
+    "meaning": "非法的",
+    "partOfSpeech": "adj.",
+    "example": "Illicit drugs are dangerous.",
+    "exampleTranslation": "非法药物是危险的。",
+    "difficulty": 3,
+    "chapter": 5,
+    "level": 3,
+    "synonyms": [
+      "illegal",
+      "unlawful"
+    ],
+    "antonyms": [
+      "legal",
+      "lawful"
+    ],
+    "rootAnalysis": "il(不)+licit(合法的)→不合法的",
+    "memoryTip": "易混词: illicit(非法的,ill=不好) vs elicit(引出)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "discreet",
+    "phonetic": "/dɪˈskriːt/",
+    "meaning": "谨慎的",
+    "partOfSpeech": "adj.",
+    "example": "Please be discreet about this matter.",
+    "exampleTranslation": "请对此事保持谨慎。",
+    "difficulty": 3,
+    "chapter": 5,
+    "level": 3,
+    "synonyms": [
+      "cautious",
+      "prudent"
+    ],
+    "antonyms": [
+      "indiscreet"
+    ],
+    "rootAnalysis": "dis(分开)+creet(区分)→能分开对待→谨慎的",
+    "memoryTip": "易混词: discreet(谨慎的,ee像两只小心的眼睛) vs discrete(分离的)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "discrete",
+    "phonetic": "/dɪˈskriːt/",
+    "meaning": "分离的",
+    "partOfSpeech": "adj.",
+    "example": "The data falls into discrete categories.",
+    "exampleTranslation": "数据分为不同的类别。",
+    "difficulty": 3,
+    "chapter": 5,
+    "level": 3,
+    "synonyms": [
+      "separate",
+      "distinct"
+    ],
+    "antonyms": [
+      "continuous"
+    ],
+    "rootAnalysis": "dis(分开)+crete(分辨)→分开的",
+    "memoryTip": "易混词: discrete(分离的,te=分开) vs discreet(谨慎的)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "precede",
+    "phonetic": "/prɪˈsiːd/",
+    "meaning": "在…之前",
+    "partOfSpeech": "v.",
+    "example": "Thunder precedes lightning in perception.",
+    "exampleTranslation": "在感知中雷声先于闪电。",
+    "difficulty": 3,
+    "chapter": 5,
+    "level": 3,
+    "synonyms": [
+      "come before"
+    ],
+    "antonyms": [
+      "follow"
+    ],
+    "rootAnalysis": "pre(前)+cede(走)→走在前面",
+    "memoryTip": "易混词: precede(在前,pre=前) vs proceed(继续,pro=向前进)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "proceed",
+    "phonetic": "/prəˈsiːd/",
+    "meaning": "继续进行",
+    "partOfSpeech": "v.",
+    "example": "Please proceed to the next step.",
+    "exampleTranslation": "请继续进行下一步。",
+    "difficulty": 3,
+    "chapter": 5,
+    "level": 3,
+    "synonyms": [
+      "continue",
+      "go on"
+    ],
+    "antonyms": [
+      "stop"
+    ],
+    "rootAnalysis": "pro(向前)+ceed(走)→向前走→继续",
+    "memoryTip": "易混词: proceed(继续,pro=向前) vs precede(在前,pre=预先)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "ingenious",
+    "phonetic": "/ɪnˈdʒiːniəs/",
+    "meaning": "巧妙的",
+    "partOfSpeech": "adj.",
+    "example": "What an ingenious solution!",
+    "exampleTranslation": "多么巧妙的解决方案！",
+    "difficulty": 3,
+    "chapter": 5,
+    "level": 3,
+    "synonyms": [
+      "clever",
+      "brilliant"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "in(内)+gen(产生)+ious→内在产生的才华",
+    "memoryTip": "易混词: ingenious(巧妙的,genius天才) vs ingenuous(天真的)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "ingenuous",
+    "phonetic": "/ɪnˈdʒenjuəs/",
+    "meaning": "天真的",
+    "partOfSpeech": "adj.",
+    "example": "She gave an ingenuous smile.",
+    "exampleTranslation": "她天真地笑了。",
+    "difficulty": 3,
+    "chapter": 5,
+    "level": 3,
+    "synonyms": [
+      "naive",
+      "innocent"
+    ],
+    "antonyms": [
+      "disingenuous"
+    ],
+    "rootAnalysis": "in(内在)+genu(天生)+ous→天生的→天真的",
+    "memoryTip": "易混词: ingenuous(天真的,genuine真实的) vs ingenious(巧妙的)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "allusion",
+    "phonetic": "/əˈluːʒən/",
+    "meaning": "典故/暗指",
+    "partOfSpeech": "n.",
+    "example": "The poem contains an allusion to Shakespeare.",
+    "exampleTranslation": "这首诗包含对莎士比亚的暗指。",
+    "difficulty": 3,
+    "chapter": 5,
+    "level": 3,
+    "synonyms": [
+      "reference",
+      "hint"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "al(向)+lus(玩)+ion→玩弄暗示→典故",
+    "memoryTip": "易混词: allusion(暗指) vs illusion(幻觉) vs delusion(妄想)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "illusion",
+    "phonetic": "/ɪˈluːʒən/",
+    "meaning": "幻觉",
+    "partOfSpeech": "n.",
+    "example": "It was just an optical illusion.",
+    "exampleTranslation": "那只是一个视觉幻觉。",
+    "difficulty": 3,
+    "chapter": 5,
+    "level": 3,
+    "synonyms": [
+      "mirage",
+      "fantasy"
+    ],
+    "antonyms": [
+      "reality"
+    ],
+    "rootAnalysis": "il(不)+lus(玩)+ion→不真实的→幻觉",
+    "memoryTip": "易混词: illusion(幻觉,ill=不真实) vs allusion(暗指)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "ambiguous",
+    "phonetic": "/æmˈbɪɡjuəs/",
+    "meaning": "模棱两可的",
+    "partOfSpeech": "adj.",
+    "example": "His answer was ambiguous.",
+    "exampleTranslation": "他的回答模棱两可。",
+    "difficulty": 4,
+    "chapter": 5,
+    "level": 4,
+    "synonyms": [
+      "vague",
+      "unclear"
+    ],
+    "antonyms": [
+      "clear",
+      "unambiguous"
+    ],
+    "rootAnalysis": "ambi(两个)+gu(走)+ous→两边走→模棱两可",
+    "memoryTip": "易混词: ambiguous(模糊的,ambi两面) vs ambivalent(矛盾的)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "ambivalent",
+    "phonetic": "/æmˈbɪvələnt/",
+    "meaning": "矛盾的",
+    "partOfSpeech": "adj.",
+    "example": "She felt ambivalent about the decision.",
+    "exampleTranslation": "她对这个决定感到矛盾。",
+    "difficulty": 4,
+    "chapter": 5,
+    "level": 4,
+    "synonyms": [
+      "conflicted",
+      "uncertain"
+    ],
+    "antonyms": [
+      "decisive"
+    ],
+    "rootAnalysis": "ambi(两个)+val(力量)+ent→两种力量→矛盾的",
+    "memoryTip": "易混词: ambivalent(矛盾的,val=value两种价值) vs ambiguous(模糊的)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "flaunt",
+    "phonetic": "/flɔːnt/",
+    "meaning": "炫耀",
+    "partOfSpeech": "v.",
+    "example": "She likes to flaunt her wealth.",
+    "exampleTranslation": "她喜欢炫耀她的财富。",
+    "difficulty": 4,
+    "chapter": 5,
+    "level": 4,
+    "synonyms": [
+      "show off",
+      "parade"
+    ],
+    "antonyms": [
+      "hide"
+    ],
+    "rootAnalysis": "",
+    "memoryTip": "易混词: flaunt(炫耀) vs flout(蔑视)，flaunt→拂浪特→炫耀地拂袖",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "flout",
+    "phonetic": "/flaʊt/",
+    "meaning": "蔑视/违反",
+    "partOfSpeech": "v.",
+    "example": "He flouted the school rules.",
+    "exampleTranslation": "他蔑视学校规则。",
+    "difficulty": 4,
+    "chapter": 5,
+    "level": 4,
+    "synonyms": [
+      "defy",
+      "violate"
+    ],
+    "antonyms": [
+      "obey"
+    ],
+    "rootAnalysis": "",
+    "memoryTip": "易混词: flout(蔑视,out→踢出去) vs flaunt(炫耀)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "censure",
+    "phonetic": "/ˈsenʃər/",
+    "meaning": "谴责",
+    "partOfSpeech": "v.",
+    "example": "The committee censured the official.",
+    "exampleTranslation": "委员会谴责了这位官员。",
+    "difficulty": 4,
+    "chapter": 5,
+    "level": 4,
+    "synonyms": [
+      "condemn",
+      "criticize"
+    ],
+    "antonyms": [
+      "praise"
+    ],
+    "rootAnalysis": "cens(评价)+ure→严厉评价→谴责",
+    "memoryTip": "易混词: censure(谴责) vs censor(审查)，-sure→肯定地批评",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "censor",
+    "phonetic": "/ˈsensər/",
+    "meaning": "审查",
+    "partOfSpeech": "v.",
+    "example": "The government censored the news.",
+    "exampleTranslation": "政府审查了新闻。",
+    "difficulty": 4,
+    "chapter": 5,
+    "level": 4,
+    "synonyms": [
+      "filter",
+      "suppress"
+    ],
+    "antonyms": [
+      "allow"
+    ],
+    "rootAnalysis": "cens(评价)+or→评价的人→审查者",
+    "memoryTip": "易混词: censor(审查,-or是人) vs censure(谴责,-ure是动作)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "endemic",
+    "phonetic": "/enˈdemɪk/",
+    "meaning": "地方性的",
+    "partOfSpeech": "adj.",
+    "example": "Malaria is endemic in some tropical regions.",
+    "exampleTranslation": "疟疾在一些热带地区是地方性的。",
+    "difficulty": 4,
+    "chapter": 5,
+    "level": 4,
+    "synonyms": [
+      "native",
+      "local"
+    ],
+    "antonyms": [
+      "pandemic"
+    ],
+    "rootAnalysis": "en(在内)+dem(人民)+ic→在当地人民中的",
+    "memoryTip": "易混词: endemic(地方性的) vs epidemic(流行的) vs pandemic(大流行的)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "epidemic",
+    "phonetic": "/ˌepɪˈdemɪk/",
+    "meaning": "流行病",
+    "partOfSpeech": "n.",
+    "example": "The flu epidemic spread quickly.",
+    "exampleTranslation": "流感疫情迅速蔓延。",
+    "difficulty": 4,
+    "chapter": 5,
+    "level": 4,
+    "synonyms": [
+      "outbreak"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "epi(在…上)+dem(人民)+ic→在人民之上蔓延",
+    "memoryTip": "易混词: epidemic(流行病,epi在上面蔓延) vs endemic(地方性的) vs pandemic(大流行)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "veracious",
+    "phonetic": "/vəˈreɪʃəs/",
+    "meaning": "诚实的",
+    "partOfSpeech": "adj.",
+    "example": "She is a veracious person.",
+    "exampleTranslation": "她是一个诚实的人。",
+    "difficulty": 5,
+    "chapter": 5,
+    "level": 5,
+    "synonyms": [
+      "truthful",
+      "honest"
+    ],
+    "antonyms": [
+      "mendacious"
+    ],
+    "rootAnalysis": "ver(真实)+acious→真实的→诚实的",
+    "memoryTip": "易混词: veracious(诚实的,ver=真理) vs voracious(贪婪的,vor=吞食)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "voracious",
+    "phonetic": "/vəˈreɪʃəs/",
+    "meaning": "贪婪的",
+    "partOfSpeech": "adj.",
+    "example": "He is a voracious reader.",
+    "exampleTranslation": "他是一个如饥似渴的读者。",
+    "difficulty": 5,
+    "chapter": 5,
+    "level": 5,
+    "synonyms": [
+      "greedy",
+      "ravenous"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "vor(吞食)+acious→吞食般的→贪婪的",
+    "memoryTip": "易混词: voracious(贪婪的,vor=devour吞食) vs veracious(诚实的)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "prescribe",
+    "phonetic": "/prɪˈskraɪb/",
+    "meaning": "开处方",
+    "partOfSpeech": "v.",
+    "example": "The doctor prescribed some medicine.",
+    "exampleTranslation": "医生开了一些药。",
+    "difficulty": 5,
+    "chapter": 5,
+    "level": 5,
+    "synonyms": [
+      "recommend"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "pre(预先)+scribe(写)→预先写下→开处方",
+    "memoryTip": "易混词: prescribe(开处方,pre提前写) vs proscribe(禁止,pro向前禁止)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "proscribe",
+    "phonetic": "/proʊˈskraɪb/",
+    "meaning": "禁止",
+    "partOfSpeech": "v.",
+    "example": "The law proscribes such behavior.",
+    "exampleTranslation": "法律禁止这种行为。",
+    "difficulty": 5,
+    "chapter": 5,
+    "level": 5,
+    "synonyms": [
+      "ban",
+      "prohibit"
+    ],
+    "antonyms": [
+      "allow",
+      "prescribe"
+    ],
+    "rootAnalysis": "pro(向前)+scribe(写)→写在前面公示→禁止",
+    "memoryTip": "易混词: proscribe(禁止,pro=禁止向前) vs prescribe(开处方)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "tortuous",
+    "phonetic": "/ˈtɔːrtʃuəs/",
+    "meaning": "曲折的",
+    "partOfSpeech": "adj.",
+    "example": "The road was long and tortuous.",
+    "exampleTranslation": "道路漫长而曲折。",
+    "difficulty": 5,
+    "chapter": 5,
+    "level": 5,
+    "synonyms": [
+      "winding",
+      "twisting"
+    ],
+    "antonyms": [
+      "straight"
+    ],
+    "rootAnalysis": "tort(扭)+uous→扭来扭去的→曲折的",
+    "memoryTip": "易混词: tortuous(曲折的,tort=扭转) vs torturous(折磨的,torture)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "torturous",
+    "phonetic": "/ˈtɔːrtʃərəs/",
+    "meaning": "折磨人的",
+    "partOfSpeech": "adj.",
+    "example": "The wait was torturous.",
+    "exampleTranslation": "等待是折磨人的。",
+    "difficulty": 5,
+    "chapter": 5,
+    "level": 5,
+    "synonyms": [
+      "agonizing",
+      "painful"
+    ],
+    "antonyms": [
+      "pleasant"
+    ],
+    "rootAnalysis": "torture(折磨)+ous→折磨人的",
+    "memoryTip": "易混词: torturous(折磨的,torture折磨) vs tortuous(曲折的)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "deprecate",
+    "phonetic": "/ˈdeprɪkeɪt/",
+    "meaning": "反对/不赞成",
+    "partOfSpeech": "v.",
+    "example": "He deprecated the use of violence.",
+    "exampleTranslation": "他反对使用暴力。",
+    "difficulty": 5,
+    "chapter": 5,
+    "level": 5,
+    "synonyms": [
+      "disapprove",
+      "condemn"
+    ],
+    "antonyms": [
+      "approve"
+    ],
+    "rootAnalysis": "de(下)+prec(祈祷)+ate→祈祷去除→反对",
+    "memoryTip": "易混词: deprecate(反对) vs depreciate(贬值)，-cate=批评",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "depreciate",
+    "phonetic": "/dɪˈpriːʃieɪt/",
+    "meaning": "贬值",
+    "partOfSpeech": "v.",
+    "example": "Cars depreciate quickly.",
+    "exampleTranslation": "汽车贬值很快。",
+    "difficulty": 5,
+    "chapter": 5,
+    "level": 5,
+    "synonyms": [
+      "devalue",
+      "diminish"
+    ],
+    "antonyms": [
+      "appreciate"
+    ],
+    "rootAnalysis": "de(下)+preci(价值)+ate→价值下降→贬值",
+    "memoryTip": "易混词: depreciate(贬值,preci=price价格) vs deprecate(反对)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "eminent",
+    "phonetic": "/ˈemɪnənt/",
+    "meaning": "杰出的",
+    "partOfSpeech": "adj.",
+    "example": "She is an eminent scientist.",
+    "exampleTranslation": "她是一位杰出的科学家。",
+    "difficulty": 5,
+    "chapter": 5,
+    "level": 5,
+    "synonyms": [
+      "distinguished",
+      "renowned"
+    ],
+    "antonyms": [
+      "unknown"
+    ],
+    "rootAnalysis": "e(出)+min(突出)+ent→突出的→杰出的",
+    "memoryTip": "易混词: eminent(杰出的) vs imminent(即将发生的) vs immanent(内在的)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "imminent",
+    "phonetic": "/ˈɪmɪnənt/",
+    "meaning": "即将发生的",
+    "partOfSpeech": "adj.",
+    "example": "A storm is imminent.",
+    "exampleTranslation": "暴风雨即将来临。",
+    "difficulty": 5,
+    "chapter": 5,
+    "level": 5,
+    "synonyms": [
+      "impending",
+      "approaching"
+    ],
+    "antonyms": [
+      "distant"
+    ],
+    "rootAnalysis": "im(在上)+min(悬挂)+ent→悬挂在头上的→即将发生的",
+    "memoryTip": "易混词: imminent(即将发生的,im=即刻) vs eminent(杰出的)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "happy",
+    "phonetic": "/ˈhæpi/",
+    "meaning": "快乐的",
+    "partOfSpeech": "adj.",
+    "example": "She looks very happy today.",
+    "exampleTranslation": "她今天看起来很快乐。",
+    "difficulty": 1,
+    "chapter": 6,
+    "level": 1,
+    "synonyms": [
+      "glad",
+      "joyful"
+    ],
+    "antonyms": [
+      "sad"
+    ],
+    "rootAnalysis": "",
+    "memoryTip": "happy→哈皮→开心哈皮",
+    "category": "review_mixed"
+  },
+  {
+    "word": "run",
+    "phonetic": "/rʌn/",
+    "meaning": "跑",
+    "partOfSpeech": "v.",
+    "example": "He runs every morning.",
+    "exampleTranslation": "他每天早上跑步。",
+    "difficulty": 1,
+    "chapter": 6,
+    "level": 1,
+    "synonyms": [
+      "sprint",
+      "dash"
+    ],
+    "antonyms": [
+      "walk"
+    ],
+    "rootAnalysis": "",
+    "memoryTip": "run→润→跑得满头大汗润润的",
+    "category": "review_mixed"
+  },
+  {
+    "word": "big",
+    "phonetic": "/bɪɡ/",
+    "meaning": "大的",
+    "partOfSpeech": "adj.",
+    "example": "That is a big house.",
+    "exampleTranslation": "那是一栋大房子。",
+    "difficulty": 1,
+    "chapter": 6,
+    "level": 1,
+    "synonyms": [
+      "large",
+      "huge"
+    ],
+    "antonyms": [
+      "small"
+    ],
+    "rootAnalysis": "",
+    "memoryTip": "big→比个→比个头谁大",
+    "category": "review_mixed"
+  },
+  {
+    "word": "open",
+    "phonetic": "/ˈoʊpən/",
+    "meaning": "打开",
+    "partOfSpeech": "v.",
+    "example": "Please open the door.",
+    "exampleTranslation": "请打开门。",
+    "difficulty": 1,
+    "chapter": 6,
+    "level": 1,
+    "synonyms": [
+      "unlock"
+    ],
+    "antonyms": [
+      "close"
+    ],
+    "rootAnalysis": "",
+    "memoryTip": "open→哦盆→哦打开盆子",
+    "category": "review_mixed"
+  },
+  {
+    "word": "light",
+    "phonetic": "/laɪt/",
+    "meaning": "光/轻的",
+    "partOfSpeech": "n./adj.",
+    "example": "Turn on the light please.",
+    "exampleTranslation": "请把灯打开。",
+    "difficulty": 1,
+    "chapter": 6,
+    "level": 1,
+    "synonyms": [
+      "illumination"
+    ],
+    "antonyms": [
+      "dark",
+      "heavy"
+    ],
+    "rootAnalysis": "",
+    "memoryTip": "light→赖特→莱特兄弟的飞机需要光",
+    "category": "review_mixed"
+  },
+  {
+    "word": "cold",
+    "phonetic": "/koʊld/",
+    "meaning": "冷的",
+    "partOfSpeech": "adj.",
+    "example": "It is very cold outside.",
+    "exampleTranslation": "外面很冷。",
+    "difficulty": 1,
+    "chapter": 6,
+    "level": 1,
+    "synonyms": [
+      "chilly",
+      "freezing"
+    ],
+    "antonyms": [
+      "hot",
+      "warm"
+    ],
+    "rootAnalysis": "",
+    "memoryTip": "cold→口得→冷得张口哈气",
+    "category": "review_mixed"
+  },
+  {
+    "word": "begin",
+    "phonetic": "/bɪˈɡɪn/",
+    "meaning": "开始",
+    "partOfSpeech": "v.",
+    "example": "Let us begin the lesson.",
+    "exampleTranslation": "让我们开始上课。",
+    "difficulty": 1,
+    "chapter": 6,
+    "level": 1,
+    "synonyms": [
+      "start",
+      "commence"
+    ],
+    "antonyms": [
+      "end",
+      "finish"
+    ],
+    "rootAnalysis": "",
+    "memoryTip": "begin→比个→比赛开始比个高低",
+    "category": "review_mixed"
+  },
+  {
+    "word": "important",
+    "phonetic": "/ɪmˈpɔːrtənt/",
+    "meaning": "重要的",
+    "partOfSpeech": "adj.",
+    "example": "Education is very important.",
+    "exampleTranslation": "教育非常重要。",
+    "difficulty": 1,
+    "chapter": 6,
+    "level": 1,
+    "synonyms": [
+      "significant",
+      "crucial"
+    ],
+    "antonyms": [
+      "unimportant"
+    ],
+    "rootAnalysis": "im(进入)+port(带)+ant→带进来的→重要的",
+    "memoryTip": "import(进口)+ant→进口的蚂蚁很重要",
+    "category": "review_mixed"
+  },
+  {
+    "word": "beautiful",
+    "phonetic": "/ˈbjuːtɪfəl/",
+    "meaning": "美丽的",
+    "partOfSpeech": "adj.",
+    "example": "What a beautiful sunset!",
+    "exampleTranslation": "多么美丽的日落！",
+    "difficulty": 1,
+    "chapter": 6,
+    "level": 1,
+    "synonyms": [
+      "gorgeous",
+      "lovely"
+    ],
+    "antonyms": [
+      "ugly"
+    ],
+    "rootAnalysis": "beauty(美)+ful(充满)→充满美的",
+    "memoryTip": "beauty(美)+ful→充满美的→美丽的",
+    "category": "review_mixed"
+  },
+  {
+    "word": "different",
+    "phonetic": "/ˈdɪfərənt/",
+    "meaning": "不同的",
+    "partOfSpeech": "adj.",
+    "example": "They have different opinions.",
+    "exampleTranslation": "他们有不同的观点。",
+    "difficulty": 1,
+    "chapter": 6,
+    "level": 1,
+    "synonyms": [
+      "various",
+      "distinct"
+    ],
+    "antonyms": [
+      "same",
+      "similar"
+    ],
+    "rootAnalysis": "dif(分开)+fer(带)+ent→带向不同方向的",
+    "memoryTip": "differ(不同)+ent→不同的",
+    "category": "review_mixed"
+  },
+  {
+    "word": "remember",
+    "phonetic": "/rɪˈmembər/",
+    "meaning": "记住",
+    "partOfSpeech": "v.",
+    "example": "Please remember to bring your book.",
+    "exampleTranslation": "请记得带你的书。",
+    "difficulty": 1,
+    "chapter": 6,
+    "level": 1,
+    "synonyms": [
+      "recall",
+      "recollect"
+    ],
+    "antonyms": [
+      "forget"
+    ],
+    "rootAnalysis": "re(再)+member(成员)→再次成为记忆成员",
+    "memoryTip": "re(再)+member(成员)→再次成为记忆的成员",
+    "category": "review_mixed"
+  },
+  {
+    "word": "understand",
+    "phonetic": "/ˌʌndərˈstænd/",
+    "meaning": "理解",
+    "partOfSpeech": "v.",
+    "example": "I understand what you mean.",
+    "exampleTranslation": "我理解你的意思。",
+    "difficulty": 1,
+    "chapter": 6,
+    "level": 1,
+    "synonyms": [
+      "comprehend"
+    ],
+    "antonyms": [
+      "misunderstand"
+    ],
+    "rootAnalysis": "under(在下面)+stand(站)→站在下面支撑→理解",
+    "memoryTip": "under+stand→站在(话语)下面→理解",
+    "category": "review_mixed"
+  },
+  {
+    "word": "excellent",
+    "phonetic": "/ˈeksələnt/",
+    "meaning": "优秀的",
+    "partOfSpeech": "adj.",
+    "example": "She did an excellent job.",
+    "exampleTranslation": "她做得非常优秀。",
+    "difficulty": 2,
+    "chapter": 6,
+    "level": 2,
+    "synonyms": [
+      "outstanding",
+      "superb"
+    ],
+    "antonyms": [
+      "terrible",
+      "poor"
+    ],
+    "rootAnalysis": "ex(出)+cell(上升)+ent→超出的→优秀的",
+    "memoryTip": "excel(超越)+lent→超越的→优秀的",
+    "category": "review_mixed"
+  },
+  {
+    "word": "achieve",
+    "phonetic": "/əˈtʃiːv/",
+    "meaning": "实现",
+    "partOfSpeech": "v.",
+    "example": "He achieved his dream of becoming a doctor.",
+    "exampleTranslation": "他实现了成为医生的梦想。",
+    "difficulty": 2,
+    "chapter": 6,
+    "level": 2,
+    "synonyms": [
+      "accomplish",
+      "attain"
+    ],
+    "antonyms": [
+      "fail"
+    ],
+    "rootAnalysis": "a(到)+chieve(头)→到头了→实现",
+    "memoryTip": "achieve→额气五→实现目标额头冒五道气",
+    "category": "review_mixed"
+  },
+  {
+    "word": "opportunity",
+    "phonetic": "/ˌɒpərˈtjuːnɪti/",
+    "meaning": "机会",
+    "partOfSpeech": "n.",
+    "example": "This is a great opportunity for you.",
+    "exampleTranslation": "这对你来说是个好机会。",
+    "difficulty": 2,
+    "chapter": 6,
+    "level": 2,
+    "synonyms": [
+      "chance"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "op(向)+port(港口)+unity→向港口的→机会来了",
+    "memoryTip": "opportunity→哦扑团你踢→机会来了扑上去",
+    "category": "review_mixed"
+  },
+  {
+    "word": "experience",
+    "phonetic": "/ɪkˈspɪəriəns/",
+    "meaning": "经验",
+    "partOfSpeech": "n.",
+    "example": "She has ten years of experience.",
+    "exampleTranslation": "她有十年的经验。",
+    "difficulty": 2,
+    "chapter": 6,
+    "level": 2,
+    "synonyms": [
+      "knowledge"
+    ],
+    "antonyms": [
+      "inexperience"
+    ],
+    "rootAnalysis": "ex(出)+peri(尝试)+ence→尝试出来的→经验",
+    "memoryTip": "ex+peri(尝试)+ence→尝试后得到的→经验",
+    "category": "review_mixed"
+  },
+  {
+    "word": "environment",
+    "phonetic": "/ɪnˈvaɪrənmənt/",
+    "meaning": "环境",
+    "partOfSpeech": "n.",
+    "example": "We should protect the environment.",
+    "exampleTranslation": "我们应该保护环境。",
+    "difficulty": 2,
+    "chapter": 6,
+    "level": 2,
+    "synonyms": [
+      "surroundings"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "environ(围绕)+ment→围绕着的→环境",
+    "memoryTip": "environ(围绕)+ment→围绕我们的→环境",
+    "category": "review_mixed"
+  },
+  {
+    "word": "communicate",
+    "phonetic": "/kəˈmjuːnɪkeɪt/",
+    "meaning": "交流",
+    "partOfSpeech": "v.",
+    "example": "It is important to communicate clearly.",
+    "exampleTranslation": "清楚地交流很重要。",
+    "difficulty": 2,
+    "chapter": 6,
+    "level": 2,
+    "synonyms": [
+      "interact",
+      "convey"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "com(共同)+munic(服务)+ate→共同服务→交流",
+    "memoryTip": "community(社区)→communicate→社区里交流",
+    "category": "review_mixed"
+  },
+  {
+    "word": "education",
+    "phonetic": "/ˌedʒuˈkeɪʃən/",
+    "meaning": "教育",
+    "partOfSpeech": "n.",
+    "example": "Education changes lives.",
+    "exampleTranslation": "教育改变人生。",
+    "difficulty": 2,
+    "chapter": 6,
+    "level": 2,
+    "synonyms": [
+      "learning",
+      "schooling"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "e(出)+duc(引导)+ation→引导出来→教育",
+    "memoryTip": "e(出)+duc(引导)→引导人才出来→教育",
+    "category": "review_mixed"
+  },
+  {
+    "word": "responsibility",
+    "phonetic": "/rɪˌspɒnsɪˈbɪlɪti/",
+    "meaning": "责任",
+    "partOfSpeech": "n.",
+    "example": "It is your responsibility to finish the work.",
+    "exampleTranslation": "完成这项工作是你的责任。",
+    "difficulty": 2,
+    "chapter": 6,
+    "level": 2,
+    "synonyms": [
+      "duty",
+      "obligation"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "re(回)+spons(承诺)+ibility→回应承诺的能力",
+    "memoryTip": "response(回应)+ability(能力)→回应的能力→责任",
+    "category": "review_mixed"
+  },
+  {
+    "word": "knowledge",
+    "phonetic": "/ˈnɒlɪdʒ/",
+    "meaning": "知识",
+    "partOfSpeech": "n.",
+    "example": "Knowledge is power.",
+    "exampleTranslation": "知识就是力量。",
+    "difficulty": 2,
+    "chapter": 6,
+    "level": 2,
+    "synonyms": [
+      "wisdom",
+      "learning"
+    ],
+    "antonyms": [
+      "ignorance"
+    ],
+    "rootAnalysis": "know(知道)+ledge→知道的东西",
+    "memoryTip": "know(知道)+ledge(边缘)→知识的边缘→知识",
+    "category": "review_mixed"
+  },
+  {
+    "word": "courage",
+    "phonetic": "/ˈkʌrɪdʒ/",
+    "meaning": "勇气",
+    "partOfSpeech": "n.",
+    "example": "It takes courage to speak up.",
+    "exampleTranslation": "发声需要勇气。",
+    "difficulty": 2,
+    "chapter": 6,
+    "level": 2,
+    "synonyms": [
+      "bravery",
+      "valor"
+    ],
+    "antonyms": [
+      "cowardice"
+    ],
+    "rootAnalysis": "cour(心)+age→心的力量→勇气",
+    "memoryTip": "cour(心,如encourage鼓励)+age→心的力量→勇气",
+    "category": "review_mixed"
+  },
+  {
+    "word": "perseverance",
+    "phonetic": "/ˌpɜːrsɪˈvɪərəns/",
+    "meaning": "毅力",
+    "partOfSpeech": "n.",
+    "example": "Success requires perseverance.",
+    "exampleTranslation": "成功需要毅力。",
+    "difficulty": 3,
+    "chapter": 6,
+    "level": 3,
+    "synonyms": [
+      "persistence",
+      "determination"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "per(始终)+sever(严格)+ance→始终严格要求→毅力",
+    "memoryTip": "persevere(坚持)+ance→坚持不懈→毅力",
+    "category": "review_mixed"
+  },
+  {
+    "word": "consequence",
+    "phonetic": "/ˈkɒnsɪkwəns/",
+    "meaning": "后果",
+    "partOfSpeech": "n.",
+    "example": "Every action has consequences.",
+    "exampleTranslation": "每个行动都有后果。",
+    "difficulty": 3,
+    "chapter": 6,
+    "level": 3,
+    "synonyms": [
+      "result",
+      "outcome"
+    ],
+    "antonyms": [
+      "cause"
+    ],
+    "rootAnalysis": "con(一起)+sequ(跟随)+ence→跟随而来的",
+    "memoryTip": "con+sequence(序列)→跟随的序列→后果",
+    "category": "review_mixed"
+  },
+  {
+    "word": "inevitable",
+    "phonetic": "/ɪnˈevɪtəbəl/",
+    "meaning": "不可避免的",
+    "partOfSpeech": "adj.",
+    "example": "Change is inevitable.",
+    "exampleTranslation": "变化是不可避免的。",
+    "difficulty": 3,
+    "chapter": 6,
+    "level": 3,
+    "synonyms": [
+      "unavoidable",
+      "certain"
+    ],
+    "antonyms": [
+      "avoidable"
+    ],
+    "rootAnalysis": "in(不)+evit(避免)+able(能)→不能避免的",
+    "memoryTip": "in(不)+evitable(可避免的)→不可避免的",
+    "category": "review_mixed"
+  },
+  {
+    "word": "enthusiasm",
+    "phonetic": "/ɪnˈθjuːziæzəm/",
+    "meaning": "热情",
+    "partOfSpeech": "n.",
+    "example": "She showed great enthusiasm for the project.",
+    "exampleTranslation": "她对这个项目表现出极大的热情。",
+    "difficulty": 3,
+    "chapter": 6,
+    "level": 3,
+    "synonyms": [
+      "passion",
+      "zeal"
+    ],
+    "antonyms": [
+      "apathy"
+    ],
+    "rootAnalysis": "en(在内)+thus(神)+iasm→内心有神灵→热情",
+    "memoryTip": "en+theos(神)→被神灵附体般→热情",
+    "category": "review_mixed"
+  },
+  {
+    "word": "perspective",
+    "phonetic": "/pərˈspektɪv/",
+    "meaning": "视角",
+    "partOfSpeech": "n.",
+    "example": "Try to see things from a different perspective.",
+    "exampleTranslation": "试着从不同的视角看事物。",
+    "difficulty": 3,
+    "chapter": 6,
+    "level": 3,
+    "synonyms": [
+      "viewpoint",
+      "angle"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "per(穿过)+spect(看)+ive→穿过去看→视角",
+    "memoryTip": "per(穿)+spect(看)→穿透去看→视角",
+    "category": "review_mixed"
+  },
+  {
+    "word": "appreciate",
+    "phonetic": "/əˈpriːʃieɪt/",
+    "meaning": "感激/欣赏",
+    "partOfSpeech": "v.",
+    "example": "I really appreciate your help.",
+    "exampleTranslation": "我真的很感激你的帮助。",
+    "difficulty": 3,
+    "chapter": 6,
+    "level": 3,
+    "synonyms": [
+      "value",
+      "treasure"
+    ],
+    "antonyms": [
+      "depreciate"
+    ],
+    "rootAnalysis": "ap(向)+preci(价值)+ate→看到价值→欣赏",
+    "memoryTip": "ap+preci(价格/价值)+ate→认识到价值→感激",
+    "category": "review_mixed"
+  },
+  {
+    "word": "significant",
+    "phonetic": "/sɪɡˈnɪfɪkənt/",
+    "meaning": "重大的",
+    "partOfSpeech": "adj.",
+    "example": "This is a significant discovery.",
+    "exampleTranslation": "这是一个重大发现。",
+    "difficulty": 3,
+    "chapter": 6,
+    "level": 3,
+    "synonyms": [
+      "important",
+      "major"
+    ],
+    "antonyms": [
+      "insignificant"
+    ],
+    "rootAnalysis": "sign(标记)+ific(做)+ant→做出标记的→重大的",
+    "memoryTip": "sign(标记)+ificant→值得标记的→重大的",
+    "category": "review_mixed"
+  },
+  {
+    "word": "elaborate",
+    "phonetic": "/ɪˈlæbəreɪt/",
+    "meaning": "详细的/详述",
+    "partOfSpeech": "adj./v.",
+    "example": "Could you elaborate on that point?",
+    "exampleTranslation": "你能详细说明那一点吗？",
+    "difficulty": 3,
+    "chapter": 6,
+    "level": 3,
+    "synonyms": [
+      "detailed",
+      "complex"
+    ],
+    "antonyms": [
+      "simple"
+    ],
+    "rootAnalysis": "e(出)+labor(劳动)+ate→花大力气做出→详尽的",
+    "memoryTip": "e+labor(劳动)+ate→费劲劳动做出→详细的",
+    "category": "review_mixed"
+  },
+  {
+    "word": "resilience",
+    "phonetic": "/rɪˈzɪliəns/",
+    "meaning": "韧性",
+    "partOfSpeech": "n.",
+    "example": "Her resilience helped her overcome difficulties.",
+    "exampleTranslation": "她的韧性帮她克服了困难。",
+    "difficulty": 3,
+    "chapter": 6,
+    "level": 3,
+    "synonyms": [
+      "toughness",
+      "endurance"
+    ],
+    "antonyms": [
+      "fragility"
+    ],
+    "rootAnalysis": "re(回)+sil(跳)+ience→弹跳回来→韧性",
+    "memoryTip": "re(回)+sili(跳)+ence→弹回来→韧性",
+    "category": "review_mixed"
+  },
+  {
+    "word": "comprehensive",
+    "phonetic": "/ˌkɒmprɪˈhensɪv/",
+    "meaning": "全面的",
+    "partOfSpeech": "adj.",
+    "example": "The report provides a comprehensive analysis.",
+    "exampleTranslation": "报告提供了全面的分析。",
+    "difficulty": 4,
+    "chapter": 6,
+    "level": 4,
+    "synonyms": [
+      "thorough",
+      "complete"
+    ],
+    "antonyms": [
+      "partial"
+    ],
+    "rootAnalysis": "com(全部)+prehens(抓住)+ive→全部抓住的→全面的",
+    "memoryTip": "com+prehend(理解)+sive→完全理解的→全面的",
+    "category": "review_mixed"
+  },
+  {
+    "word": "extraordinary",
+    "phonetic": "/ɪkˈstrɔːrdɪneri/",
+    "meaning": "非凡的",
+    "partOfSpeech": "adj.",
+    "example": "She has extraordinary talent.",
+    "exampleTranslation": "她有非凡的才华。",
+    "difficulty": 4,
+    "chapter": 6,
+    "level": 4,
+    "synonyms": [
+      "remarkable",
+      "exceptional"
+    ],
+    "antonyms": [
+      "ordinary"
+    ],
+    "rootAnalysis": "extra(超出)+ordinary(普通的)→超出普通的",
+    "memoryTip": "extra(超)+ordinary(普通)→超越普通→非凡的",
+    "category": "review_mixed"
+  },
+  {
+    "word": "sophisticated",
+    "phonetic": "/səˈfɪstɪkeɪtɪd/",
+    "meaning": "复杂精密的",
+    "partOfSpeech": "adj.",
+    "example": "This is a sophisticated system.",
+    "exampleTranslation": "这是一个复杂精密的系统。",
+    "difficulty": 4,
+    "chapter": 6,
+    "level": 4,
+    "synonyms": [
+      "complex",
+      "refined"
+    ],
+    "antonyms": [
+      "simple",
+      "naive"
+    ],
+    "rootAnalysis": "soph(智慧)+istic+ated→有智慧的→精密的",
+    "memoryTip": "sophisticate→soph(智慧)+istic→充满智慧的→精密的",
+    "category": "review_mixed"
+  },
+  {
+    "word": "controversial",
+    "phonetic": "/ˌkɒntrəˈvɜːrʃəl/",
+    "meaning": "有争议的",
+    "partOfSpeech": "adj.",
+    "example": "The topic is very controversial.",
+    "exampleTranslation": "这个话题很有争议。",
+    "difficulty": 4,
+    "chapter": 6,
+    "level": 4,
+    "synonyms": [
+      "debatable",
+      "contentious"
+    ],
+    "antonyms": [
+      "uncontroversial"
+    ],
+    "rootAnalysis": "contra(反对)+vers(转)+ial→反转的→有争议的",
+    "memoryTip": "contro(反对)+vers(转)→互相反转→有争议的",
+    "category": "review_mixed"
+  },
+  {
+    "word": "predominant",
+    "phonetic": "/prɪˈdɒmɪnənt/",
+    "meaning": "主导的",
+    "partOfSpeech": "adj.",
+    "example": "English is the predominant language in business.",
+    "exampleTranslation": "英语是商业中的主导语言。",
+    "difficulty": 4,
+    "chapter": 6,
+    "level": 4,
+    "synonyms": [
+      "dominant",
+      "leading"
+    ],
+    "antonyms": [
+      "minor"
+    ],
+    "rootAnalysis": "pre(在前)+dominant(统治的)→在前面统治的",
+    "memoryTip": "pre(前)+dominant(统治)→在前面统治→主导的",
+    "category": "review_mixed"
+  },
+  {
+    "word": "acknowledge",
+    "phonetic": "/əkˈnɒlɪdʒ/",
+    "meaning": "承认",
+    "partOfSpeech": "v.",
+    "example": "He acknowledged his mistake.",
+    "exampleTranslation": "他承认了自己的错误。",
+    "difficulty": 4,
+    "chapter": 6,
+    "level": 4,
+    "synonyms": [
+      "admit",
+      "recognize"
+    ],
+    "antonyms": [
+      "deny"
+    ],
+    "rootAnalysis": "ac(向)+knowledge(知识)→向知识低头→承认",
+    "memoryTip": "ac+knowledge(知识)→认识到→承认",
+    "category": "review_mixed"
+  },
+  {
+    "word": "deteriorate",
+    "phonetic": "/dɪˈtɪəriəreɪt/",
+    "meaning": "恶化",
+    "partOfSpeech": "v.",
+    "example": "His health continued to deteriorate.",
+    "exampleTranslation": "他的健康持续恶化。",
+    "difficulty": 4,
+    "chapter": 6,
+    "level": 4,
+    "synonyms": [
+      "worsen",
+      "decline"
+    ],
+    "antonyms": [
+      "improve"
+    ],
+    "rootAnalysis": "de(向下)+terior(更差)+ate→变得更差→恶化",
+    "memoryTip": "de(下)+terior(差)→向下变差→恶化",
+    "category": "review_mixed"
+  },
+  {
+    "word": "metamorphosis",
+    "phonetic": "/ˌmetəˈmɔːrfəsɪs/",
+    "meaning": "蜕变",
+    "partOfSpeech": "n.",
+    "example": "The caterpillar undergoes metamorphosis.",
+    "exampleTranslation": "毛毛虫经历蜕变。",
+    "difficulty": 4,
+    "chapter": 6,
+    "level": 4,
+    "synonyms": [
+      "transformation",
+      "change"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "meta(变化)+morph(形态)+osis→形态变化→蜕变",
+    "memoryTip": "meta(变)+morph(形态)→变形→蜕变",
+    "category": "review_mixed"
+  },
+  {
+    "word": "ubiquitous",
+    "phonetic": "/juːˈbɪkwɪtəs/",
+    "meaning": "无处不在的",
+    "partOfSpeech": "adj.",
+    "example": "Smartphones are ubiquitous in modern life.",
+    "exampleTranslation": "智能手机在现代生活中无处不在。",
+    "difficulty": 4,
+    "chapter": 6,
+    "level": 4,
+    "synonyms": [
+      "omnipresent",
+      "pervasive"
+    ],
+    "antonyms": [
+      "rare"
+    ],
+    "rootAnalysis": "ubique(到处)+ous→到处都有的",
+    "memoryTip": "ubiquitous→you be quiet→你到处都安静→无处不在",
+    "category": "review_mixed"
+  },
+  {
+    "word": "quintessential",
+    "phonetic": "/ˌkwɪntɪˈsenʃəl/",
+    "meaning": "典型的",
+    "partOfSpeech": "adj.",
+    "example": "This is the quintessential British pub.",
+    "exampleTranslation": "这是典型的英式酒吧。",
+    "difficulty": 5,
+    "chapter": 6,
+    "level": 5,
+    "synonyms": [
+      "typical",
+      "classic"
+    ],
+    "antonyms": [
+      "atypical"
+    ],
+    "rootAnalysis": "quint(第五)+essential(本质)→第五元素般本质的",
+    "memoryTip": "quint(五)+essential(精华)→五重精华→最典型的",
+    "category": "review_mixed"
+  },
+  {
+    "word": "serendipity",
+    "phonetic": "/ˌserənˈdɪpɪti/",
+    "meaning": "意外发现",
+    "partOfSpeech": "n.",
+    "example": "Finding this cafe was pure serendipity.",
+    "exampleTranslation": "发现这家咖啡馆纯属意外的惊喜。",
+    "difficulty": 5,
+    "chapter": 6,
+    "level": 5,
+    "synonyms": [
+      "luck",
+      "fortune"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "来自波斯童话Serendip(锡兰)",
+    "memoryTip": "serendipity→仙人滴匹体→仙人点化般的意外发现",
+    "category": "review_mixed"
+  },
+  {
+    "word": "juxtaposition",
+    "phonetic": "/ˌdʒʌkstəpəˈzɪʃən/",
+    "meaning": "并列对比",
+    "partOfSpeech": "n.",
+    "example": "The juxtaposition of old and new is striking.",
+    "exampleTranslation": "新旧的并列对比很醒目。",
+    "difficulty": 5,
+    "chapter": 6,
+    "level": 5,
+    "synonyms": [
+      "contrast",
+      "comparison"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "juxta(旁边)+position(位置)→放在旁边→并列",
+    "memoryTip": "juxta(旁边)+position(位置)→并排放置→并列对比",
+    "category": "review_mixed"
+  },
+  {
+    "word": "paradox",
+    "phonetic": "/ˈpærədɒks/",
+    "meaning": "矛盾/悖论",
+    "partOfSpeech": "n.",
+    "example": "It is a paradox that less is more.",
+    "exampleTranslation": "少即是多是一个悖论。",
+    "difficulty": 5,
+    "chapter": 6,
+    "level": 5,
+    "synonyms": [
+      "contradiction"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "para(旁边)+dox(观点)→旁边的观点→相反的→悖论",
+    "memoryTip": "para(旁)+dox(观点)→旁观点→悖论",
+    "category": "review_mixed"
+  },
+  {
+    "word": "pragmatic",
+    "phonetic": "/præɡˈmætɪk/",
+    "meaning": "务实的",
+    "partOfSpeech": "adj.",
+    "example": "We need a pragmatic approach.",
+    "exampleTranslation": "我们需要务实的方法。",
+    "difficulty": 5,
+    "chapter": 6,
+    "level": 5,
+    "synonyms": [
+      "practical",
+      "realistic"
+    ],
+    "antonyms": [
+      "idealistic"
+    ],
+    "rootAnalysis": "pragma(行动)+tic→注重行动的→务实的",
+    "memoryTip": "pragma(实践)+tic→注重实践的→务实的",
+    "category": "review_mixed"
+  },
+  {
+    "word": "meticulous",
+    "phonetic": "/mɪˈtɪkjʊləs/",
+    "meaning": "一丝不苟的",
+    "partOfSpeech": "adj.",
+    "example": "She is meticulous about her work.",
+    "exampleTranslation": "她对工作一丝不苟。",
+    "difficulty": 5,
+    "chapter": 6,
+    "level": 5,
+    "synonyms": [
+      "thorough",
+      "precise"
+    ],
+    "antonyms": [
+      "careless",
+      "sloppy"
+    ],
+    "rootAnalysis": "metic(恐惧)+ulous→怕出错的→一丝不苟的",
+    "memoryTip": "meticulous→没踢Q了死→做事没踢到Q就死→一丝不苟",
+    "category": "review_mixed"
+  },
+  {
+    "word": "eloquent",
+    "phonetic": "/ˈeləkwənt/",
+    "meaning": "雄辩的",
+    "partOfSpeech": "adj.",
+    "example": "She gave an eloquent speech.",
+    "exampleTranslation": "她发表了一场雄辩的演讲。",
+    "difficulty": 5,
+    "chapter": 6,
+    "level": 5,
+    "synonyms": [
+      "articulate",
+      "fluent"
+    ],
+    "antonyms": [
+      "inarticulate"
+    ],
+    "rootAnalysis": "e(出)+loqu(说)+ent→说出来→雄辩的",
+    "memoryTip": "e(出)+loqu(说)+ent→说出精彩的→雄辩的",
+    "category": "review_mixed"
+  },
+  {
+    "word": "tenacious",
+    "phonetic": "/tɪˈneɪʃəs/",
+    "meaning": "顽强的",
+    "partOfSpeech": "adj.",
+    "example": "She is tenacious in pursuing her goals.",
+    "exampleTranslation": "她在追求目标时很顽强。",
+    "difficulty": 5,
+    "chapter": 6,
+    "level": 5,
+    "synonyms": [
+      "persistent",
+      "determined"
+    ],
+    "antonyms": [
+      "yielding"
+    ],
+    "rootAnalysis": "ten(握住)+acious→紧握不放的→顽强的",
+    "memoryTip": "ten(握)+acious→紧紧握住不放→顽强的",
+    "category": "review_mixed"
+  },
+  {
+    "word": "catalyst",
+    "phonetic": "/ˈkætəlɪst/",
+    "meaning": "催化剂",
+    "partOfSpeech": "n.",
+    "example": "The event was a catalyst for change.",
+    "exampleTranslation": "这个事件是变革的催化剂。",
+    "difficulty": 5,
+    "chapter": 6,
+    "level": 5,
+    "synonyms": [
+      "trigger",
+      "stimulus"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "cata(向下)+lyst(分解)→促使分解的→催化剂",
+    "memoryTip": "catalyst→卡他离死他→催化剂卡住然后分离",
+    "category": "review_mixed"
+  },
+  {
+    "word": "ambition",
+    "phonetic": "/æmˈbɪʃən/",
+    "meaning": "雄心",
+    "partOfSpeech": "n.",
+    "example": "She has the ambition to become president.",
+    "exampleTranslation": "她有成为总统的雄心。",
+    "difficulty": 5,
+    "chapter": 6,
+    "level": 5,
+    "synonyms": [
+      "aspiration",
+      "drive"
+    ],
+    "antonyms": [
+      "apathy"
+    ],
+    "rootAnalysis": "ambi(周围)+tion→四处奔走拉票→雄心",
+    "memoryTip": "amb(走)+ition→到处走的动力→雄心",
+    "category": "review_mixed"
+  },
+  {
+    "word": "authentic",
+    "phonetic": "/ɔːˈθentɪk/",
+    "meaning": "真实的",
+    "partOfSpeech": "adj.",
+    "example": "Is this painting authentic?",
+    "exampleTranslation": "这幅画是真品吗？",
+    "difficulty": 5,
+    "chapter": 6,
+    "level": 5,
+    "synonyms": [
+      "genuine",
+      "real"
+    ],
+    "antonyms": [
+      "fake",
+      "counterfeit"
+    ],
+    "rootAnalysis": "auth(自己)+entic→出自本人的→真实的",
+    "memoryTip": "author(作者)+entic→出自作者本人→真实的",
+    "category": "review_mixed"
+  },
+  {
+    "word": "yellow",
+    "phonetic": "/ˈjeloʊ/",
+    "meaning": "黄色的",
+    "partOfSpeech": "adj.",
+    "example": "The sun is bright yellow.",
+    "exampleTranslation": "太阳是明亮的黄色。",
+    "difficulty": 1,
+    "chapter": 1,
+    "level": 2,
+    "synonyms": [
+      "golden"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "yellow→也楼→也给楼刷成黄色",
+    "category": "colors"
+  },
+  {
+    "word": "brand",
+    "phonetic": "/brænd/",
+    "meaning": "品牌",
+    "partOfSpeech": "n.",
+    "example": "This is a famous brand.",
+    "exampleTranslation": "这是一个著名的品牌。",
+    "difficulty": 2,
+    "chapter": 3,
+    "level": 2,
+    "synonyms": [
+      "label"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "brand本意是烙印→品牌",
+    "memoryTip": "brand→不让的→好品牌不让人忘记",
+    "category": "shopping"
+  },
+  {
+    "word": "contract",
+    "phonetic": "/ˈkɒntrækt/",
+    "meaning": "合同",
+    "partOfSpeech": "n.",
+    "example": "They signed a contract.",
+    "exampleTranslation": "他们签了一份合同。",
+    "difficulty": 3,
+    "chapter": 3,
+    "level": 3,
+    "synonyms": [
+      "agreement"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "con(共同)+tract(拉)→共同拉到一起→合同",
+    "memoryTip": "con(共)+tract(拉)→拉到一起→签合同",
+    "category": "business"
+  },
+  {
+    "word": "delicacy",
+    "phonetic": "/ˈdelɪkəsi/",
+    "meaning": "美味佳肴",
+    "partOfSpeech": "n.",
+    "example": "This dish is a local delicacy.",
+    "exampleTranslation": "这道菜是当地的美味佳肴。",
+    "difficulty": 3,
+    "chapter": 3,
+    "level": 3,
+    "synonyms": [
+      "treat"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "delic(取悦)+acy→令人愉悦的食物",
+    "memoryTip": "delicate(精致的)→delicacy→精致的美食",
+    "category": "restaurant"
+  },
+  {
+    "word": "embargo",
+    "phonetic": "/ɪmˈbɑːrɡoʊ/",
+    "meaning": "禁运",
+    "partOfSpeech": "n.",
+    "example": "The country imposed an embargo on imports.",
+    "exampleTranslation": "该国对进口实施了禁运。",
+    "difficulty": 5,
+    "chapter": 3,
+    "level": 5,
+    "synonyms": [
+      "ban",
+      "restriction"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "em(进入)+barg(障碍)+o→设置障碍→禁运",
+    "memoryTip": "embargo→俺吧哥→俺吧哥说禁运了",
+    "category": "business"
+  },
+  {
+    "word": "lavish",
+    "phonetic": "/ˈlævɪʃ/",
+    "meaning": "奢华的",
+    "partOfSpeech": "adj.",
+    "example": "They held a lavish party.",
+    "exampleTranslation": "他们举办了一场奢华的派对。",
+    "difficulty": 4,
+    "chapter": 3,
+    "level": 4,
+    "synonyms": [
+      "extravagant",
+      "luxurious"
+    ],
+    "antonyms": [
+      "modest"
+    ],
+    "rootAnalysis": "",
+    "memoryTip": "lavish→拉我试→拉我去试奢华的生活",
+    "category": "social"
+  },
+  {
+    "word": "ethos",
+    "phonetic": "/ˈiːθɒs/",
+    "meaning": "精神特质",
+    "partOfSpeech": "n.",
+    "example": "The company has a strong work ethos.",
+    "exampleTranslation": "公司有很强的工作精神。",
+    "difficulty": 5,
+    "chapter": 3,
+    "level": 5,
+    "synonyms": [
+      "spirit",
+      "values"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "来自希腊语ethos(特性)",
+    "memoryTip": "ethos→一瘦死→精神特质一瘦死也坚持",
+    "category": "social"
+  },
+  {
+    "word": "sojourn",
+    "phonetic": "/ˈsɒdʒɜːrn/",
+    "meaning": "逗留",
+    "partOfSpeech": "n.",
+    "example": "During our sojourn in Paris, we visited many museums.",
+    "exampleTranslation": "在巴黎逗留期间，我们参观了许多博物馆。",
+    "difficulty": 5,
+    "chapter": 3,
+    "level": 5,
+    "synonyms": [
+      "stay",
+      "visit"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "so(在下面)+journ(一天)→在某处过一天→逗留",
+    "memoryTip": "sojourn→所以journey→所以旅途中逗留",
+    "category": "travel"
+  },
+  {
+    "word": "lecture",
+    "phonetic": "/ˈlektʃər/",
+    "meaning": "讲座",
+    "partOfSpeech": "n.",
+    "example": "The professor gave an interesting lecture.",
+    "exampleTranslation": "教授做了一场有趣的讲座。",
+    "difficulty": 2,
+    "chapter": 4,
+    "level": 2,
+    "synonyms": [
+      "talk",
+      "speech"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "lect(读)+ure→读出来→讲座",
+    "memoryTip": "lect(读)+ure→朗读出来→讲座",
+    "category": "education"
+  },
+  {
+    "word": "research",
+    "phonetic": "/rɪˈsɜːrtʃ/",
+    "meaning": "研究",
+    "partOfSpeech": "n.",
+    "example": "She is doing research on cancer.",
+    "exampleTranslation": "她在做癌症研究。",
+    "difficulty": 2,
+    "chapter": 4,
+    "level": 2,
+    "synonyms": [
+      "study",
+      "investigation"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "re(反复)+search(搜索)→反复搜索→研究",
+    "memoryTip": "re(反复)+search(搜索)→反复搜索→研究",
+    "category": "academic"
+  },
+  {
+    "word": "oxygen",
+    "phonetic": "/ˈɒksɪdʒən/",
+    "meaning": "氧气",
+    "partOfSpeech": "n.",
+    "example": "We need oxygen to breathe.",
+    "exampleTranslation": "我们需要氧气来呼吸。",
+    "difficulty": 2,
+    "chapter": 4,
+    "level": 2,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "oxy(酸)+gen(产生)→产生酸的(早期误认为)",
+    "memoryTip": "oxygen→氧可生→氧气可以让人生存",
+    "category": "science"
+  },
+  {
+    "word": "robot",
+    "phonetic": "/ˈroʊbɒt/",
+    "meaning": "机器人",
+    "partOfSpeech": "n.",
+    "example": "Robots are used in factories.",
+    "exampleTranslation": "工厂里使用机器人。",
+    "difficulty": 2,
+    "chapter": 4,
+    "level": 2,
+    "synonyms": [
+      "automaton"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "来自捷克语robota(劳动)",
+    "memoryTip": "robot→肉伯特→像肉做的伯特→机器人",
+    "category": "technology"
+  },
+  {
+    "word": "surgery",
+    "phonetic": "/ˈsɜːrdʒəri/",
+    "meaning": "手术",
+    "partOfSpeech": "n.",
+    "example": "The surgery was successful.",
+    "exampleTranslation": "手术很成功。",
+    "difficulty": 3,
+    "chapter": 4,
+    "level": 3,
+    "synonyms": [
+      "operation"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "surg(上升)+ery→切开让里面的东西上升→手术",
+    "memoryTip": "surge(涌起)+ry→手术刀涌起→手术",
+    "category": "medical"
+  },
+  {
+    "word": "theorem",
+    "phonetic": "/ˈθɪərəm/",
+    "meaning": "定理",
+    "partOfSpeech": "n.",
+    "example": "Pythagoras' theorem is fundamental in math.",
+    "exampleTranslation": "勾股定理是数学的基础。",
+    "difficulty": 3,
+    "chapter": 4,
+    "level": 3,
+    "synonyms": [
+      "principle"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "theor(观察)+em→通过观察得出的→定理",
+    "memoryTip": "theory(理论)→theorem→理论中的定理",
+    "category": "science"
+  },
+  {
+    "word": "cybernetics",
+    "phonetic": "/ˌsaɪbərˈnetɪks/",
+    "meaning": "控制论",
+    "partOfSpeech": "n.",
+    "example": "Cybernetics studies control systems.",
+    "exampleTranslation": "控制论研究控制系统。",
+    "difficulty": 4,
+    "chapter": 4,
+    "level": 4,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "cyber(舵手)+netics→掌舵的学问→控制论",
+    "memoryTip": "cyber(控制)+netics→控制的学问→控制论",
+    "category": "technology"
+  },
+  {
+    "word": "anatomy",
+    "phonetic": "/əˈnætəmi/",
+    "meaning": "解剖学",
+    "partOfSpeech": "n.",
+    "example": "She studied human anatomy.",
+    "exampleTranslation": "她学习了人体解剖学。",
+    "difficulty": 4,
+    "chapter": 4,
+    "level": 4,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "ana(向上)+tom(切)+y→切开来看→解剖学",
+    "memoryTip": "ana(上)+tomy(切)→往上切开→解剖学",
+    "category": "medical"
+  },
+  {
+    "word": "symposium",
+    "phonetic": "/sɪmˈpoʊziəm/",
+    "meaning": "学术研讨会",
+    "partOfSpeech": "n.",
+    "example": "The symposium attracted scholars worldwide.",
+    "exampleTranslation": "研讨会吸引了世界各地的学者。",
+    "difficulty": 4,
+    "chapter": 4,
+    "level": 4,
+    "synonyms": [
+      "conference"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "sym(一起)+pos(喝)+ium→一起喝酒讨论→研讨会",
+    "memoryTip": "sym(共同)+posium→共同聚饮讨论→研讨会",
+    "category": "academic"
+  },
+  {
+    "word": "cognitive",
+    "phonetic": "/ˈkɒɡnɪtɪv/",
+    "meaning": "认知的",
+    "partOfSpeech": "adj.",
+    "example": "Cognitive skills develop with age.",
+    "exampleTranslation": "认知能力随年龄发展。",
+    "difficulty": 5,
+    "chapter": 4,
+    "level": 5,
+    "synonyms": [
+      "mental",
+      "intellectual"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "cogn(认识)+itive→认识的→认知的",
+    "memoryTip": "cogn(认知)+itive→认识的→认知的",
+    "category": "academic"
+  },
+  {
+    "word": "bioinformatics",
+    "phonetic": "/ˌbaɪoʊɪnfərˈmætɪks/",
+    "meaning": "生物信息学",
+    "partOfSpeech": "n.",
+    "example": "Bioinformatics combines biology and computer science.",
+    "exampleTranslation": "生物信息学结合了生物学和计算机科学。",
+    "difficulty": 5,
+    "chapter": 4,
+    "level": 5,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "bio(生命)+informatics(信息学)",
+    "memoryTip": "bio(生物)+informatics(信息学)→生物信息学",
+    "category": "science"
+  },
+  {
+    "word": "militate",
+    "phonetic": "/ˈmɪlɪteɪt/",
+    "meaning": "对…产生影响",
+    "partOfSpeech": "v.",
+    "example": "Several factors militate against success.",
+    "exampleTranslation": "几个因素不利于成功。",
+    "difficulty": 5,
+    "chapter": 5,
+    "level": 5,
+    "synonyms": [
+      "influence"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "milit(军事)+ate→像军事般施加影响",
+    "memoryTip": "易混词: militate(产生影响) vs mitigate(减轻)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "mitigate",
+    "phonetic": "/ˈmɪtɪɡeɪt/",
+    "meaning": "减轻",
+    "partOfSpeech": "v.",
+    "example": "We need to mitigate the risks.",
+    "exampleTranslation": "我们需要减轻风险。",
+    "difficulty": 5,
+    "chapter": 5,
+    "level": 5,
+    "synonyms": [
+      "reduce",
+      "alleviate"
+    ],
+    "antonyms": [
+      "aggravate"
+    ],
+    "rootAnalysis": "mit(温和)+ig+ate→使温和→减轻",
+    "memoryTip": "易混词: mitigate(减轻,mit=mild温和) vs militate(影响)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "apathy",
+    "phonetic": "/ˈæpəθi/",
+    "meaning": "冷漠",
+    "partOfSpeech": "n.",
+    "example": "Voter apathy is a growing problem.",
+    "exampleTranslation": "选民冷漠是一个日益严重的问题。",
+    "difficulty": 4,
+    "chapter": 5,
+    "level": 4,
+    "synonyms": [
+      "indifference"
+    ],
+    "antonyms": [
+      "passion",
+      "enthusiasm"
+    ],
+    "rootAnalysis": "a(无)+path(感情)+y→没有感情→冷漠",
+    "memoryTip": "易混词: apathy(冷漠,a=无) vs empathy(共情,em=进入)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "empathy",
+    "phonetic": "/ˈempəθi/",
+    "meaning": "共情",
+    "partOfSpeech": "n.",
+    "example": "She showed empathy towards others.",
+    "exampleTranslation": "她对他人表现出共情。",
+    "difficulty": 4,
+    "chapter": 5,
+    "level": 4,
+    "synonyms": [
+      "compassion",
+      "understanding"
+    ],
+    "antonyms": [
+      "apathy"
+    ],
+    "rootAnalysis": "em(进入)+path(感情)+y→进入别人感情→共情",
+    "memoryTip": "易混词: empathy(共情,em=进入感受) vs apathy(冷漠) vs sympathy(同情)",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "creative",
+    "phonetic": "/kriˈeɪtɪv/",
+    "meaning": "有创造力的",
+    "partOfSpeech": "adj.",
+    "example": "She is a very creative person.",
+    "exampleTranslation": "她是一个很有创造力的人。",
+    "difficulty": 2,
+    "chapter": 6,
+    "level": 2,
+    "synonyms": [
+      "innovative",
+      "imaginative"
+    ],
+    "antonyms": [
+      "unimaginative"
+    ],
+    "rootAnalysis": "create(创造)+ive→有创造力的",
+    "memoryTip": "create(创造)+ive→有创造力的",
+    "category": "review_mixed"
+  },
+  {
+    "word": "strategy",
+    "phonetic": "/ˈstrætədʒi/",
+    "meaning": "策略",
+    "partOfSpeech": "n.",
+    "example": "We need a better strategy.",
+    "exampleTranslation": "我们需要更好的策略。",
+    "difficulty": 3,
+    "chapter": 6,
+    "level": 3,
+    "synonyms": [
+      "plan",
+      "approach"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "strat(军队)+egy(引导)→引导军队→策略",
+    "memoryTip": "strategy→死抓特急→策略死抓住特别紧急的",
+    "category": "review_mixed"
+  },
+  {
+    "word": "phenomenon",
+    "phonetic": "/fɪˈnɒmɪnən/",
+    "meaning": "现象",
+    "partOfSpeech": "n.",
+    "example": "This is a natural phenomenon.",
+    "exampleTranslation": "这是一种自然现象。",
+    "difficulty": 3,
+    "chapter": 6,
+    "level": 3,
+    "synonyms": [
+      "occurrence",
+      "event"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "来自希腊语phainomenon(显现的东西)",
+    "memoryTip": "phenomenon→飞呢马农→飞的马农是一个现象",
+    "category": "review_mixed"
+  },
+  {
+    "word": "aesthetic",
+    "phonetic": "/esˈθetɪk/",
+    "meaning": "审美的",
+    "partOfSpeech": "adj.",
+    "example": "The building has great aesthetic value.",
+    "exampleTranslation": "这栋建筑有很高的审美价值。",
+    "difficulty": 4,
+    "chapter": 6,
+    "level": 4,
+    "synonyms": [
+      "artistic"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "aesth(感觉)+etic→关于感觉的→审美的",
+    "memoryTip": "aesthetic→爱死了踢客→审美好到爱死了",
+    "category": "review_mixed"
+  },
+  {
+    "word": "altruistic",
+    "phonetic": "/ˌæltrʊˈɪstɪk/",
+    "meaning": "利他的",
+    "partOfSpeech": "adj.",
+    "example": "His motives were purely altruistic.",
+    "exampleTranslation": "他的动机纯粹是利他的。",
+    "difficulty": 5,
+    "chapter": 6,
+    "level": 5,
+    "synonyms": [
+      "selfless",
+      "unselfish"
+    ],
+    "antonyms": [
+      "selfish"
+    ],
+    "rootAnalysis": "altr(他人)+uistic→为他人的→利他的",
+    "memoryTip": "alter(其他)+uistic→为其他人的→利他的",
+    "category": "review_mixed"
+  },
+  {
+    "word": "dichotomy",
+    "phonetic": "/daɪˈkɒtəmi/",
+    "meaning": "二分法",
+    "partOfSpeech": "n.",
+    "example": "The dichotomy between rich and poor is growing.",
+    "exampleTranslation": "贫富之间的二分化日益加剧。",
+    "difficulty": 5,
+    "chapter": 6,
+    "level": 5,
+    "synonyms": [
+      "division",
+      "split"
+    ],
+    "antonyms": [
+      "unity"
+    ],
+    "rootAnalysis": "dicho(二)+tomy(切)→切成两半→二分法",
+    "memoryTip": "dicho(二)+tomy(切)→切成两半→二分法",
+    "category": "review_mixed"
+  },
+  {
+    "word": "synthesize",
+    "phonetic": "/ˈsɪnθəsaɪz/",
+    "meaning": "综合",
+    "partOfSpeech": "v.",
+    "example": "She can synthesize complex information.",
+    "exampleTranslation": "她能综合复杂的信息。",
+    "difficulty": 5,
+    "chapter": 6,
+    "level": 5,
+    "synonyms": [
+      "combine",
+      "integrate"
+    ],
+    "antonyms": [
+      "analyze"
+    ],
+    "rootAnalysis": "syn(一起)+thes(放)+ize→放在一起→综合",
+    "memoryTip": "syn(共同)+thesize→放在一起→综合",
+    "category": "review_mixed"
+  },
+  {
+    "word": "penguin",
+    "phonetic": "/ˈpeŋɡwɪn/",
+    "meaning": "企鹅",
+    "partOfSpeech": "n.",
+    "example": "Penguins live in cold regions.",
+    "exampleTranslation": "企鹅生活在寒冷地区。",
+    "difficulty": 2,
+    "chapter": 2,
+    "level": 2,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "",
+    "memoryTip": "penguin→胖官→胖胖的企鹅像个官",
+    "category": "animals"
+  },
+  {
+    "word": "refund",
+    "phonetic": "/ˈriːfʌnd/",
+    "meaning": "退款",
+    "partOfSpeech": "n.",
+    "example": "I requested a full refund.",
+    "exampleTranslation": "我要求全额退款。",
+    "difficulty": 2,
+    "chapter": 3,
+    "level": 2,
+    "synonyms": [
+      "reimbursement"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "re(回)+fund(资金)→资金回来→退款",
+    "memoryTip": "re(回)+fund(资金)→钱退回来→退款",
+    "category": "shopping"
+  },
+  {
+    "word": "bankrupt",
+    "phonetic": "/ˈbæŋkrʌpt/",
+    "meaning": "破产的",
+    "partOfSpeech": "adj.",
+    "example": "The company went bankrupt.",
+    "exampleTranslation": "公司破产了。",
+    "difficulty": 4,
+    "chapter": 3,
+    "level": 4,
+    "synonyms": [
+      "insolvent"
+    ],
+    "antonyms": [
+      "solvent"
+    ],
+    "rootAnalysis": "bank(银行)+rupt(破)→银行破了→破产",
+    "memoryTip": "bank(银行)+rupt(破裂)→银行破裂→破产",
+    "category": "business"
+  },
+  {
+    "word": "microscope",
+    "phonetic": "/ˈmaɪkrəskoʊp/",
+    "meaning": "显微镜",
+    "partOfSpeech": "n.",
+    "example": "She examined the cells under a microscope.",
+    "exampleTranslation": "她在显微镜下检查细胞。",
+    "difficulty": 3,
+    "chapter": 4,
+    "level": 3,
+    "synonyms": [],
+    "antonyms": [],
+    "rootAnalysis": "micro(微小)+scope(看)→看微小事物的",
+    "memoryTip": "micro(微)+scope(镜)→看微小的镜→显微镜",
+    "category": "science"
+  },
+  {
+    "word": "allergy",
+    "phonetic": "/ˈælɜːrdʒi/",
+    "meaning": "过敏",
+    "partOfSpeech": "n.",
+    "example": "He has an allergy to peanuts.",
+    "exampleTranslation": "他对花生过敏。",
+    "difficulty": 3,
+    "chapter": 4,
+    "level": 3,
+    "synonyms": [
+      "sensitivity"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "all(其他)+erg(工作)+y→身体异常工作→过敏",
+    "memoryTip": "allergy→阿乐急→过敏了阿乐很着急",
+    "category": "medical"
+  },
+  {
+    "word": "tenure",
+    "phonetic": "/ˈtenjər/",
+    "meaning": "终身教职",
+    "partOfSpeech": "n.",
+    "example": "She received tenure at the university.",
+    "exampleTranslation": "她在大学获得了终身教职。",
+    "difficulty": 4,
+    "chapter": 4,
+    "level": 4,
+    "synonyms": [
+      "permanence"
+    ],
+    "antonyms": [],
+    "rootAnalysis": "ten(持有)+ure→持有职位→终身教职",
+    "memoryTip": "ten(持有)+ure→持有不放→终身教职",
+    "category": "academic"
+  },
+  {
+    "word": "perpetuate",
+    "phonetic": "/pərˈpetʃueɪt/",
+    "meaning": "使永存",
+    "partOfSpeech": "v.",
+    "example": "We should not perpetuate stereotypes.",
+    "exampleTranslation": "我们不应该使刻板印象永存。",
+    "difficulty": 4,
+    "chapter": 5,
+    "level": 4,
+    "synonyms": [
+      "maintain",
+      "preserve"
+    ],
+    "antonyms": [
+      "end",
+      "abolish"
+    ],
+    "rootAnalysis": "per(始终)+petu(追求)+ate→始终追求→使永存",
+    "memoryTip": "易混词: perpetuate(使永存) vs perpetrate(犯罪)，-uate延续",
+    "category": "confusing_pairs"
+  },
+  {
+    "word": "innovation",
+    "phonetic": "/ˌɪnəˈveɪʃən/",
+    "meaning": "创新",
+    "partOfSpeech": "n.",
+    "example": "Innovation drives economic growth.",
+    "exampleTranslation": "创新驱动经济增长。",
+    "difficulty": 3,
+    "chapter": 6,
+    "level": 3,
+    "synonyms": [
+      "invention",
+      "novelty"
+    ],
+    "antonyms": [
+      "tradition"
+    ],
+    "rootAnalysis": "in(进入)+nov(新)+ation→引入新事物→创新",
+    "memoryTip": "in+nova(新)+tion→引进新东西→创新",
+    "category": "review_mixed"
+  },
+  {
+    "word": "benevolent",
+    "phonetic": "/bəˈnevələnt/",
+    "meaning": "仁慈的",
+    "partOfSpeech": "adj.",
+    "example": "She was a benevolent leader.",
+    "exampleTranslation": "她是一位仁慈的领导者。",
+    "difficulty": 4,
+    "chapter": 6,
+    "level": 4,
+    "synonyms": [
+      "kind",
+      "charitable"
+    ],
+    "antonyms": [
+      "malevolent"
+    ],
+    "rootAnalysis": "bene(好)+vol(意愿)+ent→好意愿的→仁慈的",
+    "memoryTip": "bene(好)+volent(意愿)→好意的→仁慈的",
+    "category": "review_mixed"
+  }
+]

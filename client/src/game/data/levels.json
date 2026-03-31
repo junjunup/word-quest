@@ -1,0 +1,88 @@
+{
+  "chapters": [
+    {
+      "id": 1,
+      "name": "初入大陆",
+      "theme": "基础日常词汇",
+      "description": "欢迎来到词汇大陆！从最基础的日常词汇开始你的冒险吧。",
+      "color": "#4a90d9",
+      "levels": [
+        { "id": 1, "name": "食物天地", "wordsCount": 16, "category": "food" },
+        { "id": 2, "name": "身体部位", "wordsCount": 16, "category": "body" },
+        { "id": 3, "name": "家庭成员", "wordsCount": 16, "category": "family" },
+        { "id": 4, "name": "时间日期", "wordsCount": 16, "category": "time" },
+        { "id": 5, "name": "色彩世界", "wordsCount": 16, "category": "colors" }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "森林迷踪",
+      "theme": "自然与动物",
+      "description": "深入神秘森林，认识大自然中的各种生灵和景观。",
+      "color": "#7ed321",
+      "levels": [
+        { "id": 1, "name": "森林动物", "wordsCount": 14, "category": "animals" },
+        { "id": 2, "name": "花草树木", "wordsCount": 14, "category": "plants" },
+        { "id": 3, "name": "天气气象", "wordsCount": 14, "category": "weather" },
+        { "id": 4, "name": "地形地貌", "wordsCount": 14, "category": "geography" },
+        { "id": 5, "name": "海洋世界", "wordsCount": 14, "category": "ocean" }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "商贸集市",
+      "theme": "商业与社交",
+      "description": "来到繁华的商贸集市，学习社交和商务场景的必备词汇。",
+      "color": "#f5a623",
+      "levels": [
+        { "id": 1, "name": "购物达人", "wordsCount": 14, "category": "shopping" },
+        { "id": 2, "name": "职场英语", "wordsCount": 14, "category": "business" },
+        { "id": 3, "name": "社交礼仪", "wordsCount": 14, "category": "social" },
+        { "id": 4, "name": "餐厅点餐", "wordsCount": 14, "category": "restaurant" },
+        { "id": 5, "name": "旅行交通", "wordsCount": 14, "category": "travel" }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "学者塔楼",
+      "theme": "学术与科技",
+      "description": "攀登学者塔楼，挑战更高级的学术和科技词汇。",
+      "color": "#9b59b6",
+      "levels": [
+        { "id": 1, "name": "校园生活", "wordsCount": 14, "category": "education" },
+        { "id": 2, "name": "科学探索", "wordsCount": 14, "category": "science" },
+        { "id": 3, "name": "数码科技", "wordsCount": 14, "category": "technology" },
+        { "id": 4, "name": "医学健康", "wordsCount": 14, "category": "medical" },
+        { "id": 5, "name": "学术研究", "wordsCount": 14, "category": "academic" }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "暗影深渊",
+      "theme": "高频易混词",
+      "description": "最危险的区域——那些长得很像、意思却不同的词汇怪物在此出没！",
+      "color": "#d0021b",
+      "levels": [
+        { "id": 1, "name": "形近词对决", "wordsCount": 10, "category": "look_alike" },
+        { "id": 2, "name": "义近词辨析", "wordsCount": 10, "category": "synonym" },
+        { "id": 3, "name": "易混介词", "wordsCount": 10, "category": "preposition" },
+        { "id": 4, "name": "词性变形", "wordsCount": 10, "category": "word_form" },
+        { "id": 5, "name": "深渊Boss", "wordsCount": 10, "category": "mixed" }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "最终考验",
+      "theme": "综合复习",
+      "description": "终极挑战！所有章节的词汇将在这里等待你的最终检验。",
+      "color": "#ffd700",
+      "levels": [
+        { "id": 1, "name": "基础回顾", "wordsCount": 12, "category": "review_basic" },
+        { "id": 2, "name": "自然商务", "wordsCount": 12, "category": "review_mid" },
+        { "id": 3, "name": "学术挑战", "wordsCount": 12, "category": "review_hard" },
+        { "id": 4, "name": "综合测试", "wordsCount": 12, "category": "review_all" },
+        { "id": 5, "name": "最终Boss", "wordsCount": 12, "category": "final_boss" }
+      ]
+    }
+  ]
+}
