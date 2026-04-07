@@ -60,7 +60,17 @@ export const EVENTS = {
   QUIZ_ANSWERED: 'quiz_answered',      // 答题结果
   RESUME_GAME: 'resume_game',         // 恢复游戏
   START_LEVEL: 'start_level',         // 开始关卡
-  CHAT_CLOSED: 'chat_closed'          // 对话关闭
+  CHAT_CLOSED: 'chat_closed',         // 对话关闭
+
+  // UI 面板事件
+  SHOW_LEADERBOARD: 'show_leaderboard',       // 显示排行榜
+  SHOW_LEVEL_SELECT: 'show_level_select',     // 显示关卡选择
+  SHOW_CHARACTER_SELECT: 'show_character_select', // 显示角色选择
+  SHOW_GAME_INTRO: 'show_game_intro',         // 显示游戏介绍
+  START_GAME_LEVEL: 'start_game_level',       // Vue通知Phaser启动关卡
+  SHOW_BOSS_QUIZ: 'show_boss_quiz',           // 显示Boss答题弹窗
+  BOSS_QUIZ_RESULT: 'boss_quiz_result',        // Boss答题结果
+  TOGGLE_PAUSE: 'toggle_pause'                 // 切换暂停菜单
 }
 
 export default eventBus

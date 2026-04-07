@@ -1,4 +1,5 @@
 import express from 'express'
+import mongoose from 'mongoose'
 import { authMiddleware } from '../middleware/auth.js'
 import VocabularyBank from '../models/VocabularyBank.js'
 
@@ -32,6 +33,9 @@ router.get('/chapter/:chapter/level/:level', authMiddleware, async (req, res) =>
 // 随机出题（获取干扰项）
 router.get('/quiz/:wordId', authMiddleware, async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.wordId)) {
+      return res.status(400).json({ error: '无效的单词ID' })
+    }
     const word = await VocabularyBank.findById(req.params.wordId)
     if (!word) return res.status(404).json({ success: false, message: '词汇不存在' })
 

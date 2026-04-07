@@ -85,6 +85,7 @@ router.post('/register', async (req, res) => {
           username: user.username,
           nickname: user.nickname,
           avatar: user.avatar,
+          characterSpriteIndex: user.characterSpriteIndex || 0,
           level: user.level,
           totalExp: user.totalExp,
           totalScore: user.totalScore
@@ -137,6 +138,7 @@ router.post('/login', async (req, res) => {
           username: user.username,
           nickname: user.nickname,
           avatar: user.avatar,
+          characterSpriteIndex: user.characterSpriteIndex || 0,
           level: user.level,
           totalExp: user.totalExp,
           totalScore: user.totalScore
@@ -144,7 +146,7 @@ router.post('/login', async (req, res) => {
       }
     })
   } catch (err) {
-    console.error('登录错误:', err.message)
+    console.error('登录错误:', err.message, err.stack)
     res.status(500).json({ success: false, message: '登录失败，请稍后重试' })
   }
 })

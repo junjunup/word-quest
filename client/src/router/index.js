@@ -1,20 +1,28 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-// chunk 加载失败重试计数器
-let chunkRetryCount = 0
-const MAX_CHUNK_RETRIES = 2
-
-function lazyLoad(importFn) {
-  return () => importFn().catch((err) => {
-    if (chunkRetryCount < MAX_CHUNK_RETRIES) {
-      chunkRetryCount++
-      console.warn(`页面加载失败，第${chunkRetryCount}次重试...`, err)
-      window.location.reload()
-    } else {
-      console.error('页面加载多次失败，请检查网络连接', err)
-      // 不再刷新，避免无限循环
+function lazyLoad(importFn, retries = 3) {
+  return () => {
+    const attempt = (retriesLeft) => {
+      return importFn().catch((err) => {
+        if (retriesLeft > 0) {
+          console.warn(`页面加载失败，剩余重试${retriesLeft}次...`, err)
+          return new Promise(resolve => setTimeout(resolve, 1000)).then(() => attempt(retriesLeft - 1))
+        }
+        console.error('页面加载多次失败，请检查网络连接', err)
+        // Return a fallback error component instead of throwing
+        return {
+          default: {
+            template: `<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#2d5016;color:#f5edd6;flex-direction:column;font-family:sans-serif;">
+              <h2 style="margin-bottom:16px;">⚠️ 页面加载失败</h2>
+              <p style="margin-bottom:16px;color:#c4b99a;">网络异常，请检查连接后重试</p>
+              <button onclick="location.reload()" style="padding:10px 24px;background:#5b8c3e;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:16px;">🔄 重新加载</button>
+            </div>`
+          }
+        }
+      })
     }
-  })
+    return attempt(retries)
+  }
 }
 
 const routes = [

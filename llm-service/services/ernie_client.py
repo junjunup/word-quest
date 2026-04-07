@@ -4,6 +4,7 @@
 import os
 import json
 import time
+import logging
 import httpx
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
@@ -12,6 +13,8 @@ from typing import Optional
 from config import ERNIE_API_KEY, ERNIE_SECRET_KEY, ERNIE_TOKEN_URL, ERNIE_CHAT_URL
 from services.prompt_manager import PromptManager
 from services.safety_filter import SafetyFilter
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 prompt_manager = PromptManager()
@@ -54,10 +57,12 @@ async def get_access_token() -> str:
             response.raise_for_status()
             data = response.json()
         except (httpx.TimeoutException, httpx.HTTPStatusError) as e:
-            raise HTTPException(status_code=502, detail=f"Token服务异常: {e}")
+            logger.error(f"Token service error: {str(e)}", exc_info=True)
+            raise HTTPException(status_code=502, detail="AI 服务暂时不可用，请稍后再试")
 
         if "access_token" not in data:
-            raise HTTPException(status_code=500, detail=f"获取access_token失败: {data}")
+            logger.error(f"Failed to obtain access_token: {data}")
+            raise HTTPException(status_code=500, detail="AI 服务暂时不可用，请稍后再试")
 
         _token_cache["token"] = data["access_token"]
         _token_cache["expires_at"] = time.time() + data.get("expires_in", 2592000) - 60
@@ -135,7 +140,8 @@ async def chat(request: ChatRequest):
                 content = safety_filter.filter_output(data["result"])
                 return ChatResponse(content=content, usage=data.get("usage"))
             else:
-                raise HTTPException(status_code=500, detail=f"API返回错误: {data}")
+                logger.error(f"LLM API returned error: {data}")
+                raise HTTPException(status_code=500, detail="AI 服务暂时不可用，请稍后再试")
 
     except httpx.TimeoutException:
         return ChatResponse(content="哎呀，我思考得太久了~ 请再问我一次吧！⏰")
@@ -144,7 +150,8 @@ async def chat(request: ChatRequest):
             return ChatResponse(
                 content=get_mock_response(request.message, request.context or {})
             )
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"LLM chat error: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail="AI 服务暂时不可用，请稍后再试")
 
 
 @router.post("/chat/stream")
@@ -194,7 +201,8 @@ async def chat_stream(request: ChatRequest):
             yield "data: [DONE]\n\n"
 
         except Exception as e:
-            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+            logger.error(f"LLM stream error: {str(e)}", exc_info=True)
+            yield f"data: {json.dumps({'error': 'AI 服务暂时不可用，请稍后再试'})}\n\n"
             yield "data: [DONE]\n\n"
 
     return StreamingResponse(generate(), media_type="text/event-stream")

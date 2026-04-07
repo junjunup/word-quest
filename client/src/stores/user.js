@@ -5,6 +5,7 @@ import { login, register, getUserInfo } from '@/api/auth'
 export const useUserStore = defineStore('user', () => {
   const token = ref(localStorage.getItem('token') || '')
   const userInfo = ref(null)
+  const characterSpriteIndex = ref(0)
 
   const isLoggedIn = computed(() => !!token.value)
 
@@ -12,6 +13,7 @@ export const useUserStore = defineStore('user', () => {
     const res = await login({ username, password })
     token.value = res.data.token
     userInfo.value = res.data.user
+    characterSpriteIndex.value = res.data.user.characterSpriteIndex || 0
     localStorage.setItem('token', res.data.token)
     return res.data
   }
@@ -20,6 +22,7 @@ export const useUserStore = defineStore('user', () => {
     const res = await register({ username, password, nickname })
     token.value = res.data.token
     userInfo.value = res.data.user
+    characterSpriteIndex.value = res.data.user.characterSpriteIndex || 0
     localStorage.setItem('token', res.data.token)
     return res.data
   }
@@ -28,13 +31,15 @@ export const useUserStore = defineStore('user', () => {
     if (!token.value) return
     const res = await getUserInfo()
     userInfo.value = res.data
+    characterSpriteIndex.value = res.data.characterSpriteIndex || 0
   }
 
   function logout() {
     token.value = ''
     userInfo.value = null
+    characterSpriteIndex.value = 0
     localStorage.removeItem('token')
   }
 
-  return { token, userInfo, isLoggedIn, doLogin, doRegister, fetchUserInfo, logout }
+  return { token, userInfo, isLoggedIn, characterSpriteIndex, doLogin, doRegister, fetchUserInfo, logout }
 })

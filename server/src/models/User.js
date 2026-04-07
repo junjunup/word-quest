@@ -6,6 +6,8 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true, minlength: 6 },
   nickname: { type: String, required: true, trim: true },
   avatar: { type: String, default: 'default_avatar' },
+  characterSpriteIndex: { type: Number, default: 0, min: 0, max: 7 },
+  difficultyPreference: { type: String, enum: ['easy', 'normal', 'hard'], default: 'normal' },
   level: { type: Number, default: 1 },
   totalExp: { type: Number, default: 0 },
   totalScore: { type: Number, default: 0 },

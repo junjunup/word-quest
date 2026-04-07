@@ -152,34 +152,41 @@ docker-compose ps            # 查看服务状态
 
 ---
 
-### 方式二：本地开发部署
+### 方式二：本地开发部署（无需 Docker）
 
 **前提条件**:
 - Node.js 18+
-- MongoDB 7.0+（运行中）
+- MongoDB 7.0+（可选，未安装则自动使用内存数据库）
 - Python 3.11+（可选，AI 功能需要）
 
-#### 1. 启动后端
+#### 一键启动
 
 ```bash
-cd server
-cp ../.env.example .env    # 复制并编辑配置
-npm install
-npm run seed               # 初始化词库 + 测试用户
-npm run dev                # 启动开发服务器 (端口 4000)
+# Windows:
+start-local.bat
+
+# Linux / Mac:
+chmod +x start-local.sh && ./start-local.sh
 ```
 
-#### 2. 启动前端
+脚本会自动安装依赖、启动后端（含自动数据初始化）和前端。
+
+> **注意**: 如果未安装 MongoDB，系统会自动启动内存数据库并导入测试数据。内存数据库中的数据在服务器重启后会丢失，适合开发和演示使用。
+
+#### 手动分步启动
 
 ```bash
+# 1. 启动后端（自动初始化词库 + 测试用户）
+cd server
+npm install
+npm run dev                # 启动开发服务器 (端口 4000)
+
+# 2. 启动前端（新终端）
 cd client
 npm install
 npm run dev                # 启动开发服务器 (端口 3000)
-```
 
-#### 3. 启动 AI 服务（可选）
-
-```bash
+# 3. 启动 AI 服务（可选，新终端）
 cd llm-service
 pip install -r requirements.txt
 python main.py             # 启动 FastAPI (端口 8000)
@@ -220,7 +227,8 @@ NODE_ENV=production
 ai-gamified-learning/
 ├── docker-compose.yml          # Docker 编排配置
 ├── .env.example                # 环境变量模板
-├── start.bat / start.sh        # 一键启动脚本
+├── start.bat / start.sh        # Docker 一键部署脚本
+├── start-local.bat / .sh       # 本地开发启动脚本（无需 Docker）
 │
 ├── client/                     # 前端 (Vue 3 + Phaser 3)
 │   ├── public/assets/          # 游戏素材

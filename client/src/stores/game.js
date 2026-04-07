@@ -2,6 +2,12 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { getProgress, saveProgress } from '@/api/game'
 
+const DIFFICULTY_CONFIGS = {
+  easy:   { lives: 4, timer: 35000, scoreMultiplier: 0.8, monsterMod: -2 },
+  normal: { lives: 3, timer: 30000, scoreMultiplier: 1.0, monsterMod: 0 },
+  hard:   { lives: 2, timer: 20000, scoreMultiplier: 1.5, monsterMod: 3 }
+}
+
 export const useGameStore = defineStore('game', () => {
   // 当前游戏状态
   const currentChapter = ref(1)
@@ -13,6 +19,13 @@ export const useGameStore = defineStore('game', () => {
   const correctCount = ref(0)
   const wrongCount = ref(0)
   const currentDifficulty = ref(1)
+
+  // 难度系统
+  const savedDifficulty = localStorage.getItem('wordquest:difficulty')
+  const selectedDifficulty = ref(
+    (savedDifficulty && ['easy', 'normal', 'hard'].includes(savedDifficulty)) ? savedDifficulty : 'normal'
+  )
+  const difficultyConfig = computed(() => DIFFICULTY_CONFIGS[selectedDifficulty.value] || DIFFICULTY_CONFIGS.normal)
 
   // 进度数据
   const progress = ref(null)
@@ -30,7 +43,7 @@ export const useGameStore = defineStore('game', () => {
   })
 
   function resetLevel() {
-    lives.value = 3
+    lives.value = difficultyConfig.value.lives
     score.value = 0
     combo.value = 0
     maxCombo.value = 0
@@ -76,6 +89,7 @@ export const useGameStore = defineStore('game', () => {
   return {
     currentChapter, currentLevel, lives, score, combo, maxCombo,
     correctCount, wrongCount, currentDifficulty,
+    selectedDifficulty, difficultyConfig,
     progress, unlockedChapters, achievements,
     currentWords, currentWordIndex, currentWord, levelProgress,
     resetLevel, onCorrectAnswer, onWrongAnswer, nextWord,

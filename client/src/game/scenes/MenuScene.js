@@ -50,18 +50,20 @@ export default class MenuScene extends Phaser.Scene {
     line.fillRect(width / 2 + 136, 162, 8, 8)
 
     // 木质按钮
-    this.createWoodButton(width / 2, 260, '🌿 开 始 冒 险', 0x5b8c3e, 0x3a6b1e, () => {
-      this.scene.start('WorldScene', { chapter: 1, level: 1 })
+    this.createWoodButton(width / 2, 230, '🌿 开 始 冒 险', 0x5b8c3e, 0x3a6b1e, () => {
+      eventBus.emit(EVENTS.SHOW_LEVEL_SELECT, { mode: 'new' })
     })
 
-    this.createWoodButton(width / 2, 340, '📖 继 续 游 戏', 0x7eb55e, 0x5b8c3e, () => {
-      const ch = levelManager.currentChapter || 1
-      const lv = levelManager.currentLevel || 1
-      this.scene.start('WorldScene', { chapter: ch, level: lv, continueGame: true })
+    this.createWoodButton(width / 2, 300, '📖 继 续 游 戏', 0x7eb55e, 0x5b8c3e, () => {
+      eventBus.emit(EVENTS.SHOW_LEVEL_SELECT, { mode: 'continue' })
     })
 
-    this.createWoodButton(width / 2, 420, '🏆 排 行 榜', 0xe8a33c, 0xb8832e, () => {
-      eventBus.emit(EVENTS.UPDATE_HUD, { showLeaderboard: true })
+    this.createWoodButton(width / 2, 370, '👤 角 色', 0x9b7ed3, 0x7b5eb3, () => {
+      eventBus.emit(EVENTS.SHOW_CHARACTER_SELECT)
+    })
+
+    this.createWoodButton(width / 2, 440, '🏆 排 行 榜', 0xe8a33c, 0xb8832e, () => {
+      eventBus.emit(EVENTS.SHOW_LEADERBOARD)
     })
 
     // 底部信息

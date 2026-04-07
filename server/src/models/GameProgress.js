@@ -9,7 +9,8 @@ const gameProgressSchema = new mongoose.Schema({
       stars: { type: Number, default: 0, min: 0, max: 3 },
       score: { type: Number, default: 0 },
       completed: { type: Boolean, default: false },
-      completedAt: { type: Date }
+      completedAt: { type: Date },
+      difficulty: { type: String, enum: ['easy', 'normal', 'hard'], default: 'normal' }
     },
     default: new Map()
   },

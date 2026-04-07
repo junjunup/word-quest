@@ -169,6 +169,12 @@ export default class BootScene extends Phaser.Scene {
       console.warn(`素材加载失败: ${file.key}, 将使用占位图`)
       failedAssetKeys.add(file.key)
     })
+
+    // === 音效加载 ===
+    const sfxKeys = ['correct', 'wrong', 'boss_appear', 'boss_defeat', 'combo', 'coin', 'level_complete', 'click']
+    sfxKeys.forEach(key => {
+      this.load.audio(key, `/assets/audio/${key}.mp3`)
+    })
   }
 
   /**
@@ -238,6 +244,9 @@ export default class BootScene extends Phaser.Scene {
 
     // 生成占位素材（用于加载失败的 fallback，以及 UI 元素）
     this.generateUIAssets()
+
+    // After generating fallback textures, create simple fallback animations
+    this.createFallbackAnimations()
 
     // 短暂延迟后进入菜单
     this.time.delayedCall(500, () => {
@@ -504,6 +513,65 @@ export default class BootScene extends Phaser.Scene {
       btnBG.strokeRoundedRect(0, 0, 200, 50, 4)
       btnBG.generateTexture('btn_blue', 200, 50)
       btnBG.destroy()
+    }
+
+    // === Boss 相关纹理 ===
+
+    // Boss子弹 - 8x8 橙色圆
+    const bulletG = this.make.graphics({ add: false })
+    bulletG.fillStyle(0xff8833, 1)
+    bulletG.fillCircle(4, 4, 4)
+    bulletG.fillStyle(0xffcc66, 1)
+    bulletG.fillCircle(4, 4, 2)
+    bulletG.generateTexture('boss_bullet', 8, 8)
+    bulletG.destroy()
+
+    // Boss击败粒子 - 4x4 黄色圆
+    const partG = this.make.graphics({ add: false })
+    partG.fillStyle(0xffdd44, 1)
+    partG.fillCircle(2, 2, 2)
+    partG.generateTexture('boss_particle', 4, 4)
+    partG.destroy()
+  }
+
+  /**
+   * 创建 fallback 动画（当 spritesheet 加载失败时，用单帧纹理创建最小动画）
+   * 防止 WorldScene 调用 sprite.play('player_idle_down') 等时崩溃
+   */
+  createFallbackAnimations() {
+    // Only create if main spritesheet animations weren't created
+    const fallbackAnims = [
+      'player_idle_down', 'player_idle_up', 'player_idle_left', 'player_idle_right',
+      'player_walk_down', 'player_walk_up', 'player_walk_left', 'player_walk_right'
+    ]
+
+    for (const key of fallbackAnims) {
+      if (!this.anims.exists(key) && this.textures.exists('player')) {
+        this.anims.create({
+          key,
+          frames: [{ key: 'player', frame: 0 }],
+          frameRate: 1,
+          repeat: -1
+        })
+      }
+    }
+
+    if (!this.anims.exists('chicken_idle') && this.textures.exists('monster')) {
+      this.anims.create({
+        key: 'chicken_idle',
+        frames: [{ key: 'monster', frame: 0 }],
+        frameRate: 1,
+        repeat: -1
+      })
+    }
+
+    if (!this.anims.exists('cow_idle') && this.textures.exists('npc')) {
+      this.anims.create({
+        key: 'cow_idle',
+        frames: [{ key: 'npc', frame: 0 }],
+        frameRate: 1,
+        repeat: -1
+      })
     }
   }
 }

@@ -5,6 +5,9 @@ dist/
 .DS_Store
 .vite/
 *.zip
+*.tgz
 __pycache__/
 *.pyc
 .claude/
+.venv*/
+audit-full.json

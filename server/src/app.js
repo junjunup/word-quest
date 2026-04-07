@@ -29,12 +29,14 @@ const strictLimiter = rateLimit({
 const app = express()
 
 // 中间件
+const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:5173'
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  origin: corsOrigin.split(',').map(s => s.trim()),
   credentials: true
 }))
 app.use(helmet())
-app.use(express.json())
+app.use(express.json({ limit: '32kb' }))
+app.use(express.urlencoded({ extended: true, limit: '32kb' }))
 app.use('/api', globalLimiter)
 
 // 路由
@@ -55,16 +57,37 @@ app.use(errorHandler)
 // 连接数据库并启动服务
 async function start() {
   try {
-    await mongoose.connect(config.mongoUri)
+    // 尝试连接外部 MongoDB
+    await mongoose.connect(config.mongoUri, { serverSelectionTimeoutMS: 5000 })
     logger.info('MongoDB connected successfully')
-
-    app.listen(config.port, () => {
-      logger.info(`Server running on port ${config.port}`)
-    })
   } catch (err) {
-    logger.error('Failed to start server:', err)
-    process.exit(1)
+    // 外部 MongoDB 连接失败 → 自动启动内存数据库（无需安装 MongoDB）
+    logger.warn('External MongoDB unavailable, starting in-memory database...')
+    try {
+      const { MongoMemoryServer } = await import('mongodb-memory-server')
+      const mongod = await MongoMemoryServer.create()
+      const memUri = mongod.getUri()
+      await mongoose.connect(memUri)
+      logger.info(`In-memory MongoDB started at ${memUri}`)
+      logger.warn('WARNING: Data will be lost when server stops. Install MongoDB for persistence.')
+
+      // 自动执行 seed（内存库每次重启都是空的）
+      try {
+        const { seedOnly } = await import('./seed.js')
+        await seedOnly()
+        logger.info('Auto-seeded in-memory database')
+      } catch (seedErr) {
+        logger.warn('Auto-seed skipped:', seedErr.message)
+      }
+    } catch (memErr) {
+      logger.error('Failed to start in-memory MongoDB:', memErr)
+      process.exit(1)
+    }
   }
+
+  app.listen(config.port, () => {
+    logger.info(`Server running on port ${config.port}`)
+  })
 }
 
 start()

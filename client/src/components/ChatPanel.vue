@@ -128,6 +128,7 @@ async function sendMessage() {
       const decoder = new TextDecoder()
       let fullText = ''
       let streamDone = false
+      let sseBuffer = ''
 
       const msgIndex = messages.length
       addMessage('assistant', '')
@@ -137,8 +138,11 @@ async function sendMessage() {
         const { done, value } = await reader.read()
         if (done) break
 
-        const chunk = decoder.decode(value, { stream: true })
-        const lines = chunk.split('\n')
+        const text = decoder.decode(value, { stream: true })
+        sseBuffer += text
+        const lines = sseBuffer.split('\n')
+        // Keep the last incomplete line in buffer
+        sseBuffer = lines.pop() || ''
         for (const line of lines) {
           if (line.startsWith('data: ')) {
             const data = line.slice(6)

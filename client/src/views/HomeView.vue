@@ -100,7 +100,7 @@ async function handleAuth() {
     }
     router.push('/game')
   } catch (err) {
-    errorMsg.value = err?.message || '操作失败，请重试'
+    errorMsg.value = err?.message || err?.data?.message || '操作失败，请检查网络连接后重试'
   } finally {
     loading.value = false
   }

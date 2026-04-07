@@ -123,4 +123,40 @@ function getBuiltinVocabulary() {
   return ch1Words
 }
 
-seed()
+// 导出供 app.js 内存模式调用（跳过连接和断开，使用已有连接）
+export async function seedOnly() {
+  try {
+    await VocabularyBank.deleteMany({})
+
+    let words = []
+    try {
+      const vocabPath = join(__dirname, 'data', 'vocabulary.json')
+      const rawData = readFileSync(vocabPath, 'utf-8')
+      words = JSON.parse(rawData)
+    } catch {
+      words = getBuiltinVocabulary()
+    }
+
+    if (words.length > 0) {
+      await VocabularyBank.insertMany(words)
+    }
+
+    const existingUser = await User.findOne({ username: 'test' })
+    if (!existingUser) {
+      const testUser = new User({ username: 'test', password: '123456', nickname: '测试玩家' })
+      await testUser.save()
+      await new GameProgress({ userId: testUser._id }).save()
+    }
+
+    console.log('✅ Seed completed')
+  } catch (err) {
+    console.error('Seed failed:', err.message)
+  }
+}
+
+// 直接运行时才执行完整流程（连接→seed→断开）
+// 被 import 时不执行
+const isDirectRun = process.argv[1]?.replace(/\\/g, '/').endsWith('seed.js')
+if (isDirectRun) {
+  seed()
+}
