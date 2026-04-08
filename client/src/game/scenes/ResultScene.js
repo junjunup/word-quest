@@ -146,23 +146,27 @@ export default class ResultScene extends Phaser.Scene {
     this.createWoodButton(width / 2 - 140, btnY, '下一关 ▶', 0x5b8c3e, 0x3a6b1e, () => {
       const nextLevel = level < MAX_LEVELS ? level + 1 : 1
       const nextChapter = level >= MAX_LEVELS ? Math.min(chapter + 1, MAX_CHAPTERS) : chapter
-      // Emit event to go back to level select with next level highlighted
-      eventBus.emit(EVENTS.SHOW_LEVEL_SELECT, {
-        mode: 'continue',
-        suggestedChapter: nextChapter,
-        suggestedLevel: nextLevel
-      })
+      // 先切到 MenuScene，再延迟触发 LevelSelect，确保 scene 切换完成
       this.scene.start('MenuScene')
+      setTimeout(() => {
+        eventBus.emit(EVENTS.SHOW_LEVEL_SELECT, {
+          mode: 'continue',
+          suggestedChapter: nextChapter,
+          suggestedLevel: nextLevel
+        })
+      }, 100)
     }, 3000)
 
     // "再来一次"
     this.createWoodButton(width / 2 + 140, btnY, '再来一次 🔄', 0xe8a33c, 0xb8832e, () => {
-      eventBus.emit(EVENTS.SHOW_LEVEL_SELECT, {
-        mode: 'retry',
-        suggestedChapter: chapter,
-        suggestedLevel: level
-      })
       this.scene.start('MenuScene')
+      setTimeout(() => {
+        eventBus.emit(EVENTS.SHOW_LEVEL_SELECT, {
+          mode: 'retry',
+          suggestedChapter: chapter,
+          suggestedLevel: level
+        })
+      }, 100)
     }, 3200)
 
     // 返回菜单
@@ -250,7 +254,21 @@ export default class ResultScene extends Phaser.Scene {
     return `${minutes}:${seconds.toString().padStart(2, '0')}`
   }
 
+
   shutdown() {
+    // Clean up all tweens first
     this.tweens.killAll()
+    
+    // Disable input on the scene to prevent queued pointer events
+    this.input.enabled = false
+    
+    // Remove all event listeners from keyboard input
+    if (this.input.keyboard) {
+      this.input.keyboard.off('keydown')
+      this.input.keyboard.off('keyup')
+    }
+    
+    // Remove all display objects - this also removes event listeners attached to them
+    this.children.removeAll(true)
   }
 }

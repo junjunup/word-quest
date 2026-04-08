@@ -7,7 +7,13 @@
     <div class="game-hud" v-if="showHud && uiState === 'game'">
       <div class="hud-left">
         <span class="hud-hearts">
-          <span v-for="i in hudData.maxLives" :key="i" class="heart" :class="{ lost: i > hudData.lives }">❤️</span>
+          <template v-if="isTutorialLevel">
+            <span class="heart">❤️</span>
+            <span class="heart-infinity">∞</span>
+          </template>
+          <template v-else>
+            <span v-for="i in hudData.maxLives" :key="i" class="heart" :class="{ lost: i > hudData.lives }">❤️</span>
+          </template>
         </span>
         <span class="hud-score">💰 {{ hudData.score }}</span>
         <span class="hud-combo" v-if="hudData.combo > 0">🔥 x{{ hudData.combo }}</span>
@@ -171,6 +177,7 @@ const currentDifficulty = ref(1)
 const currentMonsterIndex = ref(-1)
 const pendingWrongAnswer = ref(false)
 const showTutorial = ref(false)
+const isTutorialLevel = ref(false)
 
 // 多题型与自适应难度
 const currentQuestionType = ref('choice_en2cn')
@@ -272,6 +279,8 @@ async function onStartLevel(data) {
   hudData.chapter = chapter
   hudData.level = level
   hudData.maxLives = gameStore.difficultyConfig.lives
+  hudData.lives = gameStore.difficultyConfig.lives
+  isTutorialLevel.value = !!isTutorial
   await loadWordsAndInitLevel(chapter, level)
   if (isTutorial) {
     levelManager.setTutorialMode()
@@ -294,7 +303,8 @@ function onShowLeaderboard() {
   uiState.value = 'leaderboard'
 }
 
-function onLevelSelectStart({ chapter, level, difficulty }) {
+
+async function onLevelSelectStart({ chapter, level, difficulty }) {
   gameStore.selectedDifficulty = difficulty
   // Persist difficulty preference to localStorage
   safeSetJSON(STORAGE_KEYS.difficulty, difficulty)
@@ -303,14 +313,13 @@ function onLevelSelectStart({ chapter, level, difficulty }) {
   // Check if we should show intro
   const skipIntro = safeGetItem(STORAGE_KEYS.skipIntro) === 'true'
   if (skipIntro) {
-    startGameLevel()
+    await startGameLevel()
   } else {
     // 先启动游戏，然后叠加交互式引导
-    startGameLevel()
+    await startGameLevel()
     showTutorial.value = true
   }
 }
-
 function onLevelSelectBack() {
   uiState.value = 'game'
 }
@@ -327,7 +336,7 @@ function onCharacterBack() {
   uiState.value = 'game'
 }
 
-function startGameLevel() {
+async function startGameLevel() {
   uiState.value = 'game'
   const params = pendingLevelParams.value
   if (!params) return
@@ -350,6 +359,11 @@ function startGameLevel() {
     for (const sceneName of sceneNames) {
       const scene = game.scene.getScene(sceneName)
       if (scene && scene.scene.isActive()) {
+        // Use .stop() instead of .start() to fully shut down the current scene
+        // This ensures shutdown() is called and cleans up all event listeners
+        scene.scene.stop()
+        // Brief delay to ensure scene cleanup completes before starting new scene
+        await new Promise(resolve => setTimeout(resolve, 50))
         scene.scene.start('WorldScene', {
           chapter: params.chapter,
           level: params.level,
@@ -740,6 +754,13 @@ function onUpdateHud(data) {
 
 async function onLevelComplete(result) {
   console.log('关卡完成:', result)
+
+  // 关闭可能残留的 UI 面板
+  showChatPanel.value = false
+  showQuiz.value = false
+  showBossQuiz.value = false
+  showPauseMenu.value = false
+
   // 更新成就上下文
   achievementContext.levelsCompleted++
   if (result.correctRate >= 100) achievementContext.perfectClears++
@@ -760,6 +781,22 @@ function onGameOver(result) {
   showQuiz.value = false
   showBossQuiz.value = false
   showChatPanel.value = false
+  showPauseMenu.value = false
+
+  // 保存成就上下文
+  persistAchievementContext()
+
+  // 跳转到 ResultScene 显示结算页面
+  if (game) {
+    const sceneNames = ['WorldScene', 'MenuScene', 'BootScene']
+    for (const sceneName of sceneNames) {
+      const scene = game.scene.getScene(sceneName)
+      if (scene && scene.scene.isActive()) {
+        scene.scene.start('ResultScene', result || levelManager.getLevelResult())
+        return
+      }
+    }
+  }
 }
 
 function onShowAchievement(data) {
@@ -837,6 +874,14 @@ function handleLogout() {
 .heart.lost {
   filter: grayscale(100%);
   opacity: 0.3;
+}
+
+.heart-infinity {
+  color: #ffc847;
+  font-weight: bold;
+  font-size: 16px;
+  font-family: 'Press Start 2P', monospace;
+  margin-left: -4px;
 }
 
 .hud-score {

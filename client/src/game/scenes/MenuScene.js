@@ -216,6 +216,19 @@ export default class MenuScene extends Phaser.Scene {
   }
 
   shutdown() {
+    // Clean up all tweens first
     this.tweens.killAll()
+    
+    // Disable input on the scene to prevent queued pointer events
+    this.input.enabled = false
+    
+    // Remove all event listeners from keyboard input
+    if (this.input.keyboard) {
+      this.input.keyboard.off('keydown')
+      this.input.keyboard.off('keyup')
+    }
+    
+    // Remove all display objects - this also removes event listeners attached to them
+    this.children.removeAll(true)
   }
 }
