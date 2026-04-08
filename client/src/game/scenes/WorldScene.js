@@ -75,11 +75,12 @@ export default class WorldScene extends Phaser.Scene {
 
     // ESC key for pause menu
     this.escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
-    this.escKey.on('down', () => {
+    this.boundOnEscDown = () => {
       if (!this.isPaused) {
         eventBus.emit(EVENTS.TOGGLE_PAUSE)
       }
-    })
+    }
+    this.escKey.on('down', this.boundOnEscDown)
 
     // 碰撞检测
     this.physics.add.overlap(this.player, this.monsters, this.onMonsterEncounter, null, this)
@@ -241,7 +242,7 @@ export default class WorldScene extends Phaser.Scene {
    * Bullet hit player
    */
   onBulletHit(player, bullet) {
-    if (this.invincible || !bullet.active) return
+    if (this.invincible || !bullet.active || this.isPaused) return  // isPaused: 答题期间不受弹
     if (levelManager.lives <= 0) return  // 防止多重命中导致负生命值
 
     bullet.setActive(false).setVisible(false)
@@ -734,6 +735,11 @@ export default class WorldScene extends Phaser.Scene {
     this.encounterCooldown = true
     player.setVelocity(0, 0)
 
+    // 暂停 Boss 行为（防止答题期间 Boss 子弹/冲锋命中玩家）
+    if (this.boss && !this.boss.defeated && this.boss.pauseBehavior) {
+      this.boss.pauseBehavior()
+    }
+
     eventBus.emit(EVENTS.SHOW_QUIZ, {
       monsterIndex: monster.getData('index'),
       chapter: this.chapter,
@@ -834,6 +840,10 @@ export default class WorldScene extends Phaser.Scene {
     this.isPaused = false
     this.resetEncounterCooldown()
     this.resetNpcCooldown()
+    // 恢复 Boss 行为
+    if (this.boss && !this.boss.defeated && this.boss.resumeBehavior) {
+      this.boss.resumeBehavior()
+    }
   }
 
   onChatClosed() {
@@ -841,6 +851,10 @@ export default class WorldScene extends Phaser.Scene {
     this.isPaused = false
     this.resetEncounterCooldown()
     this.resetNpcCooldown()
+    // 恢复 Boss 行为
+    if (this.boss && !this.boss.defeated && this.boss.resumeBehavior) {
+      this.boss.resumeBehavior()
+    }
   }
 
   onGameOver(result) {
@@ -957,6 +971,11 @@ export default class WorldScene extends Phaser.Scene {
     eventBus.off(EVENTS.CHAT_CLOSED, this.boundOnChatClosed)
     eventBus.off(EVENTS.GAME_OVER, this.boundOnGameOver)
     eventBus.off(EVENTS.BOSS_QUIZ_RESULT, this.boundOnBossQuizResult)
+
+    // 清理 ESC 键监听
+    if (this.escKey && this.boundOnEscDown) {
+      this.escKey.off('down', this.boundOnEscDown)
+    }
 
     // 禁用输入，防止场景切换时幽灵点击穿透
     this.input.enabled = false

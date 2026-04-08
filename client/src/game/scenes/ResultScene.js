@@ -146,11 +146,18 @@ export default class ResultScene extends Phaser.Scene {
     const MAX_CHAPTERS = 6
 
     // "下一关" → 通过事件回到关卡选择
-    this.createWoodButton(width / 2 - 140, btnY, '下一关 ▶', 0x5b8c3e, 0x3a6b1e, () => {
+    const isLastLevel = (chapter >= MAX_CHAPTERS && level >= MAX_LEVELS)
+    const nextBtnText = isLastLevel ? '🏆 全部通关！' : '下一关 ▶'
+    this.createWoodButton(width / 2 - 140, btnY, nextBtnText, 0x5b8c3e, 0x3a6b1e, () => {
       if (!this.scene.isActive()) return  // 防止重复点击
       this.input.enabled = false
+      if (isLastLevel) {
+        // 全部通关，返回主菜单
+        this.scene.start('MenuScene')
+        return
+      }
       const nextLevel = level < MAX_LEVELS ? level + 1 : 1
-      const nextChapter = level >= MAX_LEVELS ? Math.min(chapter + 1, MAX_CHAPTERS) : chapter
+      const nextChapter = level >= MAX_LEVELS ? chapter + 1 : chapter
       // 先切到 MenuScene，再延迟触发 LevelSelect，确保 scene 切换完成
       this.scene.start('MenuScene')
       setTimeout(() => {

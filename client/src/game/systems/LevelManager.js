@@ -174,7 +174,9 @@ class LevelManager {
 
     // 计算星级 (0-3星)
     let stars = 0
-    if (correctRate >= 0.95 && avgTime < 8000 && this.lives === this.difficultyConfig.lives) stars = 3
+    if (this.lives <= 0) {
+      stars = 0  // Game Over 不给星
+    } else if (correctRate >= 0.95 && avgTime < 8000 && this.lives === this.difficultyConfig.lives) stars = 3
     else if (correctRate >= 0.8 && this.lives >= Math.ceil(this.difficultyConfig.lives / 2)) stars = 2
     else if (correctRate >= 0.5) stars = 1
 

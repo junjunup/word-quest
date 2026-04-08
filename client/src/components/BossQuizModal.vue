@@ -76,7 +76,7 @@
       <!-- Result feedback -->
       <div v-if="answered" class="result-feedback" :class="isCorrect ? 'correct' : 'wrong'">
         <p class="result-icon">{{ isCorrect ? '✅ 回答正确！Boss受到伤害！' : '❌ 回答错误，扣一条命！' }}</p>
-        <p v-if="!isCorrect && isChoiceType" class="correct-answer">正确答案：{{ currentWord?.meaning }}</p>
+        <p v-if="!isCorrect && isChoiceType" class="correct-answer">正确答案：{{ questionType === 'choice_cn2en' ? currentWord?.word : currentWord?.meaning }}</p>
 
         <!-- 例句区块 -->
         <div v-if="currentWord?.example" class="example-block">

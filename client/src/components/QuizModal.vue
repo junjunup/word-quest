@@ -69,7 +69,7 @@
       <!-- 结果反馈 -->
       <div v-if="answered" class="result-feedback" :class="isCorrect ? 'correct' : 'wrong'">
         <p class="result-icon">{{ isCorrect ? '✅ 回答正确！' : '❌ 回答错误' }}</p>
-        <p v-if="!isCorrect && isChoiceType" class="correct-answer">正确答案：{{ wordData?.meaning }}</p>
+        <p v-if="!isCorrect && isChoiceType" class="correct-answer">正确答案：{{ questionType === 'choice_cn2en' ? wordData?.word : wordData?.meaning }}</p>
 
         <!-- 例句区块 -->
         <div v-if="wordData?.example" class="example-block">

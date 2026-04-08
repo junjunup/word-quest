@@ -36,7 +36,7 @@ function checkRateLimit(ip) {
 function validateUsername(username) {
   if (!username || typeof username !== 'string') return '用户名不能为空'
   const trimmed = username.trim()
-  if (trimmed.length < 2 || trimmed.length > 30) return '用户名长度需要2-30个字符'
+  if (trimmed.length < 3 || trimmed.length > 30) return '用户名长度需要3-30个字符'
   if (!/^[a-zA-Z0-9_\u4e00-\u9fa5]+$/.test(trimmed)) return '用户名只能包含字母、数字、下划线或中文'
   return null
 }

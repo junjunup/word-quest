@@ -333,7 +333,7 @@ function closeLeaderboard() {
 async function onLevelSelectStart({ chapter, level, difficulty }) {
   gameStore.selectedDifficulty = difficulty
   // Persist difficulty preference to localStorage
-  safeSetJSON(STORAGE_KEYS.difficulty, difficulty)
+  safeSetItem(STORAGE_KEYS.difficulty, difficulty)
   pendingLevelParams.value = { chapter, level, difficulty }
 
   // Check if we should show intro
@@ -383,24 +383,21 @@ async function startGameLevel() {
 
   // Start WorldScene via Phaser
   if (game) {
-    // Find any active scene to transition from
+    // Stop all active scenes first
     const sceneNames = ['MenuScene', 'WorldScene', 'ResultScene', 'BootScene']
     for (const sceneName of sceneNames) {
       const scene = game.scene.getScene(sceneName)
       if (scene && scene.scene.isActive()) {
-        // Use .stop() instead of .start() to fully shut down the current scene
-        // This ensures shutdown() is called and cleans up all event listeners
         scene.scene.stop()
-        // Brief delay to ensure scene cleanup completes before starting new scene
-        await new Promise(resolve => setTimeout(resolve, 50))
-        scene.scene.start('WorldScene', {
-          chapter: params.chapter,
-          level: params.level,
-          difficulty: params.difficulty
-        })
-        return
       }
     }
+    await new Promise(resolve => setTimeout(resolve, 50))
+    // 使用 game.scene.start（而非已停止的 scene.scene.start）确保数据正确传递
+    game.scene.start('WorldScene', {
+      chapter: params.chapter,
+      level: params.level,
+      difficulty: params.difficulty
+    })
   }
 }
 
@@ -417,13 +414,13 @@ function onShowBossQuiz(data) {
 
 function onBossQuizComplete(result) {
   showBossQuiz.value = false
-  // Sync HUD from LevelManager after boss quiz answers
+  // 先 emit 让 WorldScene 处理扣血逻辑
+  eventBus.emit(EVENTS.BOSS_QUIZ_RESULT, result)
+  // 扣血完成后再同步 HUD（此时 levelManager.lives 已是扣血后的值）
   hudData.lives = levelManager.lives
   hudData.score = levelManager.score
   hudData.combo = levelManager.combo
-  // Sync Pinia store for persistence
   gameStore.lives = levelManager.lives
-  eventBus.emit(EVENTS.BOSS_QUIZ_RESULT, result)
 }
 
 function onBossQuizClose() {
@@ -795,13 +792,21 @@ async function onLevelComplete(result) {
   // 更新成就上下文
   achievementContext.levelsCompleted++
   if (result.correctRate >= 100) achievementContext.perfectClears++
-  if (result.level >= 5) achievementContext.chaptersCompleted++
+  if (result.level >= 5) {
+    // 只在首次完成该章最后一关时计数，避免重玩重复累加
+    const completedChapters = safeGetJSON('wordquest:completedChapters') || []
+    if (!completedChapters.includes(result.chapter)) {
+      completedChapters.push(result.chapter)
+      safeSetJSON('wordquest:completedChapters', completedChapters)
+      achievementContext.chaptersCompleted = completedChapters.length
+    }
+  }
   scoreSystem.checkAchievements(achievementContext)
   persistAchievementContext()
 
   // 保存进度到服务器
   try {
-    await gameStore.saveLevelResult(result.chapter, result.level, result.stars, result.score)
+    await gameStore.saveLevelResult(result.chapter, result.level, result.stars, result.score, result.sessionId)
   } catch (e) {
     console.warn('保存进度失败:', e)
   }
@@ -818,19 +823,8 @@ async function onGameOver(result) {
   // 保存成就上下文
   persistAchievementContext()
 
-  // 跳转到 ResultScene 显示结算页面
-  if (game) {
-    const sceneNames = ['WorldScene', 'MenuScene', 'BootScene']
-    for (const sceneName of sceneNames) {
-      const scene = game.scene.getScene(sceneName)
-      if (scene && scene.scene.isActive()) {
-        scene.scene.stop()
-        await new Promise(resolve => setTimeout(resolve, 50))
-        game.scene.start('ResultScene', result || levelManager.getLevelResult())
-        return
-      }
-    }
-  }
+  // 场景跳转由 WorldScene.onGameOver 负责（避免双重跳转竞态）
+  // 此处仅做 Vue 层 UI 清理
 }
 
 function onShowAchievement(data) {
@@ -843,7 +837,13 @@ function goToDashboard() {
 
 async function backToMenu() {
   showPauseMenu.value = false
+  showQuiz.value = false
+  showBossQuiz.value = false
+  showChatPanel.value = false
   inGameLevel.value = false  // 离开关卡，隐藏 HUD
+  pendingWrongAnswer.value = false
+  consecutiveWrong.value = 0
+  currentMonsterIndex.value = -1
   if (game) {
     const scene = game.scene.getScene('WorldScene')
     if (scene && scene.scene.isActive()) {
@@ -857,6 +857,9 @@ async function backToMenu() {
 function handleLogout() {
   showPauseMenu.value = false
   inGameLevel.value = false
+  // 清理游戏状态，防止跨账户数据泄漏
+  levelManager.initLevel(1, 1, [], 'normal')
+  gameStore.resetAll()
   if (game) { game.destroy(true); game = null }
   const userStore = useUserStore()
   userStore.logout()

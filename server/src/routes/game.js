@@ -61,7 +61,7 @@ router.post('/progress', authMiddleware, async (req, res) => {
   try {
     const { chapter, level, stars, score: clientScore, sessionId } = req.body
     if (!Number.isInteger(chapter) || chapter < 1 || chapter > 6) return res.status(400).json({ success: false, message: '无效的章节' })
-    if (!Number.isInteger(level) || level < 0 || level > 5) return res.status(400).json({ success: false, message: '无效的关卡' })
+    if (!Number.isInteger(level) || level < 1 || level > 5) return res.status(400).json({ success: false, message: '无效的关卡' })
     if (!Number.isInteger(stars) || stars < 0 || stars > 3) return res.status(400).json({ success: false, message: '无效的星级' })
     if (!Number.isInteger(clientScore) || clientScore < 0 || clientScore > 50000) return res.status(400).json({ success: false, message: '无效的分数' })
 
@@ -117,13 +117,14 @@ router.post('/progress', authMiddleware, async (req, res) => {
 
     // 只在新分数更高时更新
     if (!existing || score > existing.score) {
+      const newStars = Math.max(stars, oldStars)  // 星级只升不降
       progress.levels.set(key, {
-        stars,
+        stars: newStars,
         score,
         completed: true,
         completedAt: new Date()
       })
-      progress.totalStars += (stars - oldStars)
+      progress.totalStars += (newStars - oldStars)
     }
 
     // 解锁下一关/下一章

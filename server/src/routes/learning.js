@@ -170,10 +170,29 @@ router.get('/top-mistakes', authMiddleware, async (req, res) => {
       { $match: { wrongCount: { $gte: 1 } } },
       { $sort: { wrongCount: -1 } },
       { $limit: limit },
+      // 关联词库补全 meaning/phonetic/example 等字段（错词复习模式需要）
+      {
+        $lookup: {
+          from: 'vocabularybanks',
+          let: { wid: '$_id.wordId' },
+          pipeline: [
+            { $match: { $expr: { $eq: ['$_id', { $toObjectId: '$$wid' }] } } },
+            { $project: { meaning: 1, phonetic: 1, example: 1, exampleTranslation: 1, difficulty: 1 } }
+          ],
+          as: 'vocabInfo'
+        }
+      },
+      { $unwind: { path: '$vocabInfo', preserveNullAndEmptyArrays: true } },
       {
         $project: {
+          _id: '$_id.wordId',
           wordId: '$_id.wordId',
           word: '$_id.word',
+          meaning: { $ifNull: ['$vocabInfo.meaning', '未知释义'] },
+          phonetic: { $ifNull: ['$vocabInfo.phonetic', ''] },
+          example: { $ifNull: ['$vocabInfo.example', ''] },
+          exampleTranslation: { $ifNull: ['$vocabInfo.exampleTranslation', ''] },
+          difficulty: { $ifNull: ['$vocabInfo.difficulty', 1] },
           wrongCount: 1,
           totalCount: 1,
           errorRate: { $round: [{ $multiply: [{ $divide: ['$wrongCount', '$totalCount'] }, 100] }, 1] }

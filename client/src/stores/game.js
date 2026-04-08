@@ -62,7 +62,7 @@ export const useGameStore = defineStore('game', () => {
   function onWrongAnswer() {
     wrongCount.value++
     combo.value = 0
-    lives.value--
+    lives.value = Math.max(0, lives.value - 1)
   }
 
   function nextWord() {
@@ -82,8 +82,26 @@ export const useGameStore = defineStore('game', () => {
     }
   }
 
-  async function saveLevelResult(chapter, level, stars, levelScore) {
-    await saveProgress({ chapter, level, stars, score: levelScore })
+  async function saveLevelResult(chapter, level, stars, levelScore, sessionId) {
+    await saveProgress({ chapter, level, stars, score: levelScore, sessionId })
+  }
+
+  function resetAll() {
+    currentChapter.value = 1
+    currentLevel.value = 1
+    lives.value = 3
+    score.value = 0
+    combo.value = 0
+    maxCombo.value = 0
+    correctCount.value = 0
+    wrongCount.value = 0
+    currentDifficulty.value = 1
+    selectedDifficulty.value = 'normal'
+    progress.value = null
+    unlockedChapters.value = [1]
+    achievements.value = []
+    currentWords.value = []
+    currentWordIndex.value = 0
   }
 
   return {
@@ -93,6 +111,6 @@ export const useGameStore = defineStore('game', () => {
     progress, unlockedChapters, achievements,
     currentWords, currentWordIndex, currentWord, levelProgress,
     resetLevel, onCorrectAnswer, onWrongAnswer, nextWord,
-    loadProgress, saveLevelResult
+    loadProgress, saveLevelResult, resetAll
   }
 })
