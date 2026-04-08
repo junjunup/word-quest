@@ -306,6 +306,7 @@ export default class WorldScene extends Phaser.Scene {
     // Apply life loss for wrong answers (loseLife already emits UPDATE_HUD)
     if (wrongCount > 0) {
       for (let i = 0; i < wrongCount; i++) {
+        if (levelManager.lives <= 0) return  // 已死亡，由 GAME_OVER 处理
         const lifeResult = levelManager.loseLife()
         if (lifeResult === 'game_over') return
       }
@@ -322,7 +323,15 @@ export default class WorldScene extends Phaser.Scene {
         lives: levelManager.lives,
         combo: levelManager.combo
       })
-      this.checkLevelComplete()
+
+      // 检查关卡是否完成（所有怪 + Boss 都被击败）
+      // 如果完成，checkLevelComplete 会设 isPaused=true 并启动跳转
+      // 此时不应再覆盖 isPaused 状态
+      const levelDone = this.checkLevelComplete()
+      if (levelDone) return  // 关卡完成，不再执行后续恢复逻辑
+
+      // Boss 击败但还有怪物剩余，弹开玩家继续游戏
+      this.bouncePlayerFromBoss()
     } else {
       // Boss survived, bounce player away
       if (this.boss.resumeBehavior) this.boss.resumeBehavior()
@@ -346,6 +355,7 @@ export default class WorldScene extends Phaser.Scene {
 
   /**
    * Check if level is complete (all monsters + boss defeated)
+   * @returns {boolean} true if level is complete and transitioning
    */
   checkLevelComplete() {
     const remainingMonsters = this.monsters.getChildren().filter(m => !m.getData('defeated'))
@@ -356,9 +366,13 @@ export default class WorldScene extends Phaser.Scene {
       this.input.enabled = false  // 防止过渡期间幽灵点击
       audioManager.play('level_complete')
       this.time.delayedCall(1000, () => {
-        this.scene.start('ResultScene', levelManager.getLevelResult())
+        if (this.scene?.isActive()) {
+          this.scene.start('ResultScene', levelManager.getLevelResult())
+        }
       })
+      return true
     }
+    return false
   }
 
   /**
@@ -775,11 +789,12 @@ export default class WorldScene extends Phaser.Scene {
       audioManager.play('correct')
       if (data.combo > 0 && data.combo % 5 === 0) audioManager.play('combo')
 
-      this.isPaused = false
-      this.resetEncounterCooldown()
-
-      // Check level complete
-      this.checkLevelComplete()
+      // 先检查关卡是否完成，完成则不恢复游戏状态
+      const levelDone = this.checkLevelComplete()
+      if (!levelDone) {
+        this.isPaused = false
+        this.resetEncounterCooldown()
+      }
     } else {
       audioManager.play('wrong')
       if (monster) {
