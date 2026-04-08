@@ -48,13 +48,20 @@
 ### 游戏系统
 | 功能 | 说明 |
 |------|------|
-| 🎮 像素风 RPG | Sprout Lands 田园素材，角色行走动画，装饰物散布 |
-| ⚔️ 答题战斗 | 4 选 1 选择题，30 秒倒计时，连击加分 |
+| 🎮 像素风 RPG | Sprout Lands 田园素材，角色行走动画，完整树木与花草装饰 |
+| ⚔️ 答题战斗 | 多题型（选择/拼写/翻译），30 秒倒计时，连击加分 |
+| 👹 Boss 战 | 3 种 Boss 类型（巡逻/炮台/冲锋），答题攻击 Boss |
+| ♾️ 无尽模式 | 无限答题挑战，难度随连续答对数动态提升（5 级） |
+| 📝 错词复习 | 专项复习答错词汇，针对性巩固薄弱环节 |
 | 🔄 错词重测 | 答错的怪物 2 秒后恢复，强制重复练习 |
 | ⭐ 三星评级 | 基于正确率、速度、生命值的星级评定 |
+| 🎯 难度选择 | 简单/普通/困难三档，影响生命值、时间和分数倍率 |
+| 👤 角色系统 | 8 种角色外观选择，实时预览 |
 | 🏆 成就系统 | 16 个成就覆盖连击、词汇量、速度等维度 |
 | ⏸️ 暂停菜单 | 暂停/继续/返回菜单/退出登录 |
 | 📊 学习报告 | 每日统计、章节分析、错词排行、学习热力图 |
+| 🏅 排行榜 | 全服总分/经验排名 Top 50 |
+| 🎁 每日奖励 | 连续登录递增奖励（基础 10 + 连续天数 × 5 经验） |
 
 ### AI 学伴"小智"
 | 功能 | 说明 |
@@ -70,8 +77,10 @@
 |------|------|
 | 🐳 Docker 一键部署 | 全容器化，任何环境零配置启动 |
 | 🔒 安全防护 | Helmet + 限流 + CORS + 注入防护 + 输入校验 |
-| 📱 模块化架构 | Phaser ↔ Vue 事件总线解耦 |
-| 🎨 田园像素风 | Sprout Lands 专业像素素材包 |
+| 📱 模块化架构 | Phaser ↔ Vue 事件总线解耦，场景切换防幽灵点击 |
+| 🎨 田园像素风 | Sprout Lands 专业像素素材包，多帧拼接树木 |
+| 🛡️ 容错设计 | API 独立容错、加载进度反馈、优雅降级（内存数据库） |
+| 📖 例句系统 | 答题后展示英文例句 + 中文翻译，强化语境记忆 |
 
 ---
 
@@ -236,10 +245,22 @@ ai-gamified-learning/
 │   │   └── sprout-lands-ui/    # UI 素材包
 │   ├── src/
 │   │   ├── api/                # API 调用层
-│   │   ├── components/         # Vue 组件 (QuizModal/ChatPanel/Achievement)
+│   │   ├── components/         # Vue 组件
+│   │   │   ├── QuizModal.vue       # 答题弹窗（多题型+例句展示）
+│   │   │   ├── BossQuizModal.vue   # Boss 战答题弹窗
+│   │   │   ├── EndlessMode.vue     # 无尽模式（进度条+难度递增）
+│   │   │   ├── ReviewMode.vue      # 错词复习模式
+│   │   │   ├── ChatPanel.vue       # AI 学伴对话面板
+│   │   │   ├── LevelSelect.vue     # 关卡选择（章节/难度/解锁状态）
+│   │   │   ├── CharacterSelect.vue # 角色选择
+│   │   │   ├── ScoreBoard.vue      # 排行榜
+│   │   │   └── AchievementPopup.vue # 成就弹窗
 │   │   ├── game/               # Phaser 游戏层
 │   │   │   ├── scenes/         # Boot/Menu/World/Result 场景
-│   │   │   └── systems/        # EventBus/LevelManager/ScoreSystem
+│   │   │   ├── entities/       # Boss（巡逻/炮台/冲锋）
+│   │   │   ├── systems/        # EventBus/LevelManager/ScoreSystem/AudioManager
+│   │   │   ├── config/         # gameConstants.js（章节主题/难度/计分）
+│   │   │   └── data/           # levels.json（6章30关配置）
 │   │   ├── views/              # HomeView/GameView/Dashboard/Profile
 │   │   ├── stores/             # Pinia 状态管理
 │   │   └── styles/             # 全局 SCSS 田园主题
@@ -279,10 +300,12 @@ ai-gamified-learning/
 | 方法 | 路径 | 认证 | 说明 |
 |------|------|------|------|
 | GET | `/progress` | JWT | 获取游戏进度 |
-| POST | `/progress` | JWT | 保存关卡成绩 |
+| POST | `/progress` | JWT | 保存关卡成绩（服务端积分校验） |
+| GET | `/levels-status` | JWT | 获取关卡地图（解锁/星级/分数） |
 | GET | `/leaderboard?type=total` | 否 | 排行榜 (top 50) |
 | GET | `/achievements` | JWT | 获取已解锁成就 |
 | POST | `/daily-reward` | JWT | 领取每日登录奖励 |
+| PUT | `/character` | JWT | 保存角色外观选择 |
 
 ### 词库 (`/api/vocab`)
 
@@ -321,8 +344,8 @@ User (用户)
  ├── 1:N → QuizRecord (答题记录、正确率、用时)
  └── 1:N → LearningLog (学习日志、登录、事件)
 
-VocabularyBank (词库: 6章×5关, ~360词)
- └── word/phonetic/meaning/example/difficulty/chapter/level
+VocabularyBank (词库: 6章×5关, 400词)
+ └── word/phonetic/meaning/example/exampleTranslation/difficulty/chapter/level
 ```
 
 ---
@@ -333,8 +356,17 @@ VocabularyBank (词库: 6章×5关, ~360词)
 
 ```
 score = 100 × difficulty + min(combo × 10, 50) + timeBonus
-timeBonus: <5秒 → +30 | <10秒 → +15 | 其他 → 0
+timeBonus: <3秒 → +50 | <5秒 → +30 | <10秒 → +15 | 其他 → 0
+最终得分 = score × 难度倍率（简单 0.8 / 普通 1.0 / 困难 1.5）
 ```
+
+### 难度系统
+
+| 难度 | 生命 | 答题时限 | 分数倍率 | 怪物数修正 |
+|------|------|---------|---------|-----------|
+| 🌱 简单 | 4 命 | 35 秒 | ×0.8 | -2 |
+| ⚔️ 普通 | 3 命 | 30 秒 | ×1.0 | +0 |
+| 🔥 困难 | 2 命 | 20 秒 | ×1.5 | +3 |
 
 ### 星级评定
 
