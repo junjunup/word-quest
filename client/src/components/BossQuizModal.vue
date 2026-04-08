@@ -77,6 +77,14 @@
       <div v-if="answered" class="result-feedback" :class="isCorrect ? 'correct' : 'wrong'">
         <p class="result-icon">{{ isCorrect ? '✅ 回答正确！Boss受到伤害！' : '❌ 回答错误，扣一条命！' }}</p>
         <p v-if="!isCorrect && isChoiceType" class="correct-answer">正确答案：{{ currentWord?.meaning }}</p>
+
+        <!-- 例句区块 -->
+        <div v-if="currentWord?.example" class="example-block">
+          <div class="example-label">📖 例句</div>
+          <p class="example-en">{{ currentWord.example }}</p>
+          <p v-if="currentWord?.exampleTranslation" class="example-cn">{{ currentWord.exampleTranslation }}</p>
+        </div>
+
         <button class="btn btn-primary continue-btn" @click="nextQuestion">
           {{ bossDefeated ? '👹 Boss已击败！' : '继续战斗 ⚔️' }}
         </button>
@@ -551,6 +559,36 @@ onUnmounted(() => {
 
 .result-icon { font-size: 16px; font-weight: bold; margin-bottom: 8px; }
 .correct-answer { color: #88ff88; font-size: 14px; margin-bottom: 8px; }
+
+.example-block {
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 10px 0 14px;
+  text-align: left;
+}
+
+.example-label {
+  font-size: 12px;
+  font-weight: bold;
+  color: #cc8866;
+  margin-bottom: 6px;
+}
+
+.example-en {
+  font-size: 16px;
+  color: #ffccaa;
+  font-style: italic;
+  line-height: 1.6;
+  margin-bottom: 4px;
+}
+
+.example-cn {
+  font-size: 14px;
+  color: #cc8866;
+  line-height: 1.5;
+}
 
 .continue-btn {
   padding: 8px 30px;

@@ -63,7 +63,14 @@
           <p v-if="!isCorrect" class="correct-answer-text">
             正确答案：<strong>{{ currentWord.meaning }}</strong>
           </p>
-          <p v-if="currentWord.example" class="example-text">📖 {{ currentWord.example }}</p>
+
+          <!-- 例句区块 -->
+          <div v-if="currentWord.example" class="example-block">
+            <div class="example-label">📖 例句</div>
+            <p class="example-en">{{ currentWord.example }}</p>
+            <p v-if="currentWord.exampleTranslation" class="example-cn">{{ currentWord.exampleTranslation }}</p>
+          </div>
+
           <button class="btn btn-primary" @click="nextWord">
             {{ currentIndex < words.length - 1 ? '下一题' : '查看结果' }}
           </button>
@@ -340,11 +347,34 @@ onMounted(() => {
   strong { font-weight: bold; }
 }
 
-.example-text {
+.example-block {
+  background: rgba(139, 105, 20, 0.1);
+  border: 2px solid rgba(139, 105, 20, 0.25);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 10px 0 14px;
+  text-align: left;
+}
+
+.example-label {
+  font-size: 12px;
+  font-weight: bold;
   color: #8b6914;
-  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.example-en {
+  font-size: 16px;
+  color: #5b3a1a;
   font-style: italic;
-  margin: 4px 0 12px;
+  line-height: 1.6;
+  margin-bottom: 4px;
+}
+
+.example-cn {
+  font-size: 14px;
+  color: #8b6914;
+  line-height: 1.5;
 }
 
 .review-complete {

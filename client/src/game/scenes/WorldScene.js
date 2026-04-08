@@ -218,6 +218,7 @@ export default class WorldScene extends Phaser.Scene {
    */
   handleBossDamage() {
     if (this.invincible) return
+    if (levelManager.lives <= 0) return  // 防止多重命中导致负生命值
 
     const result = levelManager.loseLife()
     this.startInvincibility()
@@ -241,6 +242,7 @@ export default class WorldScene extends Phaser.Scene {
    */
   onBulletHit(player, bullet) {
     if (this.invincible || !bullet.active) return
+    if (levelManager.lives <= 0) return  // 防止多重命中导致负生命值
 
     bullet.setActive(false).setVisible(false)
     bullet.body.enable = false
@@ -351,6 +353,7 @@ export default class WorldScene extends Phaser.Scene {
 
     if (remainingMonsters.length === 0 && bossDefeated) {
       this.isPaused = true
+      this.input.enabled = false  // 防止过渡期间幽灵点击
       audioManager.play('level_complete')
       this.time.delayedCall(1000, () => {
         this.scene.start('ResultScene', levelManager.getLevelResult())
@@ -450,21 +453,75 @@ export default class WorldScene extends Phaser.Scene {
 
   addDecorations(mapWidth, mapHeight, tileSize, hasGrassDecor) {
     const theme = CHAPTER_THEMES[this.chapter] || CHAPTER_THEMES[1]
-    const decoCount = theme.decoCount
-    const padding = 2
+    const padding = 3  // 离墙壁的最小距离（格数）
+    const playerSpawn = { x: 80, y: 300 }
+    const npcSpawn = { x: 700, y: 300 }
+    const exclusionDist = 120  // 与玩家/NPC出生点的排斥距离
 
+    // ─── 树定义：绿树帧[0,1,2,9,10,11]，粉树帧[3,4,5,12,13,14] ───
+    // 每棵树由 3列×2行 的 16x16 帧拼成，实际尺寸 48x32（scale 2 后 96x64）
+    const TREE_FRAMES = {
+      green: { topRow: [0, 1, 2], bottomRow: [9, 10, 11] },
+      pink:  { topRow: [3, 4, 5], bottomRow: [12, 13, 14] }
+    }
+
+    // ─── 1. 放置完整的多帧树 ───
+    if (hasGrassDecor && theme.treeTypes && theme.treeCount > 0) {
+      const treePositions = []
+      const treeExclusionDist = 120  // 树与树之间的最小距离
+
+      for (let t = 0; t < theme.treeCount; t++) {
+        const treeType = theme.treeTypes[t % theme.treeTypes.length]
+        const frames = TREE_FRAMES[treeType]
+        if (!frames) continue
+
+        // 找一个合适的位置
+        let placed = false
+        for (let attempt = 0; attempt < 50; attempt++) {
+          const gx = Phaser.Math.Between(padding, mapWidth - padding - 3)
+          const gy = Phaser.Math.Between(padding, mapHeight - padding - 2)
+          const px = gx * tileSize + 16
+          const py = gy * tileSize + 16
+
+          // 检查排斥：玩家、NPC、其他树
+          if (Math.hypot(px - playerSpawn.x, py - playerSpawn.y) < exclusionDist) continue
+          if (Math.hypot(px - npcSpawn.x, py - npcSpawn.y) < exclusionDist) continue
+          if (treePositions.some(p => Math.hypot(p.x - px, p.y - py) < treeExclusionDist)) continue
+
+          // 放置 3×2 帧组成的完整树
+          const scale = 2
+          const frameW = 16
+          for (let row = 0; row < 2; row++) {
+            const rowFrames = row === 0 ? frames.topRow : frames.bottomRow
+            for (let col = 0; col < 3; col++) {
+              const fx = px + (col - 1) * frameW * scale
+              const fy = py + (row - 0.5) * frameW * scale
+              const treePart = this.add.image(fx, fy, 'grass_decor', rowFrames[col]).setScale(scale)
+              treePart.setDepth(3)
+              this.decoContainer.add(treePart)
+            }
+          }
+
+          treePositions.push({ x: px, y: py })
+          placed = true
+          break
+        }
+      }
+    }
+
+    // ─── 2. 放置单帧小装饰（花、蘑菇、石头等） ───
+    const decoCount = theme.decoCount || 20
     for (let i = 0; i < decoCount; i++) {
       const gx = Phaser.Math.Between(padding, mapWidth - padding - 1)
       const gy = Phaser.Math.Between(padding, mapHeight - padding - 1)
       const px = gx * tileSize + 16
       const py = gy * tileSize + 16
 
-      if (Math.hypot(px - 80, py - 300) < 100) continue
-      if (Math.hypot(px - 700, py - 300) < 100) continue
+      if (Math.hypot(px - playerSpawn.x, py - playerSpawn.y) < 80) continue
+      if (Math.hypot(px - npcSpawn.x, py - npcSpawn.y) < 80) continue
 
-      if (hasGrassDecor) {
-        const decoFrames = theme.decoFrames
-        const frame = decoFrames[Phaser.Math.Between(0, decoFrames.length - 1)]
+      if (hasGrassDecor && theme.decoFrames && theme.decoFrames.length > 0) {
+        const frame = theme.decoFrames[Phaser.Math.Between(0, theme.decoFrames.length - 1)]
         const deco = this.add.image(px, py, 'grass_decor', frame).setScale(2)
         deco.setAlpha(0.9)
         this.decoContainer.add(deco)
@@ -542,12 +599,17 @@ export default class WorldScene extends Phaser.Scene {
       if (hasChicken) {
         monster = this.monsters.create(positions[i].x, positions[i].y, 'chicken_sheet', 0)
         monster.setScale(3.5)
+        // 缩小碰撞箱到小鸡身体中心区域（原始帧 16x16，取中间 10x10）
+        monster.body.setSize(10, 10)
+        monster.body.setOffset(3, 4)
         if (this.anims.exists('chicken_idle')) {
           monster.play('chicken_idle')
         }
       } else {
         monster = this.monsters.create(positions[i].x, positions[i].y, 'monster')
         monster.setScale(1.2)
+        monster.body.setSize(20, 20)
+        monster.body.setOffset(6, 6)
       }
 
       monster.setData('index', i)
@@ -583,6 +645,9 @@ export default class WorldScene extends Phaser.Scene {
     if (hasCow) {
       npc = this.npcs.create(700, 300, 'cow_sheet', 0)
       npc.setScale(2)
+      // 缩小碰撞箱到奶牛身体中心（原始帧 32x32，取中间 20x18）
+      npc.body.setSize(20, 18)
+      npc.body.setOffset(6, 10)
       if (this.anims.exists('cow_idle')) {
         npc.play('cow_idle')
       }
@@ -877,6 +942,9 @@ export default class WorldScene extends Phaser.Scene {
     eventBus.off(EVENTS.CHAT_CLOSED, this.boundOnChatClosed)
     eventBus.off(EVENTS.GAME_OVER, this.boundOnGameOver)
     eventBus.off(EVENTS.BOSS_QUIZ_RESULT, this.boundOnBossQuizResult)
+
+    // 禁用输入，防止场景切换时幽灵点击穿透
+    this.input.enabled = false
 
     // Kill all tweens to prevent callbacks firing after scene shutdown
     this.tweens.killAll()

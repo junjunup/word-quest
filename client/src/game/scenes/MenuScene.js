@@ -18,6 +18,9 @@ export default class MenuScene extends Phaser.Scene {
     // 注册 shutdown 清理
     this.events.once('shutdown', this.shutdown, this)
 
+    // 场景刚创建时禁用输入，防止上一个场景的残留点击穿透
+    this.input.enabled = false
+
     // 田园背景（草地+装饰）
     this.createPastoralBackground(width, height)
 
@@ -103,6 +106,13 @@ export default class MenuScene extends Phaser.Scene {
       yoyo: true,
       repeat: -1,
       ease: 'Sine.easeInOut'
+    })
+
+    // 延迟启用输入，等待上一场景残留的指针事件完全排空
+    this.time.delayedCall(200, () => {
+      if (this.scene.isActive()) {
+        this.input.enabled = true
+      }
     })
   }
 

@@ -3,8 +3,8 @@
     <!-- Phaser游戏容器 -->
     <div id="phaser-container" ref="phaserContainer"></div>
 
-    <!-- HUD覆盖层 -->
-    <div class="game-hud" v-if="showHud && uiState === 'game'">
+    <!-- HUD覆盖层 - 仅在关卡内显示 -->
+    <div class="game-hud" v-if="showHud && uiState === 'game' && inGameLevel">
       <div class="hud-left">
         <span class="hud-hearts">
           <template v-if="isTutorialLevel">
@@ -29,8 +29,8 @@
       </div>
     </div>
 
-    <!-- 暂停菜单 -->
-    <div class="pause-overlay" v-if="showPauseMenu">
+    <!-- 暂停菜单 - 仅在关卡内 -->
+    <div class="pause-overlay" v-if="showPauseMenu && inGameLevel">
       <div class="pause-card card">
         <h3 class="pause-title">⏸️ 游戏暂停</h3>
         <button class="btn btn-primary pause-btn" @click="showPauseMenu = false">🌿 继续游戏</button>
@@ -63,9 +63,9 @@
     />
 
     <!-- 排行榜浮窗 -->
-    <div class="leaderboard-overlay" v-if="uiState === 'leaderboard'" @click.self="uiState = 'game'">
+    <div class="leaderboard-overlay" v-if="uiState === 'leaderboard'" @click.self="closeLeaderboard">
       <div class="leaderboard-panel">
-        <button class="leaderboard-close" @click="uiState = 'game'">✕</button>
+        <button class="leaderboard-close" @click="closeLeaderboard">✕</button>
         <ScoreBoard />
       </div>
     </div>
@@ -167,6 +167,7 @@ let game = null
 const uiState = ref('game')
 
 const showHud = ref(true)
+const inGameLevel = ref(false)  // 是否在关卡内（区别于菜单/结算等场景）
 const showQuiz = ref(false)
 const showBossQuiz = ref(false)
 const showChatPanel = ref(false)
@@ -276,6 +277,7 @@ async function loadWordsAndInitLevel(chapter, level) {
  */
 async function onStartLevel(data) {
   const { chapter, level, isTutorial } = data
+  inGameLevel.value = true  // 进入关卡，显示 HUD
   hudData.chapter = chapter
   hudData.level = level
   hudData.maxLives = gameStore.difficultyConfig.lives
@@ -291,16 +293,40 @@ async function onStartLevel(data) {
 
 // --- UI Panel Event Handlers ---
 
+/**
+ * 当 Vue 层 overlay（关卡选择/角色选择/排行榜等）覆盖在 Phaser canvas 上方时，
+ * 必须禁用 Phaser 的输入系统，否则鼠标事件会穿透 Vue 层到达底层 canvas。
+ * 这是导致"点简单跳排行榜"等幽灵点击 bug 的根本原因。
+ */
+function setPhaserInputEnabled(enabled) {
+  if (!game) return
+  const scenes = ['MenuScene', 'WorldScene', 'ResultScene', 'BootScene']
+  for (const name of scenes) {
+    const scene = game.scene.getScene(name)
+    if (scene && scene.scene.isActive()) {
+      scene.input.enabled = enabled
+    }
+  }
+}
+
 function onShowLevelSelect(data) {
   uiState.value = 'levelSelect'
+  setPhaserInputEnabled(false)
 }
 
 function onShowCharacterSelect() {
   uiState.value = 'characterSelect'
+  setPhaserInputEnabled(false)
 }
 
 function onShowLeaderboard() {
   uiState.value = 'leaderboard'
+  setPhaserInputEnabled(false)
+}
+
+function closeLeaderboard() {
+  uiState.value = 'game'
+  setPhaserInputEnabled(true)
 }
 
 
@@ -322,6 +348,7 @@ async function onLevelSelectStart({ chapter, level, difficulty }) {
 }
 function onLevelSelectBack() {
   uiState.value = 'game'
+  setPhaserInputEnabled(true)
 }
 
 function onIntroDismiss() {
@@ -330,10 +357,12 @@ function onIntroDismiss() {
 
 function onCharacterConfirm() {
   uiState.value = 'game'
+  setPhaserInputEnabled(true)
 }
 
 function onCharacterBack() {
   uiState.value = 'game'
+  setPhaserInputEnabled(true)
 }
 
 async function startGameLevel() {
@@ -582,6 +611,7 @@ function buildQuizData(question, distractors, eventData) {
     meaning: question.meaning,
     phonetic: question.phonetic,
     example: question.example,
+    exampleTranslation: question.exampleTranslation,
     options: shuffle(options),
     chapter: eventData.chapter,
     level: eventData.level
@@ -760,6 +790,7 @@ async function onLevelComplete(result) {
   showQuiz.value = false
   showBossQuiz.value = false
   showPauseMenu.value = false
+  inGameLevel.value = false  // 离开关卡，隐藏 HUD
 
   // 更新成就上下文
   achievementContext.levelsCompleted++
@@ -776,12 +807,13 @@ async function onLevelComplete(result) {
   }
 }
 
-function onGameOver(result) {
+async function onGameOver(result) {
   console.log('游戏结束:', result)
   showQuiz.value = false
   showBossQuiz.value = false
   showChatPanel.value = false
   showPauseMenu.value = false
+  inGameLevel.value = false  // 离开关卡，隐藏 HUD
 
   // 保存成就上下文
   persistAchievementContext()
@@ -792,7 +824,9 @@ function onGameOver(result) {
     for (const sceneName of sceneNames) {
       const scene = game.scene.getScene(sceneName)
       if (scene && scene.scene.isActive()) {
-        scene.scene.start('ResultScene', result || levelManager.getLevelResult())
+        scene.scene.stop()
+        await new Promise(resolve => setTimeout(resolve, 50))
+        game.scene.start('ResultScene', result || levelManager.getLevelResult())
         return
       }
     }
@@ -807,16 +841,22 @@ function goToDashboard() {
   router.push('/dashboard')
 }
 
-function backToMenu() {
+async function backToMenu() {
   showPauseMenu.value = false
+  inGameLevel.value = false  // 离开关卡，隐藏 HUD
   if (game) {
     const scene = game.scene.getScene('WorldScene')
-    if (scene) scene.scene.start('MenuScene')
+    if (scene && scene.scene.isActive()) {
+      scene.scene.stop()
+      await new Promise(resolve => setTimeout(resolve, 50))
+      game.scene.start('MenuScene')
+    }
   }
 }
 
 function handleLogout() {
   showPauseMenu.value = false
+  inGameLevel.value = false
   if (game) { game.destroy(true); game = null }
   const userStore = useUserStore()
   userStore.logout()

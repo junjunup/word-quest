@@ -74,13 +74,21 @@ export const SCORING_CONFIG = {
 }
 
 // ============ 章节视觉主题 ============
+// decoFrames: 单帧小装饰（花、蘑菇、石头等），每个帧是完整的 16x16 图案
+// treeTypes: 多帧拼接的树，每棵树由 3×2=6 个 16x16 帧组成
+//   grass_decor spritesheet 帧布局（9列×5行）:
+//   行0: [0-2]绿树上半  [3-5]粉树上半  [6]心 [7]蝴蝶 [8]小花
+//   行1: [9-11]绿树下半 [12-14]粉树下半 [15]蘑菇 [16]蘑菇 [17]南瓜
+//   行2: [18-20]花      [21-23]石头     [24]向日葵 [25]小花 [26]小花
+//   行3: [27-29]草丛    [30-35]小装饰
+//   行4: [36-44]小装饰
 export const CHAPTER_THEMES = {
-  1: { name: '田园', bgColor: '#4a8c28', grassColors: [0x5b8c3e, 0x4a8c28, 0x6b9c4e, 0x5a9a38], decoFrames: [0, 3, 6, 7, 8, 9], decoCount: 40 },
-  2: { name: '森林', bgColor: '#2d6b16', grassColors: [0x3a6b1e, 0x2d5016, 0x4a7c2e, 0x3a5a2e], decoFrames: [12, 15, 18, 21, 24, 27], decoCount: 50 },
-  3: { name: '集市', bgColor: '#7c6b3e', grassColors: [0x8b7c4a, 0x6b5c3a, 0x9c8c5a, 0x7a6c3e], decoFrames: [0, 3, 9, 12], decoCount: 30 },
-  4: { name: '塔楼', bgColor: '#3a4c6e', grassColors: [0x4a5c7e, 0x3a4c6e, 0x5a6c8e, 0x4a5a6e], decoFrames: [6, 7, 15, 18], decoCount: 35 },
-  5: { name: '深渊', bgColor: '#2a1a2a', grassColors: [0x3a2a3a, 0x2a1a2a, 0x4a3a4a, 0x3a2a3a], decoFrames: [21, 24, 27], decoCount: 20 },
-  6: { name: '终极', bgColor: '#5b5016', grassColors: [0x6b6026, 0x5b5016, 0x7b7036, 0x6a5a26], decoFrames: [0, 3, 6, 9, 12, 15, 18, 21], decoCount: 45 }
+  1: { name: '田园', bgColor: '#4a8c28', grassColors: [0x5b8c3e, 0x4a8c28, 0x6b9c4e, 0x5a9a38], decoFrames: [6, 7, 8, 15, 17, 18, 24, 25, 27, 28], treeTypes: ['green', 'pink'], treeCount: 4, decoCount: 25 },
+  2: { name: '森林', bgColor: '#2d6b16', grassColors: [0x3a6b1e, 0x2d5016, 0x4a7c2e, 0x3a5a2e], decoFrames: [15, 16, 18, 19, 20, 21, 27, 28, 29], treeTypes: ['green', 'green', 'pink'], treeCount: 7, decoCount: 30 },
+  3: { name: '集市', bgColor: '#7c6b3e', grassColors: [0x8b7c4a, 0x6b5c3a, 0x9c8c5a, 0x7a6c3e], decoFrames: [17, 21, 22, 23, 24, 25], treeTypes: ['green'], treeCount: 2, decoCount: 20 },
+  4: { name: '塔楼', bgColor: '#3a4c6e', grassColors: [0x4a5c7e, 0x3a4c6e, 0x5a6c8e, 0x4a5a6e], decoFrames: [6, 7, 15, 21, 22, 23], treeTypes: ['pink'], treeCount: 3, decoCount: 22 },
+  5: { name: '深渊', bgColor: '#2a1a2a', grassColors: [0x3a2a3a, 0x2a1a2a, 0x4a3a4a, 0x3a2a3a], decoFrames: [21, 22, 23], treeTypes: [], treeCount: 0, decoCount: 15 },
+  6: { name: '终极', bgColor: '#5b5016', grassColors: [0x6b6026, 0x5b5016, 0x7b7036, 0x6a5a26], decoFrames: [6, 8, 15, 17, 18, 21, 24, 27], treeTypes: ['green', 'pink'], treeCount: 5, decoCount: 28 }
 }
 
 // ============ 通用后备干扰项词库 ============

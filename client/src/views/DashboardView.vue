@@ -11,6 +11,11 @@
     </header>
 
     <main class="dashboard-content">
+      <!-- 部分数据加载失败提示 -->
+      <div v-if="loadErrors.length > 0" class="dashboard-error-banner">
+        ⚠️ 部分数据加载失败（{{ loadErrors.join('、') }}），请检查网络连接
+      </div>
+
       <div class="main-section">
         <LearningReport :stats="stats" :daily-data="dailyData" :chapter-data="chapterData" />
 
@@ -64,24 +69,28 @@ const dailyData = ref([])
 const chapterData = ref([])
 const topMistakes = ref([])
 const heatmapData = ref([])
+const loadErrors = ref([])
 
 onMounted(async () => {
-  try {
-    const [statsRes, dailyRes, chapterRes, mistakeRes, heatmapRes] = await Promise.all([
-      getStats(),
-      getDailyStats(30),
-      getChapterStats(),
-      getTopMistakes(10),
-      getHeatmap(new Date().getFullYear())
-    ])
-    stats.value = statsRes.data
-    dailyData.value = dailyRes.data || []
-    chapterData.value = chapterRes.data || []
-    topMistakes.value = mistakeRes.data || []
-    heatmapData.value = heatmapRes.data || []
-  } catch (e) {
-    console.error('加载仪表盘数据失败:', e)
-  }
+  loadErrors.value = []
+
+  // 各模块独立加载，互不影响
+  const tasks = [
+    { name: '学习统计', fn: async () => { const r = await getStats(); stats.value = r.data } },
+    { name: '每日数据', fn: async () => { const r = await getDailyStats(30); dailyData.value = r.data || [] } },
+    { name: '章节数据', fn: async () => { const r = await getChapterStats(); chapterData.value = r.data || [] } },
+    { name: '易错词汇', fn: async () => { const r = await getTopMistakes(10); topMistakes.value = r.data || [] } },
+    { name: '学习热力图', fn: async () => { const r = await getHeatmap(new Date().getFullYear()); heatmapData.value = r.data || [] } }
+  ]
+
+  await Promise.all(tasks.map(async (task) => {
+    try {
+      await task.fn()
+    } catch (e) {
+      console.warn(`仪表盘加载失败 [${task.name}]:`, e)
+      loadErrors.value.push(task.name)
+    }
+  }))
 })
 
 const heatmapOption = computed(() => {
@@ -159,6 +168,17 @@ const heatmapOption = computed(() => {
   display: grid;
   grid-template-columns: 1fr 350px;
   gap: 20px;
+}
+
+.dashboard-error-banner {
+  grid-column: 1 / -1;
+  background: rgba(212, 91, 62, 0.15);
+  border: 1px solid rgba(212, 91, 62, 0.4);
+  border-radius: 8px;
+  padding: 10px 16px;
+  color: #ff8866;
+  font-size: 13px;
+  text-align: center;
 }
 
 .chart-container {

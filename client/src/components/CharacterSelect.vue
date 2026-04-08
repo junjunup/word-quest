@@ -26,7 +26,9 @@
 
       <div class="cs-footer">
         <button class="cs-back-btn" @click="$emit('back')">← 返回</button>
-        <button class="cs-confirm-btn" @click="confirmCharacter">✅ 确认选择</button>
+        <button class="cs-confirm-btn" @click="confirmCharacter" :disabled="saving">
+          {{ saving ? '保存中...' : '✅ 确认选择' }}
+        </button>
       </div>
     </div>
   </div>
@@ -98,14 +100,21 @@ onMounted(async () => {
   }
 })
 
+const saving = ref(false)
+
 async function confirmCharacter() {
+  if (saving.value) return
+  saving.value = true
   try {
     await updateCharacter({ characterSpriteIndex: selectedId.value })
     userStore.characterSpriteIndex = selectedId.value
+    emit('confirm')
   } catch (e) {
     console.warn('保存角色失败:', e)
+    alert(e?.message || '保存角色失败，请重试')
+  } finally {
+    saving.value = false
   }
-  emit('confirm')
 }
 </script>
 

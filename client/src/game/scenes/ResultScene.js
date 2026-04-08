@@ -21,6 +21,9 @@ export default class ResultScene extends Phaser.Scene {
     // 注册 shutdown 清理
     this.events.once('shutdown', this.shutdown, this)
 
+    // 场景刚创建时禁用输入，防止上一个场景的残留点击穿透
+    this.input.enabled = false
+
     const {
       chapter = 1, level = 1, stars = 1, score = 0,
       correctCount = 0, wrongCount = 0, totalWords = 0,
@@ -144,6 +147,8 @@ export default class ResultScene extends Phaser.Scene {
 
     // "下一关" → 通过事件回到关卡选择
     this.createWoodButton(width / 2 - 140, btnY, '下一关 ▶', 0x5b8c3e, 0x3a6b1e, () => {
+      if (!this.scene.isActive()) return  // 防止重复点击
+      this.input.enabled = false
       const nextLevel = level < MAX_LEVELS ? level + 1 : 1
       const nextChapter = level >= MAX_LEVELS ? Math.min(chapter + 1, MAX_CHAPTERS) : chapter
       // 先切到 MenuScene，再延迟触发 LevelSelect，确保 scene 切换完成
@@ -159,6 +164,8 @@ export default class ResultScene extends Phaser.Scene {
 
     // "再来一次"
     this.createWoodButton(width / 2 + 140, btnY, '再来一次 🔄', 0xe8a33c, 0xb8832e, () => {
+      if (!this.scene.isActive()) return  // 防止重复点击
+      this.input.enabled = false
       this.scene.start('MenuScene')
       setTimeout(() => {
         eventBus.emit(EVENTS.SHOW_LEVEL_SELECT, {
@@ -174,12 +181,23 @@ export default class ResultScene extends Phaser.Scene {
       fontSize: '13px', fontFamily: 'Microsoft YaHei', color: '#c4b99a',
       stroke: '#2d5016', strokeThickness: 2
     }).setOrigin(0.5).setInteractive({ useHandCursor: true })
-      .on('pointerdown', () => this.scene.start('MenuScene'))
+      .on('pointerdown', () => {
+        if (!this.scene.isActive()) return
+        this.input.enabled = false
+        this.scene.start('MenuScene')
+      })
       .on('pointerover', function () { this.setColor('#ffc847') })
       .on('pointerout', function () { this.setColor('#c4b99a') })
 
     // 通知Vue层
     eventBus.emit(EVENTS.LEVEL_COMPLETE, this.result)
+
+    // 延迟启用输入，等待上一场景残留的指针事件完全排空
+    this.time.delayedCall(200, () => {
+      if (this.scene.isActive()) {
+        this.input.enabled = true
+      }
+    })
   }
 
   createBackground(width, height) {

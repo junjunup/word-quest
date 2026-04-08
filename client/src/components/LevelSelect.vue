@@ -17,8 +17,15 @@
           <p>正在加载关卡数据...</p>
         </div>
 
+        <!-- Error state -->
+        <div class="ls-error" v-else-if="loadError">
+          <div class="error-icon">⚠️</div>
+          <p class="error-msg">{{ loadError }}</p>
+          <button class="btn btn-primary" @click="loadLevelsData">🔄 重试</button>
+        </div>
+
         <!-- Left: Chapter list -->
-        <div class="ls-chapters" v-if="!loading">
+        <div class="ls-chapters" v-if="!loading && !loadError">
           <div
             v-for="chapter in chapters"
             :key="chapter.id"
@@ -44,7 +51,7 @@
         </div>
 
         <!-- Right: Level grid -->
-        <div class="ls-levels" v-if="!loading">
+        <div class="ls-levels" v-if="!loading && !loadError">
           <div class="ls-chapter-header" v-if="selectedChapter">
             <h3 :style="{ color: selectedChapter.color }">{{ selectedChapter.name }}</h3>
             <p class="chapter-desc">{{ selectedChapter.description }}</p>
@@ -130,6 +137,7 @@ const selectedDifficulty = ref(
   (savedDiff && ['easy', 'normal', 'hard'].includes(savedDiff)) ? savedDiff : 'normal'
 )
 const loading = ref(true)
+const loadError = ref('')
 
 const difficulties = [
   { key: 'easy', icon: '🌱', label: '简单', desc: '35秒/4命/0.8x' },
@@ -176,6 +184,12 @@ function startLevel() {
 }
 
 onMounted(async () => {
+  await loadLevelsData()
+})
+
+async function loadLevelsData() {
+  loading.value = true
+  loadError.value = ''
   try {
     const res = await getLevelsStatus()
     if (res.data?.chapters) {
@@ -188,11 +202,11 @@ onMounted(async () => {
     }
   } catch (e) {
     console.warn('加载关卡状态失败:', e)
-    // Fallback: create minimal data from local levels.json
+    loadError.value = e?.message || '加载关卡失败，请检查网络连接或重新登录'
   } finally {
     loading.value = false
   }
-})
+}
 </script>
 
 <style scoped lang="scss">
@@ -542,6 +556,29 @@ onMounted(async () => {
     font-size: 40px;
     animation: spin 2s linear infinite;
     margin-bottom: 16px;
+  }
+}
+
+.ls-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 60px 20px;
+  text-align: center;
+
+  .error-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+  }
+
+  .error-msg {
+    color: #d45b3e;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 16px;
+    line-height: 1.6;
   }
 }
 
