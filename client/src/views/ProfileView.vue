@@ -5,7 +5,12 @@
       <h1>个人中心</h1>
     </header>
 
-    <div class="profile-content" v-if="userStore.userInfo">
+    <!-- 加载中 -->
+    <div class="profile-loading" v-if="!userStore.userInfo && userStore.userInfoLoading">
+      <p>正在加载用户信息...</p>
+    </div>
+
+    <div class="profile-content" v-else-if="userStore.userInfo">
       <div class="profile-card card">
         <div class="avatar-section">
           <div class="avatar">{{ userStore.userInfo.nickname?.charAt(0) || '勇' }}</div>
@@ -115,6 +120,15 @@ function handleLogout() {
   background: var(--bg-dark);
   overflow-y: auto;
   padding: 20px;
+}
+
+.profile-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #b8b8d4;
+  font-size: 16px;
 }
 
 .profile-header {

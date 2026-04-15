@@ -164,7 +164,7 @@ router.post('/progress', authMiddleware, async (req, res) => {
 })
 
 // 排行榜
-router.get('/leaderboard', async (req, res) => {
+router.get('/leaderboard', authMiddleware, async (req, res) => {
   try {
     const { type = 'total' } = req.query
     let users
@@ -185,6 +185,40 @@ router.get('/achievements', authMiddleware, async (req, res) => {
   try {
     const progress = await GameProgress.findOne({ userId: req.userId })
     res.json({ success: true, data: progress?.achievements || [] })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ success: false, message: '服务器内部错误' })
+  }
+})
+
+// 保存新解锁的成就
+router.post('/achievements', authMiddleware, async (req, res) => {
+  try {
+    const { id, name, description } = req.body
+    if (!id || typeof id !== 'string' || id.length > 50) {
+      return res.status(400).json({ success: false, message: '无效的成就ID' })
+    }
+
+    let progress = await GameProgress.findOne({ userId: req.userId })
+    if (!progress) {
+      progress = new GameProgress({ userId: req.userId })
+    }
+
+    // 防止重复添加
+    const alreadyExists = progress.achievements.some(a => a.id === id)
+    if (alreadyExists) {
+      return res.json({ success: true, data: progress.achievements, duplicate: true })
+    }
+
+    progress.achievements.push({
+      id,
+      name: (name || '').slice(0, 50),
+      description: (description || '').slice(0, 200),
+      unlockedAt: new Date()
+    })
+    await progress.save()
+
+    res.json({ success: true, data: progress.achievements })
   } catch (err) {
     console.error(err)
     res.status(500).json({ success: false, message: '服务器内部错误' })
@@ -308,6 +342,60 @@ router.get('/levels-status', authMiddleware, async (req, res) => {
     })
 
     res.json({ success: true, data: { chapters } })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ success: false, message: '服务器内部错误' })
+  }
+})
+
+// 无尽模式 - 提交成绩（只升不降）
+router.post('/endless-score', authMiddleware, async (req, res) => {
+  try {
+    const { score, maxStreak } = req.body
+    if (typeof score !== 'number' || score < 0) {
+      return res.status(400).json({ success: false, message: '无效分数' })
+    }
+
+    let progress = await GameProgress.findOne({ userId: req.userId })
+    if (!progress) {
+      progress = new GameProgress({ userId: req.userId })
+    }
+
+    let isNewRecord = false
+    if (score > (progress.endlessBestScore || 0)) {
+      progress.endlessBestScore = score
+      isNewRecord = true
+    }
+    if ((maxStreak || 0) > (progress.endlessBestStreak || 0)) {
+      progress.endlessBestStreak = maxStreak || 0
+    }
+    await progress.save()
+
+    res.json({
+      success: true,
+      data: {
+        bestScore: progress.endlessBestScore,
+        bestStreak: progress.endlessBestStreak,
+        isNewRecord
+      }
+    })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ success: false, message: '服务器内部错误' })
+  }
+})
+
+// 无尽模式 - 获取最佳成绩
+router.get('/endless-score', authMiddleware, async (req, res) => {
+  try {
+    const progress = await GameProgress.findOne({ userId: req.userId })
+    res.json({
+      success: true,
+      data: {
+        bestScore: progress?.endlessBestScore || 0,
+        bestStreak: progress?.endlessBestStreak || 0
+      }
+    })
   } catch (err) {
     console.error(err)
     res.status(500).json({ success: false, message: '服务器内部错误' })

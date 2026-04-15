@@ -18,5 +18,6 @@ const vocabularyBankSchema = new mongoose.Schema({
 })
 
 vocabularyBankSchema.index({ chapter: 1, difficulty: 1 })
+vocabularyBankSchema.index({ chapter: 1, level: 1 })
 
 export default mongoose.model('VocabularyBank', vocabularyBankSchema)

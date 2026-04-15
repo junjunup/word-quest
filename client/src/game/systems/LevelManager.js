@@ -165,11 +165,12 @@ class LevelManager {
    */
   getLevelResult() {
     const totalTime = Date.now() - this.startTime
-    const correctRate = this.words.length > 0
-      ? Math.min(this.correctCount / this.words.length, 1.0)
+    const totalAnswered = this.correctCount + this.wrongCount
+    const correctRate = totalAnswered > 0
+      ? Math.min(this.correctCount / totalAnswered, 1.0)
       : 0
-    const avgTime = this.words.length > 0
-      ? totalTime / this.words.length
+    const avgTime = totalAnswered > 0
+      ? totalTime / totalAnswered
       : 0
 
     // 计算星级 (0-3星)

@@ -74,6 +74,11 @@ const loadErrors = ref([])
 onMounted(async () => {
   loadErrors.value = []
 
+  // 确保刷新页面后 userInfo 被恢复
+  if (!userStore.userInfo && userStore.isLoggedIn) {
+    try { await userStore.fetchUserInfo() } catch (e) { console.warn('获取用户信息失败:', e) }
+  }
+
   // 各模块独立加载，互不影响
   const tasks = [
     { name: '学习统计', fn: async () => { const r = await getStats(); stats.value = r.data } },

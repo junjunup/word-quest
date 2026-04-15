@@ -6,6 +6,7 @@ export const useUserStore = defineStore('user', () => {
   const token = ref(localStorage.getItem('token') || '')
   const userInfo = ref(null)
   const characterSpriteIndex = ref(0)
+  const userInfoLoading = ref(false)
 
   const isLoggedIn = computed(() => !!token.value)
 
@@ -29,9 +30,14 @@ export const useUserStore = defineStore('user', () => {
 
   async function fetchUserInfo() {
     if (!token.value) return
-    const res = await getUserInfo()
-    userInfo.value = res.data
-    characterSpriteIndex.value = res.data.characterSpriteIndex || 0
+    userInfoLoading.value = true
+    try {
+      const res = await getUserInfo()
+      userInfo.value = res.data
+      characterSpriteIndex.value = res.data.characterSpriteIndex || 0
+    } finally {
+      userInfoLoading.value = false
+    }
   }
 
   function logout() {
@@ -41,5 +47,5 @@ export const useUserStore = defineStore('user', () => {
     localStorage.removeItem('token')
   }
 
-  return { token, userInfo, isLoggedIn, characterSpriteIndex, doLogin, doRegister, fetchUserInfo, logout }
+  return { token, userInfo, isLoggedIn, userInfoLoading, characterSpriteIndex, doLogin, doRegister, fetchUserInfo, logout }
 })

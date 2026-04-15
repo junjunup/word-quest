@@ -3,6 +3,7 @@ import mongoose from 'mongoose'
 import { authMiddleware } from '../middleware/auth.js'
 import QuizRecord from '../models/QuizRecord.js'
 import LearningLog from '../models/LearningLog.js'
+import VocabularyBank from '../models/VocabularyBank.js'
 import { getAdaptiveDifficulty } from '../services/adaptiveEngine.js'
 import { verifyAnswer, calculateServerScore } from '../services/answerVerificationService.js'
 
@@ -79,6 +80,9 @@ router.get('/stats', authMiddleware, async (req, res) => {
       { $match: { $expr: { $gte: [{ $divide: ['$correctCount', '$totalCount'] }, 0.8] }, totalCount: { $gte: 3 } } }
     ])
 
+    // 获取词库总词汇数
+    const totalVocabCount = await VocabularyBank.countDocuments()
+
     res.json({
       success: true,
       data: {
@@ -86,7 +90,8 @@ router.get('/stats', authMiddleware, async (req, res) => {
         correctRate: totalQuizzes > 0 ? (correctQuizzes / totalQuizzes * 100).toFixed(1) : 0,
         wordsLearned: uniqueWords.length,
         wordsMastered: masteredWords.length,
-        totalStudyTime: 0 // 通过LearningLog计算
+        totalStudyTime: 0, // 通过LearningLog计算
+        totalVocabCount
       }
     })
   } catch (err) {

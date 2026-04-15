@@ -123,6 +123,7 @@ const bossDefeated = ref(false)
 const wrongCount = ref(0)
 const typedAnswer = ref('')
 const spellInput = ref(null)
+const answerRecords = ref([])  // 收集每道题的答题记录，用于上报后端
 
 // 计算属性
 const isChoiceType = computed(() =>
@@ -178,7 +179,7 @@ async function loadQuestion() {
 
   const word = getNextWord()
   if (!word) {
-    emit('complete', { correctCount: correctCount.value, wrongCount: wrongCount.value })
+    emit('complete', { correctCount: correctCount.value, wrongCount: wrongCount.value, answerRecords: answerRecords.value })
     return
   }
 
@@ -260,6 +261,17 @@ function selectOption(index, option) {
     shaking.value = true
     setTimeout(() => shaking.value = false, 500)
   }
+
+  // 收集答题记录
+  answerRecords.value.push({
+    wordId: currentWord.value?._id || 'unknown',
+    word: currentWord.value?.word || '',
+    isCorrect: option.correct,
+    responseTime: props.timeLimit - remainingTime.value,
+    playerAnswer: option.text || '',
+    correctAnswer: props.questionType === 'choice_cn2en'
+      ? currentWord.value?.word : currentWord.value?.meaning
+  })
 }
 
 function onSpellInput(e) {
@@ -286,6 +298,16 @@ function submitTypedAnswer() {
     shaking.value = true
     setTimeout(() => shaking.value = false, 500)
   }
+
+  // 收集答题记录
+  answerRecords.value.push({
+    wordId: currentWord.value?._id || 'unknown',
+    word: currentWord.value?.word || '',
+    isCorrect: isCorrect.value,
+    responseTime: props.timeLimit - remainingTime.value,
+    playerAnswer: typedAnswer.value,
+    correctAnswer: currentWord.value?.word || ''
+  })
 }
 
 function handleTimeout() {
@@ -295,11 +317,21 @@ function handleTimeout() {
   totalAnswered.value++
   wrongCount.value++
   if (timerInterval) clearInterval(timerInterval)
+
+  // 收集超时答题记录
+  answerRecords.value.push({
+    wordId: currentWord.value?._id || 'unknown',
+    word: currentWord.value?.word || '',
+    isCorrect: false,
+    responseTime: props.timeLimit,
+    playerAnswer: '(timeout)',
+    correctAnswer: currentWord.value?.word || ''
+  })
 }
 
 function nextQuestion() {
   if (bossDefeated.value) {
-    emit('complete', { correctCount: correctCount.value, wrongCount: wrongCount.value, defeated: true })
+    emit('complete', { correctCount: correctCount.value, wrongCount: wrongCount.value, defeated: true, answerRecords: answerRecords.value })
     return
   }
   loadQuestion()

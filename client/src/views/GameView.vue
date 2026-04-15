@@ -113,7 +113,7 @@
 
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, onBeforeRouteLeave } from 'vue-router'
 import Phaser from 'phaser'
 import { createGameConfig } from '@/game/config'
 import eventBus, { EVENTS } from '@/game/systems/EventBus'
@@ -129,9 +129,10 @@ import LevelSelect from '@/components/LevelSelect.vue'
 import GameIntro from '@/components/GameIntro.vue'
 import CharacterSelect from '@/components/CharacterSelect.vue'
 import { submitQuizRecord } from '@/api/learning'
+import { saveAchievement } from '@/api/game'
 import { getChapterLevelWords, getQuizForWord, getChapterWords } from '@/api/vocabulary'
 import { DEATH_SPIRAL, STORAGE_KEYS, QUESTION_TYPES } from '@/game/config/gameConstants'
-import { calculateScore, shuffle, buildChoiceOptions, safeGetJSON, safeSetJSON, safeGetItem } from '@/utils/helpers'
+import { calculateScore, shuffle, buildChoiceOptions, safeGetJSON, safeSetJSON, safeGetItem, safeSetItem } from '@/utils/helpers'
 import scoreSystem from '@/game/systems/ScoreSystem'
 import audioManager from '@/game/systems/AudioManager'
 
@@ -162,6 +163,7 @@ const gameStore = useGameStore()
 
 const phaserContainer = ref(null)
 let game = null
+let chatSafetyTimer = null
 
 // UI状态机: 'game' | 'levelSelect' | 'characterSelect' | 'intro' | 'leaderboard'
 const uiState = ref('game')
@@ -370,6 +372,15 @@ async function startGameLevel() {
   const params = pendingLevelParams.value
   if (!params) return
 
+  // 预先加载词汇，如果失败则阻止关卡启动
+  await loadWordsAndInitLevel(params.chapter, params.level)
+  if (levelWords.value.length === 0) {
+    alert('词汇加载失败，请检查网络连接后重试')
+    uiState.value = 'levelSelect'
+    setPhaserInputEnabled(false)
+    return
+  }
+
   pendingLevelParams.value = null
   hudData.chapter = params.chapter
   hudData.level = params.level
@@ -421,6 +432,28 @@ function onBossQuizComplete(result) {
   hudData.score = levelManager.score
   hudData.combo = levelManager.combo
   gameStore.lives = levelManager.lives
+
+  // 上报 Boss 答题记录到后端（异步，不阻塞）
+  if (result.answerRecords && result.answerRecords.length > 0) {
+    for (const record of result.answerRecords) {
+      submitQuizRecord({
+        wordId: record.wordId,
+        word: record.word,
+        questionType: currentQuestionType.value,
+        isCorrect: record.isCorrect,
+        responseTime: record.responseTime,
+        difficulty: currentDifficulty.value,
+        hintUsed: false,
+        npcInteraction: false,
+        sessionId: levelManager.sessionId,
+        chapter: hudData.chapter,
+        level: hudData.level,
+        playerAnswer: record.playerAnswer,
+        correctAnswer: record.correctAnswer,
+        isBossQuiz: true
+      }).catch(err => console.warn('Boss答题记录上报失败:', err))
+    }
+  }
 }
 
 function onBossQuizClose() {
@@ -466,16 +499,13 @@ onMounted(async () => {
   hudData.chapter = chapter
   hudData.level = level
 
-  // 加载词汇并初始化 LevelManager
-  await loadWordsAndInitLevel(chapter, level)
-
-  // 初始化 Phaser 游戏
+  // 初始化 Phaser 游戏（先启动，不阻塞词汇加载）
   if (phaserContainer.value) {
     const config = createGameConfig(phaserContainer.value)
     game = new Phaser.Game(config)
   }
 
-  // 注册事件监听
+  // 注册事件监听（必须在 Phaser 启动后、词汇加载前注册，否则可能丢事件）
   eventBus.on(EVENTS.SHOW_QUIZ, onShowQuiz)
   eventBus.on(EVENTS.SHOW_CHAT, onShowChat)
   eventBus.on(EVENTS.UPDATE_HUD, onUpdateHud)
@@ -488,6 +518,12 @@ onMounted(async () => {
   eventBus.on(EVENTS.SHOW_CHARACTER_SELECT, onShowCharacterSelect)
   eventBus.on(EVENTS.SHOW_BOSS_QUIZ, onShowBossQuiz)
   eventBus.on(EVENTS.TOGGLE_PAUSE, onTogglePause)
+
+  // 异步加载词汇并初始化 LevelManager（不阻塞 Phaser 启动）
+  loadWordsAndInitLevel(chapter, level).catch(e => console.warn('初始词汇加载失败:', e))
+
+  // 浏览器关闭/刷新时提示
+  window.addEventListener('beforeunload', onBeforeUnload)
 })
 
 onUnmounted(() => {
@@ -505,12 +541,38 @@ onUnmounted(() => {
   eventBus.off(EVENTS.SHOW_BOSS_QUIZ, onShowBossQuiz)
   eventBus.off(EVENTS.TOGGLE_PAUSE, onTogglePause)
 
+  // 清理安全计时器
+  if (chatSafetyTimer) { clearTimeout(chatSafetyTimer); chatSafetyTimer = null }
+
+  // 移除浏览器关闭拦截
+  window.removeEventListener('beforeunload', onBeforeUnload)
+
   // 销毁Phaser游戏
   if (game) {
     game.destroy(true)
     game = null
   }
 })
+
+// 浏览器后退按钮 / 路由离开拦截：关卡进行中时需确认
+onBeforeRouteLeave((to, from, next) => {
+  if (inGameLevel.value && !showPauseMenu.value) {
+    const confirmed = window.confirm('游戏正在进行中，确定要离开吗？进度可能丢失。')
+    if (!confirmed) {
+      next(false)
+      return
+    }
+  }
+  next()
+})
+
+// 浏览器关闭/刷新时提示
+function onBeforeUnload(e) {
+  if (inGameLevel.value) {
+    e.preventDefault()
+    e.returnValue = ''
+  }
+}
 
 /**
  * 怪物碰撞 → 显示答题弹窗
@@ -744,6 +806,13 @@ function closeQuiz() {
     // 答错：打开 ChatPanel（游戏保持暂停，等 Chat 关闭再恢复）
     pendingWrongAnswer.value = false
     showChatPanel.value = true
+    // 安全兜底：如果 ChatPanel 60秒内未关闭（异常情况），自动恢复游戏
+    chatSafetyTimer = setTimeout(() => {
+      if (showChatPanel.value) {
+        showChatPanel.value = false
+        eventBus.emit(EVENTS.CHAT_CLOSED)
+      }
+    }, 60000)
   } else {
     // 答对：通知 Phaser 恢复游戏（双重保险，WorldScene 自己也会 resume）
     eventBus.emit(EVENTS.RESUME_GAME)
@@ -764,6 +833,7 @@ function openManualChat() {
 
 function closeChatPanel() {
   showChatPanel.value = false
+  if (chatSafetyTimer) { clearTimeout(chatSafetyTimer); chatSafetyTimer = null }
   achievementContext.npcChats++
   scoreSystem.checkAchievements(achievementContext)
   persistAchievementContext()
@@ -829,6 +899,11 @@ async function onGameOver(result) {
 
 function onShowAchievement(data) {
   achievementData.value = data
+  // 将新解锁的成就保存到服务端（异步，不阻塞）
+  if (data?.id) {
+    saveAchievement({ id: data.id, name: data.name || '', description: data.description || '' })
+      .catch(err => console.warn('成就保存失败:', err))
+  }
 }
 
 function goToDashboard() {

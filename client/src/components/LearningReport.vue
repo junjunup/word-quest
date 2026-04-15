@@ -75,7 +75,7 @@ const pieOption = computed(() => ({
     data: [
       { value: props.stats?.wordsMastered || 0, name: '已掌握' },
       { value: (props.stats?.wordsLearned || 0) - (props.stats?.wordsMastered || 0), name: '学习中' },
-      { value: 400 - (props.stats?.wordsLearned || 0), name: '未接触' }
+      { value: Math.max(0, (props.stats?.totalVocabCount || 400) - (props.stats?.wordsLearned || 0)), name: '未接触' }
     ]
   }]
 }))

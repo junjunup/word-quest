@@ -166,7 +166,9 @@ function getChapterStars(chapter) {
 function selectChapter(chapter) {
   if (!chapter.unlocked) return
   selectedChapter.value = chapter
-  selectedLevel.value = null
+  // 自动选中该章节第一个已解锁的关卡
+  const firstUnlockedLevel = chapter.levels.find(l => l.unlocked)
+  selectedLevel.value = firstUnlockedLevel || null
 }
 
 function selectLevel(level) {
@@ -198,6 +200,11 @@ async function loadLevelsData() {
       const firstUnlocked = chapters.value.find(c => c.unlocked)
       if (firstUnlocked) {
         selectedChapter.value = firstUnlocked
+        // 自动选中该章节第一个已解锁的关卡，让"开始挑战"按钮立即可见
+        const firstUnlockedLevel = firstUnlocked.levels.find(l => l.unlocked)
+        if (firstUnlockedLevel) {
+          selectedLevel.value = firstUnlockedLevel
+        }
       }
     }
   } catch (e) {
