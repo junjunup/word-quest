@@ -25,7 +25,7 @@
         <span>第{{ hudData.chapter }}章 第{{ hudData.level }}关</span>
         <button class="btn-icon" @click="openManualChat" title="求助小智">🤖</button>
         <button class="btn-icon" @click="goToDashboard" title="学习报告">📊</button>
-        <button class="btn-icon" @click="showPauseMenu = true" title="暂停">⏸️</button>
+        <button class="btn-icon" @click="onTogglePause" title="暂停">⏸️</button>
       </div>
     </div>
 
@@ -33,7 +33,7 @@
     <div class="pause-overlay" v-if="showPauseMenu && inGameLevel">
       <div class="pause-card card">
         <h3 class="pause-title">⏸️ 游戏暂停</h3>
-        <button class="btn btn-primary pause-btn" @click="showPauseMenu = false">🌿 继续游戏</button>
+        <button class="btn btn-primary pause-btn" @click="onTogglePause">🌿 继续游戏</button>
         <button class="btn pause-btn" @click="toggleMute">
           {{ isMuted ? '🔇 取消静音' : '🔊 静音' }}
         </button>
@@ -275,7 +275,9 @@ async function loadWordsAndInitLevel(chapter, level) {
 }
 
 /**
- * WorldScene 启动新关卡时触发，重新加载词汇
+ * WorldScene 启动新关卡时触发
+ * 注意：如果 startGameLevel() 已经预加载了词汇并初始化了 LevelManager，
+ * 此处不再重复调用 loadWordsAndInitLevel，避免清空词汇、重置 sessionId/生命/分数。
  */
 async function onStartLevel(data) {
   const { chapter, level, isTutorial } = data
@@ -285,7 +287,15 @@ async function onStartLevel(data) {
   hudData.maxLives = gameStore.difficultyConfig.lives
   hudData.lives = gameStore.difficultyConfig.lives
   isTutorialLevel.value = !!isTutorial
-  await loadWordsAndInitLevel(chapter, level)
+
+  // 仅在词汇尚未加载时（如 continueGame 直接进入场景）才重新加载
+  const alreadyLoaded = levelWords.value.length > 0
+    && levelManager.currentChapter === chapter
+    && levelManager.currentLevel === level
+  if (!alreadyLoaded) {
+    await loadWordsAndInitLevel(chapter, level)
+  }
+
   if (isTutorial) {
     levelManager.setTutorialMode()
     hudData.maxLives = 99
@@ -345,7 +355,10 @@ async function onLevelSelectStart({ chapter, level, difficulty }) {
   } else {
     // 先启动游戏，然后叠加交互式引导
     await startGameLevel()
-    showTutorial.value = true
+    // 只有成功启动后才显示教程；如果 startGameLevel 失败并回退到 levelSelect，不显示
+    if (uiState.value === 'game') {
+      showTutorial.value = true
+    }
   }
 }
 function onLevelSelectBack() {
@@ -369,46 +382,55 @@ function onCharacterBack() {
 
 async function startGameLevel() {
   uiState.value = 'game'
+  setPhaserInputEnabled(true)
   const params = pendingLevelParams.value
   if (!params) return
 
-  // 预先加载词汇，如果失败则阻止关卡启动
-  await loadWordsAndInitLevel(params.chapter, params.level)
-  if (levelWords.value.length === 0) {
-    alert('词汇加载失败，请检查网络连接后重试')
+  try {
+    // 预先加载词汇，如果失败则阻止关卡启动
+    await loadWordsAndInitLevel(params.chapter, params.level)
+    if (levelWords.value.length === 0) {
+      alert('词汇加载失败，请检查网络连接后重试')
+      uiState.value = 'levelSelect'
+      setPhaserInputEnabled(false)
+      return
+    }
+
+    pendingLevelParams.value = null
+    hudData.chapter = params.chapter
+    hudData.level = params.level
+    hudData.maxLives = gameStore.difficultyConfig.lives
+
+    // Set character sprite index in Phaser registry
+    const userStore = useUserStore()
+    if (game) {
+      game.registry.set('characterSpriteIndex', userStore.characterSpriteIndex || 0)
+    }
+
+    // Start WorldScene via Phaser
+    if (game) {
+      // Stop all active scenes first
+      const sceneNames = ['MenuScene', 'WorldScene', 'ResultScene', 'BootScene']
+      for (const sceneName of sceneNames) {
+        const scene = game.scene.getScene(sceneName)
+        if (scene && scene.scene.isActive()) {
+          scene.scene.stop()
+        }
+      }
+      await new Promise(resolve => setTimeout(resolve, 50))
+      // 使用 game.scene.start（而非已停止的 scene.scene.start）确保数据正确传递
+      game.scene.start('WorldScene', {
+        chapter: params.chapter,
+        level: params.level,
+        difficulty: params.difficulty
+      })
+    }
+  } catch (err) {
+    console.error('启动关卡失败:', err)
+    alert('启动关卡失败：' + (err?.message || '未知错误'))
+    // 回退到关卡选择界面，不要留在空白画面
     uiState.value = 'levelSelect'
     setPhaserInputEnabled(false)
-    return
-  }
-
-  pendingLevelParams.value = null
-  hudData.chapter = params.chapter
-  hudData.level = params.level
-  hudData.maxLives = gameStore.difficultyConfig.lives
-
-  // Set character sprite index in Phaser registry
-  const userStore = useUserStore()
-  if (game) {
-    game.registry.set('characterSpriteIndex', userStore.characterSpriteIndex || 0)
-  }
-
-  // Start WorldScene via Phaser
-  if (game) {
-    // Stop all active scenes first
-    const sceneNames = ['MenuScene', 'WorldScene', 'ResultScene', 'BootScene']
-    for (const sceneName of sceneNames) {
-      const scene = game.scene.getScene(sceneName)
-      if (scene && scene.scene.isActive()) {
-        scene.scene.stop()
-      }
-    }
-    await new Promise(resolve => setTimeout(resolve, 50))
-    // 使用 game.scene.start（而非已停止的 scene.scene.start）确保数据正确传递
-    game.scene.start('WorldScene', {
-      chapter: params.chapter,
-      level: params.level,
-      difficulty: params.difficulty
-    })
   }
 }
 
@@ -458,12 +480,27 @@ function onBossQuizComplete(result) {
 
 function onBossQuizClose() {
   showBossQuiz.value = false
-  eventBus.emit(EVENTS.BOSS_QUIZ_RESULT, { correctCount: 0, cancelled: true })
+  eventBus.emit(EVENTS.BOSS_QUIZ_RESULT, { correctCount: 0, wrongCount: 0, cancelled: true })
 }
 
 function onTogglePause() {
   if (uiState.value === 'game' && !showQuiz.value && !showBossQuiz.value && !showChatPanel.value) {
     showPauseMenu.value = !showPauseMenu.value
+    // 同步通知 Phaser 场景暂停/恢复，防止暂停菜单下角色继续移动、Boss继续攻击
+    if (game) {
+      const scene = game.scene.getScene('WorldScene')
+      if (scene && scene.scene.isActive()) {
+        scene.isPaused = showPauseMenu.value
+        // 暂停时也冻结 Boss 行为
+        if (scene.boss && !scene.boss.defeated) {
+          if (showPauseMenu.value && scene.boss.pauseBehavior) {
+            scene.boss.pauseBehavior()
+          } else if (!showPauseMenu.value && scene.boss.resumeBehavior) {
+            scene.boss.resumeBehavior()
+          }
+        }
+      }
+    }
   }
 }
 
@@ -791,6 +828,8 @@ async function handleQuizAnswer(result) {
   if (status === 'game_over') {
     // LevelManager 已通过 eventBus emit GAME_OVER
     showQuiz.value = false
+    // Game Over 时清理答题残留状态，避免跨局污染
+    pendingWrongAnswer.value = false
     return
   }
 }
@@ -889,6 +928,12 @@ async function onGameOver(result) {
   showChatPanel.value = false
   showPauseMenu.value = false
   inGameLevel.value = false  // 离开关卡，隐藏 HUD
+
+  // 重置答题状态，防止跨局残留导致下一局异常
+  pendingWrongAnswer.value = false
+  consecutiveWrong.value = 0
+  currentMonsterIndex.value = -1
+  if (chatSafetyTimer) { clearTimeout(chatSafetyTimer); chatSafetyTimer = null }
 
   // 保存成就上下文
   persistAchievementContext()

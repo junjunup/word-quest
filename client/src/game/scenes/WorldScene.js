@@ -43,6 +43,10 @@ export default class WorldScene extends Phaser.Scene {
     this.npcCooldown = false
     this.invincible = false
 
+    // 显式启用输入 —— shutdown() 会设 input.enabled = false，
+    // Phaser 场景重启时不会自动重置该状态，导致键盘/鼠标完全失效
+    this.input.enabled = true
+
     // 生成田园地图
     this.createPastoralMap()
 
@@ -85,6 +89,10 @@ export default class WorldScene extends Phaser.Scene {
     // 碰撞检测
     this.physics.add.overlap(this.player, this.monsters, this.onMonsterEncounter, null, this)
     this.physics.add.overlap(this.player, this.npcs, this.onNPCInteract, null, this)
+    // 玩家与围墙碰撞（walls 在 createPastoralMap 中创建）
+    if (this.walls) {
+      this.physics.add.collider(this.player, this.walls)
+    }
 
     // Boss碰撞
     if (this.boss) {
@@ -788,6 +796,7 @@ export default class WorldScene extends Phaser.Scene {
         })
         if (this.monsterLabels[monsterIndex]) {
           this.monsterLabels[monsterIndex].destroy()
+          this.monsterLabels[monsterIndex] = null
         }
         this.spawnCoinEffect(monster.x, monster.y, score)
       }
@@ -957,6 +966,19 @@ export default class WorldScene extends Phaser.Scene {
 
     if (this.playerNameText) {
       this.playerNameText.setPosition(this.player.x, this.player.y - 30)
+    }
+
+    // 更新怪物标签位置（跟随浮动动画）
+    if (this.monsterLabels) {
+      const children = this.monsters.getChildren()
+      for (const monster of children) {
+        if (!monster.active || monster.getData('defeated')) continue
+        const idx = monster.getData('index')
+        const label = this.monsterLabels[idx]
+        if (label && label.active) {
+          label.setPosition(monster.x, monster.y - 28)
+        }
+      }
     }
 
     // Update boss
