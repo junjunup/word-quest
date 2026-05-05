@@ -224,7 +224,14 @@ const chatContext = reactive({
   correctStreak: 0,
   wrongStreak: 0,
   chapterName: '初入大陆',
-  triggerType: 'manual'
+  triggerType: 'manual',
+  correctAnswer: '',
+  playerAnswer: '',
+  answerQuality: '',
+  editDistance: null,
+  similarity: 0,
+  fuzzyFeedback: '',
+  wordKnowledge: {}
 })
 
 /**
@@ -472,6 +479,11 @@ function onBossQuizComplete(result) {
         level: hudData.level,
         playerAnswer: record.playerAnswer,
         correctAnswer: record.correctAnswer,
+        answerQuality: record.answerQuality,
+        editDistance: record.editDistance,
+        similarity: record.similarity,
+        scoreRatio: record.scoreRatio,
+        fuzzyFeedback: record.fuzzyFeedback,
         isBossQuiz: true
       }).catch(err => console.warn('Boss答题记录上报失败:', err))
     }
@@ -650,7 +662,7 @@ async function onShowQuiz(data) {
   try {
     // 尝试从 API 获取题目 + 干扰项
     if (word._id) {
-      const res = await getQuizForWord(word._id)
+      const res = await getQuizForWord(word._id, currentQuestionType.value)
       if (res.data) {
         const { question, distractors } = res.data
         currentQuizData.value = buildQuizData(question, distractors, data)
@@ -708,6 +720,11 @@ function buildQuizData(question, distractors, eventData) {
     phonetic: question.phonetic,
     example: question.example,
     exampleTranslation: question.exampleTranslation,
+    rootAnalysis: question.rootAnalysis || '',
+    memoryTip: question.memoryTip || '',
+    synonyms: question.synonyms || [],
+    antonyms: question.antonyms || [],
+    category: question.category || '',
     options: shuffle(options),
     chapter: eventData.chapter,
     level: eventData.level
@@ -740,9 +757,21 @@ function buildQuizDataLocal(word, eventData) {
  * 处理答题结果
  */
 async function handleQuizAnswer(result) {
-  const { isCorrect, responseTime, answer } = result
-  const baseScore = calculateScore(isCorrect, responseTime, levelManager.combo, currentDifficulty.value, false)
+  const {
+    isCorrect,
+    responseTime,
+    answer,
+    answerQuality = isCorrect ? 'exact' : 'wrong',
+    editDistance = null,
+    similarity = isCorrect ? 1 : 0,
+    scoreRatio = isCorrect ? 1 : 0,
+    fuzzyFeedback = ''
+  } = result
+  const baseScore = calculateScore(isCorrect, responseTime, levelManager.combo, currentDifficulty.value, false, scoreRatio)
   const score = Math.round(baseScore * gameStore.difficultyConfig.scoreMultiplier)
+  const correctAnswerForType = ['choice_cn2en', 'spell_hint', 'spell_full', 'translate'].includes(currentQuestionType.value)
+    ? currentQuizData.value?.word || ''
+    : currentQuizData.value?.meaning || ''
 
   // 通过 LevelManager 更新状态（单一数据源）
   const status = levelManager.handleAnswer(isCorrect, responseTime, score)
@@ -788,6 +817,21 @@ async function handleQuizAnswer(result) {
     // 答错：标记需要打开 ChatPanel
     pendingWrongAnswer.value = true
     chatContext.currentWord = currentQuizData.value?.word || ''
+    chatContext.correctAnswer = correctAnswerForType
+    chatContext.playerAnswer = answer
+    chatContext.answerQuality = answerQuality
+    chatContext.editDistance = editDistance
+    chatContext.similarity = similarity
+    chatContext.fuzzyFeedback = fuzzyFeedback
+    chatContext.wordKnowledge = {
+      rootAnalysis: currentQuizData.value?.rootAnalysis || '',
+      memoryTip: currentQuizData.value?.memoryTip || '',
+      example: currentQuizData.value?.example || '',
+      exampleTranslation: currentQuizData.value?.exampleTranslation || '',
+      synonyms: currentQuizData.value?.synonyms || [],
+      antonyms: currentQuizData.value?.antonyms || [],
+      category: currentQuizData.value?.category || ''
+    }
     chatContext.triggerType = 'wrong_answer'
     chatContext.wrongStreak = levelManager.wrongCount
   }
@@ -796,11 +840,6 @@ async function handleQuizAnswer(result) {
   achievementContext.maxCombo = Math.max(achievementContext.maxCombo, levelManager.combo)
   scoreSystem.checkAchievements(achievementContext)
   persistAchievementContext()
-
-  // Determine correct answer based on question type
-  const correctAnswerForType = ['choice_cn2en', 'spell_hint', 'spell_full', 'translate'].includes(currentQuestionType.value)
-    ? currentQuizData.value?.word || ''
-    : currentQuizData.value?.meaning || ''
 
   // 提交答题记录到后端（异步，不阻塞）
   submitQuizRecord({
@@ -816,7 +855,12 @@ async function handleQuizAnswer(result) {
     chapter: hudData.chapter,
     level: hudData.level,
     playerAnswer: answer,
-    correctAnswer: correctAnswerForType
+    correctAnswer: correctAnswerForType,
+    answerQuality,
+    editDistance,
+    similarity,
+    scoreRatio,
+    fuzzyFeedback
   }).then(res => {
     if (res?.data?.adaptiveDifficulty) {
       const ad = res.data.adaptiveDifficulty

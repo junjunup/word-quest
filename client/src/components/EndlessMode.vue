@@ -150,6 +150,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { getChapterWords } from '@/api/vocabulary'
+import { submitEndlessScore } from '@/api/game'
 import { ENDLESS_CONFIG, STORAGE_KEYS } from '@/game/config/gameConstants'
 import { shuffle, buildChoiceOptions, compareSpelling, safeGetItem, safeSetItem } from '@/utils/helpers'
 import levelsData from '@/game/data/levels.json'
@@ -397,6 +398,11 @@ function endGame() {
     bestStreak.value = maxStreak.value
     safeSetItem(STORAGE_KEYS.endlessBest, String(maxStreak.value))
   }
+  // 上报成绩到服务器（异步，不阻塞）
+  submitEndlessScore({
+    score: score.value,
+    maxStreak: maxStreak.value
+  }).catch(err => console.warn('无尽模式成绩上报失败:', err))
 }
 
 function handleClose() {

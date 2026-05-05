@@ -1,5 +1,5 @@
 # 词汇大冒险 (Word Quest) — 开发进度记录
-# 最后更新: 2026-04-08
+# 最后更新: 2026-04-09
 # 项目路径: D:/CLAW/sxh-game/ai-gamified-learning
 
 ---
@@ -76,18 +76,21 @@
 
 ## 二、审计发现但未修复的 P2 问题（优先级低）
 
-| # | 问题 | 说明 |
-|---|------|------|
-| 1 | ResultScene setTimeout 未在 shutdown 清理 | 场景切换时 100ms 的 setTimeout 不受 Phaser 管理，快速双击可能重复触发 |
-| 2 | monsterLabels 销毁后未置 null | destroy 后数组元素仍在，后续 setText 可能报错（极低概率） |
-| 3 | 路由守卫不检查 token 过期 | 只检查 token 存在，过期 token 仍可进入 /game，第一个 API 才被踢回 |
-| 4 | 浏览器后退按钮无拦截 | 游戏中按后退无确认提示，Phaser 实例可能泄漏 |
-| 5 | Boss 答题记录不上报后端 | BossQuizModal 答题不调 submitQuizRecord，学习统计缺失 |
-| 6 | 无尽模式分数不持久化到服务器 | 仅存 localStorage，换设备丢失 |
-| 7 | AudioManager.init 重复创建 sound 对象 | 多次进出关卡可能内存泄漏 |
-| 8 | compareSpelling 连字符/空格不互通 | ice-cream vs ice cream 判为错误 |
-| 9 | 服务端星级公式与客户端不一致 | scoringService.js 硬编码 lives=3，不支持简单/困难模式 |
-| 10 | EventBus 死事件 | SHOW_GAME_INTRO / START_GAME_LEVEL 已定义但未使用 |
+> **2026-04-09 全部 10 个 P2 已修复 ✅**
+
+### 第 7 轮：P2 问题全修复（10 个 Bug）
+| # | 问题 | 修复内容 | 文件 |
+|---|------|----------|------|
+| 36 | ResultScene setTimeout 未在 shutdown 清理 | 追踪 _pendingTimeouts 数组 + shutdown 时 clearTimeout | ResultScene.js |
+| 37 | monsterLabels 销毁后未置 null | destroy 后 `this.monsterLabels[index] = null` | WorldScene.js |
+| 38 | 路由守卫不检查 token 过期 | isTokenValid() 解码 JWT payload.exp + 自动清理过期 token | router/index.js |
+| 39 | 浏览器后退按钮无拦截 | onBeforeRouteLeave 确认弹窗 + beforeunload 事件 | GameView.vue |
+| 40 | Boss 答题记录不上报后端 | BossQuizModal 收集 answerRecords[] + GameView 逐条 submitQuizRecord | BossQuizModal.vue + GameView.vue |
+| 41 | 无尽模式分数不持久化到服务器 | 新增 POST/GET /game/endless-score 接口 + GameProgress.endlessBestScore/endlessBestStreak + EndlessMode 结算时上报 | server game.js + GameProgress.js + EndlessMode.vue + client api/game.js |
+| 42 | AudioManager.init 重复创建 sound 对象 | 同一 scene 跳过 + scene 切换时 destroy 旧 sounds | AudioManager.js |
+| 43 | compareSpelling 连字符/空格不互通 | normalizeSpelling() 将 `-` 和空格统一为单空格再比较 | helpers.js |
+| 44 | 服务端星级公式与客户端不一致 | calculateStars 新增 maxLives 参数 + 匹配客户端公式（含 lives<=0→0星、correctRate>=0.5→1星） | scoringService.js |
+| 45 | EventBus 死事件 | 移除未使用的 SHOW_GAME_INTRO / START_GAME_LEVEL | EventBus.js |
 
 ---
 
@@ -102,30 +105,37 @@
 ## 四、涉及修改的文件完整清单
 
 ### 客户端 (client/src/)
-- views/GameView.vue — 核心改动最多（HUD、场景跳转、Boss 暂停、状态管理等）
+- views/GameView.vue — 核心改动最多（HUD、场景跳转、Boss 暂停、状态管理、浏览器后退拦截、Boss 答题记录上报等）
 - views/DashboardView.vue — API 独立容错
-- components/EndlessMode.vue — 进度条 + 并行加载 + 结算修复 + 例句
+- components/EndlessMode.vue — 进度条 + 并行加载 + 结算修复 + 例句 + 分数上报服务器
 - components/LevelSelect.vue — 错误状态 + 重试
 - components/QuizModal.vue — 例句升级 + 中→英答错修复
-- components/BossQuizModal.vue — 例句 + 中→英答错修复
+- components/BossQuizModal.vue — 例句 + 中→英答错修复 + 答题记录收集上报
 - components/ReviewMode.vue — 例句升级
 - components/CharacterSelect.vue — await API
-- game/scenes/WorldScene.js — Boss 暂停/恢复、碰撞箱、树拼接、ESC 清理、checkLevelComplete 返回值
+- game/scenes/WorldScene.js — Boss 暂停/恢复、碰撞箱、树拼接、ESC 清理、checkLevelComplete 返回值、monsterLabels 置 null
 - game/scenes/MenuScene.js — create 禁用 input + 200ms 延迟启用
-- game/scenes/ResultScene.js — 同上 + 全部通关 + 防重复点击
+- game/scenes/ResultScene.js — 同上 + 全部通关 + 防重复点击 + setTimeout 清理
 - game/config/gameConstants.js — 章节主题 decoFrames/treeTypes
 - game/systems/LevelManager.js — lives<=0 强制 0 星
 - stores/game.js — resetAll + sessionId + lives 负数保护
+- router/index.js — JWT 过期检查 + 自动清理无效 token
+- game/systems/AudioManager.js — init 去重 + destroy 销毁旧 sound
+- game/systems/EventBus.js — 清理死事件
+- utils/helpers.js — compareSpelling 连字符/空格互通
+- api/game.js — 新增 submitEndlessScore / getEndlessBestScore
 
 ### 服务端 (server/src/)
-- routes/game.js — 星级只升不降 + level>=1
+- routes/game.js — 星级只升不降 + level>=1 + 无尽模式分数接口
 - routes/learning.js — top-mistakes $lookup 补全字段
 - routes/auth.js — 用户名最小长度 3
+- services/scoringService.js — 星级公式支持 maxLives 参数
+- models/GameProgress.js — 新增 endlessBestScore / endlessBestStreak 字段
 
 ---
 
 ## 五、下次继续的切入点
 
 1. 如果用户给了无尽模式对战策划 → 按策划重做 EndlessMode
-2. 如果要继续修 P2 → 从上面"未修复的 P2"列表开始
-3. 如果要加新功能 → README.md 中的功能清单即当前全部已实现功能
+2. 如果要加新功能 → README.md 中的功能清单即当前全部已实现功能
+3. 所有已知 Bug（35 个 P0/P1 + 10 个 P2）全部修复完毕，可进入功能迭代阶段

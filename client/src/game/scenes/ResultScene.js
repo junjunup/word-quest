@@ -12,6 +12,7 @@ export default class ResultScene extends Phaser.Scene {
 
   init(data) {
     this.result = data || {}
+    this._pendingTimeouts = []
   }
 
   create() {
@@ -160,13 +161,13 @@ export default class ResultScene extends Phaser.Scene {
       const nextChapter = level >= MAX_LEVELS ? chapter + 1 : chapter
       // 先切到 MenuScene，再延迟触发 LevelSelect，确保 scene 切换完成
       this.scene.start('MenuScene')
-      setTimeout(() => {
+      this._pendingTimeouts.push(setTimeout(() => {
         eventBus.emit(EVENTS.SHOW_LEVEL_SELECT, {
           mode: 'continue',
           suggestedChapter: nextChapter,
           suggestedLevel: nextLevel
         })
-      }, 100)
+      }, 100))
     }, 3000)
 
     // "再来一次"
@@ -174,13 +175,13 @@ export default class ResultScene extends Phaser.Scene {
       if (!this.scene.isActive()) return  // 防止重复点击
       this.input.enabled = false
       this.scene.start('MenuScene')
-      setTimeout(() => {
+      this._pendingTimeouts.push(setTimeout(() => {
         eventBus.emit(EVENTS.SHOW_LEVEL_SELECT, {
           mode: 'retry',
           suggestedChapter: chapter,
           suggestedLevel: level
         })
-      }, 100)
+      }, 100))
     }, 3200)
 
     // 返回菜单
@@ -281,6 +282,12 @@ export default class ResultScene extends Phaser.Scene {
 
 
   shutdown() {
+    // Clean up pending native timeouts
+    if (this._pendingTimeouts) {
+      this._pendingTimeouts.forEach(id => clearTimeout(id))
+      this._pendingTimeouts = []
+    }
+
     // Clean up all tweens first
     this.tweens.killAll()
     

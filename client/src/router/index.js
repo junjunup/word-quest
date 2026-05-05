@@ -61,12 +61,35 @@ const router = createRouter({
   routes
 })
 
+/**
+ * 简易 JWT 过期检查（不验签，只看 exp 字段）
+ * @returns {boolean} token 是否有效（存在且未过期）
+ */
+function isTokenValid() {
+  const token = localStorage.getItem('token')
+  if (!token) return false
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]))
+    // exp 是秒级时间戳
+    if (payload.exp && payload.exp * 1000 < Date.now()) {
+      // 过期 → 主动清理
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      return false
+    }
+    return true
+  } catch {
+    // token 格式异常 → 视为无效
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    return false
+  }
+}
+
 // 路由守卫：检查登录状态
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('token')
-
-  // 需要认证但未登录 → 跳转登录页
-  if (to.meta.requiresAuth && !token) {
+  // 需要认证但 token 无效/过期 → 跳转登录页
+  if (to.meta.requiresAuth && !isTokenValid()) {
     next({ name: 'Home' })
     return
   }

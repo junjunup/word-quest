@@ -8,6 +8,6 @@ export const getChapterLevelWords = (chapter, level) =>
 export const getChapterWords = (chapter) =>
   request.get(`/vocab/chapter/${chapter}`)
 
-// 获取单词的答题数据（含干扰项）
-export const getQuizForWord = (wordId) =>
-  request.get(`/vocab/quiz/${wordId}`)
+// 获取单词的答题数据（含语义干扰项）
+export const getQuizForWord = (wordId, questionType = 'choice_en2cn') =>
+  request.get(`/vocab/quiz/${wordId}`, { params: { questionType } })

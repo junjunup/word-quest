@@ -18,7 +18,12 @@ const quizRecordSchema = new mongoose.Schema({
   chapter: { type: Number, required: true },
   level: { type: Number, required: true },
   playerAnswer: { type: String, default: '' },
-  correctAnswer: { type: String, default: '' }
+  correctAnswer: { type: String, default: '' },
+  answerQuality: { type: String, enum: ['exact', 'near', 'wrong'], default: 'wrong' },
+  editDistance: { type: Number, default: null },
+  similarity: { type: Number, default: 0, min: 0, max: 1 },
+  scoreRatio: { type: Number, default: 0, min: 0, max: 1 },
+  fuzzyFeedback: { type: String, default: '' }
 }, {
   timestamps: true
 })

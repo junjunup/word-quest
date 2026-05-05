@@ -6,6 +6,7 @@
  */
 
 import VocabularyBank from '../models/VocabularyBank.js'
+import { evaluateFuzzyAnswer } from './fuzzyScoringService.js'
 import { calculateQuizScore } from './scoringService.js'
 
 /**
@@ -46,13 +47,22 @@ export async function verifyAnswer(wordId, playerAnswer, questionType) {
   const normalizedAnswer = normalize(playerAnswer)
   let isCorrect = false
   let correctAnswer = ''
+  let answerQuality = 'wrong'
+  let editDistance = null
+  let similarity = isCorrect ? 1 : 0
+  let scoreRatio = 0
+  let feedback = ''
 
   switch (questionType) {
     // 英译中选择题：正确答案是 word.meaning（中文释义）
     case 'choice_en2cn': {
       correctAnswer = word.meaning
-      // 选择题做精确匹配（客户端是从选项中选的）
+      // 选择题来自固定选项，必须精确匹配，避免同义释义造成歧义
       isCorrect = normalize(playerAnswer) === normalize(word.meaning)
+      answerQuality = isCorrect ? 'exact' : 'wrong'
+      similarity = isCorrect ? 1 : 0
+      scoreRatio = isCorrect ? 1 : 0
+      feedback = isCorrect ? '回答完全正确' : '选择项与标准答案不一致'
       break
     }
 
@@ -60,22 +70,26 @@ export async function verifyAnswer(wordId, playerAnswer, questionType) {
     case 'choice_cn2en': {
       correctAnswer = word.word
       isCorrect = normalize(playerAnswer) === normalize(word.word)
+      answerQuality = isCorrect ? 'exact' : 'wrong'
+      similarity = isCorrect ? 1 : 0
+      scoreRatio = isCorrect ? 1 : 0
+      feedback = isCorrect ? '回答完全正确' : '选择项与标准答案不一致'
       break
     }
 
-    // 拼写类 / 翻译题：比较英文单词（宽松匹配）
+    // 拼写类 / 翻译题：使用编辑距离进行模糊评分
     case 'spell_hint':
     case 'spell_full':
-    case 'translate': {
-      correctAnswer = word.word
-      isCorrect = normalizedAnswer === normalize(word.word)
-      break
-    }
-
-    // 填空题：可能匹配英文单词
+    case 'translate':
     case 'fill_blank': {
       correctAnswer = word.word
-      isCorrect = normalizedAnswer === normalize(word.word)
+      const fuzzy = evaluateFuzzyAnswer(normalizedAnswer, word.word)
+      isCorrect = fuzzy.isCorrect
+      answerQuality = fuzzy.answerQuality
+      editDistance = fuzzy.editDistance
+      similarity = fuzzy.similarity
+      scoreRatio = fuzzy.scoreRatio
+      feedback = fuzzy.feedback
       break
     }
 
@@ -84,7 +98,25 @@ export async function verifyAnswer(wordId, playerAnswer, questionType) {
       return { isCorrect: null, correctAnswer: word.word || null, verified: false }
   }
 
-  return { isCorrect, correctAnswer, verified: true }
+  return {
+    isCorrect,
+    correctAnswer,
+    verified: true,
+    answerQuality,
+    editDistance,
+    similarity,
+    scoreRatio,
+    feedback,
+    wordKnowledge: {
+      rootAnalysis: word.rootAnalysis || '',
+      memoryTip: word.memoryTip || '',
+      example: word.example || '',
+      exampleTranslation: word.exampleTranslation || '',
+      synonyms: word.synonyms || [],
+      antonyms: word.antonyms || [],
+      category: word.category || ''
+    }
+  }
 }
 
 /**
@@ -93,12 +125,13 @@ export async function verifyAnswer(wordId, playerAnswer, questionType) {
  * 使用与 scoringService.calculateQuizScore 相同的公式，
  * 但以服务端验证的 isCorrect 为准。
  */
-export function calculateServerScore(isCorrect, responseTime, combo, difficulty, hintUsed) {
+export function calculateServerScore(isCorrect, responseTime, combo, difficulty, hintUsed, scoreRatio = 1) {
   // 限制入参范围，防止注入异常值
   const safeResponseTime = Math.max(0, Math.min(Number(responseTime) || 0, 300000)) // 上限5分钟
   const safeDifficulty = Math.max(1, Math.min(Math.round(Number(difficulty) || 1), 5))
   const safeCombo = Math.max(0, Math.min(Math.round(Number(combo) || 0), 100))
   const safeHintUsed = !!hintUsed
+  const safeScoreRatio = Math.max(0, Math.min(Number(scoreRatio) || 0, 1))
 
-  return calculateQuizScore(isCorrect, safeResponseTime, safeCombo, safeDifficulty, safeHintUsed)
+  return calculateQuizScore(isCorrect, safeResponseTime, safeCombo, safeDifficulty, safeHintUsed, safeScoreRatio)
 }

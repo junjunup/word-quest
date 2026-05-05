@@ -67,11 +67,12 @@ export function formatTime(ms) {
  * @param {boolean} hintUsed
  * @returns {number} 得分
  */
-export function calculateScore(isCorrect, responseTime, combo, difficulty, hintUsed = false) {
+export function calculateScore(isCorrect, responseTime, combo, difficulty, hintUsed = false, scoreRatio = 1) {
   if (!isCorrect) return 0
   const diff = Math.max(1, Math.min(Number(difficulty) || 1, 10))
   const safeCombo = Math.max(0, Number(combo) || 0)
   const safeTime = Math.max(0, Number(responseTime) || 99999)
+  const safeScoreRatio = Math.max(0, Math.min(Number(scoreRatio) || 0, 1))
 
   let baseScore = SCORING_CONFIG.baseScore * diff
   if (hintUsed) baseScore = Math.floor(baseScore * SCORING_CONFIG.hintPenalty)
@@ -83,7 +84,7 @@ export function calculateScore(isCorrect, responseTime, combo, difficulty, hintU
     if (safeTime < tier.maxMs) { timeBonus = tier.bonus; break }
   }
 
-  return baseScore + comboBonus + timeBonus
+  return Math.round((baseScore + comboBonus + timeBonus) * safeScoreRatio)
 }
 
 /** 计算星级评定 (1-3星) */
@@ -190,8 +191,84 @@ export function sanitizeSpellInput(input) {
   return input.trim().replace(/[^a-zA-Z\s'-]/g, '')
 }
 
-/** 比较拼写答案（忽略大小写，容忍首尾空格） */
+/** 规范化拼写：统一连字符/空格，去除多余空白 */
+function normalizeSpelling(str) {
+  if (typeof str !== 'string') return ''
+  return str.trim().toLowerCase().replace(/[^a-z\s'-]/g, '').replace(/[-\s]+/g, ' ').replace(/\s+/g, ' ')
+}
+
+export function levenshteinDistance(a, b) {
+  const left = normalizeSpelling(a)
+  const right = normalizeSpelling(b)
+  if (left === right) return 0
+  if (!left) return right.length
+  if (!right) return left.length
+
+  const previous = Array.from({ length: right.length + 1 }, (_, index) => index)
+  const current = Array(right.length + 1).fill(0)
+
+  for (let i = 1; i <= left.length; i++) {
+    current[0] = i
+    for (let j = 1; j <= right.length; j++) {
+      const substitutionCost = left[i - 1] === right[j - 1] ? 0 : 1
+      current[j] = Math.min(
+        previous[j] + 1,
+        current[j - 1] + 1,
+        previous[j - 1] + substitutionCost
+      )
+    }
+    for (let j = 0; j <= right.length; j++) previous[j] = current[j]
+  }
+
+  return previous[right.length]
+}
+
+function maxAllowedDistance(correctWord) {
+  const length = normalizeSpelling(correctWord).replace(/\s/g, '').length
+  if (length <= 4) return 0
+  if (length <= 7) return 1
+  return 2
+}
+
+export function evaluateSpellingAnswer(userInput, correctWord) {
+  const normalizedInput = normalizeSpelling(sanitizeSpellInput(userInput))
+  const normalizedCorrect = normalizeSpelling(correctWord)
+
+  if (!normalizedInput || !normalizedCorrect) {
+    return { isCorrect: false, answerQuality: 'wrong', editDistance: null, similarity: 0, scoreRatio: 0, feedback: '答案不能为空' }
+  }
+
+  const editDistance = levenshteinDistance(normalizedInput, normalizedCorrect)
+  const maxLength = Math.max(normalizedInput.length, normalizedCorrect.length)
+  const similarity = maxLength === 0 ? 0 : Math.max(0, 1 - editDistance / maxLength)
+
+  if (editDistance === 0) {
+    return { isCorrect: true, answerQuality: 'exact', editDistance: 0, similarity: 1, scoreRatio: 1, feedback: '回答完全正确' }
+  }
+
+  const allowedDistance = maxAllowedDistance(normalizedCorrect)
+  if (allowedDistance > 0 && editDistance <= allowedDistance && similarity >= 0.78) {
+    return {
+      isCorrect: true,
+      answerQuality: 'near',
+      editDistance,
+      similarity: Number(similarity.toFixed(3)),
+      scoreRatio: editDistance === 1 ? 0.75 : 0.6,
+      feedback: `拼写接近正确，和标准答案相差 ${editDistance} 处`
+    }
+  }
+
+  return {
+    isCorrect: false,
+    answerQuality: 'wrong',
+    editDistance,
+    similarity: Number(similarity.toFixed(3)),
+    scoreRatio: 0,
+    feedback: '答案与标准答案差异较大'
+  }
+}
+
+/** 比较拼写答案（忽略大小写、首尾空格，连字符与空格互通；轻微拼写错误视为接近正确） */
 export function compareSpelling(userInput, correctWord) {
-  if (!userInput || !correctWord) return false
-  return sanitizeSpellInput(userInput).toLowerCase() === correctWord.trim().toLowerCase()
+  return evaluateSpellingAnswer(userInput, correctWord).isCorrect
 }

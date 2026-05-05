@@ -68,7 +68,8 @@
 
       <!-- 结果反馈 -->
       <div v-if="answered" class="result-feedback" :class="isCorrect ? 'correct' : 'wrong'">
-        <p class="result-icon">{{ isCorrect ? '✅ 回答正确！' : '❌ 回答错误' }}</p>
+        <p class="result-icon">{{ resultTitle }}</p>
+        <p v-if="answerQuality === 'near'" class="near-answer">{{ fuzzyFeedback }}，本题按 {{ Math.round(scoreRatio * 100) }}% 计分</p>
         <p v-if="!isCorrect && isChoiceType" class="correct-answer">正确答案：{{ questionType === 'choice_cn2en' ? wordData?.word : wordData?.meaning }}</p>
 
         <!-- 例句区块 -->
@@ -88,7 +89,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
-import { compareSpelling } from '@/utils/helpers'
+import { evaluateSpellingAnswer } from '@/utils/helpers'
 
 const props = defineProps({
   wordData: { type: Object, required: true, validator: (v) => v && v.word && v.meaning },
@@ -106,6 +107,11 @@ const shaking = ref(false)
 const startTime = ref(Date.now())
 const typedAnswer = ref('')
 const spellInput = ref(null)
+const answerQuality = ref('wrong')
+const editDistance = ref(null)
+const similarity = ref(0)
+const scoreRatio = ref(1)
+const fuzzyFeedback = ref('')
 
 // 计算属性
 const isChoiceType = computed(() =>
@@ -126,6 +132,11 @@ const questionTypeLabel = computed(() => ({
   spell_full:   '完整拼写',
   translate:    '翻译'
 }[props.questionType] || '选择'))
+
+const resultTitle = computed(() => {
+  if (answerQuality.value === 'near') return '🟡 接近正确！'
+  return isCorrect.value ? '✅ 回答正确！' : '❌ 回答错误'
+})
 
 const hintText = computed(() => {
   const w = props.wordData?.word || ''
@@ -169,6 +180,11 @@ function selectOption(index, option) {
   selectedIndex.value = index
   answered.value = true
   isCorrect.value = option.correct
+  answerQuality.value = option.correct ? 'exact' : 'wrong'
+  editDistance.value = null
+  similarity.value = option.correct ? 1 : 0
+  scoreRatio.value = option.correct ? 1 : 0
+  fuzzyFeedback.value = option.correct ? '回答完全正确' : '选择项与标准答案不一致'
 
   const responseTime = Date.now() - startTime.value
   clearInterval(timerInterval)
@@ -181,7 +197,12 @@ function selectOption(index, option) {
   emit('answer', {
     isCorrect: option.correct,
     responseTime,
-    answer: option.text
+    answer: option.text,
+    answerQuality: answerQuality.value,
+    editDistance: editDistance.value,
+    similarity: similarity.value,
+    scoreRatio: scoreRatio.value,
+    fuzzyFeedback: fuzzyFeedback.value
   })
 }
 
@@ -193,7 +214,13 @@ function onSpellInput(e) {
 function submitTypedAnswer() {
   if (answered.value || !typedAnswer.value.trim()) return
   answered.value = true
-  isCorrect.value = compareSpelling(typedAnswer.value, props.wordData?.word)
+  const fuzzy = evaluateSpellingAnswer(typedAnswer.value, props.wordData?.word)
+  isCorrect.value = fuzzy.isCorrect
+  answerQuality.value = fuzzy.answerQuality
+  editDistance.value = fuzzy.editDistance
+  similarity.value = fuzzy.similarity
+  scoreRatio.value = fuzzy.scoreRatio
+  fuzzyFeedback.value = fuzzy.feedback
   const responseTime = Date.now() - startTime.value
   clearInterval(timerInterval)
 
@@ -205,7 +232,12 @@ function submitTypedAnswer() {
   emit('answer', {
     isCorrect: isCorrect.value,
     responseTime,
-    answer: typedAnswer.value.trim()
+    answer: typedAnswer.value.trim(),
+    answerQuality: answerQuality.value,
+    editDistance: editDistance.value,
+    similarity: similarity.value,
+    scoreRatio: scoreRatio.value,
+    fuzzyFeedback: fuzzyFeedback.value
   })
 }
 
@@ -213,12 +245,22 @@ function handleTimeout() {
   if (answered.value) return
   answered.value = true
   isCorrect.value = false
+  answerQuality.value = 'wrong'
+  editDistance.value = null
+  similarity.value = 0
+  scoreRatio.value = 0
+  fuzzyFeedback.value = '答题超时'
   clearInterval(timerInterval)
 
   emit('answer', {
     isCorrect: false,
     responseTime: totalTime,
-    answer: ''
+    answer: '',
+    answerQuality: answerQuality.value,
+    editDistance: editDistance.value,
+    similarity: similarity.value,
+    scoreRatio: scoreRatio.value,
+    fuzzyFeedback: fuzzyFeedback.value
   })
 }
 
@@ -466,6 +508,13 @@ function continueGame() {
 
 .correct-answer {
   color: #5b8c3e;
+  font-size: 14px;
+  margin-bottom: 6px;
+  font-weight: bold;
+}
+
+.near-answer {
+  color: #8b6914;
   font-size: 14px;
   margin-bottom: 6px;
   font-weight: bold;

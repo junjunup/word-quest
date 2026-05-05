@@ -13,6 +13,12 @@ class AudioManager {
   }
 
   init(scene) {
+    // 如果 scene 没变且 sounds 已初始化，跳过重复创建
+    if (this.scene === scene && Object.keys(this.sounds).length > 0) return
+
+    // scene 变了（重新进入关卡），先清理旧 sound 对象
+    this.destroy()
+
     this.scene = scene
     const keys = ['correct', 'wrong', 'boss_appear', 'boss_defeat', 'combo', 'coin', 'level_complete', 'click']
     for (const key of keys) {
@@ -41,6 +47,15 @@ class AudioManager {
     this.volume = v
     localStorage.setItem('wordquest:volume', String(v))
     Object.values(this.sounds).forEach(s => { s.volume = v })
+  }
+
+  destroy() {
+    // 销毁已创建的 sound 对象，防止内存泄漏
+    Object.values(this.sounds).forEach(s => {
+      try { if (s.destroy) s.destroy() } catch { /* ignore */ }
+    })
+    this.sounds = {}
+    this.scene = null
   }
 }
 

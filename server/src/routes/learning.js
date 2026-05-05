@@ -16,7 +16,7 @@ router.post('/quiz-record', authMiddleware, async (req, res) => {
     if (!req.body || !req.body.word || !req.body.questionType) {
       return res.status(400).json({ error: '缺少必要的答题参数' })
     }
-    const { wordId, word, questionType, isCorrect: clientIsCorrect, responseTime, difficulty, hintUsed, npcInteraction, sessionId, chapter, level, playerAnswer, correctAnswer: clientCorrectAnswer, combo } = req.body
+    const { wordId, word, questionType, isCorrect: clientIsCorrect, responseTime, difficulty, hintUsed, npcInteraction, sessionId, chapter, level, playerAnswer, correctAnswer: clientCorrectAnswer, combo, answerQuality: clientAnswerQuality, editDistance: clientEditDistance, similarity: clientSimilarity, scoreRatio: clientScoreRatio, fuzzyFeedback: clientFuzzyFeedback } = req.body
 
     // ── 服务端答案验证 ──
     const verification = await verifyAnswer(wordId, playerAnswer, questionType)
@@ -24,9 +24,22 @@ router.post('/quiz-record', authMiddleware, async (req, res) => {
     // verified=true → 使用服务端结果；否则降级使用客户端值（wordId 未知/找不到时）
     const isCorrect = verification.verified ? verification.isCorrect : !!clientIsCorrect
     const correctAnswer = verification.verified ? verification.correctAnswer : (clientCorrectAnswer || '')
+    const answerQuality = verification.verified ? verification.answerQuality : (clientAnswerQuality || (isCorrect ? 'exact' : 'wrong'))
+    const editDistance = verification.verified ? verification.editDistance : (clientEditDistance ?? null)
+    const similarity = verification.verified ? verification.similarity : (Number(clientSimilarity) || (isCorrect ? 1 : 0))
+    const scoreRatio = verification.verified ? verification.scoreRatio : (Number(clientScoreRatio) || (isCorrect ? 1 : 0))
+    const fuzzyFeedback = verification.verified ? verification.feedback : (clientFuzzyFeedback || '')
+    const safeAnswerQuality = ['exact', 'near', 'wrong'].includes(answerQuality)
+      ? answerQuality
+      : (isCorrect ? 'exact' : 'wrong')
+    const safeEditDistance = editDistance === null || editDistance === undefined
+      ? null
+      : Math.max(0, Math.min(Math.round(Number(editDistance) || 0), 100))
+    const safeSimilarity = Math.max(0, Math.min(Number(similarity) || 0, 1))
+    const safeScoreRatio = Math.max(0, Math.min(Number(scoreRatio) || 0, 1))
 
     // ── 服务端计算分数 ──
-    const serverScore = calculateServerScore(isCorrect, responseTime, combo, difficulty, hintUsed)
+    const serverScore = calculateServerScore(isCorrect, responseTime, combo, difficulty, hintUsed, safeScoreRatio)
 
     const record = new QuizRecord({
       userId: req.userId,
@@ -34,7 +47,12 @@ router.post('/quiz-record', authMiddleware, async (req, res) => {
       isCorrect,           // 服务端验证值
       responseTime, difficulty, hintUsed, npcInteraction, sessionId, chapter, level,
       playerAnswer,
-      correctAnswer         // 服务端查到的正确答案
+      correctAnswer,        // 服务端查到的正确答案
+      answerQuality: safeAnswerQuality,
+      editDistance: safeEditDistance,
+      similarity: safeSimilarity,
+      scoreRatio: safeScoreRatio,
+      fuzzyFeedback
     })
     await record.save()
 
@@ -57,7 +75,13 @@ router.post('/quiz-record', authMiddleware, async (req, res) => {
         adaptiveDifficulty,
         serverVerified: verification.verified,
         serverIsCorrect: isCorrect,
-        serverScore
+        serverScore,
+        answerQuality: safeAnswerQuality,
+        editDistance: safeEditDistance,
+        similarity: safeSimilarity,
+        scoreRatio: safeScoreRatio,
+        fuzzyFeedback,
+        wordKnowledge: verification.wordKnowledge || null
       }
     })
   } catch (err) {

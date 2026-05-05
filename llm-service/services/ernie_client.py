@@ -75,11 +75,19 @@ def get_mock_response(message: str, context: dict) -> str:
     trigger_type = context.get("triggerType", "manual")
 
     if trigger_type == "wrong_answer" and current_word:
+        knowledge = context.get("wordKnowledge") or {}
+        player_answer = context.get("playerAnswer", "")
+        correct_answer = context.get("correctAnswer", current_word)
+        answer_quality = context.get("answerQuality", "wrong")
+        memory_tip = knowledge.get("memoryTip") or f"试试把 '{current_word}' 拆分成音节或词根来记。"
+        if answer_quality == "near":
+            prefix = f"已经很接近啦！你写的 '{player_answer}' 和标准答案 '{correct_answer}' 只有细微差异。"
+        else:
+            prefix = f"别灰心，'{current_word}' 确实容易混。你刚才的答案是 '{player_answer or '空'}'。"
         return (
-            f"别灰心哦！'{current_word}' 这个词确实有点容易搞混呢~ 😊\n\n"
-            f"💡 记忆技巧：试试把 '{current_word}' 拆分来记，"
-            f"或者联想一个你熟悉的场景。\n\n"
-            f"多练几次就能记住啦，加油！💪"
+            f"{prefix}\n\n"
+            f"记忆技巧：{memory_tip}\n\n"
+            f"下次先默念发音，再检查每个字母的位置。"
         )
     elif "记" in message or "记忆" in message:
         return (

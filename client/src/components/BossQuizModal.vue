@@ -75,7 +75,8 @@
 
       <!-- Result feedback -->
       <div v-if="answered" class="result-feedback" :class="isCorrect ? 'correct' : 'wrong'">
-        <p class="result-icon">{{ isCorrect ? '✅ 回答正确！Boss受到伤害！' : '❌ 回答错误，扣一条命！' }}</p>
+        <p class="result-icon">{{ resultTitle }}</p>
+        <p v-if="answerQuality === 'near'" class="near-answer">{{ fuzzyFeedback }}，本题按部分分记录</p>
         <p v-if="!isCorrect && isChoiceType" class="correct-answer">正确答案：{{ questionType === 'choice_cn2en' ? currentWord?.word : currentWord?.meaning }}</p>
 
         <!-- 例句区块 -->
@@ -96,7 +97,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { getQuizForWord } from '@/api/vocabulary'
-import { shuffle, buildChoiceOptions, compareSpelling } from '@/utils/helpers'
+import { shuffle, buildChoiceOptions, evaluateSpellingAnswer } from '@/utils/helpers'
 
 const props = defineProps({
   bossName: { type: String, default: '👹 BOSS' },
@@ -123,6 +124,11 @@ const bossDefeated = ref(false)
 const wrongCount = ref(0)
 const typedAnswer = ref('')
 const spellInput = ref(null)
+const answerQuality = ref('wrong')
+const editDistance = ref(null)
+const similarity = ref(0)
+const scoreRatio = ref(1)
+const fuzzyFeedback = ref('')
 const answerRecords = ref([])  // 收集每道题的答题记录，用于上报后端
 
 // 计算属性
@@ -141,6 +147,11 @@ const hintText = computed(() => {
   const w = currentWord.value?.word || ''
   if (w.length <= 1) return w
   return w[0] + '_'.repeat(w.length - 1) + ` (${w.length}个字母)`
+})
+
+const resultTitle = computed(() => {
+  if (answerQuality.value === 'near') return '🟡 接近正确！Boss受到伤害！'
+  return isCorrect.value ? '✅ 回答正确！Boss受到伤害！' : '❌ 回答错误，扣一条命！'
 })
 
 // Timer
@@ -175,6 +186,11 @@ async function loadQuestion() {
   answered.value = false
   selectedIndex.value = -1
   isCorrect.value = false
+  answerQuality.value = 'wrong'
+  editDistance.value = null
+  similarity.value = 0
+  scoreRatio.value = 1
+  fuzzyFeedback.value = ''
   typedAnswer.value = ''
 
   const word = getNextWord()
@@ -196,7 +212,7 @@ async function loadQuestion() {
   // Try API for quiz data
   try {
     if (word._id) {
-      const res = await getQuizForWord(word._id)
+      const res = await getQuizForWord(word._id, props.questionType)
       if (res.data) {
         const { question, distractors } = res.data
         if (props.questionType === 'choice_cn2en') {
@@ -246,6 +262,11 @@ function selectOption(index, option) {
   selectedIndex.value = index
   answered.value = true
   isCorrect.value = option.correct
+  answerQuality.value = option.correct ? 'exact' : 'wrong'
+  editDistance.value = null
+  similarity.value = option.correct ? 1 : 0
+  scoreRatio.value = option.correct ? 1 : 0
+  fuzzyFeedback.value = option.correct ? '回答完全正确' : '选择项与标准答案不一致'
   totalAnswered.value++
 
   if (timerInterval) clearInterval(timerInterval)
@@ -270,7 +291,12 @@ function selectOption(index, option) {
     responseTime: props.timeLimit - remainingTime.value,
     playerAnswer: option.text || '',
     correctAnswer: props.questionType === 'choice_cn2en'
-      ? currentWord.value?.word : currentWord.value?.meaning
+      ? currentWord.value?.word : currentWord.value?.meaning,
+    answerQuality: answerQuality.value,
+    editDistance: editDistance.value,
+    similarity: similarity.value,
+    scoreRatio: scoreRatio.value,
+    fuzzyFeedback: fuzzyFeedback.value
   })
 }
 
@@ -282,7 +308,13 @@ function onSpellInput(e) {
 function submitTypedAnswer() {
   if (answered.value || !typedAnswer.value.trim()) return
   answered.value = true
-  isCorrect.value = compareSpelling(typedAnswer.value, currentWord.value?.word)
+  const fuzzy = evaluateSpellingAnswer(typedAnswer.value, currentWord.value?.word)
+  isCorrect.value = fuzzy.isCorrect
+  answerQuality.value = fuzzy.answerQuality
+  editDistance.value = fuzzy.editDistance
+  similarity.value = fuzzy.similarity
+  scoreRatio.value = fuzzy.scoreRatio
+  fuzzyFeedback.value = fuzzy.feedback
   totalAnswered.value++
 
   if (timerInterval) clearInterval(timerInterval)
@@ -306,7 +338,12 @@ function submitTypedAnswer() {
     isCorrect: isCorrect.value,
     responseTime: props.timeLimit - remainingTime.value,
     playerAnswer: typedAnswer.value,
-    correctAnswer: currentWord.value?.word || ''
+    correctAnswer: currentWord.value?.word || '',
+    answerQuality: answerQuality.value,
+    editDistance: editDistance.value,
+    similarity: similarity.value,
+    scoreRatio: scoreRatio.value,
+    fuzzyFeedback: fuzzyFeedback.value
   })
 }
 
@@ -314,6 +351,11 @@ function handleTimeout() {
   if (answered.value) return
   answered.value = true
   isCorrect.value = false
+  answerQuality.value = 'wrong'
+  editDistance.value = null
+  similarity.value = 0
+  scoreRatio.value = 0
+  fuzzyFeedback.value = '答题超时'
   totalAnswered.value++
   wrongCount.value++
   if (timerInterval) clearInterval(timerInterval)
@@ -325,7 +367,12 @@ function handleTimeout() {
     isCorrect: false,
     responseTime: props.timeLimit,
     playerAnswer: '(timeout)',
-    correctAnswer: currentWord.value?.word || ''
+    correctAnswer: currentWord.value?.word || '',
+    answerQuality: answerQuality.value,
+    editDistance: editDistance.value,
+    similarity: similarity.value,
+    scoreRatio: scoreRatio.value,
+    fuzzyFeedback: fuzzyFeedback.value
   })
 }
 
@@ -591,6 +638,7 @@ onUnmounted(() => {
 
 .result-icon { font-size: 16px; font-weight: bold; margin-bottom: 8px; }
 .correct-answer { color: #88ff88; font-size: 14px; margin-bottom: 8px; }
+.near-answer { color: #ffaa66; font-size: 14px; margin-bottom: 8px; font-weight: bold; }
 
 .example-block {
   background: rgba(255, 255, 255, 0.08);

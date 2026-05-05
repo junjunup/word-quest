@@ -1,4 +1,17 @@
 /* 全局样式 - 田园像素风主题 */
+@font-face {
+  font-family: 'SproutLands';
+  src: url('/assets/sprout-lands-ui/Sprout Lands - UI Pack - Basic pack/fonts/pixelFont-7-8x14-sproutLands.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+canvas {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
 :root {
   --primary-color: #5b8c3e;
   --secondary-color: #e8a33c;

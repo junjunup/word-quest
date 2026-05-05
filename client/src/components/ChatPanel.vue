@@ -83,9 +83,10 @@ let isMounted = true         // 组件是否仍挂载
 onMounted(() => {
   // 初始问候
   if (props.context.triggerType === 'wrong_answer') {
-    addMessage('assistant', `别灰心呀！"${props.context.currentWord || '这个词'}" 确实有点难度呢~ 让我来给你分析一下吧！😊`)
+    addMessage('assistant', `别灰心呀！"${props.context.currentWord || '这个词'}" 确实有点难度呢~ 我会结合你的答案做一次针对性分析。`)
+    nextTick(() => sendQuick('请根据我刚才的答题情况，帮我分析错因并给出记忆建议。'))
   } else {
-    addMessage('assistant', '嗨！我是小智 🐄 你的词汇学习伙伴！有什么想问的，尽管来问我吧~')
+    addMessage('assistant', '嗨！我是小智，你的词汇学习伙伴！有什么想问的，尽管来问我吧~')
   }
 })
 
@@ -98,6 +99,7 @@ function addMessage(role, content) {
   })
   scrollToBottom()
 }
+
 
 async function sendMessage() {
   const text = inputText.value.trim()
@@ -119,7 +121,14 @@ async function sendMessage() {
         correctStreak: props.context.correctStreak || 0,
         wrongStreak: props.context.wrongStreak || 0,
         chapterName: props.context.chapterName || '',
-        triggerType: props.context.triggerType || 'manual'
+        triggerType: props.context.triggerType || 'manual',
+        correctAnswer: props.context.correctAnswer || '',
+        playerAnswer: props.context.playerAnswer || '',
+        answerQuality: props.context.answerQuality || '',
+        editDistance: props.context.editDistance,
+        similarity: props.context.similarity,
+        fuzzyFeedback: props.context.fuzzyFeedback || '',
+        wordKnowledge: props.context.wordKnowledge || {}
       }
     }, abortController?.signal)
 

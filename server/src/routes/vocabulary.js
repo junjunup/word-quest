@@ -2,6 +2,7 @@ import express from 'express'
 import mongoose from 'mongoose'
 import { authMiddleware } from '../middleware/auth.js'
 import VocabularyBank from '../models/VocabularyBank.js'
+import { generateSemanticDistractors } from '../services/distractorService.js'
 
 const router = express.Router()
 
@@ -30,27 +31,26 @@ router.get('/chapter/:chapter/level/:level', authMiddleware, async (req, res) =>
   }
 })
 
-// 随机出题（获取干扰项）
+// 智能出题（获取语义干扰项）
 router.get('/quiz/:wordId', authMiddleware, async (req, res) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.wordId)) {
       return res.status(400).json({ error: '无效的单词ID' })
     }
-    const word = await VocabularyBank.findById(req.params.wordId)
+    const word = await VocabularyBank.findById(req.params.wordId).lean()
     if (!word) return res.status(404).json({ success: false, message: '词汇不存在' })
 
-    // 获取同章节的3个干扰项（meaning 不能与正确答案相同）
-    const distractors = await VocabularyBank.aggregate([
-      { $match: { chapter: word.chapter, _id: { $ne: word._id }, meaning: { $ne: word.meaning } } },
-      { $sample: { size: 3 } },
-      { $project: { word: 1, meaning: 1 } }
-    ])
+    const questionType = typeof req.query.questionType === 'string'
+      ? req.query.questionType
+      : 'choice_en2cn'
+    const distractors = await generateSemanticDistractors(word, questionType, 3)
 
     res.json({
       success: true,
       data: {
         question: word,
-        distractors: distractors.map(d => ({ id: d._id, word: d.word, meaning: d.meaning }))
+        distractors,
+        strategy: 'semantic_feature_similarity'
       }
     })
   } catch (err) {

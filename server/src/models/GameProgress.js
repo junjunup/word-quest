@@ -23,7 +23,9 @@ const gameProgressSchema = new mongoose.Schema({
     description: String,
     unlockedAt: { type: Date, default: Date.now }
   }],
-  totalStars: { type: Number, default: 0 }
+  totalStars: { type: Number, default: 0 },
+  endlessBestScore: { type: Number, default: 0 },
+  endlessBestStreak: { type: Number, default: 0 }
 }, {
   timestamps: true
 })

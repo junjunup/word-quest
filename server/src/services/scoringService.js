@@ -10,8 +10,10 @@
  * @param {number} difficulty - 难度等级(1-5)
  * @param {boolean} hintUsed - 是否使用提示
  */
-export function calculateQuizScore(isCorrect, responseTime, combo, difficulty, hintUsed = false) {
+export function calculateQuizScore(isCorrect, responseTime, combo, difficulty, hintUsed = false, scoreRatio = 1) {
   if (!isCorrect) return 0
+
+  const safeScoreRatio = Math.max(0, Math.min(Number(scoreRatio) || 0, 1))
 
   // 基础分 = 难度 × 100
   let baseScore = difficulty * 100
@@ -28,7 +30,7 @@ export function calculateQuizScore(isCorrect, responseTime, combo, difficulty, h
   // 使用提示扣分
   if (hintUsed) baseScore = Math.floor(baseScore * 0.5)
 
-  return baseScore + comboBonus + timeBonus
+  return Math.round((baseScore + comboBonus + timeBonus) * safeScoreRatio)
 }
 
 /**
@@ -43,9 +45,15 @@ export function calculateLevelExp(stars, chapter, correctRate) {
 
 /**
  * 计算星级评定
+ * @param {number} correctRate - 正确率 (0~1)
+ * @param {number} avgTime - 平均答题时间(ms)
+ * @param {number} livesRemaining - 剩余生命
+ * @param {number} maxLives - 该难度下的最大生命（easy=4, normal=3, hard=2）
  */
-export function calculateStars(correctRate, avgTime, livesRemaining) {
-  if (correctRate >= 0.95 && avgTime < 8000 && livesRemaining === 3) return 3
-  if (correctRate >= 0.8 && livesRemaining >= 2) return 2
+export function calculateStars(correctRate, avgTime, livesRemaining, maxLives = 3) {
+  if (livesRemaining <= 0) return 0
+  if (correctRate >= 0.95 && avgTime < 8000 && livesRemaining === maxLives) return 3
+  if (correctRate >= 0.8 && livesRemaining >= Math.ceil(maxLives / 2)) return 2
+  if (correctRate >= 0.5) return 1
   return 1
 }

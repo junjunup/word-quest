@@ -85,6 +85,7 @@ class PromptManager:
         context_info += f"\n- 当前章节: {context.get('chapterName', '初入大陆')}"
         context_info += f"\n- 连续答对: {context.get('correctStreak', 0)}"
         context_info += f"\n- 连续答错: {context.get('wrongStreak', 0)}"
+        context_info += self._build_answer_context(context)
 
         # 根据触发类型添加特定指令
         if trigger_type == "wrong_answer":
@@ -104,6 +105,32 @@ class PromptManager:
             specific = self.ASK_HELP_TEMPLATE.format(**self._get_template_vars(context))
 
         return base + context_info + "\n\n" + specific
+
+    def _build_answer_context(self, context: dict) -> str:
+        """构建答题诊断上下文，供 LLM 生成个性化反馈。"""
+        if context.get("triggerType") != "wrong_answer":
+            return ""
+
+        knowledge = context.get("wordKnowledge") or {}
+        lines = [
+            "\n\n本次答题诊断：",
+            f"- 玩家答案: {context.get('playerAnswer', '未知')}",
+            f"- 标准答案: {context.get('correctAnswer', '未知')}",
+            f"- 答案质量: {context.get('answerQuality', 'wrong')}",
+            f"- 编辑距离: {context.get('editDistance', '未知')}",
+            f"- 相似度: {context.get('similarity', '未知')}",
+            f"- 系统反馈: {context.get('fuzzyFeedback', '')}",
+            "\n词汇知识库：",
+            f"- 词根词缀: {knowledge.get('rootAnalysis', '')}",
+            f"- 记忆技巧: {knowledge.get('memoryTip', '')}",
+            f"- 例句: {knowledge.get('example', '')}",
+            f"- 例句翻译: {knowledge.get('exampleTranslation', '')}",
+            f"- 同义词: {', '.join(knowledge.get('synonyms', [])[:5]) if isinstance(knowledge.get('synonyms'), list) else ''}",
+            f"- 反义词: {', '.join(knowledge.get('antonyms', [])[:5]) if isinstance(knowledge.get('antonyms'), list) else ''}",
+            f"- 分类: {knowledge.get('category', '')}",
+            "\n反馈要求：结合玩家答案和词汇知识，指出具体错因；如果是拼写错误，说明容易错的位置；给一个可执行的记忆方法。"
+        ]
+        return "\n".join(lines)
 
     def _get_template_vars(self, context: dict) -> dict:
         return {
