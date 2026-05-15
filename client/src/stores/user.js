@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { login, register, getUserInfo } from '@/api/auth'
+import { login, register, getUserInfo, updateReminderSettings } from '@/api/auth'
 
 export const useUserStore = defineStore('user', () => {
   const token = ref(localStorage.getItem('token') || '')
@@ -40,6 +40,14 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  async function saveReminderSettings(settings) {
+    const res = await updateReminderSettings(settings)
+    if (userInfo.value) {
+      userInfo.value.reminderSettings = res.data
+    }
+    return res.data
+  }
+
   function logout() {
     token.value = ''
     userInfo.value = null
@@ -47,5 +55,5 @@ export const useUserStore = defineStore('user', () => {
     localStorage.removeItem('token')
   }
 
-  return { token, userInfo, isLoggedIn, userInfoLoading, characterSpriteIndex, doLogin, doRegister, fetchUserInfo, logout }
+  return { token, userInfo, isLoggedIn, userInfoLoading, characterSpriteIndex, doLogin, doRegister, fetchUserInfo, saveReminderSettings, logout }
 })

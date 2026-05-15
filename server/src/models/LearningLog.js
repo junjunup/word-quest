@@ -4,7 +4,7 @@ const learningLogSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   eventType: {
     type: String,
-    enum: ['login', 'quiz', 'chat', 'level_complete', 'achievement', 'daily_reward'],
+    enum: ['login', 'quiz', 'review', 'chat', 'level_complete', 'achievement', 'daily_reward', 'reminder_settings'],
     required: true
   },
   eventData: { type: mongoose.Schema.Types.Mixed, default: {} },

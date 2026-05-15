@@ -55,11 +55,25 @@
           <div class="ls-chapter-header" v-if="selectedChapter">
             <h3 :style="{ color: selectedChapter.color }">{{ selectedChapter.name }}</h3>
             <p class="chapter-desc">{{ selectedChapter.description }}</p>
+            <p class="chapter-progress">共 {{ selectedChapter.levels.length }} 关，当前显示 {{ currentSegmentLabel }}</p>
+          </div>
+
+          <div class="level-segments" v-if="levelSegments.length > 1" role="tablist" aria-label="关卡分段">
+            <button
+              v-for="segment in levelSegments"
+              :key="segment.index"
+              type="button"
+              class="segment-btn"
+              :class="{ active: levelSegment === segment.index }"
+              @click="levelSegment = segment.index"
+            >
+              {{ segment.label }}
+            </button>
           </div>
 
           <div class="level-grid" v-if="selectedChapter">
             <div
-              v-for="level in selectedChapter.levels"
+              v-for="level in visibleLevels"
               :key="level.id"
               class="level-card"
               :class="{
@@ -138,6 +152,8 @@ const selectedDifficulty = ref(
 )
 const loading = ref(true)
 const loadError = ref('')
+const levelSegment = ref(0)
+const LEVELS_PER_SEGMENT = 10
 
 const difficulties = [
   { key: 'easy', icon: '🌱', label: '简单', desc: '35秒/4命/0.8x' },
@@ -159,6 +175,26 @@ const maxStars = computed(() => {
   return chapters.value.reduce((sum, ch) => sum + ch.levels.length * 3, 0)
 })
 
+const levelSegments = computed(() => {
+  if (!selectedChapter.value?.levels?.length) return []
+  const total = selectedChapter.value.levels.length
+  return Array.from({ length: Math.ceil(total / LEVELS_PER_SEGMENT) }, (_, index) => {
+    const start = index * LEVELS_PER_SEGMENT + 1
+    const end = Math.min((index + 1) * LEVELS_PER_SEGMENT, total)
+    return { index, start, end, label: `${start}-${end}关` }
+  })
+})
+
+const visibleLevels = computed(() => {
+  if (!selectedChapter.value?.levels?.length) return []
+  const start = levelSegment.value * LEVELS_PER_SEGMENT
+  return selectedChapter.value.levels.slice(start, start + LEVELS_PER_SEGMENT)
+})
+
+const currentSegmentLabel = computed(() => {
+  return levelSegments.value.find(segment => segment.index === levelSegment.value)?.label || '全部关卡'
+})
+
 function getChapterStars(chapter) {
   return chapter.levels.reduce((sum, lv) => sum + (lv.stars || 0), 0)
 }
@@ -166,9 +202,10 @@ function getChapterStars(chapter) {
 function selectChapter(chapter) {
   if (!chapter.unlocked) return
   selectedChapter.value = chapter
-  // 自动选中该章节第一个已解锁的关卡
   const firstUnlockedLevel = chapter.levels.find(l => l.unlocked)
   selectedLevel.value = firstUnlockedLevel || null
+  const selectedIndex = Math.max(0, chapter.levels.findIndex(level => level.id === selectedLevel.value?.id))
+  levelSegment.value = Math.floor(selectedIndex / LEVELS_PER_SEGMENT)
 }
 
 function selectLevel(level) {
@@ -204,6 +241,8 @@ async function loadLevelsData() {
         const firstUnlockedLevel = firstUnlocked.levels.find(l => l.unlocked)
         if (firstUnlockedLevel) {
           selectedLevel.value = firstUnlockedLevel
+          const selectedIndex = Math.max(0, firstUnlocked.levels.findIndex(level => level.id === firstUnlockedLevel.id))
+          levelSegment.value = Math.floor(selectedIndex / LEVELS_PER_SEGMENT)
         }
       }
     }
@@ -389,6 +428,36 @@ async function loadLevelsData() {
     color: #8b6914;
     font-size: 13px;
   }
+
+  .chapter-progress {
+    color: #6b5010;
+    font-size: 12px;
+    margin-top: 6px;
+  }
+}
+
+.level-segments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.segment-btn {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 2px solid #8b6914;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.32);
+  color: #5b3a1a;
+  font-weight: bold;
+  cursor: pointer;
+
+  &.active,
+  &:hover {
+    background: rgba(255, 200, 71, 0.42);
+    border-color: #ffc847;
+  }
 }
 
 .level-grid {
@@ -526,6 +595,7 @@ async function loadLevelsData() {
 
 .start-btn {
   width: 100%;
+  min-height: 52px;
   padding: 14px;
   background: #5b8c3e;
   border: 3px solid #3a6b1e;
@@ -592,5 +662,117 @@ async function loadLevelsData() {
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+@media (max-width: 760px) {
+  .level-select-overlay {
+    align-items: stretch;
+    justify-content: stretch;
+  }
+
+  .level-select-panel {
+    width: 100vw;
+    max-width: 100vw;
+    max-height: 100vh;
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+
+  .ls-header {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .ls-back-btn,
+  .ls-review-btn {
+    min-height: 44px;
+    padding: 8px 12px;
+  }
+
+  .ls-title {
+    order: -1;
+    width: 100%;
+    font-size: 20px;
+    text-align: center;
+  }
+
+  .ls-body {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .ls-chapters {
+    width: 100%;
+    max-height: 178px;
+    border-right: 0;
+    border-bottom: 3px solid #8b6914;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .chapter-card:hover:not(.locked) {
+    transform: none;
+  }
+
+  .ls-levels {
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .level-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .selected-detail,
+  .difficulty-selector {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 430px) {
+  .ls-header {
+    padding: 10px;
+  }
+
+  .ls-stars-total {
+    width: 100%;
+    text-align: center;
+  }
+
+  .ls-chapters {
+    grid-template-columns: 1fr;
+    max-height: 150px;
+    padding: 10px;
+  }
+
+  .ls-levels {
+    padding: 10px;
+  }
+
+  .level-segments {
+    gap: 6px;
+  }
+
+  .segment-btn {
+    flex: 1 1 30%;
+    padding: 8px 6px;
+    font-size: 12px;
+  }
+
+  .level-grid {
+    gap: 8px;
+  }
+
+  .level-card {
+    min-height: 92px;
+    padding: 10px 6px;
+  }
+
+  .level-number {
+    font-size: 20px;
+  }
 }
 </style>

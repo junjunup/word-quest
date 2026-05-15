@@ -15,8 +15,11 @@ const __dirname = dirname(__filename)
 import VocabularyBank from './models/VocabularyBank.js'
 import User from './models/User.js'
 import GameProgress from './models/GameProgress.js'
+import { loadWordbookFiles } from './scripts/importVocabulary.js'
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/word-quest'
+const IS_PRODUCTION = process.env.NODE_ENV === 'production'
+const SHOULD_CREATE_TEST_USER = !IS_PRODUCTION || process.env.CREATE_TEST_USER === 'true'
 
 async function seed() {
   try {
@@ -28,17 +31,24 @@ async function seed() {
     await VocabularyBank.deleteMany({})
     console.log('已清空旧词库数据')
 
-    // 读取词库JSON
-    const vocabPath = join(__dirname, 'data', 'vocabulary.json')
+    // 读取企业级多词书 JSON；失败时才回退旧示例数据
     let vocabulary = []
 
     try {
-      const rawData = readFileSync(vocabPath, 'utf-8')
-      vocabulary = JSON.parse(rawData)
-      console.log(`从文件读取了 ${vocabulary.length} 个词汇`)
+      const loaded = loadWordbookFiles(join(__dirname, 'data', 'wordbooks'))
+      vocabulary = loaded.vocabulary
+      console.log(`从多词书目录读取了 ${vocabulary.length} 个词汇`)
     } catch (e) {
-      console.log('词库文件不存在，使用内置示例数据...')
-      vocabulary = getBuiltinVocabulary()
+      console.log('多词书文件不存在，尝试读取旧版词库文件...')
+      try {
+        const vocabPath = join(__dirname, 'data', 'vocabulary.json')
+        const rawData = readFileSync(vocabPath, 'utf-8')
+        vocabulary = JSON.parse(rawData)
+        console.log(`从旧版文件读取了 ${vocabulary.length} 个词汇`)
+      } catch {
+        console.log('词库文件不存在，使用内置示例数据...')
+        vocabulary = getBuiltinVocabulary()
+      }
     }
 
     // 批量插入
@@ -47,27 +57,31 @@ async function seed() {
       console.log(`成功导入 ${vocabulary.length} 个词汇！`)
     }
 
-    // 统计各章节词汇数
-    for (let ch = 1; ch <= 6; ch++) {
-      const count = await VocabularyBank.countDocuments({ chapter: ch })
-      console.log(`  第${ch}章: ${count} 词`)
-    }
+    // 统计各词书和章节词汇数
+    const wordbookStats = await VocabularyBank.aggregate([
+      { $group: { _id: '$wordbookId', name: { $first: '$wordbookName' }, total: { $sum: 1 } } },
+      { $sort: { _id: 1 } }
+    ])
+    wordbookStats.forEach(item => console.log(`  ${item._id} ${item.name}: ${item.total} 词`))
 
-    // 创建测试用户
-    const existingUser = await User.findOne({ username: 'test' })
-    if (!existingUser) {
-      const testUser = new User({
-        username: 'test',
-        password: '123456',
-        nickname: '测试勇者'
-      })
-      await testUser.save()
+    // 创建测试用户：生产默认拒绝，必须显式 CREATE_TEST_USER=true
+    if (SHOULD_CREATE_TEST_USER) {
+      const existingUser = await User.findOne({ username: 'test' })
+      if (!existingUser) {
+        const testUser = new User({
+          username: 'test',
+          password: '123456',
+          nickname: '测试勇者'
+        })
+        await testUser.save()
 
-      // 创建初始游戏进度
-      await new GameProgress({ userId: testUser._id }).save()
-      console.log('\n已创建测试用户: test / 123456')
+        await new GameProgress({ userId: testUser._id }).save()
+        console.log('\n已创建测试用户: test / 123456')
+      } else {
+        console.log('\n测试用户已存在')
+      }
     } else {
-      console.log('\n测试用户已存在')
+      console.log('\n生产环境未设置 CREATE_TEST_USER=true，跳过测试用户创建')
     }
 
     console.log('\n✅ 数据初始化完成！')
@@ -130,22 +144,28 @@ export async function seedOnly() {
 
     let words = []
     try {
-      const vocabPath = join(__dirname, 'data', 'vocabulary.json')
-      const rawData = readFileSync(vocabPath, 'utf-8')
-      words = JSON.parse(rawData)
+      words = loadWordbookFiles(join(__dirname, 'data', 'wordbooks')).vocabulary
     } catch {
-      words = getBuiltinVocabulary()
+      try {
+        const vocabPath = join(__dirname, 'data', 'vocabulary.json')
+        const rawData = readFileSync(vocabPath, 'utf-8')
+        words = JSON.parse(rawData)
+      } catch {
+        words = getBuiltinVocabulary()
+      }
     }
 
     if (words.length > 0) {
       await VocabularyBank.insertMany(words)
     }
 
-    const existingUser = await User.findOne({ username: 'test' })
-    if (!existingUser) {
-      const testUser = new User({ username: 'test', password: '123456', nickname: '测试玩家' })
-      await testUser.save()
-      await new GameProgress({ userId: testUser._id }).save()
+    if (SHOULD_CREATE_TEST_USER) {
+      const existingUser = await User.findOne({ username: 'test' })
+      if (!existingUser) {
+        const testUser = new User({ username: 'test', password: '123456', nickname: '测试玩家' })
+        await testUser.save()
+        await new GameProgress({ userId: testUser._id }).save()
+      }
     }
 
     console.log('✅ Seed completed')

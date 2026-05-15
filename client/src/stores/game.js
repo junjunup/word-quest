@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { getProgress, saveProgress } from '@/api/game'
+import { getSelectedWordbook } from '@/api/vocabulary'
 
 const DIFFICULTY_CONFIGS = {
   easy:   { lives: 4, timer: 35000, scoreMultiplier: 0.8, monsterMod: -2 },
@@ -82,8 +83,8 @@ export const useGameStore = defineStore('game', () => {
     }
   }
 
-  async function saveLevelResult(chapter, level, stars, levelScore, sessionId) {
-    await saveProgress({ chapter, level, stars, score: levelScore, sessionId })
+  async function saveLevelResult(chapter, level, stars, levelScore, sessionId, wordbookId = getSelectedWordbook()) {
+    return saveProgress({ chapter, level, stars, score: levelScore, sessionId, wordbookId })
   }
 
   function resetAll() {

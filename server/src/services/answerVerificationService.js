@@ -18,6 +18,28 @@ function normalize(str) {
 }
 
 /**
+ * Classify an answer failure reason for mastery analytics.
+ * @param {object} params Answer context.
+ * @returns {'unknown'|'spelling_near'|'meaning_confusion'|'timeout'|'pronunciation'|'other'} Error type.
+ */
+export function classifyError({ questionType, playerAnswer, correctAnswer, answerQuality, responseTime, timeLimit, pronunciationGrade, isCorrect }) {
+  if (isCorrect) return 'unknown'
+  if (!playerAnswer || !correctAnswer) return 'unknown'
+
+  const safeTimeLimit = Number(timeLimit)
+  const safeResponseTime = Number(responseTime)
+  if (Number.isFinite(safeTimeLimit) && safeTimeLimit > 0 && Number.isFinite(safeResponseTime) && safeResponseTime > safeTimeLimit) {
+    return 'timeout'
+  }
+
+  if (questionType === 'pronunciation' || pronunciationGrade === 'retry') return 'pronunciation'
+  if (answerQuality === 'near' && ['spell_hint', 'spell_full', 'fill_blank', 'translate'].includes(questionType)) return 'spelling_near'
+  if (['choice_en2cn', 'choice_cn2en'].includes(questionType)) return 'meaning_confusion'
+  if (['spell_hint', 'spell_full', 'fill_blank', 'translate'].includes(questionType)) return answerQuality === 'near' ? 'spelling_near' : 'other'
+  return 'other'
+}
+
+/**
  * 服务端验证答案
  *
  * @param {string} wordId - VocabularyBank 文档 _id
@@ -26,10 +48,10 @@ function normalize(str) {
  * @returns {{ isCorrect: boolean, correctAnswer: string, verified: boolean }}
  *   verified=true 表示服务端成功验证；false 表示回退到客户端值
  */
-export async function verifyAnswer(wordId, playerAnswer, questionType) {
+export async function verifyAnswer(wordId, playerAnswer, questionType, options = {}) {
   // 无法查询的情况：graceful fallback
   if (!wordId || wordId === 'unknown') {
-    return { isCorrect: null, correctAnswer: null, verified: false }
+    return { isCorrect: null, correctAnswer: null, verified: false, errorType: 'unknown' }
   }
 
   let word
@@ -37,11 +59,11 @@ export async function verifyAnswer(wordId, playerAnswer, questionType) {
     word = await VocabularyBank.findById(wordId).lean()
   } catch {
     // wordId 格式无效等情况
-    return { isCorrect: null, correctAnswer: null, verified: false }
+    return { isCorrect: null, correctAnswer: null, verified: false, errorType: 'unknown' }
   }
 
   if (!word) {
-    return { isCorrect: null, correctAnswer: null, verified: false }
+    return { isCorrect: null, correctAnswer: null, verified: false, errorType: 'unknown' }
   }
 
   const normalizedAnswer = normalize(playerAnswer)
@@ -95,14 +117,26 @@ export async function verifyAnswer(wordId, playerAnswer, questionType) {
 
     default:
       // 未知题型，无法验证
-      return { isCorrect: null, correctAnswer: word.word || null, verified: false }
+      return { isCorrect: null, correctAnswer: word.word || null, verified: false, errorType: 'unknown' }
   }
+
+  const errorType = classifyError({
+    questionType,
+    playerAnswer,
+    correctAnswer,
+    answerQuality,
+    responseTime: options.responseTime,
+    timeLimit: options.timeLimit,
+    pronunciationGrade: options.pronunciationGrade,
+    isCorrect
+  })
 
   return {
     isCorrect,
     correctAnswer,
     verified: true,
     answerQuality,
+    errorType,
     editDistance,
     similarity,
     scoreRatio,

@@ -1,0 +1,132 @@
+{
+  "generatedAt": "2026-05-15T02:07:44.499219+00:00",
+  "generator": "server/src/scripts/buildWordbooks.py",
+  "sourceRepository": "https://github.com/jadyyang/kajweb-dicts",
+  "sourceNote": "Public vocabulary JSONL archives transformed into Word Quest schema. Review upstream license/compliance before external redistribution.",
+  "wordbooks": [
+    {
+      "wordbookId": "cet4",
+      "wordbookName": "CET-4 真题核心词库（4500）",
+      "wordCount": 4544,
+      "outputFile": "data/wordbooks/cet4.json",
+      "outputSha256": "403213c1e776e12b826cab1c5690cc77b11768e594e3c96b50fd7834a966154b",
+      "maxWords": null,
+      "sources": [
+        {
+          "fileName": "1521164649209_CET4_1.zip",
+          "url": "https://raw.githubusercontent.com/jadyyang/kajweb-dicts/master/book/1521164649209_CET4_1.zip",
+          "sha256": "7523b595df648c7ad8cf9447e4f8b0af3d311e738f472161c413ec777d20a9ef",
+          "rawRecords": 1162,
+          "expectedBookId": "CET4_1"
+        },
+        {
+          "fileName": "1521164635506_CET4_2.zip",
+          "url": "https://raw.githubusercontent.com/jadyyang/kajweb-dicts/master/book/1521164635506_CET4_2.zip",
+          "sha256": "ca6661bcaac6330f64054283974b199b378950b755f57c7573e4a06541b07b82",
+          "rawRecords": 3739,
+          "expectedBookId": "CET4_2"
+        },
+        {
+          "fileName": "1521164643060_CET4_3.zip",
+          "url": "https://raw.githubusercontent.com/jadyyang/kajweb-dicts/master/book/1521164643060_CET4_3.zip",
+          "sha256": "2732588a69be6f97e831f47baf08fb8f91f699df01607b7cfcf346c8ad2d5f3c",
+          "rawRecords": 2607,
+          "expectedBookId": "CET4_3"
+        }
+      ]
+    },
+    {
+      "wordbookId": "cet4_core_2000",
+      "wordbookName": "CET-4 高频核心词库（2000）",
+      "wordCount": 2000,
+      "outputFile": "data/wordbooks/cet4_core_2000.json",
+      "outputSha256": "3f525328806e2298f6be13194458ba640c3e3b9da222bbadadf767f6de46ec86",
+      "maxWords": 2000,
+      "sources": [
+        {
+          "fileName": "1521164649209_CET4_1.zip",
+          "url": "https://raw.githubusercontent.com/jadyyang/kajweb-dicts/master/book/1521164649209_CET4_1.zip",
+          "sha256": "7523b595df648c7ad8cf9447e4f8b0af3d311e738f472161c413ec777d20a9ef",
+          "rawRecords": 1162,
+          "expectedBookId": "CET4_1"
+        },
+        {
+          "fileName": "1521164635506_CET4_2.zip",
+          "url": "https://raw.githubusercontent.com/jadyyang/kajweb-dicts/master/book/1521164635506_CET4_2.zip",
+          "sha256": "ca6661bcaac6330f64054283974b199b378950b755f57c7573e4a06541b07b82",
+          "rawRecords": 3739,
+          "expectedBookId": "CET4_2"
+        },
+        {
+          "fileName": "1521164643060_CET4_3.zip",
+          "url": "https://raw.githubusercontent.com/jadyyang/kajweb-dicts/master/book/1521164643060_CET4_3.zip",
+          "sha256": "2732588a69be6f97e831f47baf08fb8f91f699df01607b7cfcf346c8ad2d5f3c",
+          "rawRecords": 2607,
+          "expectedBookId": "CET4_3"
+        }
+      ]
+    },
+    {
+      "wordbookId": "cet6",
+      "wordbookName": "CET-6 真题核心词库",
+      "wordCount": 3991,
+      "outputFile": "data/wordbooks/cet6.json",
+      "outputSha256": "d3cef80a550b887fe88e12c6cf20cae44805b7ad4459180a0e2a51ac511d9d61",
+      "maxWords": null,
+      "sources": [
+        {
+          "fileName": "1521164668667_CET6_1.zip",
+          "url": "https://raw.githubusercontent.com/jadyyang/kajweb-dicts/master/book/1521164668667_CET6_1.zip",
+          "sha256": "3b80d1a86a57b1eb4c599e0c2c88940a3c00e6f4b3738d85d648aeba159f573c",
+          "rawRecords": 1228,
+          "expectedBookId": "CET6_1"
+        },
+        {
+          "fileName": "1524052554766_CET6_2.zip",
+          "url": "https://raw.githubusercontent.com/jadyyang/kajweb-dicts/master/book/1524052554766_CET6_2.zip",
+          "sha256": "fe12c5a331510e86da4a187a829d9d72e2785588e60ce45d830f349c30fc3866",
+          "rawRecords": 2078,
+          "expectedBookId": "CET6_2"
+        },
+        {
+          "fileName": "1521164633851_CET6_3.zip",
+          "url": "https://raw.githubusercontent.com/jadyyang/kajweb-dicts/master/book/1521164633851_CET6_3.zip",
+          "sha256": "053bbcfecc82ca3cea7d4bcafdb0fea56c019b8e61d544fab462cd2bf72d983f",
+          "rawRecords": 2345,
+          "expectedBookId": "CET6_3"
+        }
+      ]
+    },
+    {
+      "wordbookId": "postgraduate",
+      "wordbookName": "考研英语真题核心词库",
+      "wordCount": 5047,
+      "outputFile": "data/wordbooks/postgraduate.json",
+      "outputSha256": "477d5685495cfdd1257f38327dd603aa902b216559cc0fdde71fe0f3cf99e600",
+      "maxWords": null,
+      "sources": [
+        {
+          "fileName": "1521164669833_KaoYan_1.zip",
+          "url": "https://raw.githubusercontent.com/jadyyang/kajweb-dicts/master/book/1521164669833_KaoYan_1.zip",
+          "sha256": "650696c93758b984f280adc12f7cc970474781ab80465827cb13fb28ce841381",
+          "rawRecords": 1341,
+          "expectedBookId": "KaoYan_1"
+        },
+        {
+          "fileName": "1521164654696_KaoYan_2.zip",
+          "url": "https://raw.githubusercontent.com/jadyyang/kajweb-dicts/master/book/1521164654696_KaoYan_2.zip",
+          "sha256": "8f0670da980d55aee3e63a140633d33f78df04738ad18dbc6cfd552b63da0a5d",
+          "rawRecords": 4533,
+          "expectedBookId": "KaoYan_2"
+        },
+        {
+          "fileName": "1521164658897_KaoYan_3.zip",
+          "url": "https://raw.githubusercontent.com/jadyyang/kajweb-dicts/master/book/1521164658897_KaoYan_3.zip",
+          "sha256": "42030fb17f85e13e096c8df5c84f748cc6119601ff2638d20b7712707767454a",
+          "rawRecords": 3728,
+          "expectedBookId": "KaoYan_3"
+        }
+      ]
+    }
+  ]
+}

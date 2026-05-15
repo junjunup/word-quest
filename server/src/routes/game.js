@@ -4,41 +4,28 @@ import GameProgress from '../models/GameProgress.js'
 import QuizRecord from '../models/QuizRecord.js'
 import User from '../models/User.js'
 import { calculateQuizScore } from '../services/scoringService.js'
-import { readFileSync } from 'fs'
-import { fileURLToPath } from 'url'
-import { dirname, join } from 'path'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
-
-// Load levels data (static config)
-let levelsData = null
-function getLevelsData() {
-  if (!levelsData) {
-    try {
-      // Try loading from the client data directory
-      const levelsPath = join(__dirname, '../../../client/src/game/data/levels.json')
-      levelsData = JSON.parse(readFileSync(levelsPath, 'utf-8'))
-    } catch (e) {
-      // Fallback: minimal structure
-      levelsData = {
-        chapters: Array.from({ length: 6 }, (_, i) => ({
-          id: i + 1,
-          name: `第${i + 1}章`,
-          theme: '',
-          levels: Array.from({ length: 5 }, (_, j) => ({
-            id: j + 1,
-            name: `第${j + 1}关`,
-            wordsCount: 12
-          }))
-        }))
-      }
-    }
-  }
-  return levelsData
-}
+import {
+  MAX_CHAPTER,
+  MAX_LEVEL,
+  sanitizeWordbookId,
+  validateChapterLevel,
+  getNextLevel,
+  buildProgressKey,
+  readLevelsConfig,
+  getLevelWordCount
+} from '../services/courseMapService.js'
 
 const router = express.Router()
+
+function getProgressLevel(progress, wordbookId, chapter, level) {
+  const scopedKey = buildProgressKey(wordbookId, chapter, level)
+  const legacyKey = `${chapter}-${level}`
+  return progress.levels.get(scopedKey) || progress.levels.get(legacyKey) || null
+}
+
+function isLevelCompleted(progress, wordbookId, chapter, level) {
+  return !!getProgressLevel(progress, wordbookId, chapter, level)?.completed
+}
 
 // 获取游戏进度
 router.get('/progress', authMiddleware, async (req, res) => {
@@ -60,8 +47,9 @@ router.get('/progress', authMiddleware, async (req, res) => {
 router.post('/progress', authMiddleware, async (req, res) => {
   try {
     const { chapter, level, stars, score: clientScore, sessionId } = req.body
-    if (!Number.isInteger(chapter) || chapter < 1 || chapter > 6) return res.status(400).json({ success: false, message: '无效的章节' })
-    if (!Number.isInteger(level) || level < 1 || level > 5) return res.status(400).json({ success: false, message: '无效的关卡' })
+    const wordbookId = sanitizeWordbookId(req.body?.wordbookId || 'cet4')
+    const validation = validateChapterLevel(chapter, level)
+    if (!validation.valid) return res.status(400).json({ success: false, message: validation.message })
     if (!Number.isInteger(stars) || stars < 0 || stars > 3) return res.status(400).json({ success: false, message: '无效的星级' })
     if (!Number.isInteger(clientScore) || clientScore < 0 || clientScore > 50000) return res.status(400).json({ success: false, message: '无效的分数' })
 
@@ -69,39 +57,34 @@ router.post('/progress', authMiddleware, async (req, res) => {
     let verifiedScore = clientScore  // fallback if no session records found
 
     if (sessionId) {
-      // Sum up server-calculated scores from individual quiz records for this session
       const sessionRecords = await QuizRecord.find({
         userId: req.userId,
         sessionId,
         chapter,
-        level
+        level,
+        wordbookId
       }).lean()
 
       if (sessionRecords.length > 0) {
-        // Recalculate score from individual quiz answers using the scoring formula
         let totalFromRecords = 0
         for (const record of sessionRecords) {
           const recordScore = calculateQuizScore(
-            record.isCorrect,          // already server-verified by learning.js
+            record.isCorrect,
             record.responseTime,
-            0,                          // combo not stored per-record; use 0 for conservative calc
+            0,
             record.difficulty,
-            record.hintUsed
+            record.hintUsed,
+            record.scoreRatio || 1
           )
           totalFromRecords += recordScore
         }
 
-        // Use the server-calculated total. Allow a small tolerance (10%) above server total
-        // to account for combo bonuses that aren't tracked per-record.
         const maxAllowedScore = Math.ceil(totalFromRecords * 1.1)
         verifiedScore = Math.min(clientScore, maxAllowedScore)
       }
     }
 
-    // Additional hard cap: theoretical maximum per level
-    // Max per word = difficulty(5) * 100 + comboBonus(50) + timeBonus(50) = 600
-    // Typical level has ~12 words, so absolute max ≈ 12 * 600 = 7200
-    const wordsPerLevel = 12   // default; could look up from levels.json
+    const wordsPerLevel = await getLevelWordCount({ wordbookId, chapter, level })
     const absoluteMaxScore = wordsPerLevel * 600
     const score = Math.min(verifiedScore, absoluteMaxScore)
 
@@ -109,9 +92,11 @@ router.post('/progress', authMiddleware, async (req, res) => {
     if (!progress) {
       progress = new GameProgress({ userId: req.userId })
     }
+    progress.currentWordbookId = wordbookId
 
-    const key = `${chapter}-${level}`
-    const existing = progress.levels.get(key)
+    const key = buildProgressKey(wordbookId, chapter, level)
+    const legacyKey = `${chapter}-${level}`
+    const existing = progress.levels.get(key) || progress.levels.get(legacyKey)
     const oldScore = existing?.score || 0
     const oldStars = existing?.stars || 0
 
@@ -127,17 +112,18 @@ router.post('/progress', authMiddleware, async (req, res) => {
       progress.totalStars += (newStars - oldStars)
     }
 
-    // 解锁下一关/下一章
-    if (level >= 5 && chapter < 6) {
-      if (!progress.unlockedChapters.includes(chapter + 1)) {
-        progress.unlockedChapters.push(chapter + 1)
-      }
+    const next = getNextLevel(chapter, level)
+    if (next.chapterCompleted && !next.courseCompleted && !progress.unlockedChapters.includes(next.nextChapter)) {
+      progress.unlockedChapters.push(next.nextChapter)
     }
 
     // 更新当前进度指针
-    if (chapter > progress.currentChapter || (chapter === progress.currentChapter && level >= progress.currentLevel)) {
-      progress.currentChapter = chapter
-      progress.currentLevel = Math.min(level + 1, 5)
+    if (!next.courseCompleted && (chapter > progress.currentChapter || (chapter === progress.currentChapter && level >= progress.currentLevel))) {
+      progress.currentChapter = next.nextChapter
+      progress.currentLevel = next.nextLevel
+    } else if (next.courseCompleted) {
+      progress.currentChapter = MAX_CHAPTER
+      progress.currentLevel = MAX_LEVEL
     }
 
     await progress.save()
@@ -145,17 +131,22 @@ router.post('/progress', authMiddleware, async (req, res) => {
     // 更新用户总分（只加差值，避免重玩时无限累加）
     const scoreDelta = Math.max(0, score - oldScore)
     const user = await User.findById(req.userId)
-    user.totalScore += scoreDelta
-    user.totalExp += Math.floor(scoreDelta / 2)
-    user.level = user.getLevelFromExp()
-    await user.save()
+    if (user) {
+      user.totalScore += scoreDelta
+      user.totalExp += Math.floor(scoreDelta / 2)
+      user.level = user.getLevelFromExp()
+      await user.save()
+    }
 
     res.json({
       success: true,
       data: progress,
-      // H-01: Return server-verified score so client can reconcile
       serverScore: score,
-      scoreAdjusted: score !== clientScore
+      scoreAdjusted: score !== clientScore,
+      nextLevel: { chapter: next.nextChapter, level: next.nextLevel },
+      chapterCompleted: next.chapterCompleted,
+      courseCompleted: next.courseCompleted,
+      maxLevel: next.maxLevel
     })
   } catch (err) {
     console.error(err)
@@ -167,12 +158,9 @@ router.post('/progress', authMiddleware, async (req, res) => {
 router.get('/leaderboard', authMiddleware, async (req, res) => {
   try {
     const { type = 'total' } = req.query
-    let users
-    if (type === 'total') {
-      users = await User.find().sort({ totalScore: -1 }).limit(50).select('nickname avatar level totalScore totalExp')
-    } else {
-      users = await User.find().sort({ totalExp: -1 }).limit(50).select('nickname avatar level totalScore totalExp')
-    }
+    const users = type === 'total'
+      ? await User.find().sort({ totalScore: -1 }).limit(50).select('nickname avatar level totalScore totalExp')
+      : await User.find().sort({ totalExp: -1 }).limit(50).select('nickname avatar level totalScore totalExp')
     res.json({ success: true, data: users })
   } catch (err) {
     console.error(err)
@@ -204,7 +192,6 @@ router.post('/achievements', authMiddleware, async (req, res) => {
       progress = new GameProgress({ userId: req.userId })
     }
 
-    // 防止重复添加
     const alreadyExists = progress.achievements.some(a => a.id === id)
     if (alreadyExists) {
       return res.json({ success: true, data: progress.achievements, duplicate: true })
@@ -235,7 +222,6 @@ router.post('/daily-reward', authMiddleware, async (req, res) => {
       return res.status(400).json({ success: false, message: '今日奖励已领取' })
     }
 
-    // 检查是否连续登录
     const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
     if (user.dailyRewardDate === yesterday) {
       user.loginStreak += 1
@@ -243,7 +229,6 @@ router.post('/daily-reward', authMiddleware, async (req, res) => {
       user.loginStreak = 1
     }
 
-    // 奖励：基础10经验 + 连续登录加成
     const reward = 10 + Math.min(user.loginStreak * 5, 50)
     user.totalExp += reward
     user.level = user.getLevelFromExp()
@@ -268,11 +253,7 @@ router.put('/character', authMiddleware, async (req, res) => {
     if (!Number.isInteger(characterSpriteIndex) || characterSpriteIndex < 0 || characterSpriteIndex > 7) {
       return res.status(400).json({ success: false, message: '无效的角色索引，需要0-7' })
     }
-    const user = await User.findByIdAndUpdate(
-      req.userId,
-      { characterSpriteIndex },
-      { new: true }
-    ).select('-password')
+    const user = await User.findByIdAndUpdate(req.userId, { characterSpriteIndex }, { new: true }).select('-password')
     res.json({ success: true, data: user })
   } catch (err) {
     console.error(err)
@@ -283,26 +264,20 @@ router.put('/character', authMiddleware, async (req, res) => {
 // 获取关卡地图数据（解锁状态、星级、分数）
 router.get('/levels-status', authMiddleware, async (req, res) => {
   try {
+    const wordbookId = sanitizeWordbookId(req.query.wordbookId || 'cet4')
     let progress = await GameProgress.findOne({ userId: req.userId })
     if (!progress) {
-      progress = new GameProgress({ userId: req.userId })
+      progress = new GameProgress({ userId: req.userId, currentWordbookId: wordbookId })
       await progress.save()
     }
 
-    const data = getLevelsData()
+    const data = readLevelsConfig()
     const unlockedChapters = progress.unlockedChapters || [1]
 
     const chapters = data.chapters.map(chapter => {
       const isChapterUnlocked = unlockedChapters.includes(chapter.id)
-
       const levels = chapter.levels.map(level => {
-        const key = `${chapter.id}-${level.id}`
-        const levelData = progress.levels.get(key)
-
-        // 解锁逻辑：
-        // 1. 第1章第1关始终解锁
-        // 2. 通过某关后解锁下一关
-        // 3. 通过第5关解锁下一章
+        const levelData = getProgressLevel(progress, wordbookId, chapter.id, level.id)
         let unlocked = false
         if (chapter.id === 1 && level.id === 1) {
           unlocked = true
@@ -310,10 +285,7 @@ router.get('/levels-status', authMiddleware, async (req, res) => {
           if (level.id === 1) {
             unlocked = true
           } else {
-            // 检查前一关是否已完成
-            const prevKey = `${chapter.id}-${level.id - 1}`
-            const prevLevel = progress.levels.get(prevKey)
-            unlocked = !!prevLevel?.completed
+            unlocked = isLevelCompleted(progress, wordbookId, chapter.id, level.id - 1)
           }
         }
 
@@ -341,7 +313,7 @@ router.get('/levels-status', authMiddleware, async (req, res) => {
       }
     })
 
-    res.json({ success: true, data: { chapters } })
+    res.json({ success: true, data: { chapters, wordbookId, maxChapter: MAX_CHAPTER, maxLevel: MAX_LEVEL } })
   } catch (err) {
     console.error(err)
     res.status(500).json({ success: false, message: '服务器内部错误' })

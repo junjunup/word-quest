@@ -26,6 +26,7 @@ export default class WorldScene extends Phaser.Scene {
     this.encounterCooldown = false
     this.playerDirection = 'down'
     this.invincible = false
+    this.virtualDirection = { up: false, down: false, left: false, right: false }
   }
 
   init(data) {
@@ -34,6 +35,7 @@ export default class WorldScene extends Phaser.Scene {
     this.level = data?.level || levelManager.currentLevel || 1
     this.difficulty = data?.difficulty || 'normal'
     this.isTutorial = false
+    this.virtualDirection = { up: false, down: false, left: false, right: false }
   }
 
   create() {
@@ -932,11 +934,13 @@ export default class WorldScene extends Phaser.Scene {
     let moving = false
     let direction = this.playerDirection
 
-    if (this.cursors.left.isDown || this.wasd.left.isDown) { vx = -speed; direction = 'left'; moving = true }
-    else if (this.cursors.right.isDown || this.wasd.right.isDown) { vx = speed; direction = 'right'; moving = true }
+    const virtual = this.virtualDirection || {}
 
-    if (this.cursors.up.isDown || this.wasd.up.isDown) { vy = -speed; direction = 'up'; moving = true }
-    else if (this.cursors.down.isDown || this.wasd.down.isDown) { vy = speed; direction = 'down'; moving = true }
+    if (this.cursors.left.isDown || this.wasd.left.isDown || virtual.left) { vx = -speed; direction = 'left'; moving = true }
+    else if (this.cursors.right.isDown || this.wasd.right.isDown || virtual.right) { vx = speed; direction = 'right'; moving = true }
+
+    if (this.cursors.up.isDown || this.wasd.up.isDown || virtual.up) { vy = -speed; direction = 'up'; moving = true }
+    else if (this.cursors.down.isDown || this.wasd.down.isDown || virtual.down) { vy = speed; direction = 'down'; moving = true }
 
     if (vx !== 0 && vy !== 0) {
       const factor = Math.SQRT1_2

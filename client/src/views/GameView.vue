@@ -77,9 +77,22 @@
       :difficulty="currentDifficulty"
       :question-type="currentQuestionType"
       :time-limit="gameStore.difficultyConfig.timer"
+      :adaptive-difficulty="latestAdaptiveDifficulty"
       @answer="handleQuizAnswer"
       @close="closeQuiz"
     />
+
+    <!-- 移动端虚拟方向键 -->
+    <div
+      v-if="showVirtualControls"
+      class="virtual-controls"
+      aria-label="移动方向键"
+    >
+      <button class="vc-btn up" aria-label="向上" @pointerdown.prevent="setVirtualDirection('up', true)" @pointerup.prevent="setVirtualDirection('up', false)" @pointerleave="setVirtualDirection('up', false)">▲</button>
+      <button class="vc-btn left" aria-label="向左" @pointerdown.prevent="setVirtualDirection('left', true)" @pointerup.prevent="setVirtualDirection('left', false)" @pointerleave="setVirtualDirection('left', false)">◀</button>
+      <button class="vc-btn down" aria-label="向下" @pointerdown.prevent="setVirtualDirection('down', true)" @pointerup.prevent="setVirtualDirection('down', false)" @pointerleave="setVirtualDirection('down', false)">▼</button>
+      <button class="vc-btn right" aria-label="向右" @pointerdown.prevent="setVirtualDirection('right', true)" @pointerup.prevent="setVirtualDirection('right', false)" @pointerleave="setVirtualDirection('right', false)">▶</button>
+    </div>
 
     <!-- Boss答题弹窗 -->
     <BossQuizModal
@@ -112,7 +125,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, onBeforeRouteLeave } from 'vue-router'
 import Phaser from 'phaser'
 import { createGameConfig } from '@/game/config'
@@ -185,8 +198,12 @@ const isTutorialLevel = ref(false)
 // 多题型与自适应难度
 const currentQuestionType = ref('choice_en2cn')
 const adaptiveQuestionType = ref('choice_en2cn')
+const latestAdaptiveDifficulty = ref(null)
 const consecutiveWrong = ref(0)
 const loadError = ref('')
+
+const virtualDirection = reactive({ up: false, down: false, left: false, right: false })
+const showVirtualControls = computed(() => uiState.value === 'game' && inGameLevel.value && !showQuiz.value && !showBossQuiz.value && !showChatPanel.value && !showPauseMenu.value)
 
 // 音效
 const isMuted = ref(audioManager.muted)
@@ -568,6 +585,11 @@ onMounted(async () => {
   eventBus.on(EVENTS.SHOW_BOSS_QUIZ, onShowBossQuiz)
   eventBus.on(EVENTS.TOGGLE_PAUSE, onTogglePause)
 
+  if (new URLSearchParams(window.location.search).get('e2eLevelSelect') === '1') {
+    uiState.value = 'levelSelect'
+    setPhaserInputEnabled(false)
+  }
+
   // 异步加载词汇并初始化 LevelManager（不阻塞 Phaser 启动）
   loadWordsAndInitLevel(chapter, level).catch(e => console.warn('初始词汇加载失败:', e))
 
@@ -864,6 +886,7 @@ async function handleQuizAnswer(result) {
   }).then(res => {
     if (res?.data?.adaptiveDifficulty) {
       const ad = res.data.adaptiveDifficulty
+      latestAdaptiveDifficulty.value = ad
       adaptiveQuestionType.value = ad.questionType || 'choice_en2cn'
     }
   }).catch(e => console.warn('提交答题记录失败:', e))
@@ -930,6 +953,15 @@ function onUpdateHud(data) {
   if (data.combo !== undefined) hudData.combo = data.combo
   if (data.chapter !== undefined) hudData.chapter = data.chapter
   if (data.level !== undefined) hudData.level = data.level
+}
+
+function setVirtualDirection(direction, active) {
+  if (!(direction in virtualDirection)) return
+  virtualDirection[direction] = active
+  const scene = game?.scene?.getScene('WorldScene')
+  if (scene && scene.scene.isActive()) {
+    scene.virtualDirection = { ...virtualDirection }
+  }
 }
 
 async function onLevelComplete(result) {
@@ -1200,6 +1232,40 @@ function handleLogout() {
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
 }
 
+.virtual-controls {
+  position: absolute;
+  left: 18px;
+  bottom: 18px;
+  width: 156px;
+  height: 156px;
+  z-index: 150;
+  display: none;
+  grid-template-areas:
+    ". up ."
+    "left down right";
+  grid-template-columns: repeat(3, 48px);
+  grid-template-rows: repeat(2, 48px);
+  gap: 6px;
+  pointer-events: auto;
+}
+
+.vc-btn {
+  min-width: 48px;
+  min-height: 48px;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 200, 71, 0.75);
+  background: rgba(45, 80, 22, 0.78);
+  color: #f5edd6;
+  font-size: 20px;
+  font-weight: bold;
+  touch-action: none;
+}
+
+.vc-btn.up { grid-area: up; }
+.vc-btn.left { grid-area: left; }
+.vc-btn.down { grid-area: down; }
+.vc-btn.right { grid-area: right; }
+
 .leaderboard-close {
   position: absolute;
   top: 12px;
@@ -1225,5 +1291,48 @@ function handleLogout() {
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+@media (max-width: 980px) {
+  #phaser-container,
+  .game-hud {
+    width: min(100vw, 960px);
+  }
+  #phaser-container {
+    height: min(66.67vw, 640px);
+  }
+  #phaser-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+}
+
+@media (max-width: 760px), (pointer: coarse) {
+  .virtual-controls { display: grid; }
+  .game-hud {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    padding: 6px 10px;
+  }
+  .hud-left,
+  .hud-right {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-icon { min-width: 44px; min-height: 44px; }
+}
+
+@media (max-width: 430px) {
+  .game-view { overflow: hidden; }
+  #phaser-container { border-left: 0; border-right: 0; }
+  .game-hud { font-size: 12px; }
+  .virtual-controls {
+    left: 10px;
+    bottom: 10px;
+    transform: scale(0.9);
+    transform-origin: left bottom;
+  }
 }
 </style>

@@ -98,6 +98,14 @@ html, body {
   }
 }
 
+@media (pointer: coarse), (max-width: 430px) {
+  .btn,
+  button,
+  [role="button"] {
+    min-height: 44px;
+  }
+}
+
 /* 卡片样式 - 木纹/羊皮纸 */
 .card {
   background: linear-gradient(180deg, var(--wood-light) 0%, #c49a5a 100%);

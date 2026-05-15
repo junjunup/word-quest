@@ -2,7 +2,8 @@ import mongoose from 'mongoose'
 
 const gameProgressSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  // 关卡完成记录 - 按 "chapter-level" 做key
+  currentWordbookId: { type: String, default: 'cet4', trim: true },
+  // 关卡完成记录 - 新 key 为 "wordbookId:chapter-level"，兼容历史 "chapter-level" key
   levels: {
     type: Map,
     of: {

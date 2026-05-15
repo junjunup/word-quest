@@ -11,3 +11,5 @@ __pycache__/
 .claude/
 .venv*/
 audit-full.json
+client/test-results/
+client/playwright-report/

@@ -3,19 +3,19 @@
     <div class="review-panel card">
       <!-- 标题 -->
       <div class="review-header">
-        <h2>📝 错词复习</h2>
-        <button class="close-btn" @click="$emit('close')">✕</button>
+        <h2>{{ mode === 'today' ? '📚 今日复习' : '📝 错词复习' }}</h2>
+        <button class="close-btn" @click="$emit('close')" aria-label="关闭复习面板">✕</button>
       </div>
 
       <!-- 加载中 -->
       <div v-if="loading" class="loading-state">
-        <p>正在加载错词列表...</p>
+        <p>正在加载{{ mode === 'today' ? '今日复习' : '错词' }}列表...</p>
       </div>
 
       <!-- 无错词 -->
       <div v-else-if="words.length === 0 && !errorMsg" class="empty-state">
         <p class="empty-icon">🎉</p>
-        <p>太棒了！你没有需要复习的错词。</p>
+        <p>{{ mode === 'today' ? '太棒了！今天没有高优先级复习任务。' : '太棒了！你没有需要复习的错词。' }}</p>
         <button class="btn btn-primary" @click="$emit('close')">返回</button>
       </div>
 
@@ -33,9 +33,20 @@
           <!-- 显示英文单词 -->
           <h3 class="review-word">{{ currentWord.word }}</h3>
           <p class="review-phonetic" v-if="currentWord.phonetic">{{ currentWord.phonetic }}</p>
-          <p class="review-mistake-info">
+          <button class="tts-btn" type="button" @click="playCurrentWord" :disabled="!speechSupported">🔊 朗读</button>
+          <p class="review-mistake-info" v-if="currentWord.wrongCount !== undefined">
             ❌ 错误 {{ currentWord.wrongCount }} 次
           </p>
+          <div v-if="currentWord.reasons?.length" class="reason-list">
+            <span v-for="reason in currentWord.reasons" :key="reason" class="reason-chip">{{ reasonLabel(reason) }}</span>
+          </div>
+          <div v-if="currentWord.masteryScore !== undefined" class="mastery-block">
+            <div class="mastery-text">
+              <span>掌握度</span>
+              <strong>{{ normalizeMastery(currentWord.masteryScore) }}%</strong>
+            </div>
+            <div class="mastery-bar"><div :style="{ width: normalizeMastery(currentWord.masteryScore) + '%' }"></div></div>
+          </div>
         </div>
 
         <!-- 选择题 -->
@@ -69,10 +80,11 @@
             <div class="example-label">📖 例句</div>
             <p class="example-en">{{ currentWord.example }}</p>
             <p v-if="currentWord.exampleTranslation" class="example-cn">{{ currentWord.exampleTranslation }}</p>
+            <button class="tts-btn small" type="button" @click="playCurrentExample" :disabled="!speechSupported">🔊 朗读例句</button>
           </div>
 
-          <button class="btn btn-primary" @click="nextWord">
-            {{ currentIndex < words.length - 1 ? '下一题' : '查看结果' }}
+          <button class="btn btn-primary" @click="nextWord" :disabled="submitting">
+            {{ submitting ? '正在写入掌握度...' : (currentIndex < words.length - 1 ? '下一题' : '查看结果') }}
           </button>
         </div>
       </div>
@@ -93,7 +105,14 @@
             <span class="stat-value">{{ Math.round((correctCount / words.length) * 100) }}%</span>
             <span class="stat-label">正确率</span>
           </div>
+          <div class="stat" v-if="submissionResult">
+            <span class="stat-value">{{ submissionResult.masteryUpdated || 0 }}</span>
+            <span class="stat-label">已写入掌握度</span>
+          </div>
         </div>
+        <p v-if="submissionResult?.results?.[0]?.nextReviewAt" class="mastery-saved-text">
+          下次复习：{{ new Date(submissionResult.results[0].nextReviewAt).toLocaleString() }}
+        </p>
         <div class="result-actions">
           <button class="btn btn-primary" @click="resetReview">🔄 再来一次</button>
           <button class="btn btn-gold" @click="$emit('close')">✅ 完成</button>
@@ -105,8 +124,14 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { getTopMistakes } from '@/api/learning'
-import { shuffle, buildChoiceOptions } from '@/utils/helpers'
+import { getTopMistakes, getTodayReview, createReviewSession, submitReviewSession } from '@/api/learning'
+import { buildChoiceOptions } from '@/utils/helpers'
+import { canSpeak, speakText } from '@/utils/speech'
+
+const props = defineProps({
+  mode: { type: String, default: 'mistakes' },
+  initialWords: { type: Array, default: () => [] }
+})
 
 const emit = defineEmits(['close'])
 
@@ -121,6 +146,12 @@ const answeredCount = ref(0)
 const reviewComplete = ref(false)
 const currentOptions = ref([])
 const errorMsg = ref('')
+const reviewSessionId = ref('')
+const answerRecords = ref([])
+const submitting = ref(false)
+const submissionResult = ref(null)
+const questionStartedAt = ref(Date.now())
+const speechSupported = canSpeak()
 
 const currentWord = computed(() => words.value[currentIndex.value] || {})
 
@@ -128,16 +159,62 @@ async function loadMistakes() {
   loading.value = true
   errorMsg.value = ''
   try {
-    const res = await getTopMistakes(20)
-    if (res.data && res.data.length > 0) {
-      words.value = res.data
-      generateOptions()
+    let data = props.initialWords?.length ? props.initialWords : []
+    if (data.length === 0) {
+      try {
+        const sessionRes = await createReviewSession({ limit: 20 })
+        reviewSessionId.value = sessionRes.data?.sessionId || ''
+        data = sessionRes.data?.words || []
+      } catch (sessionError) {
+        console.warn('创建复习会话失败，回退到旧复习列表:', sessionError)
+        const res = props.mode === 'today' ? await getTodayReview(20) : await getTopMistakes(20)
+        data = res.data || []
+      }
     }
+    words.value = normalizeReviewWords(data)
+    answerRecords.value = []
+    submissionResult.value = null
+    questionStartedAt.value = Date.now()
+    if (words.value.length > 0) generateOptions()
   } catch (e) {
-    console.warn('加载错词失败:', e)
-    errorMsg.value = '加载错词失败，请检查网络'
+    console.warn('加载复习列表失败:', e)
+    if (props.mode === 'today') {
+      try {
+        const fallback = await getTopMistakes(20)
+        words.value = normalizeReviewWords(fallback.data || [])
+        if (words.value.length > 0) generateOptions()
+        errorMsg.value = ''
+      } catch (fallbackError) {
+        console.warn('加载错词兜底失败:', fallbackError)
+        errorMsg.value = '加载复习列表失败，请检查网络'
+      }
+    } else {
+      errorMsg.value = '加载错词失败，请检查网络'
+    }
   }
   loading.value = false
+}
+
+function normalizeReviewWords(items) {
+  return items.map(item => ({
+    ...item,
+    _id: item._id || item.wordId,
+    meaning: item.meaning || '暂无释义',
+    wrongCount: item.wrongCount,
+    reasons: Array.isArray(item.reasons) ? item.reasons : [],
+    masteryScore: item.masteryScore
+  }))
+}
+
+function normalizeMastery(value) {
+  const number = Number(value)
+  if (!Number.isFinite(number)) return 0
+  return Math.max(0, Math.min(Math.round(number), 100))
+}
+
+function reasonLabel(reason) {
+  const labels = { wrong: '答错', near: '接近正确', low_mastery: '低掌握度', stale: '久未复习' }
+  return labels[reason] || reason
 }
 
 function generateOptions() {
@@ -154,17 +231,48 @@ function selectAnswer(index, option) {
   isCorrect.value = option.correct
   answeredCount.value++
   if (option.correct) correctCount.value++
+  answerRecords.value.push({
+    wordId: currentWord.value._id || currentWord.value.wordId,
+    playerAnswer: option.text,
+    correctAnswer: currentWord.value.meaning || '',
+    isCorrect: option.correct,
+    responseTime: Date.now() - questionStartedAt.value
+  })
 }
 
-function nextWord() {
+function playCurrentWord() {
+  speakText(currentWord.value.word)
+}
+
+function playCurrentExample() {
+  speakText(currentWord.value.example)
+}
+
+async function nextWord() {
   if (currentIndex.value < words.value.length - 1) {
     currentIndex.value++
     answered.value = false
     selectedIndex.value = -1
     isCorrect.value = false
+    questionStartedAt.value = Date.now()
     generateOptions()
   } else {
+    await submitCurrentSession()
     reviewComplete.value = true
+  }
+}
+
+async function submitCurrentSession() {
+  if (!reviewSessionId.value || submitting.value) return
+  submitting.value = true
+  try {
+    const res = await submitReviewSession(reviewSessionId.value, answerRecords.value)
+    submissionResult.value = res.data || null
+  } catch (error) {
+    console.warn('提交复习会话失败:', error)
+    errorMsg.value = '复习结果提交失败，请稍后重试'
+  } finally {
+    submitting.value = false
   }
 }
 
@@ -175,6 +283,10 @@ async function resetReview() {
   correctCount.value = 0
   answeredCount.value = 0
   reviewComplete.value = false
+  answerRecords.value = []
+  submissionResult.value = null
+  reviewSessionId.value = ''
+  questionStartedAt.value = Date.now()
   await loadMistakes()  // Reload fresh data from API
 }
 
@@ -282,9 +394,67 @@ onMounted(() => {
   margin-bottom: 8px;
 }
 
+.tts-btn {
+  margin: 6px auto 0;
+  min-height: 36px;
+  border: 1px solid #8b6914;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.35);
+  color: #5b3a1a;
+  padding: 6px 12px;
+  cursor: pointer;
+
+  &.small {
+    min-height: 32px;
+    font-size: 12px;
+  }
+  &:disabled { opacity: 0.45; cursor: not-allowed; }
+}
+
 .review-mistake-info {
   color: #d45b3e;
   font-size: 12px;
+}
+
+.reason-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.reason-chip {
+  background: rgba(74, 144, 217, 0.16);
+  border: 1px solid rgba(74, 144, 217, 0.35);
+  border-radius: 999px;
+  padding: 3px 8px;
+  color: #2d5f93;
+  font-size: 12px;
+}
+
+.mastery-block {
+  margin-top: 10px;
+}
+
+.mastery-text {
+  display: flex;
+  justify-content: space-between;
+  color: #5b3a1a;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.mastery-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(91, 58, 26, 0.16);
+  overflow: hidden;
+
+  div {
+    height: 100%;
+    background: linear-gradient(90deg, #d45b3e, #e8a33c, #5b8c3e);
+  }
 }
 
 .review-options {
@@ -421,5 +591,25 @@ onMounted(() => {
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+@media (max-width: 430px) {
+  .review-panel {
+    width: calc(100vw - 16px);
+    max-width: calc(100vw - 16px);
+    max-height: calc(100vh - 16px);
+  }
+  .review-header,
+  .review-content { padding: 14px; }
+  .review-progress,
+  .result-actions,
+  .result-stats {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .option-btn,
+  .btn,
+  .close-btn { min-height: 44px; }
+  .review-word { font-size: 22px; word-break: break-word; }
 }
 </style>

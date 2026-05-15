@@ -49,6 +49,12 @@ const routes = [
     component: lazyLoad(() => import('@/views/ProfileView.vue')),
     meta: { requiresAuth: true }
   },
+  {
+    path: '/social',
+    name: 'Social',
+    component: lazyLoad(() => import('@/views/SocialView.vue')),
+    meta: { requiresAuth: true }
+  },
   // 404 兜底路由
   {
     path: '/:pathMatch(.*)*',

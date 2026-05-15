@@ -1,0 +1,17 @@
+{
+  "name": "词汇大冒险 Word Quest",
+  "short_name": "Word Quest",
+  "description": "AI 辅助游戏化英语词汇学习系统",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#2d5016",
+  "theme_color": "#5b8c3e",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "/assets/ui/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ]
+}

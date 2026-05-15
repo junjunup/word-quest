@@ -13,7 +13,12 @@ const userSchema = new mongoose.Schema({
   totalScore: { type: Number, default: 0 },
   dailyRewardDate: { type: String, default: '' }, // YYYY-MM-DD格式，记录上次领取日期
   loginStreak: { type: Number, default: 0 },
-  lastLoginAt: { type: Date, default: Date.now }
+  lastLoginAt: { type: Date, default: Date.now },
+  reminderSettings: {
+    enabled: { type: Boolean, default: false },
+    time: { type: String, default: '20:00', match: /^([01]\d|2[0-3]):[0-5]\d$/ },
+    lastUpdatedAt: { type: Date, default: null }
+  }
 }, {
   timestamps: true
 })

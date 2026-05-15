@@ -13,11 +13,10 @@ export default defineConfig({
     chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Phaser 独立 chunk（~1.2MB → 单独加载，利用浏览器缓存）
-          phaser: ['phaser'],
-          // Vue 生态
-          'vue-vendor': ['vue', 'vue-router', 'pinia']
+        manualChunks(id) {
+          if (id.includes('node_modules/phaser')) return 'phaser'
+          if (id.includes('node_modules/echarts') || id.includes('node_modules/zrender') || id.includes('node_modules/vue-echarts')) return 'chart-vendor'
+          if (id.includes('node_modules/vue') || id.includes('node_modules/vue-router') || id.includes('node_modules/pinia')) return 'vue-vendor'
         }
       }
     }

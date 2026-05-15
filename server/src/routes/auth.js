@@ -162,4 +162,26 @@ router.get('/me', authMiddleware, async (req, res) => {
   }
 })
 
+// 更新学习提醒设置（浏览器通知由前端触发，后端保存用户偏好）
+router.put('/reminder-settings', authMiddleware, async (req, res) => {
+  try {
+    const enabled = !!req.body?.enabled
+    const time = typeof req.body?.time === 'string' ? req.body.time.trim() : '20:00'
+    if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) {
+      return res.status(400).json({ success: false, message: '提醒时间格式应为 HH:mm' })
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.userId,
+      { reminderSettings: { enabled, time, lastUpdatedAt: new Date() } },
+      { new: true, runValidators: true }
+    ).select('-password')
+    if (!user) return res.status(404).json({ success: false, message: '用户不存在' })
+    res.json({ success: true, data: user.reminderSettings })
+  } catch (err) {
+    console.error('更新提醒设置失败:', err.message)
+    res.status(500).json({ success: false, message: '更新提醒设置失败' })
+  }
+})
+
 export default router
