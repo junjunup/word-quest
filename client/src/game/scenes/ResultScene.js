@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import eventBus, { EVENTS } from '../systems/EventBus'
+import audioManager from '../systems/AudioManager'
 
 /**
  * 关卡结算场景 - 田园木质告示牌风格
@@ -25,6 +26,10 @@ export default class ResultScene extends Phaser.Scene {
     // 场景刚创建时禁用输入，防止上一个场景的残留点击穿透
     this.input.enabled = false
 
+    // 初始化音频并播放结算背景音乐
+    audioManager.init(this)
+    audioManager.playBGM('bgm_result')
+
     const {
       chapter = 1, level = 1, stars = 1, score = 0,
       correctCount = 0, wrongCount = 0, totalWords = 0,
@@ -38,6 +43,7 @@ export default class ResultScene extends Phaser.Scene {
 
     // 标题
     const isGameOver = livesRemaining <= 0 && stars === 0
+    audioManager.play(isGameOver ? 'wrong' : 'level_complete')
     const titleText = isGameOver ? '💀 挑战失败...' : '🎉 关卡完成！'
     this.add.text(width / 2, 40, titleText, {
       fontSize: '30px', fontFamily: '"Press Start 2P", Microsoft YaHei', color: isGameOver ? '#ff6666' : '#ffc847',
@@ -190,6 +196,7 @@ export default class ResultScene extends Phaser.Scene {
       stroke: '#2d5016', strokeThickness: 2
     }).setOrigin(0.5).setInteractive({ useHandCursor: true })
       .on('pointerdown', () => {
+        audioManager.play('click')
         if (!this.scene.isActive()) return
         this.input.enabled = false
         this.scene.start('MenuScene')
@@ -253,7 +260,10 @@ export default class ResultScene extends Phaser.Scene {
     const hitArea = this.add.rectangle(x, y, btnW, btnH).setAlpha(0.001)
     this.time.delayedCall(delay + 400, () => {
       hitArea.setInteractive({ useHandCursor: true })
-      hitArea.on('pointerdown', callback)
+      hitArea.on('pointerdown', () => {
+        audioManager.play('click')
+        callback()
+      })
       hitArea.on('pointerover', () => {
         label.setScale(1.05)
         bg.clear()

@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 import eventBus, { EVENTS } from '../systems/EventBus'
 import levelManager from '../systems/LevelManager'
+import audioManager from '../systems/AudioManager'
 
 /**
  * 游戏主菜单场景 - 田园像素风
@@ -20,6 +21,10 @@ export default class MenuScene extends Phaser.Scene {
 
     // 场景刚创建时禁用输入，防止上一个场景的残留点击穿透
     this.input.enabled = false
+
+    // 初始化音频并播放菜单背景音乐
+    audioManager.init(this)
+    audioManager.playBGM('bgm_menu')
 
     // 田园背景（草地+装饰）
     this.createPastoralBackground(width, height)
@@ -222,7 +227,10 @@ export default class MenuScene extends Phaser.Scene {
       btn.setScale(1)
     })
 
-    hitArea.on('pointerdown', callback)
+    hitArea.on('pointerdown', () => {
+      audioManager.play('click')
+      callback()
+    })
   }
 
   shutdown() {

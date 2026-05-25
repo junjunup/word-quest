@@ -175,6 +175,15 @@ export default class BootScene extends Phaser.Scene {
     sfxKeys.forEach(key => {
       this.load.audio(key, `/assets/audio/${key}.mp3`)
     })
+
+    const bgmAssets = [
+      { key: 'bgm_menu', path: '/assets/audio/bgm/menu.mp3' },
+      { key: 'bgm_game', path: '/assets/audio/bgm/game.mp3' },
+      { key: 'bgm_result', path: '/assets/audio/bgm/result.mp3' }
+    ]
+    bgmAssets.forEach(({ key, path }) => {
+      this.load.audio(key, path)
+    })
   }
 
   /**

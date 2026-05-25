@@ -122,8 +122,9 @@ export default class WorldScene extends Phaser.Scene {
     // 注册 Phaser 场景 shutdown 事件，确保离开时清理监听器
     this.events.once('shutdown', this.shutdown, this)
 
-    // 初始化音效系统
+    // 初始化音效系统并播放关卡背景音乐
     audioManager.init(this)
+    audioManager.playBGM('bgm_game')
 
     // 通知 Vue 层当前关卡信息
     eventBus.emit(EVENTS.START_LEVEL, {
@@ -210,6 +211,7 @@ export default class WorldScene extends Phaser.Scene {
     this.isPaused = true
     this.encounterCooldown = true
     player.setVelocity(0, 0)
+    audioManager.pauseBGM(300, 'boss_quiz')
 
     // Pause boss behavior
     if (boss.pauseBehavior) boss.pauseBehavior()
@@ -302,6 +304,7 @@ export default class WorldScene extends Phaser.Scene {
       // Quiz cancelled, bounce player away
       if (this.boss.resumeBehavior) this.boss.resumeBehavior()
       this.bouncePlayerFromBoss()
+      audioManager.resumeBGM(300, 'boss_quiz')
       this.isPaused = false
       this.resetEncounterCooldown()
       return
@@ -349,6 +352,7 @@ export default class WorldScene extends Phaser.Scene {
       this.bouncePlayerFromBoss()
     }
 
+    audioManager.resumeBGM(300, 'boss_quiz')
     this.isPaused = false
     this.resetEncounterCooldown()
   }
@@ -744,6 +748,7 @@ export default class WorldScene extends Phaser.Scene {
     this.isPaused = true
     this.encounterCooldown = true
     player.setVelocity(0, 0)
+    audioManager.pauseBGM(300, 'quiz')
 
     // 暂停 Boss 行为（防止答题期间 Boss 子弹/冲锋命中玩家）
     if (this.boss && !this.boss.defeated && this.boss.pauseBehavior) {
@@ -762,6 +767,7 @@ export default class WorldScene extends Phaser.Scene {
     this.isPaused = true
     this.npcCooldown = true
     player.setVelocity(0, 0)
+    audioManager.pauseBGM(300, 'chat')
 
     const dx = player.x - npc.x
     const dy = player.y - npc.y
@@ -851,6 +857,8 @@ export default class WorldScene extends Phaser.Scene {
     this.isPaused = false
     this.resetEncounterCooldown()
     this.resetNpcCooldown()
+    audioManager.resumeBGM(300, 'quiz')
+    audioManager.resumeBGM(300, 'default')
     // 恢复 Boss 行为
     if (this.boss && !this.boss.defeated && this.boss.resumeBehavior) {
       this.boss.resumeBehavior()
@@ -862,6 +870,7 @@ export default class WorldScene extends Phaser.Scene {
     this.isPaused = false
     this.resetEncounterCooldown()
     this.resetNpcCooldown()
+    audioManager.resumeBGM(300, 'chat')
     // 恢复 Boss 行为
     if (this.boss && !this.boss.defeated && this.boss.resumeBehavior) {
       this.boss.resumeBehavior()

@@ -466,11 +466,13 @@ function onShowBossQuiz(data) {
   bossQuizData.bossCurrentHp = data.bossCurrentHp || 0
   bossQuizData.bossMaxHp = data.bossMaxHp || 0
   bossQuizData.timeLimit = data.timeLimit || gameStore.difficultyConfig.timer
+  audioManager.pauseBGM(300, 'boss_quiz')
   showBossQuiz.value = true
 }
 
 function onBossQuizComplete(result) {
   showBossQuiz.value = false
+  audioManager.resumeBGM(300, 'boss_quiz')
   // 先 emit 让 WorldScene 处理扣血逻辑
   eventBus.emit(EVENTS.BOSS_QUIZ_RESULT, result)
   // 扣血完成后再同步 HUD（此时 levelManager.lives 已是扣血后的值）
@@ -509,12 +511,18 @@ function onBossQuizComplete(result) {
 
 function onBossQuizClose() {
   showBossQuiz.value = false
+  audioManager.resumeBGM(300, 'boss_quiz')
   eventBus.emit(EVENTS.BOSS_QUIZ_RESULT, { correctCount: 0, wrongCount: 0, cancelled: true })
 }
 
 function onTogglePause() {
   if (uiState.value === 'game' && !showQuiz.value && !showBossQuiz.value && !showChatPanel.value) {
     showPauseMenu.value = !showPauseMenu.value
+    if (showPauseMenu.value) {
+      audioManager.pauseBGM(300, 'pause_menu')
+    } else {
+      audioManager.resumeBGM(300, 'pause_menu')
+    }
     // 同步通知 Phaser 场景暂停/恢复，防止暂停菜单下角色继续移动、Boss继续攻击
     if (game) {
       const scene = game.scene.getScene('WorldScene')
@@ -651,6 +659,7 @@ function onBeforeUnload(e) {
  */
 async function onShowQuiz(data) {
   currentMonsterIndex.value = data.monsterIndex
+  audioManager.pauseBGM(300, 'quiz')
 
   // 死亡螺旋保护
   if (consecutiveWrong.value >= DEATH_SPIRAL.forceEasyThreshold) {
@@ -911,16 +920,20 @@ function closeQuiz() {
   if (pendingWrongAnswer.value) {
     // 答错：打开 ChatPanel（游戏保持暂停，等 Chat 关闭再恢复）
     pendingWrongAnswer.value = false
+    audioManager.pauseBGM(300, 'chat')
     showChatPanel.value = true
     // 安全兜底：如果 ChatPanel 60秒内未关闭（异常情况），自动恢复游戏
     chatSafetyTimer = setTimeout(() => {
       if (showChatPanel.value) {
         showChatPanel.value = false
+        audioManager.resumeBGM(300, 'chat')
+        audioManager.resumeBGM(300, 'quiz')
         eventBus.emit(EVENTS.CHAT_CLOSED)
       }
     }, 60000)
   } else {
     // 答对：通知 Phaser 恢复游戏（双重保险，WorldScene 自己也会 resume）
+    audioManager.resumeBGM(300, 'quiz')
     eventBus.emit(EVENTS.RESUME_GAME)
   }
 }
@@ -928,18 +941,22 @@ function closeQuiz() {
 function onShowChat(data) {
   chatContext.triggerType = 'manual'
   chatContext.chapterName = `第${data?.chapter || 1}章`
+  audioManager.pauseBGM(300, 'chat')
   showChatPanel.value = true
 }
 
 function openManualChat() {
   chatContext.triggerType = 'manual'
   chatContext.currentWord = ''
+  audioManager.pauseBGM(300, 'chat')
   showChatPanel.value = true
 }
 
 function closeChatPanel() {
   showChatPanel.value = false
   if (chatSafetyTimer) { clearTimeout(chatSafetyTimer); chatSafetyTimer = null }
+  audioManager.resumeBGM(300, 'chat')
+  audioManager.resumeBGM(300, 'quiz')
   achievementContext.npcChats++
   scoreSystem.checkAchievements(achievementContext)
   persistAchievementContext()
@@ -1040,6 +1057,7 @@ async function backToMenu() {
   pendingWrongAnswer.value = false
   consecutiveWrong.value = 0
   currentMonsterIndex.value = -1
+  audioManager.stopBGM(300)
   if (game) {
     const scene = game.scene.getScene('WorldScene')
     if (scene && scene.scene.isActive()) {
@@ -1053,6 +1071,7 @@ async function backToMenu() {
 function handleLogout() {
   showPauseMenu.value = false
   inGameLevel.value = false
+  audioManager.stopBGM(0)
   // 清理游戏状态，防止跨账户数据泄漏
   levelManager.initLevel(1, 1, [], 'normal')
   gameStore.resetAll()
