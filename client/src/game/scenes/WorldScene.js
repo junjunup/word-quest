@@ -27,6 +27,7 @@ export default class WorldScene extends Phaser.Scene {
     this.playerDirection = 'down'
     this.invincible = false
     this.isGameOverTransitioning = false
+    this.gameOverTransitionTimer = null
     this.virtualDirection = { up: false, down: false, left: false, right: false }
   }
 
@@ -46,6 +47,7 @@ export default class WorldScene extends Phaser.Scene {
     this.npcCooldown = false
     this.invincible = false
     this.isGameOverTransitioning = false
+    this.gameOverTransitionTimer = null
 
     // 显式启用输入 —— shutdown() 会设 input.enabled = false，
     // Phaser 场景重启时不会自动重置该状态，导致键盘/鼠标完全失效
@@ -887,22 +889,28 @@ export default class WorldScene extends Phaser.Scene {
   onGameOver(result) {
     if (!this.scene?.isActive() || this.isGameOverTransitioning) return
     this.isGameOverTransitioning = true
+    const finalResult = result || levelManager.getLevelResult()
     this.isPaused = true
     this.encounterCooldown = true  // prevent any new encounters
     this.npcCooldown = true
     this.invincible = true  // prevent damage during transition
     this.input.enabled = false
     if (this.player?.body) this.player.setVelocity(0, 0)
-    audioManager.stopBGM(300)
+    audioManager.stopBGM(0)
     // Pause boss
     if (this.boss && !this.boss.defeated && this.boss.pauseBehavior) {
       this.boss.pauseBehavior()
     }
-    this.time.delayedCall(500, () => {
-      if (this.scene?.isActive()) {
-        this.scene.start('ResultScene', result || levelManager.getLevelResult())
+
+    // Use a native timer + game scene manager instead of Phaser time.delayedCall.
+    // Phaser TimerEvents can be cleared during scene shutdown, which previously left
+    // the game stuck in WorldScene with input disabled after death.
+    this.gameOverTransitionTimer = window.setTimeout(() => {
+      if (this.game?.scene) {
+        this.game.scene.start('ResultScene', finalResult)
       }
-    })
+      this.gameOverTransitionTimer = null
+    }, 0)
   }
 
   resetEncounterCooldown() {

@@ -23,8 +23,9 @@ export default class ResultScene extends Phaser.Scene {
     // 注册 shutdown 清理
     this.events.once('shutdown', this.shutdown, this)
 
-    // 场景刚创建时禁用输入，防止上一个场景的残留点击穿透
-    this.input.enabled = false
+    // ResultScene must stay interactive even if a later visual/audio setup fails.
+    // Ghost-click prevention is handled by delayed button interactivity, not global input disable.
+    this.input.enabled = true
 
     // 初始化音频并播放结算背景音乐
     audioManager.init(this)
@@ -210,12 +211,6 @@ export default class ResultScene extends Phaser.Scene {
       eventBus.emit(EVENTS.LEVEL_COMPLETE, this.result)
     }
 
-    // 延迟启用输入，等待上一场景残留的指针事件完全排空
-    this.time.delayedCall(200, () => {
-      if (this.scene.isActive()) {
-        this.input.enabled = true
-      }
-    })
   }
 
   createBackground(width, height) {

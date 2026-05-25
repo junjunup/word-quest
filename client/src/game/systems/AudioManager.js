@@ -222,7 +222,7 @@ class AudioManager {
         this.bgmTween = null
       }
 
-      if (!this.scene?.tweens || safeDuration === 0) {
+      if (!this.canTweenSound(sound) || safeDuration === 0) {
         sound.setVolume?.(targetVolume)
         if (onComplete) onComplete()
         return
@@ -248,14 +248,26 @@ class AudioManager {
 
   fadeOutAndDestroy(sound, duration) {
     if (!sound) return
+    if (!this.canTweenSound(sound) || duration <= 0) {
+      this.stopAndDestroySound(sound)
+      return
+    }
     this.fadeSoundTo(sound, 0, duration, () => {
-      try {
-        if (sound.isPlaying || sound.isPaused) sound.stop()
-        if (sound.destroy) sound.destroy()
-      } catch (e) {
-        // 旧 BGM 销毁失败不影响新 BGM 播放。
-      }
+      this.stopAndDestroySound(sound)
     })
+  }
+
+  canTweenSound(sound) {
+    return Boolean(sound && this.scene?.tweens && (!sound.manager || sound.manager === this.scene.sound))
+  }
+
+  stopAndDestroySound(sound) {
+    try {
+      if (sound?.isPlaying || sound?.isPaused) sound.stop()
+      if (sound?.destroy) sound.destroy()
+    } catch (e) {
+      // 旧 BGM 销毁失败不影响新 BGM 播放。
+    }
   }
 
   getEffectiveSfxVolume() {
