@@ -1,3 +1,4 @@
+import { h } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 function lazyLoad(importFn, retries = 3) {
@@ -9,14 +10,43 @@ function lazyLoad(importFn, retries = 3) {
           return new Promise(resolve => setTimeout(resolve, 1000)).then(() => attempt(retriesLeft - 1))
         }
         console.error('页面加载多次失败，请检查网络连接', err)
-        // Return a fallback error component instead of throwing
+        // Return a render-function fallback. Runtime-only Vue builds cannot compile `template` strings,
+        // so a template fallback would itself render blank after a failed dynamic import.
         return {
           default: {
-            template: `<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#2d5016;color:#f5edd6;flex-direction:column;font-family:sans-serif;">
-              <h2 style="margin-bottom:16px;">⚠️ 页面加载失败</h2>
-              <p style="margin-bottom:16px;color:#c4b99a;">网络异常，请检查连接后重试</p>
-              <button onclick="location.reload()" style="padding:10px 24px;background:#5b8c3e;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:16px;">🔄 重新加载</button>
-            </div>`
+            name: 'LazyLoadErrorFallback',
+            render() {
+              return h('div', {
+                style: {
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '100vh',
+                  background: '#2d5016',
+                  color: '#f5edd6',
+                  flexDirection: 'column',
+                  fontFamily: 'sans-serif',
+                  textAlign: 'center',
+                  padding: '24px'
+                }
+              }, [
+                h('h2', { style: { marginBottom: '16px' } }, '⚠️ 页面加载失败'),
+                h('p', { style: { marginBottom: '16px', color: '#c4b99a' } }, '页面资源加载异常，可能是版本更新缓存未刷新。请重新加载后再试。'),
+                h('button', {
+                  type: 'button',
+                  style: {
+                    padding: '10px 24px',
+                    background: '#5b8c3e',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '16px'
+                  },
+                  onClick: () => window.location.reload()
+                }, '🔄 重新加载')
+              ])
+            }
           }
         }
       })
