@@ -834,7 +834,8 @@ async function handleQuizAnswer(result) {
     totalScore: levelManager.score,
     combo: levelManager.combo,
     lives: levelManager.lives,
-    progress: levelManager.getProgress()
+    progress: levelManager.getProgress(),
+    gameOver: status === 'game_over'
   })
 
   if (isCorrect) {
@@ -844,8 +845,8 @@ async function handleQuizAnswer(result) {
     if (responseTime < achievementContext.fastestCorrect || achievementContext.fastestCorrect === 0) {
       achievementContext.fastestCorrect = responseTime
     }
-  } else {
-    // 答错：标记需要打开 ChatPanel
+  } else if (status !== 'game_over') {
+    // 答错：标记需要打开 ChatPanel；死亡时不再打开辅导弹窗，直接进入结算
     pendingWrongAnswer.value = true
     chatContext.currentWord = currentQuizData.value?.word || ''
     chatContext.correctAnswer = correctAnswerForType
@@ -902,8 +903,11 @@ async function handleQuizAnswer(result) {
 
   // 检查 Game Over
   if (status === 'game_over') {
-    // LevelManager 已通过 eventBus emit GAME_OVER
+    // LevelManager 已通过 eventBus emit GAME_OVER；死亡时必须直接结算，不能再残留答题/辅导弹窗暂停原因
     showQuiz.value = false
+    showChatPanel.value = false
+    audioManager.resumeBGM(0, 'quiz')
+    audioManager.resumeBGM(0, 'chat')
     // Game Over 时清理答题残留状态，避免跨局污染
     pendingWrongAnswer.value = false
     return
@@ -1026,6 +1030,14 @@ async function onGameOver(result) {
   pendingWrongAnswer.value = false
   consecutiveWrong.value = 0
   currentMonsterIndex.value = -1
+  virtualDirection.up = false
+  virtualDirection.down = false
+  virtualDirection.left = false
+  virtualDirection.right = false
+  audioManager.resumeBGM(0, 'quiz')
+  audioManager.resumeBGM(0, 'boss_quiz')
+  audioManager.resumeBGM(0, 'chat')
+  audioManager.resumeBGM(0, 'pause_menu')
   if (chatSafetyTimer) { clearTimeout(chatSafetyTimer); chatSafetyTimer = null }
 
   // 保存成就上下文

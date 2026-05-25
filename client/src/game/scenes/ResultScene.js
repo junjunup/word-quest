@@ -152,12 +152,27 @@ export default class ResultScene extends Phaser.Scene {
     const MAX_LEVELS = 5
     const MAX_CHAPTERS = 6
 
-    // "下一关" → 通过事件回到关卡选择
+    const openLevelSelect = (mode, suggestedChapter, suggestedLevel) => {
+      this.scene.start('MenuScene')
+      this._pendingTimeouts.push(setTimeout(() => {
+        eventBus.emit(EVENTS.SHOW_LEVEL_SELECT, {
+          mode,
+          suggestedChapter,
+          suggestedLevel
+        })
+      }, 100))
+    }
+
+    // 死亡结算不允许直接进入下一关，只提供重试与关卡选择，避免 Game Over 后流程错乱
     const isLastLevel = (chapter >= MAX_CHAPTERS && level >= MAX_LEVELS)
-    const nextBtnText = isLastLevel ? '🏆 全部通关！' : '下一关 ▶'
+    const nextBtnText = isGameOver ? '重新挑战 ▶' : (isLastLevel ? '🏆 全部通关！' : '下一关 ▶')
     this.createWoodButton(width / 2 - 140, btnY, nextBtnText, 0x5b8c3e, 0x3a6b1e, () => {
       if (!this.scene.isActive()) return  // 防止重复点击
       this.input.enabled = false
+      if (isGameOver) {
+        openLevelSelect('retry', chapter, level)
+        return
+      }
       if (isLastLevel) {
         // 全部通关，返回主菜单
         this.scene.start('MenuScene')
@@ -166,28 +181,14 @@ export default class ResultScene extends Phaser.Scene {
       const nextLevel = level < MAX_LEVELS ? level + 1 : 1
       const nextChapter = level >= MAX_LEVELS ? chapter + 1 : chapter
       // 先切到 MenuScene，再延迟触发 LevelSelect，确保 scene 切换完成
-      this.scene.start('MenuScene')
-      this._pendingTimeouts.push(setTimeout(() => {
-        eventBus.emit(EVENTS.SHOW_LEVEL_SELECT, {
-          mode: 'continue',
-          suggestedChapter: nextChapter,
-          suggestedLevel: nextLevel
-        })
-      }, 100))
+      openLevelSelect('continue', nextChapter, nextLevel)
     }, 3000)
 
-    // "再来一次"
-    this.createWoodButton(width / 2 + 140, btnY, '再来一次 🔄', 0xe8a33c, 0xb8832e, () => {
+    const retryBtnText = isGameOver ? '关卡选择 📖' : '再来一次 🔄'
+    this.createWoodButton(width / 2 + 140, btnY, retryBtnText, 0xe8a33c, 0xb8832e, () => {
       if (!this.scene.isActive()) return  // 防止重复点击
       this.input.enabled = false
-      this.scene.start('MenuScene')
-      this._pendingTimeouts.push(setTimeout(() => {
-        eventBus.emit(EVENTS.SHOW_LEVEL_SELECT, {
-          mode: 'retry',
-          suggestedChapter: chapter,
-          suggestedLevel: level
-        })
-      }, 100))
+      openLevelSelect(isGameOver ? 'continue' : 'retry', chapter, level)
     }, 3200)
 
     // 返回菜单
@@ -204,8 +205,10 @@ export default class ResultScene extends Phaser.Scene {
       .on('pointerover', function () { this.setColor('#ffc847') })
       .on('pointerout', function () { this.setColor('#c4b99a') })
 
-    // 通知Vue层
-    eventBus.emit(EVENTS.LEVEL_COMPLETE, this.result)
+    // 通知Vue层：死亡流程已由 GAME_OVER 处理，避免把死亡误记为关卡完成
+    if (!isGameOver) {
+      eventBus.emit(EVENTS.LEVEL_COMPLETE, this.result)
+    }
 
     // 延迟启用输入，等待上一场景残留的指针事件完全排空
     this.time.delayedCall(200, () => {
