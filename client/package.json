@@ -8,6 +8,7 @@
     "build": "vite build",
     "build:budget": "vite build && node scripts/checkBundleBudget.js",
     "test:responsive": "node scripts/checkResponsiveReadiness.js",
+    "test:boss-settlement": "node scripts/checkBossSettlementReadiness.js",
     "test:e2e": "playwright test",
     "preview": "vite preview"
   },

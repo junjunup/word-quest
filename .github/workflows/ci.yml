@@ -87,6 +87,8 @@ jobs:
         run: npm run build:budget
       - name: Responsive readiness validation
         run: npm run test:responsive
+      - name: Boss settlement readiness validation
+        run: npm run test:boss-settlement
       - name: Browser E2E validation
         run: PLAYWRIGHT_BROWSER_CHANNEL= npm run test:e2e
 

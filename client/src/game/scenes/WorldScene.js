@@ -28,6 +28,7 @@ export default class WorldScene extends Phaser.Scene {
     this.invincible = false
     this.isGameOverTransitioning = false
     this.gameOverTransitionTimer = null
+    this.bossRewardGranted = false
     this.virtualDirection = { up: false, down: false, left: false, right: false }
   }
 
@@ -48,6 +49,7 @@ export default class WorldScene extends Phaser.Scene {
     this.invincible = false
     this.isGameOverTransitioning = false
     this.gameOverTransitionTimer = null
+    this.bossRewardGranted = false
 
     // 显式启用输入 —— shutdown() 会设 input.enabled = false，
     // Phaser 场景重启时不会自动重置该状态，导致键盘/鼠标完全失效
@@ -295,58 +297,52 @@ export default class WorldScene extends Phaser.Scene {
    * Boss quiz result handler
    */
   onBossQuizResult(result) {
-    if (!this.scene?.isActive()) return
-    if (!this.boss || this.boss.defeated) {
-      this.isPaused = false
-      this.resetEncounterCooldown()
+    if (!this.scene?.isActive() || this.isGameOverTransitioning) return
+
+    const { correctCount = 0, wrongCount = 0, cancelled = false } = result || {}
+
+    if (!this.boss) {
+      this.finishBossQuizRecovery()
       return
     }
-
-    const { correctCount, wrongCount, defeated, cancelled } = result
 
     if (cancelled) {
       // Quiz cancelled, bounce player away
-      if (this.boss.resumeBehavior) this.boss.resumeBehavior()
+      if (!this.boss.defeated && this.boss.resumeBehavior) this.boss.resumeBehavior()
       this.bouncePlayerFromBoss()
-      audioManager.resumeBGM(300, 'boss_quiz')
-      this.isPaused = false
-      this.resetEncounterCooldown()
+      this.finishBossQuizRecovery()
       return
     }
 
-    // Apply damage for each correct answer
+    // Apply boss damage first, then immediately persist boss-defeat state/reward.
+    // This prevents a mixed outcome (Boss defeated + player dies from wrong answers)
+    // from showing "Boss未击败" in the game-over result.
     for (let i = 0; i < correctCount; i++) {
       if (!this.boss.defeated) {
         this.boss.takeDamage()
       }
     }
 
-    // Apply life loss for wrong answers (loseLife already emits UPDATE_HUD)
-    if (wrongCount > 0) {
-      for (let i = 0; i < wrongCount; i++) {
-        if (levelManager.lives <= 0) return  // 已死亡，由 GAME_OVER 处理
-        const lifeResult = levelManager.loseLife()
-        if (lifeResult === 'game_over') return
-      }
+    const bossDefeatedNow = Boolean(this.boss.defeated)
+    if (bossDefeatedNow) {
+      this.grantBossDefeatReward()
     }
 
-    if (this.boss.defeated) {
-      audioManager.play('boss_defeat')
-      levelManager.bossDefeated = true
-      // Add boss defeat score bonus (apply difficulty multiplier)
-      const bossBonus = Math.round(500 * levelManager.difficultyConfig.scoreMultiplier)
-      levelManager.score += bossBonus
-      eventBus.emit(EVENTS.UPDATE_HUD, {
-        score: levelManager.score,
-        lives: levelManager.lives,
-        combo: levelManager.combo
-      })
+    // Apply life loss for wrong answers after boss result is persisted.
+    // `loseLife()` synchronously emits GAME_OVER; when that happens, stop all normal
+    // recovery/level-complete paths and let onGameOver own the transition.
+    for (let i = 0; i < wrongCount; i++) {
+      if (levelManager.lives <= 0) return
+      const lifeResult = levelManager.loseLife()
+      if (lifeResult === 'game_over') return
+    }
 
+    if (bossDefeatedNow) {
       // 检查关卡是否完成（所有怪 + Boss 都被击败）
       // 如果完成，checkLevelComplete 会设 isPaused=true 并启动跳转
       // 此时不应再覆盖 isPaused 状态
       const levelDone = this.checkLevelComplete()
-      if (levelDone) return  // 关卡完成，不再执行后续恢复逻辑
+      if (levelDone) return
 
       // Boss 击败但还有怪物剩余，弹开玩家继续游戏
       this.bouncePlayerFromBoss()
@@ -356,6 +352,26 @@ export default class WorldScene extends Phaser.Scene {
       this.bouncePlayerFromBoss()
     }
 
+    this.finishBossQuizRecovery()
+  }
+
+  grantBossDefeatReward() {
+    if (this.bossRewardGranted) return
+    this.bossRewardGranted = true
+    audioManager.play('boss_defeat')
+    levelManager.bossDefeated = true
+    // Add boss defeat score bonus (apply difficulty multiplier)
+    const bossBonus = Math.round(500 * levelManager.difficultyConfig.scoreMultiplier)
+    levelManager.score += bossBonus
+    eventBus.emit(EVENTS.UPDATE_HUD, {
+      score: levelManager.score,
+      lives: levelManager.lives,
+      combo: levelManager.combo
+    })
+  }
+
+  finishBossQuizRecovery() {
+    if (this.isGameOverTransitioning) return
     audioManager.resumeBGM(300, 'boss_quiz')
     this.isPaused = false
     this.resetEncounterCooldown()
