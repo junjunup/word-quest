@@ -19,7 +19,7 @@ if errorlevel 1 (
 if not exist ".env" (
     echo [提示] 未检测到 .env 配置文件，将从模板创建...
     copy .env.example .env >nul
-    echo [提示] 已创建 .env，请编辑填入你的百度文心一言 API Key
+    echo [提示] 已创建 .env，请编辑填入你的通义千问 API Key
     echo [提示] 如果不填写，小智将使用本地模拟回复
     echo.
     echo 按任意键继续部署（或先编辑 .env 后重新运行此脚本）...

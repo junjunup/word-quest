@@ -30,7 +30,7 @@ fi
 if [ ! -f ".env" ]; then
     echo "[提示] 未检测到 .env 配置文件，将从模板创建..."
     cp .env.example .env
-    echo "[提示] 已创建 .env，请编辑填入你的百度文心一言 API Key"
+    echo "[提示] 已创建 .env，请编辑填入你的通义千问 API Key"
     echo "[提示] 如果不填写，小智将使用本地模拟回复"
     echo ""
     read -p "按回车继续部署..." _

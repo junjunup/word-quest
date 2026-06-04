@@ -54,8 +54,7 @@ const config = {
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
   corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5173',
   llmServiceUrl: process.env.LLM_SERVICE_URL || 'http://localhost:8000',
-  ernieApiKey: process.env.ERNIE_API_KEY || '',
-  ernieSecretKey: process.env.ERNIE_SECRET_KEY || ''
+  qwenApiKey: process.env.QWEN_API_KEY || ''
 }
 
 export default config

@@ -56,8 +56,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - ERNIE_API_KEY=${ERNIE_API_KEY:-}
-      - ERNIE_SECRET_KEY=${ERNIE_SECRET_KEY:-}
+      - QWEN_API_KEY=${QWEN_API_KEY:-}
     networks:
       - word-quest-net
     restart: unless-stopped

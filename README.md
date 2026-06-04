@@ -3,7 +3,7 @@
 > AI 辅助游戏化英语词汇学习系统 — 毕业设计项目
 
 <p align="center">
-  <strong>Phaser 3 像素风游戏 + Vue 3 前端 + Node.js 后端 + 百度文心一言 AI 学伴</strong>
+  <strong>Phaser 3 像素风游戏 + Vue 3 前端 + Node.js 后端 + 通义千问 AI 学伴</strong>
 </p>
 
 ---
@@ -66,7 +66,7 @@
 ### AI 学伴"小智"
 | 功能 | 说明 |
 |------|------|
-| 🤖 智能对话 | 接入百度文心一言，上下文感知的个性化回复 |
+| 🤖 智能对话 | 接入通义千问，上下文感知的个性化回复 |
 | 💡 记忆技巧 | 词根词缀分析、联想记忆法、语境记忆 |
 | 📖 例句生成 | 根据当前学习单词生成例句 |
 | 🛡️ 内容安全 | 输入/输出双重过滤，仅允许英语学习话题 |
@@ -103,7 +103,7 @@
          │                     │
 ┌────────▼────────┐  ┌────────▼────────┐
 │    MongoDB      │  │   LLM Service   │
-│   mongo:7.0     │  │  FastAPI + 文心  │
+│   mongo:7.0     │  │ FastAPI + 通义千问│
 │    :27017       │  │    :8000        │
 └─────────────────┘  └─────────────────┘
 ```
@@ -112,7 +112,7 @@
 |------|--------|------|
 | **前端** | Vue 3 + Phaser 3 + Pinia | SPA + 2D 游戏引擎 + 状态管理 |
 | **后端** | Express.js + Mongoose | RESTful API + MongoDB ODM |
-| **AI 服务** | FastAPI + 百度文心一言 | Python 微服务 + LLM 代理 |
+| **AI 服务** | FastAPI + 通义千问 | Python 微服务 + LLM 代理 |
 | **数据库** | MongoDB 7.0 | 用户/进度/词库/学习记录 |
 | **部署** | Docker Compose | 4 服务编排 + 自动初始化 |
 
@@ -131,7 +131,7 @@ cd ai-gamified-learning
 
 # 2. 配置环境变量
 cp .env.example .env
-# 编辑 .env，填入百度文心一言 API Key（可选，不填则使用模拟回复）
+# 编辑 .env，填入通义千问 API Key（可选，不填则使用模拟回复）
 
 # 3. 一键启动
 # Windows:
@@ -214,9 +214,9 @@ python main.py             # 启动 FastAPI (端口 8000)
 JWT_SECRET=你的强随机密钥         # JWT 签名密钥（生产环境务必修改）
 
 # ===== 可选（AI 功能）=====
-ERNIE_API_KEY=你的API_Key        # 百度文心一言 API Key
-ERNIE_SECRET_KEY=你的Secret_Key  # 百度文心一言 Secret Key
-# 获取地址: https://console.bce.baidu.com/qianfan/ais/console/applicationConsole/application
+QWEN_API_KEY=你的API_Key          # 通义千问 DashScope API Key
+# 获取地址: https://dashscope.console.aliyun.com/apiKey
+# 可选: QWEN_MODEL=qwen-plus（默认）
 # 不填则使用本地模拟回复，游戏其他功能不受影响
 
 # ===== 高级配置 =====
@@ -277,7 +277,7 @@ ai-gamified-learning/
 │
 └── llm-service/                # AI 微服务 (Python FastAPI)
     ├── services/
-    │   ├── ernie_client.py     # 文心一言 API 客户端
+    │   ├── ernie_client.py     # 通义千问 API 客户端 (DashScope)
     │   ├── prompt_manager.py   # NPC 对话 Prompt 管理
     │   └── safety_filter.py    # 内容安全过滤
     └── Dockerfile
@@ -421,7 +421,7 @@ timeBonus: <3秒 → +50 | <5秒 → +30 | <10秒 → +15 | 其他 → 0
 ## ❓ 常见问题
 
 ### 小智只会机械回复？
-未配置百度文心一言 API Key，运行在 Mock 模式。编辑 `.env` 填入 `ERNIE_API_KEY` 和 `ERNIE_SECRET_KEY`，然后 `docker-compose restart llm-service`。
+未配置通义千问 API Key，运行在 Mock 模式。编辑 `.env` 填入 `QWEN_API_KEY`，然后 `docker-compose restart llm-service`。
 
 ### Docker 启动后访问不了？
 ```bash

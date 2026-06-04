@@ -1,5 +1,5 @@
 """
-百度文心一言 LLM 微服务
+通义千问 LLM 微服务 (DashScope)
 Word Quest - AI学伴"小智"后端
 """
 import os
