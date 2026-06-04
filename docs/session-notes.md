@@ -1,6 +1,52 @@
 ---
 
-## 📅 Word Quest 项目状态 — 2026-06-05（第2会话）
+## 📅 Word Quest 项目状态 — 2026-06-05（第3会话 — 全量优化+盲审）
+
+### 🎯 会话成果
+
+#### P1+P2 优化路线图 7/8 完成
+
+| 任务 | 状态 | Commit |
+|------|------|--------|
+| P1-1 端到端验证 | ✅ | `01fe403` |
+| P1-2 LLM 文档修复 (文心→通义) | ✅ | `1ddcd25` |
+| P1-3 Docker JWT 加固 | ✅ | `cb0202d` |
+| P2-1 新手引导系统 | ✅ | `ce79478` |
+| P2-2 BGM 压缩 | ⏸️ | 需 ffmpeg |
+| P2-3 PWA 图标 | ✅ | `e16b009` |
+| P2-4 GameView 拆分 (1451→990) | ✅ | `95f2b4d` |
+| 盲审修复 5 bugs | ✅ | `0205323` |
+
+#### 盲审关键修复
+- Bug#8: GameView 缺少 updateWordMastery 导入 → 离线队列崩溃
+- Bug#14: isTutorial 跨关卡泄漏 → 每关显示教程祝贺
+- Bug#1: difficulty 未含在 quiz data → 计分始终为 1
+- Bug#2: wrongStreak 用错字段 → NPC 上下文错误
+- Bug#10: 全屏 dismissZone 拦截按钮 → 首次点击无效
+
+### 🚀 快速启动
+
+```bash
+cd /c/Users/sxh/WorkBuddy/2026-05-14-task-5/word-quest
+cd server && node src/app.js &        # 后端 :4000
+cd client && npm run dev &            # 前端 :3000
+# 测试账号: test / 123456
+```
+
+### 🧪 测试命令
+
+```bash
+cd server
+npm run test:sm2      # SM-2 算法 35/35
+npm run test:p0       # P0 验收
+npm run test:security # 安全测试
+npm run test:enterprise # 企业测试
+cd ../client && npm run build  # 前端构建
+```
+
+---
+
+## 📅 Word Quest 项目状态 — 2026-06-05（第2会话，历史）
 
 ### 🎯 会话成果
 
