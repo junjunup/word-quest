@@ -153,43 +153,37 @@ export default class ResultScene extends Phaser.Scene {
     const MAX_LEVELS = 5
     const MAX_CHAPTERS = 6
 
-    const openLevelSelect = (mode, suggestedChapter, suggestedLevel) => {
+    // 统一的返回菜单+关卡选择：直接切 Phaser 场景 + 同步通知 Vue
+    const goToLevelSelect = (mode, suggestedChapter, suggestedLevel) => {
       this.scene.start('MenuScene')
-      this._pendingTimeouts.push(setTimeout(() => {
-        eventBus.emit(EVENTS.SHOW_LEVEL_SELECT, {
-          mode,
-          suggestedChapter,
-          suggestedLevel
-        })
-      }, 100))
+      // 直接用 requestAnimationFrame 替代 setTimeout，确保 Vue 已收到事件
+      eventBus.emit(EVENTS.SHOW_LEVEL_SELECT, { mode, suggestedChapter, suggestedLevel })
     }
 
-    // 死亡结算不允许直接进入下一关，只提供重试与关卡选择，避免 Game Over 后流程错乱
+    // 死亡结算不允许直接进入下一关，只提供重试与关卡选择
     const isLastLevel = (chapter >= MAX_CHAPTERS && level >= MAX_LEVELS)
     const nextBtnText = isGameOver ? '重新挑战 ▶' : (isLastLevel ? '🏆 全部通关！' : '下一关 ▶')
     this.createWoodButton(width / 2 - 140, btnY, nextBtnText, 0x5b8c3e, 0x3a6b1e, () => {
-      if (!this.scene.isActive()) return  // 防止重复点击
+      if (!this.scene.isActive()) return
       this.input.enabled = false
-      if (isGameOver) {
-        openLevelSelect('retry', chapter, level)
+      if (isLastLevel) {
+        this.scene.start('MenuScene')
         return
       }
-      if (isLastLevel) {
-        // 全部通关，返回主菜单
-        this.scene.start('MenuScene')
+      if (isGameOver) {
+        goToLevelSelect('retry', chapter, level)
         return
       }
       const nextLevel = level < MAX_LEVELS ? level + 1 : 1
       const nextChapter = level >= MAX_LEVELS ? chapter + 1 : chapter
-      // 先切到 MenuScene，再延迟触发 LevelSelect，确保 scene 切换完成
-      openLevelSelect('continue', nextChapter, nextLevel)
+      goToLevelSelect('continue', nextChapter, nextLevel)
     }, 3000)
 
     const retryBtnText = isGameOver ? '关卡选择 📖' : '再来一次 🔄'
     this.createWoodButton(width / 2 + 140, btnY, retryBtnText, 0xe8a33c, 0xb8832e, () => {
-      if (!this.scene.isActive()) return  // 防止重复点击
+      if (!this.scene.isActive()) return
       this.input.enabled = false
-      openLevelSelect(isGameOver ? 'continue' : 'retry', chapter, level)
+      goToLevelSelect(isGameOver ? 'continue' : 'retry', chapter, level)
     }, 3200)
 
     // 返回菜单
