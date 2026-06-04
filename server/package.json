@@ -17,6 +17,8 @@
     "test:p0": "node src/scripts/p0AcceptanceTest.js",
     "test:security": "node src/scripts/productionSafetyTest.js",
     "test:fullstack": "node src/scripts/fullStackApiE2ETest.js",
+    "test:sm2": "node --test src/scripts/sm2AlgorithmTest.js",
+    "test:unit": "node --test src/scripts/sm2AlgorithmTest.js",
     "levels:generate": "node src/scripts/generateLevelsConfig.js",
     "check": "node --check src/app.js && node --check src/routes/vocabulary.js && node --check src/routes/game.js && node --check src/routes/learning.js && node --check src/routes/social.js && node --check src/routes/pronunciation.js && node --check src/routes/dailyChallenge.js && node --check src/models/Friendship.js && node --check src/models/AsyncChallenge.js && node --check src/models/PronunciationAttempt.js && node --check src/models/DailyChallenge.js && node --check src/models/DailyChallengeAttempt.js && node --check src/models/GameProgress.js && node --check src/models/QuizRecord.js && node --check src/models/ReviewSession.js && node --check src/models/WordMastery.js && node --check src/services/courseMapService.js && node --check src/services/masteryService.js && node --check src/services/answerVerificationService.js && node --check src/services/pronunciationScoringService.js && node --check src/scripts/generateLevelsConfig.js && node --check src/scripts/importVocabulary.js && node --check src/scripts/validateVocabulary.js && node --check src/scripts/p0AcceptanceTest.js && node --check src/scripts/productionSafetyTest.js && node --check src/scripts/fullStackApiE2ETest.js && node --check src/scripts/enterpriseHardRequirementTest.js && node --check src/scripts/verifyMongoImport.js && python -m py_compile src/scripts/buildWordbooks.py"
   },

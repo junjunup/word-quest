@@ -6,7 +6,6 @@
         <h1>学习数据仪表盘</h1>
       </div>
       <div class="header-right">
-        <button class="social-btn" @click="$router.push('/social')">好友 / 异步 PK</button>
         <span class="user-info">{{ userStore.userInfo?.nickname || '勇者' }} | Lv.{{ userStore.userInfo?.level || 1 }}</span>
       </div>
     </header>
@@ -18,53 +17,12 @@
       </div>
 
       <div class="main-section">
-        <section class="wordbook-switcher">
-          <div>
-            <p class="eyebrow">当前词书</p>
-            <h3>{{ selectedWordbookName }}</h3>
-          </div>
-          <select v-model="selectedWordbookId" @change="onWordbookChange">
-            <option v-for="book in wordbooks" :key="book.wordbookId" :value="book.wordbookId">
-              {{ book.name }}（{{ book.total }}词）
-            </option>
-          </select>
-        </section>
-
-        <DailyChallengeCard :wordbook-id="selectedWordbookId" />
-
-        <TodayReviewCard
-          :items="todayReview"
-          :loading="todayReviewLoading"
-          :error="todayReviewError"
-          @start-review="openTodayReview"
-        />
-
-        <VocabularyImportPanel
-          :wordbook-id="selectedWordbookId"
-          :wordbook-name="selectedWordbookName"
-          @imported="refreshAfterImport"
-        />
-
-        <LearningReport
-          :stats="stats"
-          :daily-data="dailyData"
-          :chapter-data="chapterData"
-          :adaptive-summary="adaptiveSummary"
-          :error-type-data="errorTypeData"
-          :source-mode-data="sourceModeData"
-        />
+        <LearningReport :stats="stats" :daily-data="dailyData" :chapter-data="chapterData" />
 
         <!-- 学习热力图 -->
         <div class="chart-container">
           <h4>📅 学习热力图</h4>
-          <component
-            v-if="chartReady && VChartComponent"
-            :is="VChartComponent"
-            :option="heatmapOption"
-            style="height: 180px"
-            autoresize
-          />
-          <div v-else class="chart-loading">图表模块加载中...</div>
+          <v-chart :option="heatmapOption" style="height: 180px" autoresize />
         </div>
 
         <!-- 易错词汇 Top10 -->
@@ -87,29 +45,17 @@
       <aside class="side-section">
         <ScoreBoard />
       </aside>
-
-      <ReviewMode
-        v-if="showTodayReview"
-        mode="today"
-        :initial-words="todayReview"
-        @close="showTodayReview = false"
-      />
     </main>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, defineAsyncComponent, shallowRef } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useUserStore } from '@/stores/user'
-import { getStats, getDailyStats, getChapterStats, getTopMistakes, getHeatmap, getTodayReview, getErrorTypeStats } from '@/api/learning'
-import { getSelectedWordbook, getWordbooks, setSelectedWordbook } from '@/api/vocabulary'
-
-const LearningReport = defineAsyncComponent(() => import('@/components/LearningReport.vue'))
-const ScoreBoard = defineAsyncComponent(() => import('@/components/ScoreBoard.vue'))
-const ReviewMode = defineAsyncComponent(() => import('@/components/ReviewMode.vue'))
-const TodayReviewCard = defineAsyncComponent(() => import('@/components/TodayReviewCard.vue'))
-const VocabularyImportPanel = defineAsyncComponent(() => import('@/components/VocabularyImportPanel.vue'))
-const DailyChallengeCard = defineAsyncComponent(() => import('@/components/DailyChallengeCard.vue'))
+import LearningReport from '@/components/LearningReport.vue'
+import ScoreBoard from '@/components/ScoreBoard.vue'
+import VChart from 'vue-echarts'
+import { getStats, getDailyStats, getChapterStats, getTopMistakes, getHeatmap } from '@/api/learning'
 
 const userStore = useUserStore()
 const stats = ref(null)
@@ -117,17 +63,7 @@ const dailyData = ref([])
 const chapterData = ref([])
 const topMistakes = ref([])
 const heatmapData = ref([])
-const errorTypeData = ref([])
-const sourceModeData = ref([])
-const todayReview = ref([])
-const todayReviewLoading = ref(false)
-const todayReviewError = ref('')
-const showTodayReview = ref(false)
-const wordbooks = ref([{ wordbookId: 'cet4', name: 'CET-4 核心词库', total: 0 }])
-const selectedWordbookId = ref(getSelectedWordbook())
 const loadErrors = ref([])
-const VChartComponent = shallowRef(null)
-const chartReady = ref(false)
 
 onMounted(async () => {
   loadErrors.value = []
@@ -137,16 +73,12 @@ onMounted(async () => {
     try { await userStore.fetchUserInfo() } catch (e) { console.warn('获取用户信息失败:', e) }
   }
 
-  // 各模块独立加载，互不影响；图表运行时懒加载，避免首屏强制拉取 ECharts
+  // 各模块独立加载，互不影响
   const tasks = [
-    { name: '图表运行时', fn: loadChartRuntime },
-    { name: '词书列表', fn: loadWordbooks },
-    { name: '学习统计', fn: loadStats },
+    { name: '学习统计', fn: async () => { const r = await getStats(); stats.value = r.data } },
     { name: '每日数据', fn: async () => { const r = await getDailyStats(30); dailyData.value = r.data || [] } },
     { name: '章节数据', fn: async () => { const r = await getChapterStats(); chapterData.value = r.data || [] } },
     { name: '易错词汇', fn: async () => { const r = await getTopMistakes(10); topMistakes.value = r.data || [] } },
-    { name: '今日复习', fn: loadTodayReview },
-    { name: '错因统计', fn: loadErrorTypeStats },
     { name: '学习热力图', fn: async () => { const r = await getHeatmap(new Date().getFullYear()); heatmapData.value = r.data || [] } }
   ]
 
@@ -158,97 +90,6 @@ onMounted(async () => {
       loadErrors.value.push(task.name)
     }
   }))
-})
-
-async function loadChartRuntime() {
-  if (chartReady.value) return
-  const [vueEcharts, echartsCore, renderers, charts, components] = await Promise.all([
-    import('vue-echarts'),
-    import('echarts/core'),
-    import('echarts/renderers'),
-    import('echarts/charts'),
-    import('echarts/components')
-  ])
-  echartsCore.use([
-    renderers.CanvasRenderer,
-    charts.HeatmapChart,
-    components.CalendarComponent,
-    components.VisualMapComponent,
-    components.TooltipComponent
-  ])
-  VChartComponent.value = vueEcharts.default
-  chartReady.value = true
-}
-
-async function loadWordbooks() {
-  const r = await getWordbooks()
-  const books = r.data || []
-  if (books.length > 0) wordbooks.value = books
-  if (!wordbooks.value.some(book => book.wordbookId === selectedWordbookId.value)) {
-    selectedWordbookId.value = wordbooks.value[0]?.wordbookId || 'cet4'
-    setSelectedWordbook(selectedWordbookId.value)
-  }
-}
-
-const selectedWordbookName = computed(() => {
-  return wordbooks.value.find(book => book.wordbookId === selectedWordbookId.value)?.name || selectedWordbookId.value
-})
-
-async function onWordbookChange() {
-  setSelectedWordbook(selectedWordbookId.value)
-  await refreshAfterImport()
-}
-
-async function loadStats() {
-  const r = await getStats(selectedWordbookId.value)
-  stats.value = r.data
-}
-
-async function loadErrorTypeStats() {
-  const r = await getErrorTypeStats(selectedWordbookId.value, 30)
-  errorTypeData.value = r.data?.errorTypes || []
-  sourceModeData.value = r.data?.sourceModes || []
-}
-
-async function loadTodayReview() {
-  todayReviewLoading.value = true
-  todayReviewError.value = ''
-  try {
-    const r = await getTodayReview(20, selectedWordbookId.value)
-    todayReview.value = r.data || []
-  } catch (e) {
-    console.warn('今日复习加载失败:', e)
-    todayReview.value = []
-    todayReviewError.value = e?.message || '今日复习加载失败'
-    throw e
-  } finally {
-    todayReviewLoading.value = false
-  }
-}
-
-async function refreshAfterImport() {
-  loadErrors.value = []
-  try {
-    await loadWordbooks()
-    await Promise.all([loadStats(), loadTodayReview(), loadErrorTypeStats()])
-  } catch (e) {
-    console.warn('导入后刷新统计失败:', e)
-  }
-}
-
-function openTodayReview() {
-  if (todayReview.value.length > 0) showTodayReview.value = true
-}
-
-const adaptiveSummary = computed(() => {
-  if (todayReview.value.length === 0) return null
-  const averageMastery = Math.round(todayReview.value.reduce((sum, item) => sum + (Number(item.masteryScore) || 0), 0) / todayReview.value.length)
-  return {
-    reviewCount: todayReview.value.length,
-    averageMastery,
-    weakCount: todayReview.value.filter(item => item.reasons?.some(r => ['wrong', 'near', 'low_mastery'].includes(r))).length,
-    staleCount: todayReview.value.filter(item => item.reasons?.includes('stale')).length
-  }
 })
 
 const heatmapOption = computed(() => {
@@ -317,23 +158,6 @@ const heatmapOption = computed(() => {
   &:hover { background: rgba(255, 255, 255, 0.05); }
 }
 
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.social-btn {
-  min-height: 34px;
-  border: 1px solid rgba(159, 211, 122, 0.45);
-  border-radius: 8px;
-  background: rgba(91, 140, 62, 0.24);
-  color: #f5edd6;
-  padding: 6px 12px;
-  cursor: pointer;
-  font-size: 13px;
-}
-
 .user-info {
   color: #b8b8d4;
   font-size: 14px;
@@ -356,31 +180,6 @@ const heatmapOption = computed(() => {
   text-align: center;
 }
 
-.wordbook-switcher {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 20px;
-
-  h3 { color: #ffd700; margin-top: 2px; }
-  select {
-    min-height: 44px;
-    min-width: 220px;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    background: rgba(0, 0, 0, 0.25);
-    color: #f5edd6;
-    padding: 8px 12px;
-  }
-}
-
-.eyebrow { color: #c4b99a; font-size: 12px; letter-spacing: 0.12em; }
-
 .chart-container {
   margin-bottom: 20px;
   background: rgba(255, 255, 255, 0.03);
@@ -388,17 +187,6 @@ const heatmapOption = computed(() => {
   padding: 16px;
 
   h4 { font-size: 15px; color: #b8b8d4; margin-bottom: 10px; }
-}
-
-.chart-loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 180px;
-  border: 1px dashed rgba(255, 255, 255, 0.14);
-  border-radius: 10px;
-  color: #9a9aab;
-  font-size: 13px;
 }
 
 .mistake-section {
@@ -460,44 +248,5 @@ const heatmapOption = computed(() => {
 .side-section {
   position: sticky;
   top: 20px;
-}
-
-@media (max-width: 820px) {
-  .dashboard-view { padding: 14px; }
-  .dashboard-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-  .header-left {
-    flex-wrap: wrap;
-    h1 { font-size: 18px; }
-  }
-  .dashboard-content {
-    grid-template-columns: 1fr;
-  }
-  .wordbook-switcher {
-    flex-direction: column;
-    align-items: stretch;
-    select { min-width: 0; width: 100%; }
-  }
-  .side-section {
-    position: static;
-  }
-}
-
-@media (max-width: 430px) {
-  .dashboard-view { padding: 10px; }
-  .back-btn { min-height: 44px; padding: 8px 12px; }
-  .chart-container,
-  .mistake-section { padding: 12px; }
-  .mistake-row {
-    display: grid;
-    grid-template-columns: 24px 1fr auto;
-    gap: 8px;
-  }
-  .mistake-word,
-  .mistake-count { width: auto; }
-  .mistake-bar { grid-column: 2 / -1; width: 100%; }
 }
 </style>

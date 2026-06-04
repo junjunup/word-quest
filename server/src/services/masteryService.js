@@ -62,40 +62,128 @@ function calculateTransition(mastery, record) {
   const previousInterval = Number(mastery.reviewInterval || 1)
   const previousEase = Number(mastery.easeFactor || 2.5)
 
+  // SM-2 quality 映射：将答题结果转为 0-5 分
+  const sm2Quality = mapQuizToSM2Quality(record)
+  // 基于 SM-2 计算新 interval
+  const sm2Result = updateWithSM2(previousInterval, previousEase, sm2Quality)
+
   let delta = 0
-  let interval = previousInterval
-  let easeFactor = previousEase
-  let nextReviewAt = addDays(now, 1)
 
   if (errorType === 'timeout') {
     delta = -12
-    interval = 0.25
-    easeFactor = clamp(previousEase - 0.18, 1.3, 3.0)
-    nextReviewAt = addDays(now, 0.25)
   } else if (errorType === 'pronunciation') {
     delta = record.isCorrect ? 4 : -8
-    interval = record.isCorrect ? Math.max(1, previousInterval) : 0.5
-    easeFactor = clamp(previousEase + (record.isCorrect ? 0.02 : -0.12), 1.3, 3.0)
-    nextReviewAt = addDays(now, record.isCorrect ? interval : 0.5)
   } else if (quality === 'exact' && record.isCorrect) {
     delta = 10
-    easeFactor = clamp(previousEase + 0.08, 1.3, 3.0)
-    interval = previousScore < 30 ? 1 : Math.max(2, Math.round(previousInterval * easeFactor))
-    nextReviewAt = addDays(now, interval)
   } else if (quality === 'near') {
     delta = 3
-    easeFactor = clamp(previousEase - 0.05, 1.3, 3.0)
-    interval = 1
-    nextReviewAt = addDays(now, 1)
   } else {
     delta = -15
-    easeFactor = clamp(previousEase - 0.2, 1.3, 3.0)
-    interval = 0.25
-    nextReviewAt = addDays(now, 0.25)
   }
 
   const nextScore = clamp(previousScore + delta, 0, 100)
-  return { now, quality, errorType, delta: nextScore - previousScore, nextScore, interval, easeFactor, nextReviewAt }
+
+  // 使用 SM-2 计算的 interval 和 easeFactor（替代原有硬编码间隔）
+  return {
+    now,
+    quality,
+    errorType,
+    sm2Quality,
+    delta: nextScore - previousScore,
+    nextScore,
+    interval: sm2Result.interval,
+    easeFactor: sm2Result.easeFactor,
+    nextReviewAt: addDays(now, Math.max(0.25, sm2Result.interval)),
+    learningStage: sm2Result.learningStage
+  }
+}
+
+/**
+ * 将答题记录映射为 SM-2 quality 值 (0-5)
+ * SM-2 (Piotr Wozniak, 1987)
+ *
+ * 映射规则：
+ *   5 = 拼写/翻译完全正确
+ *   4 = 选择题正确 / 听力题正确
+ *   3 = 拼写模糊匹配(near) / 想了很久才答对
+ *   2 = 不记得但看到答案感觉熟悉
+ *   1 = 不记得但看到答案想起来
+ *   0 = 完全不记得
+ */
+function mapQuizToSM2Quality(record) {
+  const questionType = record.questionType || ''
+  const quality = record.answerQuality || 'wrong'
+  const isCorrect = !!record.isCorrect
+
+  // 拼写/翻译题完全正确 → quality 5
+  if (isCorrect && quality === 'exact' && ['spell_hint', 'spell_full', 'translate'].includes(questionType)) {
+    return 5
+  }
+  // 选择题/听力题正确 → quality 4
+  if (isCorrect && ['choice_en2cn', 'choice_cn2en', 'pronunciation'].includes(questionType)) {
+    return 4
+  }
+  // 拼写模糊匹配(near) → quality 3
+  if (quality === 'near') {
+    return 3
+  }
+  // 答错但答案质量不是完全错误 → quality 1
+  if (!isCorrect && quality !== 'wrong') {
+    return 1
+  }
+  // 完全错误 → quality 0
+  if (!isCorrect) {
+    return 0
+  }
+  // 兜底
+  return isCorrect ? 4 : 0
+}
+
+/**
+ * 标准 SM-2 算法（SuperMemo 2, Piotr Wozniak 1987）
+ *
+ * @param {number} currentInterval - 当前间隔（天）
+ * @param {number} currentEase - 当前 ease factor（≥1.3）
+ * @param {number} quality - 答题质量 (0-5)
+ * @returns {{ interval: number, easeFactor: number, learningStage: string }}
+ */
+function updateWithSM2(currentInterval, currentEase, quality) {
+  let interval = Number(currentInterval) || 0
+  let easeFactor = clamp(Number(currentEase) || 2.5, 1.3, 3.0)
+
+  if (quality >= 3) {
+    // 回答正确 → 增加间隔
+    if (interval === 0) {
+      interval = 1
+    } else if (interval === 1) {
+      interval = 6
+    } else {
+      interval = Math.round(interval * easeFactor)
+    }
+    // SM-2 ease factor 公式
+    easeFactor = easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02))
+  } else {
+    // 回答错误 → 重置间隔，降低 ease
+    interval = 0
+    easeFactor = clamp(easeFactor - 0.2, 1.3, 3.0)
+  }
+
+  easeFactor = clamp(easeFactor, 1.3, 3.0)
+  interval = Math.max(0, interval)
+
+  // 根据 interval 判断学习阶段
+  let learningStage = 'learning'
+  if (interval === 0) {
+    learningStage = 'learning'  // 还在学习阶段（刚接触或刚犯错）
+  } else if (interval >= 21) {
+    learningStage = 'mastered'  // 间隔 ≥ 21 天 → 已掌握
+  } else if (interval >= 7) {
+    learningStage = 'review'    // 间隔 ≥ 7 天 → 复习阶段
+  } else {
+    learningStage = 'learning'
+  }
+
+  return { interval, easeFactor, learningStage }
 }
 
 /**
@@ -137,6 +225,7 @@ export async function updateFromQuizRecord(record) {
   mastery.nextReviewAt = transition.nextReviewAt
   mastery.reviewInterval = transition.interval
   mastery.easeFactor = transition.easeFactor
+  mastery.learningStage = transition.learningStage  // SM-2 学习阶段
   mastery.totalAttempts += 1
   mastery.lastAnswerQuality = transition.quality
   mastery.lastErrorType = transition.errorType
@@ -235,4 +324,13 @@ export async function getMasteryWords(userId, params = {}) {
     : { nextReviewAt: 1, masteryScore: 1 }
 
   return WordMastery.find(query).sort(sort).limit(limit).lean()
+}
+
+// 暴露内部函数供测试使用（与 distractorService.js __testables 模式一致）
+export const __testables = {
+  updateWithSM2,
+  mapQuizToSM2Quality,
+  calculateTransition,
+  addDays,
+  clamp
 }

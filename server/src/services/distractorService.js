@@ -233,6 +233,83 @@ export async function generateSemanticDistractors(targetWord, questionType = 'ch
   return selected.slice(0, safeCount).map(toDistractorPayload)
 }
 
+// LLM 干扰项生成内存缓存（同 session 内不重复调用）
+const llmDistractorCache = new Map()
+const LLM_CACHE_TTL = 30 * 60 * 1000 // 30分钟
+
+/**
+ * LLM 增强干扰项生成（带超时和降级）
+ *
+ * 策略：
+ *   1. 先尝试规则生成（快，零成本）
+ *   2. 如果规则生成不足或质量低 → 异步调用 LLM 补充
+ *   3. LLM 结果缓存 30 分钟（同 word 不重复调用）
+ *   4. LLM 超时/失败 → 回退纯规则生成结果
+ */
+export async function generateDistractorsWithLLM(targetWord, questionType = 'choice_en2cn', count = DEFAULT_COUNT) {
+  // 1. 规则生成
+  const ruleBased = await generateSemanticDistractors(targetWord, questionType, count)
+
+  // 2. 规则结果足够 → 直接返回
+  if (ruleBased.length >= count) {
+    return ruleBased.slice(0, count)
+  }
+
+  // 3. 检查缓存
+  const cacheKey = `${targetWord.word}:${targetWord.meaning}`
+  const cached = llmDistractorCache.get(cacheKey)
+  if (cached && Date.now() - cached.timestamp < LLM_CACHE_TTL) {
+    // 合并缓存结果
+    const merged = [...ruleBased, ...cached.items]
+    return merged.slice(0, count)
+  }
+
+  // 4. 尝试 LLM 增强（5秒超时）
+  try {
+    const llmServiceUrl = process.env.LLM_SERVICE_URL || 'http://localhost:8000'
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 5000)
+
+    const response = await fetch(`${llmServiceUrl}/api/llm/distractors`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        word: targetWord.word,
+        meaning: targetWord.meaning,
+        count: count - ruleBased.length,
+        difficulty: targetWord.difficulty || 'intermediate'
+      }),
+      signal: controller.signal
+    })
+
+    clearTimeout(timeout)
+
+    if (response.ok) {
+      const data = await response.json()
+      if (data.distractors && data.distractors.length > 0) {
+        const llmItems = data.distractors.map(d => ({
+          text: d,
+          source: 'llm'
+        }))
+
+        // 缓存
+        llmDistractorCache.set(cacheKey, {
+          items: llmItems,
+          timestamp: Date.now()
+        })
+
+        const merged = [...ruleBased, ...llmItems]
+        return merged.slice(0, count)
+      }
+    }
+  } catch (e) {
+    // LLM 不可用 → 静默降级到规则生成
+    console.warn('LLM 干扰项生成不可用，使用规则生成:', e.message)
+  }
+
+  return ruleBased.slice(0, count)
+}
+
 export const __testables = {
   normalizeText,
   tokenizeChineseMeaning,

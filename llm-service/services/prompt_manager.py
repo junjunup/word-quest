@@ -132,6 +132,30 @@ class PromptManager:
         ]
         return "\n".join(lines)
 
+    # 干扰项生成 Prompt
+    DISTRACTOR_PROMPT = """你是英语词汇教学专家。请为以下单词生成 {count} 个高质量干扰项（选择题的错误选项）。
+
+目标单词：{word}
+释义：{meaning}
+难度：{difficulty}
+
+要求：
+1. 干扰项与目标词在形态（拼写、长度、前后缀）或语义上相近，但含义不同
+2. 干扰项之间的难度应相近
+3. 每个干扰项都是真实存在的英语单词
+4. 不要包含目标词本身或其变体
+5. 不要包含目标词的近义词（那些可能是正确答案）
+
+请只返回一个 JSON 数组，格式如：["word1", "word2", "word3"]"""
+
+    def build_distractor_prompt(self, word: str, meaning: str, count: int = 3, difficulty: str = "intermediate") -> str:
+        return self.DISTRACTOR_PROMPT.format(
+            word=word,
+            meaning=meaning,
+            count=count,
+            difficulty=difficulty
+        )
+
     def _get_template_vars(self, context: dict) -> dict:
         return {
             "current_word": context.get("currentWord", ""),

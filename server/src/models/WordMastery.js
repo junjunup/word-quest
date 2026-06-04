@@ -26,6 +26,7 @@ const wordMasterySchema = new mongoose.Schema({
   wrongCount: { type: Number, default: 0, min: 0 },
   timeoutCount: { type: Number, default: 0, min: 0 },
   pronunciationCount: { type: Number, default: 0, min: 0 },
+  learningStage: { type: String, enum: ['new', 'learning', 'review', 'mastered'], default: 'new' },
   lastAnswerQuality: { type: String, enum: ['exact', 'near', 'wrong'], default: 'wrong' },
   lastErrorType: { type: String, enum: ['unknown', 'spelling_near', 'meaning_confusion', 'timeout', 'pronunciation', 'other'], default: 'unknown' },
   recentErrorTypes: [{ type: String, enum: ['unknown', 'spelling_near', 'meaning_confusion', 'timeout', 'pronunciation', 'other'] }],

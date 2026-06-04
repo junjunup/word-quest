@@ -4,6 +4,8 @@ import GameProgress from '../models/GameProgress.js'
 import QuizRecord from '../models/QuizRecord.js'
 import User from '../models/User.js'
 import { calculateQuizScore } from '../services/scoringService.js'
+import { getWordSelection, recommendQuestionTypes } from '../services/adaptiveEngine.js'
+import { updateFromQuizRecord } from '../services/masteryService.js'
 import {
   MAX_CHAPTER,
   MAX_LEVEL,
@@ -371,6 +373,123 @@ router.get('/endless-score', authMiddleware, async (req, res) => {
   } catch (err) {
     console.error(err)
     res.status(500).json({ success: false, message: '服务器内部错误' })
+  }
+})
+
+// ── 逐词记忆模型 API ──
+
+// 获取推荐单词列表（逐词级优先级排序）
+router.get('/adaptive/words', authMiddleware, async (req, res) => {
+  try {
+    const chapterId = parseInt(req.query.chapterId, 10) || 1
+    const levelId = parseInt(req.query.levelId, 10) || 1
+    const count = Math.min(Math.max(parseInt(req.query.count, 10) || 10, 1), 50)
+    const wordbookId = sanitizeWordbookId(req.query.wordbookId || 'cet4')
+
+    const validation = validateChapterLevel(chapterId, levelId)
+    if (!validation.valid) {
+      return res.status(400).json({ success: false, message: validation.message })
+    }
+
+    const words = await getWordSelection(req.userId, chapterId, levelId, wordbookId, count)
+
+    res.json({ success: true, data: { words, count: words.length, chapterId, levelId, wordbookId } })
+  } catch (err) {
+    console.error('获取推荐单词失败:', err.message)
+    res.status(500).json({ success: false, message: '获取推荐单词失败' })
+  }
+})
+
+// 更新单词掌握度（每次答题后调用）
+router.post('/word-mastery/update', authMiddleware, async (req, res) => {
+  try {
+    const { wordId, chapterId, levelId, questionType, isCorrect, responseTime, answerQuality, errorType, sourceMode, sessionId, wordbookId } = req.body
+
+    if (!wordId) {
+      return res.status(400).json({ success: false, message: '缺少 wordId' })
+    }
+
+    const record = {
+      userId: req.userId,
+      wordId,
+      wordbookId: sanitizeWordbookId(wordbookId || 'cet4'),
+      chapter: chapterId,
+      level: levelId,
+      questionType: questionType || 'choice_en2cn',
+      isCorrect: !!isCorrect,
+      responseTime: responseTime || 0,
+      answerQuality: answerQuality || (isCorrect ? 'exact' : 'wrong'),
+      errorType: errorType || 'unknown',
+      sourceMode: sourceMode || 'mainline',
+      sessionId: sessionId || ''
+    }
+
+    const result = await updateFromQuizRecord(record)
+
+    // 获取推荐题型（下次出题时使用）
+    const recommendedTypes = recommendQuestionTypes(
+      result.mastery?.masteryScore || 0,
+      result.mastery?.learningStage || 'new'
+    )
+
+    res.json({
+      success: true,
+      data: {
+        masteryScore: result.mastery?.masteryScore,
+        delta: result.delta,
+        learningStage: result.mastery?.learningStage,
+        recommendedTypes
+      }
+    })
+  } catch (err) {
+    console.error('更新单词掌握度失败:', err.message)
+    // 容错：失败时返回 success:false，客户端降级继续游戏
+    res.status(500).json({
+      success: false,
+      message: '单词掌握度更新暂不可用，不影响游戏继续',
+      data: {
+        masteryScore: 0,
+        delta: 0,
+        learningStage: 'new',
+        recommendedTypes: ['choice_en2cn', 'choice_cn2en']
+      }
+    })
+  }
+})
+
+// 获取复习日历（本月每天应复习多少词）
+router.get('/review/calendar', authMiddleware, async (req, res) => {
+  try {
+    const month = req.query.month || new Date().toISOString().slice(0, 7) // YYYY-MM
+    const wordbookId = sanitizeWordbookId(req.query.wordbookId || 'cet4')
+    const startDate = new Date(month + '-01')
+    const endDate = new Date(startDate)
+    endDate.setMonth(endDate.getMonth() + 1)
+
+    const WordMastery = (await import('../models/WordMastery.js')).default
+
+    const calendar = await WordMastery.aggregate([
+      {
+        $match: {
+          userId: new (await import('mongoose')).default.Types.ObjectId(req.userId),
+          wordbookId,
+          nextReviewAt: { $gte: startDate, $lt: endDate }
+        }
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$nextReviewAt' } },
+          count: { $sum: 1 },
+          weakCount: { $sum: { $cond: [{ $lt: ['$masteryScore', 50] }, 1, 0] } }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ])
+
+    res.json({ success: true, data: { month, wordbookId, calendar } })
+  } catch (err) {
+    console.error('获取复习日历失败:', err.message)
+    res.status(500).json({ success: false, message: '复习日历暂不可用', data: { month: req.query.month || '', wordbookId: 'cet4', calendar: [] } })
   }
 })
 

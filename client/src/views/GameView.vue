@@ -142,10 +142,11 @@ import LevelSelect from '@/components/LevelSelect.vue'
 import GameIntro from '@/components/GameIntro.vue'
 import CharacterSelect from '@/components/CharacterSelect.vue'
 import { submitQuizRecord } from '@/api/learning'
-import { saveAchievement } from '@/api/game'
-import { getChapterLevelWords, getQuizForWord, getChapterWords } from '@/api/vocabulary'
+import { saveAchievement, getAdaptiveWords, updateWordMastery } from '@/api/game'
+import { getChapterLevelWords, getQuizForWord, getChapterWords, getSelectedWordbook } from '@/api/vocabulary'
 import { DEATH_SPIRAL, STORAGE_KEYS, QUESTION_TYPES } from '@/game/config/gameConstants'
 import { calculateScore, shuffle, buildChoiceOptions, safeGetJSON, safeSetJSON, safeGetItem, safeSetItem } from '@/utils/helpers'
+import { enqueue, flushQueue, getQueueSize } from '@/utils/offlineQueue'
 import scoreSystem from '@/game/systems/ScoreSystem'
 import audioManager from '@/game/systems/AudioManager'
 
@@ -258,6 +259,7 @@ async function loadWordsAndInitLevel(chapter, level) {
   levelWords.value = []
   loadError.value = ''
 
+  // 先加载完整词汇数据（含 meaning, phonetic, example, options 等）
   try {
     const res = await getChapterLevelWords(chapter, level)
     if (res.data && res.data.length > 0) {
@@ -267,31 +269,49 @@ async function loadWordsAndInitLevel(chapter, level) {
     console.warn('加载词汇失败:', e)
   }
 
-  // 该 level 没有词汇，尝试 level=0（章节通用词）
+  // Fallback 链
   if (levelWords.value.length === 0) {
     try {
       const res = await getChapterLevelWords(chapter, 0)
-      if (res.data && res.data.length > 0) {
-        levelWords.value = res.data
-      }
-    } catch (e) {
-      console.warn('加载章节通用词汇失败:', e)
-    }
+      if (res.data && res.data.length > 0) levelWords.value = res.data
+    } catch (e) { console.warn('加载章节通用词汇失败:', e) }
   }
 
-  // 仍然没有，加载整个章节
   if (levelWords.value.length === 0) {
     try {
       const res = await getChapterWords(chapter)
       if (res.data) levelWords.value = res.data.slice(0, 10)
-    } catch (e) {
-      console.warn('Fallback 加载失败:', e)
-    }
+    } catch (e) { console.warn('Fallback 加载失败:', e) }
   }
 
   if (levelWords.value.length === 0) {
     loadError.value = '词汇加载失败，请检查网络连接'
     console.error('所有词汇加载方式均失败')
+  }
+
+  // 并行获取自适应推荐排序（不影响主流程）
+  if (levelWords.value.length > 0) {
+    try {
+      const adaptiveRes = await getAdaptiveWords(chapter, level, levelWords.value.length, getSelectedWordbook())
+      if (adaptiveRes?.data?.words && adaptiveRes.data.words.length > 0) {
+        // 以自适应推荐的 wordId 顺序重新排列词汇
+        const priorityMap = new Map()
+        adaptiveRes.data.words.forEach((item, idx) => {
+          priorityMap.set(String(item.wordId), idx)
+        })
+        levelWords.value.sort((a, b) => {
+          const pa = priorityMap.get(String(a._id))
+          const pb = priorityMap.get(String(b._id))
+          if (pa !== undefined && pb !== undefined) return pa - pb
+          if (pa !== undefined) return -1
+          if (pb !== undefined) return 1
+          return 0
+        })
+      }
+    } catch (e) {
+      // 自适应API失败 → 保持原有顺序，不影响游戏
+      console.warn('自适应排序获取失败，使用默认顺序:', e.message)
+    }
   }
 
   const difficulty = gameStore.selectedDifficulty
@@ -603,6 +623,27 @@ onMounted(async () => {
 
   // 浏览器关闭/刷新时提示
   window.addEventListener('beforeunload', onBeforeUnload)
+
+  // 网络恢复时自动刷新离线队列
+  window.addEventListener('wordquest:online', () => {
+    flushQueue(
+      (payload) => submitQuizRecord(payload),
+      (payload) => updateWordMastery(payload)
+    ).then(() => {
+      if (getQueueSize() === 0) {
+        console.log('📡 离线队列已全部同步')
+      }
+    }).catch(() => {})
+  })
+
+  // 页面加载时尝试刷新遗留的离线队列
+  if (getQueueSize() > 0) {
+    console.log(`📡 发现 ${getQueueSize()} 条离线记录，尝试同步...`)
+    flushQueue(
+      (payload) => submitQuizRecord(payload),
+      (payload) => updateWordMastery(payload)
+    ).catch(() => {})
+  }
 })
 
 onUnmounted(() => {
@@ -899,7 +940,48 @@ async function handleQuizAnswer(result) {
       latestAdaptiveDifficulty.value = ad
       adaptiveQuestionType.value = ad.questionType || 'choice_en2cn'
     }
-  }).catch(e => console.warn('提交答题记录失败:', e))
+  }).catch(e => {
+    console.warn('提交答题记录失败，加入离线队列:', e.message)
+    enqueue('submitQuizRecord', {
+      wordId: currentQuizData.value?._id || 'unknown',
+      word: currentQuizData.value?.word || '',
+      questionType: currentQuestionType.value,
+      isCorrect,
+      responseTime,
+      difficulty: currentDifficulty.value,
+      hintUsed: false,
+      npcInteraction: false,
+      sessionId: levelManager.sessionId,
+      chapter: hudData.chapter,
+      level: hudData.level,
+      playerAnswer: answer,
+      correctAnswer: correctAnswerForType,
+      answerQuality,
+      editDistance,
+      similarity,
+      scoreRatio,
+      fuzzyFeedback
+    })
+  })
+
+  // 更新逐词掌握度（SM-2 间隔重复算法 → 异步，不阻塞游戏）
+  const masteryPayload = {
+    wordId: currentQuizData.value?._id,
+    chapterId: hudData.chapter,
+    levelId: hudData.level,
+    wordbookId: getSelectedWordbook(),
+    questionType: currentQuestionType.value,
+    isCorrect,
+    responseTime,
+    answerQuality,
+    errorType: answerQuality === 'near' ? 'spelling_near' : (isCorrect ? 'unknown' : 'other'),
+    sourceMode: 'mainline',
+    sessionId: levelManager.sessionId
+  }
+  updateWordMastery(masteryPayload).catch(e => {
+    console.warn('更新单词掌握度失败，加入离线队列:', e.message)
+    enqueue('updateWordMastery', masteryPayload)
+  })
 
   // 检查 Game Over
   if (status === 'game_over') {

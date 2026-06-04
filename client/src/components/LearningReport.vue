@@ -1,60 +1,24 @@
 <template>
   <div class="learning-report">
-    <div class="report-toolbar">
-      <h3 class="report-title">📊 学习报告</h3>
-      <div class="export-actions">
-        <button class="btn" @click="exportJSON">导出 JSON</button>
-        <button class="btn" @click="exportCSV">导出 CSV</button>
-        <button class="btn btn-gold" @click="printReport">打印/PDF</button>
-      </div>
-    </div>
+    <h3 class="report-title">📊 学习报告</h3>
 
     <!-- 概览卡片 -->
     <div class="stats-grid">
-      <div v-for="card in overviewCards" :key="card.label" class="stat-card">
-        <div class="stat-value">{{ card.value }}</div>
-        <div class="stat-label">{{ card.label }}</div>
+      <div class="stat-card">
+        <div class="stat-value">{{ stats?.wordsLearned || 0 }}</div>
+        <div class="stat-label">已学单词</div>
       </div>
-    </div>
-
-    <!-- 自适应学习闭环摘要 -->
-    <div class="adaptive-summary-card" v-if="adaptiveSummary">
-      <h4>🧠 AI 自适应复习建议</h4>
-      <div class="adaptive-grid">
-        <div><strong>{{ adaptiveSummary.reviewCount || 0 }}</strong><span>今日待复习</span></div>
-        <div><strong>{{ adaptiveSummary.averageMastery || 0 }}%</strong><span>平均掌握度</span></div>
-        <div><strong>{{ adaptiveSummary.weakCount || 0 }}</strong><span>薄弱词</span></div>
-        <div><strong>{{ adaptiveSummary.staleCount || 0 }}</strong><span>久未复习</span></div>
+      <div class="stat-card">
+        <div class="stat-value">{{ stats?.wordsMastered || 0 }}</div>
+        <div class="stat-label">已掌握</div>
       </div>
-      <p>系统会结合 wrong / near / low_mastery / stale 原因生成今日复习队列。</p>
-    </div>
-
-    <div class="distribution-grid">
-      <div class="distribution-card">
-        <h4>错因分布</h4>
-        <div v-if="normalizedErrorTypeData.length" class="distribution-list">
-          <div v-for="item in normalizedErrorTypeData" :key="item.errorType" class="distribution-row">
-            <div class="distribution-row-head">
-              <span>{{ getErrorTypeLabel(item.errorType) }}</span>
-              <strong>{{ item.count }}</strong>
-            </div>
-            <div class="distribution-bar"><div :style="{ width: getErrorTypeWidth(item.count) }"></div></div>
-          </div>
-        </div>
-        <div v-else class="distribution-empty">暂无错因记录</div>
+      <div class="stat-card">
+        <div class="stat-value">{{ stats?.correctRate || 0 }}%</div>
+        <div class="stat-label">正确率</div>
       </div>
-      <div class="distribution-card">
-        <h4>学习入口分布</h4>
-        <div v-if="normalizedSourceModeData.length" class="distribution-list">
-          <div v-for="item in normalizedSourceModeData" :key="item.sourceMode" class="distribution-row">
-            <div class="distribution-row-head">
-              <span>{{ getSourceModeLabel(item.sourceMode) }}</span>
-              <strong>{{ item.count }}</strong>
-            </div>
-            <div class="distribution-bar source"><div :style="{ width: getSourceModeWidth(item.count) }"></div></div>
-          </div>
-        </div>
-        <div v-else class="distribution-empty">暂无入口记录</div>
+      <div class="stat-card">
+        <div class="stat-value">{{ stats?.totalQuizzes || 0 }}</div>
+        <div class="stat-label">总答题数</div>
       </div>
     </div>
 
@@ -75,93 +39,65 @@
       <h4>各章节正确率</h4>
       <v-chart :option="radarOption" style="height: 280px" autoresize />
     </div>
+
+    <!-- 错因分布 -->
+    <div class="chart-container" v-if="errorTypeData && errorTypeData.length > 0">
+      <h4>🔍 错因分布</h4>
+      <v-chart :option="errorTypeOption" style="height: 200px" autoresize />
+    </div>
+
+    <!-- 学习入口分布 -->
+    <div class="chart-container" v-if="sourceModeData && sourceModeData.length > 0">
+      <h4>📂 学习入口分布</h4>
+      <v-chart :option="sourceModeOption" style="height: 180px" autoresize />
+    </div>
+
+    <!-- 自适应学习摘要 -->
+    <div class="chart-container" v-if="adaptiveSummary">
+      <h4>🧠 自适应学习摘要</h4>
+      <div class="adaptive-summary">
+        <div class="adaptive-row">
+          <span class="adaptive-label">待复习词汇</span>
+          <span class="adaptive-value">{{ adaptiveSummary.reviewCount }} 个</span>
+        </div>
+        <div class="adaptive-row">
+          <span class="adaptive-label">平均掌握度</span>
+          <span class="adaptive-value">{{ adaptiveSummary.averageMastery }}%</span>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
 import VChart from 'vue-echarts'
-import { exportLearningReportCSV, exportLearningReportJSON, printLearningReport } from '@/utils/reportExport'
-import { use } from 'echarts/core'
-import { CanvasRenderer } from 'echarts/renderers'
-import { PieChart, LineChart, RadarChart } from 'echarts/charts'
-import {
-  TitleComponent, TooltipComponent, LegendComponent,
-  GridComponent, RadarComponent
-} from 'echarts/components'
-
-use([
-  CanvasRenderer, PieChart, LineChart, RadarChart,
-  TitleComponent, TooltipComponent, LegendComponent,
-  GridComponent, RadarComponent
-])
 
 const props = defineProps({
   stats: { type: Object, default: null },
   dailyData: { type: Array, default: () => [] },
   chapterData: { type: Array, default: () => [] },
-  adaptiveSummary: { type: Object, default: null },
   errorTypeData: { type: Array, default: () => [] },
-  sourceModeData: { type: Array, default: () => [] }
+  sourceModeData: { type: Array, default: () => [] },
+  adaptiveSummary: { type: Object, default: null }
 })
 
+// 错因类型中文标签映射
 const ERROR_TYPE_LABELS = {
-  unknown: '未知/正确',
   spelling_near: '拼写接近',
-  meaning_confusion: '释义混淆',
-  timeout: '超时未答',
+  meaning_confusion: '词义混淆',
+  timeout: '答题超时',
   pronunciation: '发音问题',
-  other: '其他错因'
+  unknown: '其他'
 }
 
+// 学习入口中文标签映射
 const SOURCE_MODE_LABELS = {
   mainline: '主线关卡',
-  boss: 'Boss 战',
-  review: '复习队列',
-  daily: '每日挑战',
-  pk: '好友 PK',
-  pronunciation: '发音训练',
-  endless: '无尽模式'
-}
-
-const masterySummary = computed(() => props.stats?.masterySummary || null)
-
-const overviewCards = computed(() => {
-  if (masterySummary.value) {
-    return [
-      { label: '平均掌握度', value: `${masterySummary.value.averageMastery || 0}%` },
-      { label: '待复习', value: masterySummary.value.due || 0 },
-      { label: '薄弱词', value: masterySummary.value.weak || 0 },
-      { label: '已掌握', value: masterySummary.value.mastered || props.stats?.wordsMastered || 0 }
-    ]
-  }
-  return [
-    { label: '已学单词', value: props.stats?.wordsLearned || 0 },
-    { label: '已掌握', value: props.stats?.wordsMastered || 0 },
-    { label: '正确率', value: `${props.stats?.correctRate || 0}%` },
-    { label: '总答题数', value: props.stats?.totalQuizzes || 0 }
-  ]
-})
-
-const normalizedErrorTypeData = computed(() => props.errorTypeData.filter(item => Number(item.count) > 0))
-const normalizedSourceModeData = computed(() => props.sourceModeData.filter(item => Number(item.count) > 0))
-const maxErrorTypeCount = computed(() => Math.max(1, ...normalizedErrorTypeData.value.map(item => Number(item.count) || 0)))
-const maxSourceModeCount = computed(() => Math.max(1, ...normalizedSourceModeData.value.map(item => Number(item.count) || 0)))
-
-function getErrorTypeLabel(errorType) {
-  return ERROR_TYPE_LABELS[errorType] || errorType || '未知'
-}
-
-function getSourceModeLabel(sourceMode) {
-  return SOURCE_MODE_LABELS[sourceMode] || sourceMode || '未知'
-}
-
-function getErrorTypeWidth(count) {
-  return `${Math.max(6, Math.round((Number(count) || 0) / maxErrorTypeCount.value * 100))}%`
-}
-
-function getSourceModeWidth(count) {
-  return `${Math.max(6, Math.round((Number(count) || 0) / maxSourceModeCount.value * 100))}%`
+  review: '错词复习',
+  endless: '无尽模式',
+  daily_challenge: '每日挑战',
+  boss: 'Boss 战'
 }
 
 const pieOption = computed(() => ({
@@ -203,30 +139,6 @@ const lineOption = computed(() => ({
   }]
 }))
 
-function getReportPayload() {
-  return {
-    exportedAt: new Date().toISOString(),
-    stats: props.stats,
-    dailyData: props.dailyData,
-    chapterData: props.chapterData,
-    adaptiveSummary: props.adaptiveSummary,
-    errorTypeData: props.errorTypeData,
-    sourceModeData: props.sourceModeData
-  }
-}
-
-function exportJSON() {
-  exportLearningReportJSON(getReportPayload())
-}
-
-function exportCSV() {
-  exportLearningReportCSV(getReportPayload())
-}
-
-function printReport() {
-  printLearningReport()
-}
-
 const radarOption = computed(() => {
   const chapters = ['Ch1 基础', 'Ch2 自然', 'Ch3 商务', 'Ch4 学术', 'Ch5 易混', 'Ch6 综合']
   return {
@@ -251,6 +163,70 @@ const radarOption = computed(() => {
     }]
   }
 })
+
+// 错因分布横向柱状图
+const errorTypeOption = computed(() => {
+  const data = (props.errorTypeData || []).map(item => ({
+    name: ERROR_TYPE_LABELS[item.errorType] || item.errorType,
+    value: item.count
+  }))
+  return {
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    grid: { left: 100, right: 30, top: 10, bottom: 20 },
+    xAxis: {
+      type: 'value',
+      axisLabel: { color: '#888' },
+      splitLine: { lineStyle: { color: '#222' } }
+    },
+    yAxis: {
+      type: 'category',
+      data: data.map(d => d.name),
+      axisLabel: { color: '#b8b8d4', fontSize: 12 },
+      axisLine: { lineStyle: { color: '#333' } }
+    },
+    series: [{
+      type: 'bar',
+      data: data.map(d => d.value),
+      itemStyle: {
+        color: '#d45b3e',
+        borderRadius: [0, 4, 4, 0]
+      },
+      barMaxWidth: 24
+    }]
+  }
+})
+
+// 学习入口分布横向柱状图
+const sourceModeOption = computed(() => {
+  const data = (props.sourceModeData || []).map(item => ({
+    name: SOURCE_MODE_LABELS[item.sourceMode] || item.sourceMode,
+    value: item.count
+  }))
+  return {
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    grid: { left: 100, right: 30, top: 10, bottom: 20 },
+    xAxis: {
+      type: 'value',
+      axisLabel: { color: '#888' },
+      splitLine: { lineStyle: { color: '#222' } }
+    },
+    yAxis: {
+      type: 'category',
+      data: data.map(d => d.name),
+      axisLabel: { color: '#b8b8d4', fontSize: 12 },
+      axisLine: { lineStyle: { color: '#333' } }
+    },
+    series: [{
+      type: 'bar',
+      data: data.map(d => d.value),
+      itemStyle: {
+        color: '#4a90d9',
+        borderRadius: [0, 4, 4, 0]
+      },
+      barMaxWidth: 24
+    }]
+  }
+})
 </script>
 
 <style scoped lang="scss">
@@ -258,25 +234,10 @@ const radarOption = computed(() => {
   padding: 0;
 }
 
-.report-toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
 .report-title {
   font-size: 20px;
   color: #ffd700;
-}
-
-.export-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-
-  .btn { padding: 8px 12px; font-size: 13px; min-height: 36px; }
+  margin-bottom: 20px;
 }
 
 .stats-grid {
@@ -319,106 +280,31 @@ const radarOption = computed(() => {
   }
 }
 
-.adaptive-summary-card {
-  margin-bottom: 24px;
-  background: rgba(91, 140, 62, 0.12);
-  border: 1px solid rgba(91, 140, 62, 0.35);
-  border-radius: 10px;
-  padding: 16px;
-
-  h4 { color: #9be66d; margin-bottom: 12px; }
-  p { color: #c4b99a; font-size: 13px; line-height: 1.6; }
+.adaptive-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
-.adaptive-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  margin-bottom: 10px;
-
-  div {
-    background: rgba(0, 0, 0, 0.14);
-    border-radius: 8px;
-    padding: 10px;
-    text-align: center;
-  }
-  strong { display: block; color: #ffd700; font-size: 18px; }
-  span { color: #888; font-size: 12px; }
-}
-
-.distribution-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
-.distribution-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-  padding: 16px;
-
-  h4 { font-size: 15px; color: #b8b8d4; margin-bottom: 12px; }
-}
-
-.distribution-list {
-  display: grid;
-  gap: 10px;
-}
-
-.distribution-row-head {
+.adaptive-row {
+  flex: 1;
+  min-width: 150px;
   display: flex;
   justify-content: space-between;
-  gap: 10px;
-  color: #c4b99a;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 12px 16px;
+}
+
+.adaptive-label {
   font-size: 13px;
-  margin-bottom: 5px;
-
-  strong { color: #ffd700; }
+  color: #888;
 }
 
-.distribution-bar {
-  height: 6px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
-  overflow: hidden;
-
-  div {
-    height: 100%;
-    border-radius: inherit;
-    background: linear-gradient(90deg, #d0021b, #ff8a65);
-  }
-
-  &.source div { background: linear-gradient(90deg, #4a90d9, #7ed321); }
-}
-
-.distribution-empty {
-  padding: 18px 0;
-  text-align: center;
-  color: #666;
-  font-size: 13px;
-}
-
-@media (max-width: 640px) {
-  .stats-grid,
-  .adaptive-grid,
-  .distribution-grid { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (max-width: 430px) {
-  .report-toolbar { align-items: stretch; flex-direction: column; }
-  .export-actions { display: grid; grid-template-columns: 1fr; }
-  .stats-grid,
-  .adaptive-grid,
-  .distribution-grid { grid-template-columns: 1fr; }
-  .chart-container,
-  .adaptive-summary-card,
-  .distribution-card { padding: 12px; }
-}
-
-@media print {
-  .export-actions { display: none; }
-  .learning-report { color: #111; background: #fff; }
+.adaptive-value {
+  font-size: 16px;
+  font-weight: bold;
+  color: #4a90d9;
 }
 </style>

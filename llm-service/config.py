@@ -1,6 +1,6 @@
 import os
 
-ERNIE_API_KEY = os.getenv("ERNIE_API_KEY", "")
-ERNIE_SECRET_KEY = os.getenv("ERNIE_SECRET_KEY", "")
-ERNIE_TOKEN_URL = "https://aip.baidubce.com/oauth/2.0/token"
-ERNIE_CHAT_URL = "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/ernie-4.0-8k"
+# 通义千问 DashScope API Key
+QWEN_API_KEY = os.getenv("QWEN_API_KEY", "")
+QWEN_BASE_URL = os.getenv("QWEN_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
+QWEN_MODEL = os.getenv("QWEN_MODEL", "qwen-plus")

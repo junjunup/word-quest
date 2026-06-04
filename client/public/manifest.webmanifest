@@ -1,17 +1,36 @@
 {
-  "name": "词汇大冒险 Word Quest",
+  "name": "Word Quest - 词汇大冒险",
   "short_name": "Word Quest",
-  "description": "AI 辅助游戏化英语词汇学习系统",
+  "description": "AI 辅助游戏化英语词汇学习系统 — 2D 像素风 RPG 教育游戏",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#2d5016",
-  "theme_color": "#5b8c3e",
+  "orientation": "landscape",
+  "background_color": "#2D5016",
+  "theme_color": "#4A7C23",
   "lang": "zh-CN",
+  "categories": ["education", "games"],
   "icons": [
     {
-      "src": "/assets/ui/favicon.ico",
-      "sizes": "48x48",
-      "type": "image/x-icon"
+      "src": "/assets/ui/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/ui/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "开始学习",
+      "short_name": "学习",
+      "description": "直接进入游戏开始学习",
+      "url": "/game",
+      "icons": [{ "src": "/assets/ui/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }
