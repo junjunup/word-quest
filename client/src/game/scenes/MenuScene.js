@@ -113,6 +113,13 @@ export default class MenuScene extends Phaser.Scene {
       ease: 'Sine.easeInOut'
     })
 
+    // 首次访问：小智欢迎气泡
+    const hasVisited = localStorage.getItem('wordquest:hasVisited')
+    if (!hasVisited) {
+      this.showFirstTimeWelcome(width, height)
+      localStorage.setItem('wordquest:hasVisited', 'true')
+    }
+
     // 延迟启用输入，等待上一场景残留的指针事件完全排空
     // 使用原生 setTimeout 避免被上一场景 shutdown 的 tweens.killAll() 连带清除
     this._inputTimer = setTimeout(() => {
@@ -232,6 +239,83 @@ export default class MenuScene extends Phaser.Scene {
     hitArea.on('pointerdown', () => {
       audioManager.play('click')
       callback()
+    })
+  }
+
+  /**
+   * 首次访问欢迎气泡 — 小智引导新玩家点击"开始冒险"
+   */
+  showFirstTimeWelcome(width, height) {
+    const bubbleX = width / 2
+    const bubbleY = 195
+
+    // 对话气泡背景
+    const bubble = this.add.graphics()
+    bubble.fillStyle(0xfff8e7, 0.95)
+    bubble.fillRoundedRect(bubbleX - 200, bubbleY - 45, 400, 65, 10)
+    bubble.lineStyle(2, 0x8b6914)
+    bubble.strokeRoundedRect(bubbleX - 200, bubbleY - 45, 400, 65, 10)
+    // 小三角指向开始按钮
+    bubble.fillStyle(0xfff8e7, 0.95)
+    bubble.fillTriangle(
+      bubbleX - 10, bubbleY + 20,
+      bubbleX + 10, bubbleY + 20,
+      bubbleX, bubbleY + 38
+    )
+    bubble.lineStyle(2, 0x8b6914)
+    const tri = new Phaser.Geom.Triangle(bubbleX - 10, bubbleY + 20, bubbleX + 10, bubbleY + 20, bubbleX, bubbleY + 38)
+    bubble.strokeTriangle(tri)
+    // 覆盖三角底边
+    bubble.lineStyle(2, 0xfff8e7, 0.95)
+    bubble.lineBetween(bubbleX - 10, bubbleY + 20, bubbleX + 10, bubbleY + 20)
+
+    // 欢迎文字
+    this.add.text(bubbleX, bubbleY - 22, '👋 欢迎来到词汇大冒险！', {
+      fontSize: '15px',
+      fontFamily: 'Microsoft YaHei',
+      color: '#5b3a1a',
+      fontStyle: 'bold'
+    }).setOrigin(0.5)
+
+    this.add.text(bubbleX, bubbleY + 5, '我是小智 ✨ 点击\`开始冒险\`进入你的第一课吧！', {
+      fontSize: '12px',
+      fontFamily: 'Microsoft YaHei',
+      color: '#8b6914'
+    }).setOrigin(0.5)
+
+    // 指向开始按钮的闪烁箭头
+    const arrow = this.add.text(width / 2, 210, '👇', {
+      fontSize: '22px'
+    }).setOrigin(0.5)
+
+    this.tweens.add({
+      targets: arrow,
+      y: arrow.y + 8,
+      duration: 600,
+      yoyo: true,
+      repeat: 4,
+      ease: 'Sine.easeInOut',
+      onComplete: () => {
+        // 3秒后自动淡出
+        this.tweens.add({
+          targets: [bubble, arrow],
+          alpha: 0,
+          duration: 800,
+          delay: 1000
+        })
+      }
+    })
+
+    // 点击气泡或任意位置关闭
+    const dismissZone = this.add.rectangle(width / 2, height / 2, width, height)
+      .setInteractive({ useHandCursor: false })
+      .setAlpha(0.001)
+    dismissZone.once('pointerdown', () => {
+      this.tweens.add({
+        targets: [bubble, arrow],
+        alpha: 0,
+        duration: 400
+      })
     })
   }
 

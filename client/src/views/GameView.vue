@@ -52,6 +52,7 @@
     <!-- 游戏交互式引导（叠加在游戏画面上） -->
     <GameIntro
       v-if="showTutorial"
+      :is-tutorial="isTutorialLevel"
       @dismiss="onIntroDismiss"
     />
 

@@ -36,7 +36,8 @@ export default class ResultScene extends Phaser.Scene {
       correctCount = 0, wrongCount = 0, totalWords = 0,
       correctRate = 0, maxCombo = 0, totalTime = 0,
       difficulty = 'normal', scoreMultiplier = 1.0,
-      bossDefeated = false, livesRemaining = 0
+      bossDefeated = false, livesRemaining = 0,
+      isTutorial = false
     } = this.result
 
     // 田园背景
@@ -58,13 +59,30 @@ export default class ResultScene extends Phaser.Scene {
       stroke: '#2d5016', strokeThickness: 2
     }).setOrigin(0.5)
 
+    // 教程关完成：特殊祝贺面板
+    if (isTutorial && !isGameOver) {
+      const tutorialBox = this.add.graphics().setDepth(200)
+      tutorialBox.fillStyle(0xfff8e7, 0.92)
+      tutorialBox.fillRoundedRect(width / 2 - 220, 100, 440, 40, 8)
+      tutorialBox.lineStyle(2, 0xffc847)
+      tutorialBox.strokeRoundedRect(width / 2 - 220, 100, 440, 40, 8)
+
+      this.add.text(width / 2, 110, '🎓 教程完成！你已掌握基本操作，继续冒险吧！', {
+        fontSize: '14px', fontFamily: 'Microsoft YaHei', color: '#5b3a1a', fontStyle: 'bold'
+      }).setOrigin(0.5).setDepth(201)
+
+      this.add.text(width / 2, 130, '💡 提示：之后的关卡有 Boss 战，难度更高但奖励也更丰厚！', {
+        fontSize: '11px', fontFamily: 'Microsoft YaHei', color: '#8b6914'
+      }).setOrigin(0.5).setDepth(201)
+    }
+
     // 难度badge + Boss击败标识
     const badges = []
     const diffLabels = { easy: '🌱 简单', normal: '⚔️ 普通', hard: '🔥 困难' }
     badges.push(diffLabels[difficulty] || '⚔️ 普通')
     if (bossDefeated) badges.push('👹 Boss已击败')
 
-    this.add.text(width / 2, 110, badges.join('  |  '), {
+    this.add.text(width / 2, isTutorial && !isGameOver ? 155 : 110, badges.join('  |  '), {
       fontSize: '13px', fontFamily: 'Microsoft YaHei',
       color: difficulty === 'hard' ? '#ff8866' : (difficulty === 'easy' ? '#88cc66' : '#f5edd6'),
       stroke: '#2d5016', strokeThickness: 2

@@ -47,6 +47,7 @@ class LevelManager {
    * 教程模式：99命、60秒
    */
   setTutorialMode() {
+    this.isTutorial = true
     this.lives = 99
     this.difficultyConfig = { ...this.difficultyConfig, lives: 99, timer: 60000 }
   }
@@ -197,7 +198,8 @@ class LevelManager {
       sessionId: this.sessionId,
       difficulty: this.difficulty,
       scoreMultiplier: this.difficultyConfig.scoreMultiplier,
-      bossDefeated: this.bossDefeated
+      bossDefeated: this.bossDefeated,
+      isTutorial: !!this.isTutorial
     }
   }
 }

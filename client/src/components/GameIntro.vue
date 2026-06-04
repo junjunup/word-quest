@@ -31,7 +31,7 @@
       <div class="tooltip-content">
         <div class="tooltip-icon">🐔</div>
         <h3>接触小鸡怪物！</h3>
-        <p class="tooltip-desc">走到 <strong>🐔 小鸡</strong> 旁边触发词汇答题。<br>答对消灭怪物获得分数，答错扣一条命！</p>
+        <p class="tooltip-desc">走到 <strong>🐔 小鸡</strong> 旁边触发词汇答题。<br>答对消灭怪物获得分数，答错扣一条命！<br><span class="tutorial-hint" v-if="isTutorial">💡 教程关有无限生命，放心尝试！</span></p>
         <div class="pulse-arrow">⬆️ 走向附近的怪物</div>
         <div class="step-indicator">步骤 2/3</div>
       </div>
@@ -41,14 +41,14 @@
     <div class="tutorial-tooltip step-complete" v-if="currentStep === 3">
       <div class="tooltip-content">
         <div class="tooltip-icon">🏆</div>
-        <h3>太棒了！</h3>
+        <h3>{{ isTutorial ? '🎓 教程完成！' : '太棒了！' }}</h3>
         <p class="tooltip-desc">
           🔥 <strong>连续答对</strong>可获得连击加成！<br>
           ⭐ 根据正确率和用时获得 1-3 颗星<br>
           💰 更高难度有分数倍率加成<br>
           🤖 答错时 <strong>小智</strong> 会来帮你讲解<br>
           <br>
-          消灭所有小怪和 Boss 即可通关！
+          消灭所有小怪{{ isTutorial ? '即可通关！之后关卡还有 Boss 等着你' : '和 Boss 即可通关！' }}
         </p>
         <button class="btn btn-primary start-adventure-btn" @click="finishTutorial">
           开始冒险 ⚔️
@@ -75,6 +75,9 @@ import eventBus, { EVENTS } from '@/game/systems/EventBus'
 import { TUTORIAL_CONFIG } from '@/game/config/gameConstants'
 import { safeSetItem } from '@/utils/helpers'
 
+const props = defineProps({
+  isTutorial: { type: Boolean, default: false }
+})
 const emit = defineEmits(['dismiss'])
 
 const currentStep = ref(1)
@@ -262,6 +265,16 @@ onUnmounted(() => {
   color: #8b6914;
   font-size: 12px;
   margin: 0 4px;
+}
+
+.tutorial-hint {
+  display: inline-block;
+  color: #5b8c3e;
+  background: rgba(91, 140, 62, 0.1);
+  border: 1px solid rgba(91, 140, 62, 0.3);
+  border-radius: 4px;
+  padding: 2px 8px;
+  margin-top: 4px;
 }
 
 .pulse-arrow {
