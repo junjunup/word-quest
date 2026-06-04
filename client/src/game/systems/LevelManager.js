@@ -71,6 +71,7 @@ class LevelManager {
     this.startTime = Date.now()
     this.bossDefeated = false
     this.graceLifeUsed = false
+    this.isTutorial = false
     this.sessionId = `session_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
   }
 

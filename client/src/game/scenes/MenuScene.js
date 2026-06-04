@@ -306,10 +306,11 @@ export default class MenuScene extends Phaser.Scene {
       }
     })
 
-    // 点击气泡或任意位置关闭
+    // 点击气泡或任意位置关闭（depth=-1 确保不拦截按钮点击）
     const dismissZone = this.add.rectangle(width / 2, height / 2, width, height)
       .setInteractive({ useHandCursor: false })
       .setAlpha(0.001)
+      .setDepth(-1)
     dismissZone.once('pointerdown', () => {
       this.tweens.add({
         targets: [bubble, arrow],

@@ -95,7 +95,8 @@ export function useQuizFlow(hudData, levelWordsRef, gameStore) {
       exampleTranslation: question.exampleTranslation,
       rootAnalysis: question.rootAnalysis || '', memoryTip: question.memoryTip || '',
       synonyms: question.synonyms || [], antonyms: question.antonyms || [],
-      category: question.category || '', options: shuffle(options),
+      category: question.category || '', difficulty: question.difficulty || word?.difficulty || 1,
+      options: shuffle(options),
       chapter: eventData.chapter, level: eventData.level
     }
   }
@@ -104,14 +105,16 @@ export function useQuizFlow(hudData, levelWordsRef, gameStore) {
     const qt = currentQuestionType.value
     const otherWords = levelWordsRef.value.filter(w => w.word !== word.word)
 
+    const base = { ...word, chapter: eventData.chapter, level: eventData.level, difficulty: word.difficulty || 1 }
+
     if (qt === 'choice_cn2en') {
-      return { ...word, options: buildChoiceOptions('correct', word.word, otherWords, 'word'), chapter: eventData.chapter, level: eventData.level }
+      return { ...base, options: buildChoiceOptions('correct', word.word, otherWords, 'word') }
     }
     if (['spell_hint', 'spell_full', 'translate'].includes(qt)) {
-      return { ...word, options: [], chapter: eventData.chapter, level: eventData.level }
+      return { ...base, options: [] }
     }
     const otherMeanings = levelWordsRef.value.filter(w => w.word !== word.word && w.meaning !== word.meaning)
-    return { ...word, options: buildChoiceOptions('correct', word.meaning, otherMeanings, 'meaning'), chapter: eventData.chapter, level: eventData.level }
+    return { ...base, options: buildChoiceOptions('correct', word.meaning, otherMeanings, 'meaning') }
   }
 
   /** 怪物碰撞 → 显示答题弹窗 */
@@ -269,7 +272,7 @@ export function useQuizFlow(hudData, levelWordsRef, gameStore) {
         category: currentQuizData.value?.category || ''
       },
       triggerType: 'wrong_answer',
-      wrongStreak: levelManager.wrongCount
+      wrongStreak: consecutiveWrong.value
     }
   }
 
