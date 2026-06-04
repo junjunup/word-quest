@@ -25,7 +25,9 @@ services:
     environment:
       - NODE_ENV=production
       - MONGODB_URI=mongodb://mongodb:27017/word-quest
-      - JWT_SECRET=${JWT_SECRET:-word_quest_docker_secret_change_me}
+      # ⚠️  生产环境务必在 .env 中设置强随机 JWT_SECRET（>=32字符），否则容器将拒绝启动
+      # 生成命令: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+      - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRES_IN=7d
       - LLM_SERVICE_URL=http://llm-service:8000
       - CORS_ORIGIN=http://localhost:3000

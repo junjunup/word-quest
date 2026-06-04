@@ -9,7 +9,8 @@ const weakSecrets = new Set([
   'change_me',
   'changeme',
   '123456',
-  'password'
+  'password',
+  'word_quest_docker_secret_change_me'
 ])
 
 export function isWeakJwtSecret(value) {
