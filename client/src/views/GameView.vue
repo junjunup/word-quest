@@ -3,44 +3,22 @@
     <!-- Phaser游戏容器 -->
     <div id="phaser-container" ref="phaserContainer"></div>
 
-    <!-- HUD覆盖层 - 仅在关卡内显示 -->
-    <div class="game-hud" v-if="showHud && uiState === 'game' && inGameLevel">
-      <div class="hud-left">
-        <span class="hud-hearts">
-          <template v-if="isTutorialLevel">
-            <span class="heart">❤️</span>
-            <span class="heart-infinity">∞</span>
-          </template>
-          <template v-else>
-            <span v-for="i in hudData.maxLives" :key="i" class="heart" :class="{ lost: i > hudData.lives }">❤️</span>
-          </template>
-        </span>
-        <span class="hud-score">💰 {{ hudData.score }}</span>
-        <span class="hud-combo" v-if="hudData.combo > 0">🔥 x{{ hudData.combo }}</span>
-      </div>
-      <div class="hud-right">
-        <span class="difficulty-hud-badge" v-if="gameStore.selectedDifficulty !== 'normal'">
-          {{ { easy: '🌱简单', hard: '🔥困难' }[gameStore.selectedDifficulty] }}
-        </span>
-        <span>第{{ hudData.chapter }}章 第{{ hudData.level }}关</span>
-        <button class="btn-icon" @click="openManualChat" title="求助小智">🤖</button>
-        <button class="btn-icon" @click="goToDashboard" title="学习报告">📊</button>
-        <button class="btn-icon" @click="onTogglePause" title="暂停">⏸️</button>
-      </div>
-    </div>
-
-    <!-- 暂停菜单 - 仅在关卡内 -->
-    <div class="pause-overlay" v-if="showPauseMenu && inGameLevel">
-      <div class="pause-card card">
-        <h3 class="pause-title">⏸️ 游戏暂停</h3>
-        <button class="btn btn-primary pause-btn" @click="onTogglePause">🌿 继续游戏</button>
-        <button class="btn pause-btn" @click="toggleMute">
-          {{ isMuted ? '🔇 取消静音' : '🔊 静音' }}
-        </button>
-        <button class="btn btn-gold pause-btn" @click="backToMenu">🏠 返回菜单</button>
-        <button class="btn pause-btn logout-btn" @click="handleLogout">🚪 退出登录</button>
-      </div>
-    </div>
+    <!-- HUD + 暂停菜单 -->
+    <GameHUD
+      :visible="showHud && uiState === 'game'"
+      :in-game-level="inGameLevel"
+      :is-tutorial-level="isTutorialLevel"
+      :difficulty="gameStore.selectedDifficulty"
+      :show-pause="showPauseMenu"
+      :is-muted="isMuted"
+      :hud-data="hudData"
+      @open-chat="openManualChat"
+      @go-dashboard="goToDashboard"
+      @toggle-pause="onTogglePause"
+      @toggle-mute="toggleMute"
+      @back-to-menu="backToMenu"
+      @logout="handleLogout"
+    />
 
     <!-- 关卡选择 -->
     <LevelSelect
@@ -73,14 +51,14 @@
 
     <!-- 答题弹窗 -->
     <QuizModal
-      v-if="showQuiz"
-      :word-data="currentQuizData"
-      :difficulty="currentDifficulty"
-      :question-type="currentQuestionType"
+      v-if="quiz.showQuiz"
+      :word-data="quiz.currentQuizData"
+      :difficulty="quiz.currentDifficulty"
+      :question-type="quiz.currentQuestionType"
       :time-limit="gameStore.difficultyConfig.timer"
-      :adaptive-difficulty="latestAdaptiveDifficulty"
-      @answer="handleQuizAnswer"
-      @close="closeQuiz"
+      :adaptive-difficulty="quiz.latestAdaptiveDifficulty"
+      @answer="onQuizAnswer"
+      @close="onQuizClose"
     />
 
     <!-- 移动端虚拟方向键 -->
@@ -104,7 +82,7 @@
       :boss-max-hp="bossQuizData.bossMaxHp"
       :time-limit="gameStore.difficultyConfig.timer"
       :level-words="levelWords"
-      :question-type="currentQuestionType"
+      :question-type="quiz.currentQuestionType"
       @complete="onBossQuizComplete"
       @close="onBossQuizClose"
     />
@@ -142,14 +120,16 @@ import ScoreBoard from '@/components/ScoreBoard.vue'
 import LevelSelect from '@/components/LevelSelect.vue'
 import GameIntro from '@/components/GameIntro.vue'
 import CharacterSelect from '@/components/CharacterSelect.vue'
+import GameHUD from '@/components/GameHUD.vue'
 import { submitQuizRecord } from '@/api/learning'
-import { saveAchievement, getAdaptiveWords, updateWordMastery } from '@/api/game'
-import { getChapterLevelWords, getQuizForWord, getChapterWords, getSelectedWordbook } from '@/api/vocabulary'
-import { DEATH_SPIRAL, STORAGE_KEYS, QUESTION_TYPES } from '@/game/config/gameConstants'
-import { calculateScore, shuffle, buildChoiceOptions, safeGetJSON, safeSetJSON, safeGetItem, safeSetItem } from '@/utils/helpers'
-import { enqueue, flushQueue, getQueueSize } from '@/utils/offlineQueue'
+import { saveAchievement, getAdaptiveWords } from '@/api/game'
+import { getChapterLevelWords, getChapterWords, getSelectedWordbook } from '@/api/vocabulary'
+import { STORAGE_KEYS } from '@/game/config/gameConstants'
+import { safeGetJSON, safeSetJSON, safeGetItem, safeSetItem } from '@/utils/helpers'
+import { flushQueue, getQueueSize } from '@/utils/offlineQueue'
 import scoreSystem from '@/game/systems/ScoreSystem'
 import audioManager from '@/game/systems/AudioManager'
+import { useQuizFlow } from '@/composables/useQuizFlow'
 
 // 成就上下文追踪
 const achievementContext = reactive({
@@ -184,28 +164,20 @@ let chatSafetyTimer = null
 const uiState = ref('game')
 
 const showHud = ref(true)
-const inGameLevel = ref(false)  // 是否在关卡内（区别于菜单/结算等场景）
-const showQuiz = ref(false)
+const inGameLevel = ref(false)
 const showBossQuiz = ref(false)
 const showChatPanel = ref(false)
 const showPauseMenu = ref(false)
 const achievementData = ref(null)
-const currentQuizData = ref(null)
-const currentDifficulty = ref(1)
-const currentMonsterIndex = ref(-1)
-const pendingWrongAnswer = ref(false)
 const showTutorial = ref(false)
 const isTutorialLevel = ref(false)
-
-// 多题型与自适应难度
-const currentQuestionType = ref('choice_en2cn')
-const adaptiveQuestionType = ref('choice_en2cn')
-const latestAdaptiveDifficulty = ref(null)
-const consecutiveWrong = ref(0)
 const loadError = ref('')
 
+// 使用答题流程 composable
+const quiz = useQuizFlow(hudData, levelWords, gameStore)
+
 const virtualDirection = reactive({ up: false, down: false, left: false, right: false })
-const showVirtualControls = computed(() => uiState.value === 'game' && inGameLevel.value && !showQuiz.value && !showBossQuiz.value && !showChatPanel.value && !showPauseMenu.value)
+const showVirtualControls = computed(() => uiState.value === 'game' && inGameLevel.value && !quiz.showQuiz.value && !showBossQuiz.value && !showChatPanel.value && !showPauseMenu.value)
 
 // 音效
 const isMuted = ref(audioManager.muted)
@@ -508,10 +480,10 @@ function onBossQuizComplete(result) {
       submitQuizRecord({
         wordId: record.wordId,
         word: record.word,
-        questionType: currentQuestionType.value,
+        questionType: quiz.currentQuestionType.value,
         isCorrect: record.isCorrect,
         responseTime: record.responseTime,
-        difficulty: currentDifficulty.value,
+        difficulty: quiz.currentDifficulty.value,
         hintUsed: false,
         npcInteraction: false,
         sessionId: levelManager.sessionId,
@@ -537,7 +509,7 @@ function onBossQuizClose() {
 }
 
 function onTogglePause() {
-  if (uiState.value === 'game' && !showQuiz.value && !showBossQuiz.value && !showChatPanel.value) {
+  if (uiState.value === 'game' && !quiz.showQuiz.value && !showBossQuiz.value && !showChatPanel.value) {
     showPauseMenu.value = !showPauseMenu.value
     if (showPauseMenu.value) {
       audioManager.pauseBGM(300, 'pause_menu')
@@ -695,321 +667,37 @@ function onBeforeUnload(e) {
   }
 }
 
-/**
- * 怪物碰撞 → 显示答题弹窗
- * 从词汇列表获取真实题目
- */
+// Quiz flow wrapper — delegates to composable
 async function onShowQuiz(data) {
-  currentMonsterIndex.value = data.monsterIndex
-  audioManager.pauseBGM(300, 'quiz')
-
-  // 死亡螺旋保护
-  if (consecutiveWrong.value >= DEATH_SPIRAL.forceEasyThreshold) {
-    currentQuestionType.value = DEATH_SPIRAL.downgradeType
-    currentDifficulty.value = DEATH_SPIRAL.forcedDifficulty
-    const granted = levelManager.grantGraceLife()
-    if (granted) {
-      hudData.lives = levelManager.lives
-    }
-  } else if (consecutiveWrong.value >= DEATH_SPIRAL.downgradeThreshold) {
-    // 降级为选择题但保持难度
-    const adaptive = adaptiveQuestionType.value || 'choice_en2cn'
-    const typeConfig = QUESTION_TYPES[adaptive]
-    if (typeConfig && !typeConfig.isChoice) {
-      currentQuestionType.value = DEATH_SPIRAL.downgradeType
-    } else {
-      currentQuestionType.value = adaptive
-    }
-  } else {
-    currentQuestionType.value = adaptiveQuestionType.value || 'choice_en2cn'
-  }
-
-  // 从 LevelManager 获取当前词汇
-  const word = levelManager.getCurrentWord()
-  if (!word) {
-    // 没有词汇了，直接恢复游戏
-    eventBus.emit(EVENTS.RESUME_GAME)
-    return
-  }
-
-  try {
-    // 尝试从 API 获取题目 + 干扰项
-    if (word._id) {
-      const res = await getQuizForWord(word._id, currentQuestionType.value)
-      if (res.data) {
-        const { question, distractors } = res.data
-        currentQuizData.value = buildQuizData(question, distractors, data)
-        currentDifficulty.value = word.difficulty || 1
-        showQuiz.value = true
-        return
-      }
-    }
-  } catch (e) {
-    console.warn('从API获取题目失败，使用本地生成:', e)
-  }
-
-  // Fallback：从本地词汇列表随机生成干扰项
-  currentQuizData.value = buildQuizDataLocal(word, data)
-  currentDifficulty.value = word.difficulty || 1
-  showQuiz.value = true
+  await quiz.onShowQuiz(data)
 }
 
-/**
- * 从 API 数据构建 QuizModal 所需格式（支持多题型）
- */
-function buildQuizData(question, distractors, eventData) {
-  const qt = currentQuestionType.value
-  let options
-
-  if (qt === 'choice_cn2en') {
-    options = [
-      { id: question._id, text: question.word, correct: true },
-      ...distractors.map(d => ({ id: d.id, text: d.word, correct: false }))
-    ]
-    // If distractors insufficient, use buildChoiceOptions as fallback
-    if (options.length < 4) {
-      const otherWords = levelWords.value.filter(w => w.word !== question.word)
-      options = buildChoiceOptions(question._id, question.word, otherWords, 'word')
-    }
-  } else if (['spell_hint', 'spell_full', 'translate'].includes(qt)) {
-    options = []
-  } else {
-    // choice_en2cn（默认）
-    options = [
-      { id: question._id, text: question.meaning, correct: true },
-      ...distractors.map(d => ({ id: d.id, text: d.meaning, correct: false }))
-    ]
-    // If distractors insufficient, use buildChoiceOptions as fallback
-    if (options.length < 4) {
-      const otherMeanings = levelWords.value.filter(w => w.word !== question.word && w.meaning !== question.meaning)
-      options = buildChoiceOptions(question._id, question.meaning, otherMeanings, 'meaning')
-    }
-  }
-
-  return {
-    _id: question._id,
-    word: question.word,
-    meaning: question.meaning,
-    phonetic: question.phonetic,
-    example: question.example,
-    exampleTranslation: question.exampleTranslation,
-    rootAnalysis: question.rootAnalysis || '',
-    memoryTip: question.memoryTip || '',
-    synonyms: question.synonyms || [],
-    antonyms: question.antonyms || [],
-    category: question.category || '',
-    options: shuffle(options),
-    chapter: eventData.chapter,
-    level: eventData.level
-  }
-}
-
-/**
- * 从本地词汇列表生成题目（支持多题型）
- */
-function buildQuizDataLocal(word, eventData) {
-  const qt = currentQuestionType.value
-  const otherWords = levelWords.value.filter(w => w.word !== word.word)
-
-  if (qt === 'choice_cn2en') {
-    const options = buildChoiceOptions('correct', word.word, otherWords, 'word')
-    return { ...word, options, chapter: eventData.chapter, level: eventData.level }
-  }
-
-  if (['spell_hint', 'spell_full', 'translate'].includes(qt)) {
-    return { ...word, options: [], chapter: eventData.chapter, level: eventData.level }
-  }
-
-  // default choice_en2cn
-  const otherMeanings = levelWords.value.filter(w => w.word !== word.word && w.meaning !== word.meaning)
-  const options = buildChoiceOptions('correct', word.meaning, otherMeanings, 'meaning')
-  return { ...word, options, chapter: eventData.chapter, level: eventData.level }
-}
-
-/**
- * 处理答题结果
- */
-async function handleQuizAnswer(result) {
-  const {
-    isCorrect,
-    responseTime,
-    answer,
-    answerQuality = isCorrect ? 'exact' : 'wrong',
-    editDistance = null,
-    similarity = isCorrect ? 1 : 0,
-    scoreRatio = isCorrect ? 1 : 0,
-    fuzzyFeedback = ''
-  } = result
-  const baseScore = calculateScore(isCorrect, responseTime, levelManager.combo, currentDifficulty.value, false, scoreRatio)
-  const score = Math.round(baseScore * gameStore.difficultyConfig.scoreMultiplier)
-  const correctAnswerForType = ['choice_cn2en', 'spell_hint', 'spell_full', 'translate'].includes(currentQuestionType.value)
-    ? currentQuizData.value?.word || ''
-    : currentQuizData.value?.meaning || ''
-
-  // 通过 LevelManager 更新状态（单一数据源）
-  const status = levelManager.handleAnswer(isCorrect, responseTime, score)
-
-  // 追踪连续答错
-  if (isCorrect) {
-    consecutiveWrong.value = 0
-  } else {
-    consecutiveWrong.value++
-  }
-
-  // 同步 Pinia store（仅用于持久化）
-  if (isCorrect) {
-    gameStore.onCorrectAnswer(score)
-  } else {
-    gameStore.onWrongAnswer()
-  }
-
-  // 同步 HUD
-  hudData.lives = levelManager.lives
-  hudData.score = levelManager.score
-  hudData.combo = levelManager.combo
-
-  // 通知 Phaser 场景
-  eventBus.emit(EVENTS.QUIZ_ANSWERED, {
-    monsterIndex: currentMonsterIndex.value,
-    isCorrect,
-    score,
-    totalScore: levelManager.score,
-    combo: levelManager.combo,
-    lives: levelManager.lives,
-    progress: levelManager.getProgress(),
-    gameOver: status === 'game_over'
+async function onQuizAnswer(result) {
+  const outcome = await quiz.handleQuizAnswer(result, achievementContext, () => {
+    scoreSystem.checkAchievements(achievementContext)
+    persistAchievementContext()
   })
 
-  if (isCorrect) {
-    // 答对：推进到下一个词
-    levelManager.nextWord()
-    achievementContext.wordsLearned++
-    if (responseTime < achievementContext.fastestCorrect || achievementContext.fastestCorrect === 0) {
-      achievementContext.fastestCorrect = responseTime
-    }
-  } else if (status !== 'game_over') {
-    // 答错：标记需要打开 ChatPanel；死亡时不再打开辅导弹窗，直接进入结算
-    pendingWrongAnswer.value = true
-    chatContext.currentWord = currentQuizData.value?.word || ''
-    chatContext.correctAnswer = correctAnswerForType
-    chatContext.playerAnswer = answer
-    chatContext.answerQuality = answerQuality
-    chatContext.editDistance = editDistance
-    chatContext.similarity = similarity
-    chatContext.fuzzyFeedback = fuzzyFeedback
-    chatContext.wordKnowledge = {
-      rootAnalysis: currentQuizData.value?.rootAnalysis || '',
-      memoryTip: currentQuizData.value?.memoryTip || '',
-      example: currentQuizData.value?.example || '',
-      exampleTranslation: currentQuizData.value?.exampleTranslation || '',
-      synonyms: currentQuizData.value?.synonyms || [],
-      antonyms: currentQuizData.value?.antonyms || [],
-      category: currentQuizData.value?.category || ''
-    }
-    chatContext.triggerType = 'wrong_answer'
-    chatContext.wrongStreak = levelManager.wrongCount
-  }
-
-  // 更新成就上下文并检查
-  achievementContext.maxCombo = Math.max(achievementContext.maxCombo, levelManager.combo)
-  scoreSystem.checkAchievements(achievementContext)
-  persistAchievementContext()
-
-  // 提交答题记录到后端（异步，不阻塞）
-  submitQuizRecord({
-    wordId: currentQuizData.value?._id || 'unknown',
-    word: currentQuizData.value?.word || '',
-    questionType: currentQuestionType.value,
-    isCorrect,
-    responseTime,
-    difficulty: currentDifficulty.value,
-    hintUsed: false,
-    npcInteraction: false,
-    sessionId: levelManager.sessionId,
-    chapter: hudData.chapter,
-    level: hudData.level,
-    playerAnswer: answer,
-    correctAnswer: correctAnswerForType,
-    answerQuality,
-    editDistance,
-    similarity,
-    scoreRatio,
-    fuzzyFeedback
-  }).then(res => {
-    if (res?.data?.adaptiveDifficulty) {
-      const ad = res.data.adaptiveDifficulty
-      latestAdaptiveDifficulty.value = ad
-      adaptiveQuestionType.value = ad.questionType || 'choice_en2cn'
-    }
-  }).catch(e => {
-    console.warn('提交答题记录失败，加入离线队列:', e.message)
-    enqueue('submitQuizRecord', {
-      wordId: currentQuizData.value?._id || 'unknown',
-      word: currentQuizData.value?.word || '',
-      questionType: currentQuestionType.value,
-      isCorrect,
-      responseTime,
-      difficulty: currentDifficulty.value,
-      hintUsed: false,
-      npcInteraction: false,
-      sessionId: levelManager.sessionId,
-      chapter: hudData.chapter,
-      level: hudData.level,
-      playerAnswer: answer,
-      correctAnswer: correctAnswerForType,
-      answerQuality,
-      editDistance,
-      similarity,
-      scoreRatio,
-      fuzzyFeedback
-    })
-  })
-
-  // 更新逐词掌握度（SM-2 间隔重复算法 → 异步，不阻塞游戏）
-  const masteryPayload = {
-    wordId: currentQuizData.value?._id,
-    chapterId: hudData.chapter,
-    levelId: hudData.level,
-    wordbookId: getSelectedWordbook(),
-    questionType: currentQuestionType.value,
-    isCorrect,
-    responseTime,
-    answerQuality,
-    errorType: answerQuality === 'near' ? 'spelling_near' : (isCorrect ? 'unknown' : 'other'),
-    sourceMode: 'mainline',
-    sessionId: levelManager.sessionId
-  }
-  updateWordMastery(masteryPayload).catch(e => {
-    console.warn('更新单词掌握度失败，加入离线队列:', e.message)
-    enqueue('updateWordMastery', masteryPayload)
-  })
-
-  // 检查 Game Over
-  if (status === 'game_over') {
-    // LevelManager 已通过 eventBus emit GAME_OVER；死亡时必须直接结算，不能再残留答题/辅导弹窗暂停原因
-    showQuiz.value = false
+  if (outcome.isGameOver) {
     showChatPanel.value = false
-    audioManager.resumeBGM(0, 'quiz')
     audioManager.resumeBGM(0, 'chat')
-    // Game Over 时清理答题残留状态，避免跨局污染
-    pendingWrongAnswer.value = false
     return
+  }
+
+  if (!outcome.isGameOver && !result.isCorrect) {
+    // 答错：准备 chat context
+    const ctx = quiz.getChatContext(outcome)
+    Object.assign(chatContext, ctx)
   }
 }
 
-/**
- * 关闭答题弹窗
- * 用户点击"继续战斗"/"知道了"按钮后触发
- */
-function closeQuiz() {
-  showQuiz.value = false
+function onQuizClose() {
+  const { hasPendingWrong, clearPendingWrong } = quiz.closeQuiz()
 
-  if (pendingWrongAnswer.value) {
-    // 答错：打开 ChatPanel（游戏保持暂停，等 Chat 关闭再恢复）
-    pendingWrongAnswer.value = false
+  if (hasPendingWrong) {
+    clearPendingWrong()
     audioManager.pauseBGM(300, 'chat')
     showChatPanel.value = true
-    // 安全兜底：如果 ChatPanel 60秒内未关闭（异常情况），自动恢复游戏
     chatSafetyTimer = setTimeout(() => {
       if (showChatPanel.value) {
         showChatPanel.value = false
@@ -1019,7 +707,6 @@ function closeQuiz() {
       }
     }, 60000)
   } else {
-    // 答对：通知 Phaser 恢复游戏（双重保险，WorldScene 自己也会 resume）
     audioManager.resumeBGM(300, 'quiz')
     eventBus.emit(EVENTS.RESUME_GAME)
   }
@@ -1073,7 +760,7 @@ async function onLevelComplete(result) {
 
   // 关闭可能残留的 UI 面板
   showChatPanel.value = false
-  showQuiz.value = false
+  quiz.showQuiz.value = false
   showBossQuiz.value = false
   showPauseMenu.value = false
   inGameLevel.value = false  // 离开关卡，隐藏 HUD
@@ -1103,16 +790,16 @@ async function onLevelComplete(result) {
 
 async function onGameOver(result) {
   console.log('游戏结束:', result)
-  showQuiz.value = false
+  quiz.showQuiz.value = false
   showBossQuiz.value = false
   showChatPanel.value = false
   showPauseMenu.value = false
   inGameLevel.value = false  // 离开关卡，隐藏 HUD
 
   // 重置答题状态，防止跨局残留导致下一局异常
-  pendingWrongAnswer.value = false
-  consecutiveWrong.value = 0
-  currentMonsterIndex.value = -1
+  quiz.pendingWrongAnswer.value = false
+  quiz.consecutiveWrong.value = 0
+  quiz.currentMonsterIndex.value = -1
   virtualDirection.up = false
   virtualDirection.down = false
   virtualDirection.left = false
@@ -1145,13 +832,13 @@ function goToDashboard() {
 
 async function backToMenu() {
   showPauseMenu.value = false
-  showQuiz.value = false
+  quiz.showQuiz.value = false
   showBossQuiz.value = false
   showChatPanel.value = false
   inGameLevel.value = false  // 离开关卡，隐藏 HUD
-  pendingWrongAnswer.value = false
-  consecutiveWrong.value = 0
-  currentMonsterIndex.value = -1
+  quiz.pendingWrongAnswer.value = false
+  quiz.consecutiveWrong.value = 0
+  quiz.currentMonsterIndex.value = -1
   audioManager.stopBGM(300)
   if (game) {
     const scene = game.scene.getScene('WorldScene')
@@ -1200,127 +887,6 @@ function handleLogout() {
     display: block;
     image-rendering: pixelated;
   }
-}
-
-.game-hud {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 960px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 16px;
-  background: linear-gradient(180deg, rgba(91, 58, 26, 0.9) 0%, rgba(91, 58, 26, 0.7) 100%);
-  border-bottom: 2px solid #8b6914;
-  z-index: 100;
-  pointer-events: all;
-}
-
-.hud-left {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.heart.lost {
-  filter: grayscale(100%);
-  opacity: 0.3;
-}
-
-.heart-infinity {
-  color: #ffc847;
-  font-weight: bold;
-  font-size: 16px;
-  font-family: 'Press Start 2P', monospace;
-  margin-left: -4px;
-}
-
-.hud-score {
-  color: #ffc847;
-  font-weight: bold;
-  font-family: 'Press Start 2P', monospace;
-  font-size: 13px;
-}
-
-.hud-combo {
-  color: #e8a33c;
-  font-weight: bold;
-  font-family: 'Press Start 2P', monospace;
-  font-size: 13px;
-  animation: pulse 0.5s ease;
-}
-
-.hud-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: #f5edd6;
-  font-size: 13px;
-}
-
-.difficulty-hud-badge {
-  background: rgba(255, 200, 71, 0.2);
-  border: 1px solid #ffc847;
-  border-radius: 4px;
-  padding: 2px 8px;
-  font-size: 11px;
-  color: #ffc847;
-}
-
-.btn-icon {
-  background: #5b8c3e;
-  border: 2px solid #3a6b1e;
-  border-radius: 4px;
-  padding: 4px 8px;
-  font-size: 18px;
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &:hover {
-    background: #6b9c4e;
-    border-color: #ffc847;
-    transform: translateY(-1px);
-  }
-}
-
-.pause-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(45, 80, 22, 0.85);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-  animation: fadeIn 0.2s ease;
-}
-
-.pause-card {
-  text-align: center;
-  min-width: 280px;
-  padding: 30px 40px;
-}
-
-.pause-title {
-  color: #5b3a1a;
-  font-size: 24px;
-  margin-bottom: 24px;
-}
-
-.pause-btn {
-  display: block;
-  width: 100%;
-  margin-bottom: 12px;
-  padding: 12px;
-  font-size: 16px;
-}
-
-.logout-btn {
-  background: #d45b3e;
-  border-color: #a04030;
-  color: #f5edd6;
-  &:hover { background: #e06b4e; }
 }
 
 /* 排行榜浮窗 */
@@ -1408,45 +974,17 @@ function handleLogout() {
 }
 
 @media (max-width: 980px) {
-  #phaser-container,
-  .game-hud {
-    width: min(100vw, 960px);
-  }
-  #phaser-container {
-    height: min(66.67vw, 640px);
-  }
-  #phaser-container canvas {
-    width: 100% !important;
-    height: 100% !important;
-  }
+  #phaser-container { width: min(100vw, 960px); height: min(66.67vw, 640px); }
+  #phaser-container canvas { width: 100% !important; height: 100% !important; }
 }
 
 @media (max-width: 760px), (pointer: coarse) {
   .virtual-controls { display: grid; }
-  .game-hud {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 6px;
-    padding: 6px 10px;
-  }
-  .hud-left,
-  .hud-right {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px;
-  }
-  .btn-icon { min-width: 44px; min-height: 44px; }
 }
 
 @media (max-width: 430px) {
   .game-view { overflow: hidden; }
   #phaser-container { border-left: 0; border-right: 0; }
-  .game-hud { font-size: 12px; }
-  .virtual-controls {
-    left: 10px;
-    bottom: 10px;
-    transform: scale(0.9);
-    transform-origin: left bottom;
-  }
+  .virtual-controls { left: 10px; bottom: 10px; transform: scale(0.9); transform-origin: left bottom; }
 }
 </style>
