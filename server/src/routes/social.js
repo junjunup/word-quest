@@ -8,6 +8,7 @@ import VocabularyBank from '../models/VocabularyBank.js'
 import QuizRecord from '../models/QuizRecord.js'
 import { classifyError } from '../services/answerVerificationService.js'
 import { updateFromQuizRecords } from '../services/masteryService.js'
+import { sanitizeWordbookId } from '../services/courseMapService.js'
 
 const router = express.Router()
 const MAX_QUERY_LENGTH = 30
@@ -18,11 +19,6 @@ function escapeRegex(value) {
 
 function normalizeAnswer(value) {
   return String(value || '').trim().toLowerCase().replace(/[^a-z\s-]/g, '').replace(/\s+/g, ' ')
-}
-
-function sanitizeWordbookId(value) {
-  const id = String(value || 'cet4').trim().toLowerCase().replace(/[^a-z0-9_-]/g, '')
-  return id || 'cet4'
 }
 
 function publicUser(user) {

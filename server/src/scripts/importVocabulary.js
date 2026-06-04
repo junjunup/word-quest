@@ -6,6 +6,7 @@ import { dirname } from 'path'
 import 'dotenv/config'
 import VocabularyBank from '../models/VocabularyBank.js'
 import { validateVocabulary, formatVocabularyReport } from '../utils/vocabularyValidator.js'
+import { sanitizeWordbookId } from '../services/courseMapService.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -61,11 +62,6 @@ export function loadWordbookFiles(wordbookDir = DEFAULT_WORDBOOK_DIR) {
     files: loaded,
     vocabulary: loaded.flatMap(item => item.vocabulary)
   }
-}
-
-function sanitizeWordbookId(value) {
-  const id = String(value || 'cet4').trim().toLowerCase().replace(/[^a-z0-9_-]/g, '')
-  return id || 'cet4'
 }
 
 function normalizeEntry(entry) {

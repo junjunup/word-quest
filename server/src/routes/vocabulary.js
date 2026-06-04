@@ -7,15 +7,11 @@ import { authMiddleware } from '../middleware/auth.js'
 import VocabularyBank from '../models/VocabularyBank.js'
 import { generateSemanticDistractors } from '../services/distractorService.js'
 import { validateVocabulary } from '../utils/vocabularyValidator.js'
+import { sanitizeWordbookId } from '../services/courseMapService.js'
 
 const router = express.Router()
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
-
-function sanitizeWordbookId(value) {
-  const id = String(value || 'cet4').trim().toLowerCase().replace(/[^a-z0-9_-]/g, '')
-  return id || 'cet4'
-}
 
 function sanitizeVocabularyEntry(entry, fallbackWordbookId = 'cet4', fallbackWordbookName = 'CET-4 核心词库') {
   return {

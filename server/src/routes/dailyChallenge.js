@@ -8,6 +8,7 @@ import User from '../models/User.js'
 import QuizRecord from '../models/QuizRecord.js'
 import { classifyError } from '../services/answerVerificationService.js'
 import { updateFromQuizRecords } from '../services/masteryService.js'
+import { sanitizeWordbookId } from '../services/courseMapService.js'
 
 const router = express.Router()
 const DEFAULT_QUESTION_COUNT = 12
@@ -20,11 +21,6 @@ function previousDateString(dateString) {
   const date = new Date(`${dateString}T00:00:00.000Z`)
   date.setUTCDate(date.getUTCDate() - 1)
   return todayString(date)
-}
-
-function sanitizeWordbookId(value) {
-  const id = String(value || 'cet4').trim().toLowerCase().replace(/[^a-z0-9_-]/g, '')
-  return id || 'cet4'
 }
 
 function shuffleWithSeed(items, seed) {
