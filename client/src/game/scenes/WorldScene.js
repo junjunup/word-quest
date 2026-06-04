@@ -384,11 +384,13 @@ export default class WorldScene extends Phaser.Scene {
       this.isPaused = true
       this.input.enabled = false  // 防止过渡期间幽灵点击
       audioManager.play('level_complete')
-      this.time.delayedCall(1000, () => {
-        if (this.scene?.isActive()) {
-          this.scene.start('ResultScene', levelManager.getLevelResult())
+      // 使用原生 setTimeout 避免 Phaser Timer 被 shutdown 清除
+      this._completeTimer = setTimeout(() => {
+        if (this.game?.scene) {
+          this.game.scene.start('ResultScene', levelManager.getLevelResult())
         }
-      })
+        this._completeTimer = null
+      }, 1000)
       return true
     }
     return false
@@ -1028,6 +1030,10 @@ export default class WorldScene extends Phaser.Scene {
     eventBus.off(EVENTS.CHAT_CLOSED, this.boundOnChatClosed)
     eventBus.off(EVENTS.GAME_OVER, this.boundOnGameOver)
     eventBus.off(EVENTS.BOSS_QUIZ_RESULT, this.boundOnBossQuizResult)
+
+    // 清理原生定时器（避免场景销毁后仍触发跳转）
+    if (this.gameOverTransitionTimer) { clearTimeout(this.gameOverTransitionTimer); this.gameOverTransitionTimer = null }
+    if (this._completeTimer) { clearTimeout(this._completeTimer); this._completeTimer = null }
 
     // 清理 ESC 键监听
     if (this.escKey && this.boundOnEscDown) {

@@ -2,6 +2,22 @@
 // 构建时 __SW_CACHE_HASH__ 会被 Vite 替换为最新构建哈希
 const CACHE_NAME = 'word-quest-static-__SW_CACHE_HASH__'
 
+// 开发模式检测：占位符未被替换 → 立即自毁，避免干扰 Vite 热更新
+if (CACHE_NAME.includes('__SW_CACHE_HASH__')) {
+  self.addEventListener('install', () => {
+    self.skipWaiting()
+  })
+  self.addEventListener('activate', () => {
+    self.registration.unregister().then(() => {
+      self.clients.matchAll({ type: 'window' }).then(clients => {
+        clients.forEach(client => client.navigate(client.url))
+      })
+    })
+  })
+  // 不注册 fetch 等事件 — 直接退出
+  throw new Error('DEV_MODE_SW_SELF_DESTRUCT')
+}
+
 // 预缓存：安装时立即缓存的静态资源
 const PRECACHE_URLS = [
   '/',

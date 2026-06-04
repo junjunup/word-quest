@@ -114,11 +114,13 @@ export default class MenuScene extends Phaser.Scene {
     })
 
     // 延迟启用输入，等待上一场景残留的指针事件完全排空
-    this.time.delayedCall(200, () => {
-      if (this.scene.isActive()) {
+    // 使用原生 setTimeout 避免被上一场景 shutdown 的 tweens.killAll() 连带清除
+    this._inputTimer = setTimeout(() => {
+      if (this.scene?.isActive()) {
         this.input.enabled = true
       }
-    })
+      this._inputTimer = null
+    }, 200)
   }
 
   /**
@@ -234,18 +236,21 @@ export default class MenuScene extends Phaser.Scene {
   }
 
   shutdown() {
+    // 清理原生定时器
+    if (this._inputTimer) { clearTimeout(this._inputTimer); this._inputTimer = null }
+
     // Clean up all tweens first
     this.tweens.killAll()
-    
+
     // Disable input on the scene to prevent queued pointer events
     this.input.enabled = false
-    
+
     // Remove all event listeners from keyboard input
     if (this.input.keyboard) {
       this.input.keyboard.off('keydown')
       this.input.keyboard.off('keyup')
     }
-    
+
     // Remove all display objects - this also removes event listeners attached to them
     this.children.removeAll(true)
   }

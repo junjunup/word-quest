@@ -256,7 +256,9 @@ export default class ResultScene extends Phaser.Scene {
     })
 
     const hitArea = this.add.rectangle(x, y, btnW, btnH).setAlpha(0.001)
-    this.time.delayedCall(delay + 400, () => {
+    // 使用原生 setTimeout 避免被 shutdown() 的 tweens.killAll() 连带清除
+    const btnTimer = setTimeout(() => {
+      if (!hitArea.scene || !this.scene?.isActive()) return
       hitArea.setInteractive({ useHandCursor: true })
       hitArea.on('pointerdown', () => {
         audioManager.play('click')
@@ -278,7 +280,14 @@ export default class ResultScene extends Phaser.Scene {
         bg.lineStyle(3, strokeColor)
         bg.strokeRoundedRect(x - btnW / 2, y - btnH / 2, btnW, btnH, 4)
       })
-    })
+      // 定时器执行完后从清理列表移除
+      if (this._pendingTimeouts) {
+        this._pendingTimeouts = this._pendingTimeouts.filter(t => t !== btnTimer)
+      }
+    }, delay + 400)
+    // 将按钮定时器加入清理列表
+    if (!this._pendingTimeouts) this._pendingTimeouts = []
+    this._pendingTimeouts.push(btnTimer)
   }
 
   formatTime(ms) {

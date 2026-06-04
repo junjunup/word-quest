@@ -248,19 +248,26 @@ export default class BootScene extends Phaser.Scene {
   }
 
   create() {
-    // 创建动画
-    this.createAnimations()
+    try {
+      // 创建动画
+      this.createAnimations()
 
-    // 生成占位素材（用于加载失败的 fallback，以及 UI 元素）
-    this.generateUIAssets()
+      // 生成占位素材（用于加载失败的 fallback，以及 UI 元素）
+      this.generateUIAssets()
 
-    // After generating fallback textures, create simple fallback animations
-    this.createFallbackAnimations()
+      // After generating fallback textures, create simple fallback animations
+      this.createFallbackAnimations()
+    } catch (e) {
+      console.warn('BootScene 初始化部分失败，继续进入菜单:', e.message)
+      // 不阻塞 — 即使素材生成失败也进入菜单（使用占位图）
+    }
 
-    // 短暂延迟后进入菜单
-    this.time.delayedCall(500, () => {
-      this.scene.start('MenuScene')
-    })
+    // 短暂延迟后进入菜单（使用原生 setTimeout 避免 Phaser Timer 被 shutdown 清除）
+    this._bootTimer = setTimeout(() => {
+      if (this.scene?.isActive()) {
+        this.scene.start('MenuScene')
+      }
+    }, 500)
   }
 
   /**
