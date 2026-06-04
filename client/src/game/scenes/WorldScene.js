@@ -1060,5 +1060,19 @@ export default class WorldScene extends Phaser.Scene {
       if (this.boss.active) this.boss.destroy()
       this.boss = null
     }
+
+    // 清理所有容器引用（防止内存泄漏）
+    this.mapContainer = null
+    this.decoContainer = null
+    this.monsters = null
+    this.npcs = null
+    this.walls = null
+    this.player = null
+    this.playerNameText = null
+    this.hudTexts = {}
+
+    // 销毁所有 Display Object — 防止旧场景贴图残留覆盖新场景 UI
+    // MenuScene/ResultScene 的 shutdown 都调用此方法，WorldScene 之前遗漏了
+    this.children.removeAll(true)
   }
 }

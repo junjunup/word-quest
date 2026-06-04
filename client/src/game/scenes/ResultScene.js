@@ -46,10 +46,11 @@ export default class ResultScene extends Phaser.Scene {
     const isGameOver = livesRemaining <= 0 && stars === 0
     audioManager.play(isGameOver ? 'wrong' : 'level_complete')
     const titleText = isGameOver ? '💀 挑战失败...' : '🎉 关卡完成！'
+    // 结算 UI 全部设为高 depth，防止旧场景残留贴图遮挡
     this.add.text(width / 2, 40, titleText, {
       fontSize: '30px', fontFamily: '"Press Start 2P", Microsoft YaHei', color: isGameOver ? '#ff6666' : '#ffc847',
       fontStyle: 'bold', stroke: '#5b3a1a', strokeThickness: 5
-    }).setOrigin(0.5)
+    }).setOrigin(0.5).setDepth(200)
 
     // 章节关卡信息
     this.add.text(width / 2, 85, `第${chapter}章 - 第${level}关`, {
@@ -85,11 +86,11 @@ export default class ResultScene extends Phaser.Scene {
       })
     }
 
-    // 木质成绩面板
+    // 木质成绩面板（depth=200 高于所有游戏元素）
     const panelY = 195
     const panelW = 420
     const panelH = 260
-    const panelBg = this.add.graphics()
+    const panelBg = this.add.graphics().setDepth(200)
     panelBg.fillStyle(0xd4a76a, 0.95)
     panelBg.fillRoundedRect(width / 2 - panelW / 2, panelY, panelW, panelH, 8)
     panelBg.lineStyle(4, 0x8b6914)
@@ -186,11 +187,11 @@ export default class ResultScene extends Phaser.Scene {
       goToLevelSelect(isGameOver ? 'continue' : 'retry', chapter, level)
     }, 3200)
 
-    // 返回菜单
+    // 返回菜单（depth=200）
     this.add.text(width / 2, 590, '🏠 返回菜单', {
       fontSize: '13px', fontFamily: 'Microsoft YaHei', color: '#c4b99a',
       stroke: '#2d5016', strokeThickness: 2
-    }).setOrigin(0.5).setInteractive({ useHandCursor: true })
+    }).setOrigin(0.5).setDepth(200).setInteractive({ useHandCursor: true })
       .on('pointerdown', () => {
         audioManager.play('click')
         if (!this.scene.isActive()) return
@@ -230,7 +231,7 @@ export default class ResultScene extends Phaser.Scene {
     const btnW = 220
     const btnH = 44
 
-    const bg = this.add.graphics()
+    const bg = this.add.graphics().setDepth(210)
     bg.fillStyle(fillColor, 1)
     bg.fillRoundedRect(x - btnW / 2, y - btnH / 2, btnW, btnH, 4)
     bg.lineStyle(3, strokeColor)
@@ -240,7 +241,7 @@ export default class ResultScene extends Phaser.Scene {
     const label = this.add.text(x, y, text, {
       fontSize: '15px', fontFamily: 'Microsoft YaHei', color: '#f5edd6', fontStyle: 'bold',
       stroke: '#000', strokeThickness: 1
-    }).setOrigin(0.5).setAlpha(0)
+    }).setOrigin(0.5).setAlpha(0).setDepth(210)
 
     this.tweens.add({
       targets: [bg, label],
@@ -249,7 +250,7 @@ export default class ResultScene extends Phaser.Scene {
       delay
     })
 
-    const hitArea = this.add.rectangle(x, y, btnW, btnH).setAlpha(0.001)
+    const hitArea = this.add.rectangle(x, y, btnW, btnH).setAlpha(0.001).setDepth(210)
     // 使用原生 setTimeout 避免被 shutdown() 的 tweens.killAll() 连带清除
     const btnTimer = setTimeout(() => {
       if (!hitArea.scene || !this.scene?.isActive()) return
