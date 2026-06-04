@@ -1,58 +1,197 @@
 ---
 
-## 📅 2026-06-04 (首次会话)
+## 📅 Word Quest 项目状态 — 2026-06-05（第2会话）
 
-### 📋 工作进度
+### 🎯 会话成果
 
-#### 会话前半段
-- ✅ 审查了 Word Quest 完整代码库（前后端 + CI/CD + Docker）
-- ✅ 更新了 CLAUDE_PROMPT.md 文档
-- ✅ 替换了 3 首 BGM 背景音乐文件
-- ✅ 配置了 Stop Hook
-- ✅ 修复 P0 测试失败（LearningReport.vue 前后端契约）
+#### P1-1: 端到端验证报告 ✅
 
-#### 第一个月优化（P0 级改进）
-- ✅ **任务A：逐词记忆模型** — WordMastery 扩展 + SM-2 算法 + 自适应出题 + API路由 + 前端对接
-- ✅ **任务B：AI 动态出题** — LLM干扰项生成 + 动态题型推荐 + 新端点
-- ✅ **任务C：PWA 移动端增强** — Service Worker 策略 + Manifest + 构建哈希 + 移动适配
-
-### 📝 修改的文件
-
-| 文件 | 任务 | 改动 |
+**自动测试 (5/5 API + 2/3 Playwright)**
+| 测试 | 结果 | 备注 |
 |------|------|------|
-| `server/src/models/WordMastery.js` | A1 | 新增 learningStage 字段 |
-| `server/src/services/masteryService.js` | A2 | 新增 SM-2 标准算法（mapQuizToSM2Quality + updateWithSM2） |
-| `server/src/services/adaptiveEngine.js` | A3 | 新增 getWordSelection() 逐词推荐 + recommendQuestionTypes() |
-| `server/src/services/distractorService.js` | B1 | 新增 generateDistractorsWithLLM() LLM增强模式 |
-| `server/src/routes/game.js` | A5 | 新增3个API：adaptive/words, word-mastery/update, review/calendar |
-| `llm-service/services/prompt_manager.py` | B2 | 新增干扰项生成 Prompt 模板 |
-| `llm-service/services/ernie_client.py` | B2 | 新增 /api/llm/distractors 端点 |
-| `client/src/api/game.js` | A4 | 新增 getAdaptiveWords, updateWordMastery, getReviewCalendar |
-| `client/src/views/GameView.vue` | A4 | loadWordsAndInitLevel 接入自适应排序 + 答题后更新掌握度 |
-| `client/src/components/LearningReport.vue` | — | 新增错因分布+学习入口图表（之前修复） |
-| `client/public/sw.js` | C1 | 完整缓存策略（4种：NetworkFirst/CacheFirst/SWR/NetworkOnly） |
-| `client/public/manifest.webmanifest` | C2 | 完整 PWA 配置（图标/全屏/主题色/快捷方式） |
-| `client/vite.config.js` | C4 | 构建时自动注入 SW 缓存版本哈希 |
-| `client/index.html` | C3 | 移动端适配 meta 标签（禁止缩放/全屏/Apple PWA） |
+| Full Stack API E2E | ✅ PASS | 6/6 检查全部通过 |
+| SM-2 35 单元测试 | ✅ PASS | 35/35 100% |
+| P0 验收测试 | ✅ PASS | 4544 词, 180 关 |
+| 安全测试 | ✅ PASS | JWT/Mongo/CORS |
+| 企业测试 | ✅ PASS | 6 词书验证 |
+| Playwright scene-transition | ✅ PASS | Login→Canvas→Menu 闭环 |
+| Playwright lazy-load-fallback | ✅ PASS | |
+| Playwright mobile-learning-loop | ❌ FAIL | UI 选择器过期 (.segment-btn) |
 
-### ✅ 待办事项
-- [ ] 生成 PWA 图标（icon-192.png / icon-512.png）— 可用 Phaser 游戏 Logo 截图
-- [ ] 安装 ffmpeg 压缩 menu.mp3 (2.3MB) 和 game.mp3 (2.1MB)
-- [ ] `docker-compose up --build -d` 部署验证
-- [ ] 浏览器验证 Bug #1 修复（4 条扣血路径）
-- [ ] 浏览器验证 PWA 添加到桌面 + 离线运行
-- [ ] 配置通义千问 API Key 测试 LLM 干扰项生成
-- [ ] 考虑引入 Redis / TypeScript
+**API 逐项验证**
+| 端点 | 结果 | 详情 |
+|------|------|------|
+| Health Check | ✅ | 三服务全部在线 |
+| Login/Register | ✅ | 正常 + 频率限制生效 |
+| Game Progress | ✅ | 关卡状态/分数 |
+| Levels Status | ✅ | 6 章节×30 关 |
+| Adaptive Words | ✅ | 10 词优先级排序 (abruptly p=80) |
+| Vocabulary Quiz | ✅ | 返回 3 个语义干扰项 (strategy=semantic_feature_similarity, score 0.82-0.83) |
+| Word Mastery Update | ✅ | SM-2 learningStage=learning |
+| Review Calendar | ✅ | 复习日期返回 |
+| Save Level Result | ✅ | 通关后 L2 自动解锁 |
+| Leaderboard | ✅ | |
+| Achievements | ✅ | |
+| LLM Distractor (通义千问) | ✅ | 返回 ["abandonment","abate","abhor"] source=qwen |
+| AI Chat | ✅ | 接口正常 (LLM 超时空回复，降级不崩溃) |
 
-#### 盲审修复（H1 + M2 + M3）
-- ✅ **H1**: SM-2 算法 35 个单元测试（6 suites, 100% pass），使用 Node.js 原生 `node:test`
-- ✅ **M2**: 修复 word-mastery/update 和 review/calendar 路由错误时返回 `success:false` + 500
-- ✅ **M3**: 新增 `offlineQueue.js` 离线队列，网络失败时 localStorage 暂存答题记录，恢复后自动重试
+**发现的新 Bug**
+| # | 严重度 | 描述 |
+|---|--------|------|
+| 11 | 🟡 | `POST /api/learning/quiz-record` 缺少测试验证 |
+| 12 | 🟢 | Playwright `mobile-learning-loop.spec.js` UI 选择器过期 |
+| 13 | 🟡 | `.env.example` 用 `ERNIE_API_KEY` 但代码用 `QWEN_API_KEY` |
+| 14 | 🟢 | 登录频率限制 15 分钟阻碍 E2E 自动化测试 |
 
-### 📝 新增/修改的文件
-- `server/src/scripts/sm2AlgorithmTest.js` — 35 个 SM-2 单元测试
-- `server/src/services/masteryService.js` — 新增 `__testables` 导出
-- `server/src/routes/game.js` — 修复错误响应格式
-- `server/package.json` — 新增 `test:sm2` 和 `test:unit` 脚本
-- `client/src/utils/offlineQueue.js` — 离线队列工具
-- `client/src/views/GameView.vue` — 接入离线队列 + 网络恢复监听
+#### Bug 修复
+- ✅ Bug #4: CLAUDE.md `start-all.bat` → `start-all.py`
+- ✅ Bug #6: `sanitizeWordbookId` 消除 5 处重复，统一从 courseMapService.js 导入
+
+### ⚠️ 需要手动验证（浏览器中操作）
+- [ ] 正常通关 → 结算 → 下一关循环 (3关连续)
+- [ ] Boss 战死亡 → 结算 → 重新挑战 → 关卡选择
+- [ ] 结算页 → 返回菜单 → 无残留贴图
+- [ ] PWA 添加到桌面 + 离线运行
+
+---
+
+## 📅 Word Quest 项目状态 — 2026-06-04/05（第1会话，历史）
+
+### 🎯 当前目标
+将毕业设计项目 Word Quest 产品化，对标本 Duolingo 级别的 AI 教育游戏。
+
+---
+
+### ✅ 已完成
+
+#### 第一个月 P0 优化（3 大任务）
+
+**任务A：逐词记忆模型 (SM-2)**
+- WordMastery 新增 `learningStage` 字段
+- masteryService 实现标准 SM-2 算法（`updateWithSM2` + `mapQuizToSM2Quality`）
+- adaptiveEngine 新增 `getWordSelection()` 逐词优先级推荐
+- 3 个新 API：`/api/game/adaptive/words`，`/api/game/word-mastery/update`，`/api/game/review/calendar`
+- 前端 GameView 接入自适应排序 + 答题后更新掌握度
+- 35 个 SM-2 单元测试（100% pass）
+
+**任务B：AI 动态出题**
+- distractorService 新增 `generateDistractorsWithLLM()`（LLM增强+超时降级）
+- LLM Service 新增 `/api/llm/distractors` 端点
+
+**任务C：PWA 移动端增强**
+- Service Worker 完整 4 策略缓存
+- Web App Manifest 完善
+- Vite 构建时自动注入 SW 缓存哈希
+- 移动端 meta 标签（禁止缩放/全屏/Apple PWA）
+
+#### Bug 修复
+- ✅ Bug #1 血条归零卡死 — `time.delayedCall` → `window.setTimeout`（4 个场景）
+- ✅ Bug #2 Service Worker 缓存 — v2 缓存 + 协议过滤
+- ✅ 绿屏 — Phaser 强制 Canvas 模式 + BootScene try-catch
+- ✅ 场景跳转卡死 — ResultScene `openLevelSelect` 去掉 setTimeout 延迟
+- ✅ 贴图覆盖 UI — WorldScene.shutdown 补充 `children.removeAll(true)`
+- ✅ BGM 替换 — 3 首 192kbps stereo 音频
+- ✅ P0 测试修复 — LearningReport 错因分布图表
+- ✅ Stop Hook — 关闭时自动追加会话笔记
+- ✅ 离线队列 — `offlineQueue.js` localStorage 暂存 + 网络恢复重试
+
+#### 盲审修复（高危+中危）
+- ✅ H1: SM-2 35 个单元测试
+- ✅ M2: API 错误响应改为 `success:false` + 500
+- ✅ M3: 离线答题记录暂存 + 自动重试
+
+---
+
+### 📝 修改文件清单（29 个文件，2600+ 行改动）
+
+| 文件 | 改动内容 |
+|------|---------|
+| `server/src/models/WordMastery.js` | 新增 learningStage |
+| `server/src/services/masteryService.js` | SM-2 标准算法 |
+| `server/src/services/adaptiveEngine.js` | getWordSelection + recommendQuestionTypes |
+| `server/src/services/distractorService.js` | LLM 增强干扰项 |
+| `server/src/routes/game.js` | 3 个新 API + 错误响应修复 |
+| `server/src/scripts/sm2AlgorithmTest.js` | **新增** 35 个 SM-2 单元测试 |
+| `server/package.json` | test:sm2 / test:unit 脚本 |
+| `llm-service/services/prompt_manager.py` | 干扰项生成 Prompt |
+| `llm-service/services/ernie_client.py` | /api/llm/distractors 端点 |
+| `client/src/api/game.js` | getAdaptiveWords / updateWordMastery / getReviewCalendar |
+| `client/src/views/GameView.vue` | 自适应排序 + 掌握度更新 + 离线队列 |
+| `client/src/views/DashboardView.vue` | 错因统计传递 |
+| `client/src/components/LearningReport.vue` | 错因分布 + 学习入口图表 |
+| `client/src/utils/offlineQueue.js` | **新增** 离线队列 |
+| `client/src/game/scenes/WorldScene.js` | shutdown 清理 + 定时器修复 |
+| `client/src/game/scenes/ResultScene.js` | 跳转修复 + UI depth |
+| `client/src/game/scenes/MenuScene.js` | setTimeout 输入启用 |
+| `client/src/game/scenes/BootScene.js` | try-catch + setTimeout |
+| `client/src/game/config.js` | Canvas 模式 + 渲染配置 |
+| `client/public/sw.js` | 4 策略 SW + 开发模式自毁 |
+| `client/public/manifest.webmanifest` | 完整 PWA 配置 |
+| `client/index.html` | 移动端 meta 标签 |
+| `client/vite.config.js` | SW 缓存哈希注入 |
+| `client/public/assets/audio/bgm/*.mp3` | 高品质 BGM 替换 |
+| `docs/CLAUDE_PROMPT.md` | Bug 状态更新 |
+| `docs/CLAUDE_PROMPT_MONTH1.md` | **新增** M1 任务文档 |
+| `scripts/save-session-notes.sh` | **新增** Stop Hook 脚本 |
+| `.claude/settings.json` | Stop Hook 配置 |
+
+---
+
+### ⏳ 待办
+
+#### 审计遗留（按优先级）
+- [ ] **H2**: 拆分 GameView.vue（1400 行 god component）
+- [ ] **M1**: 提取共享工具函数（sanitizeWordbookId 复制 4 次）
+- [ ] **M4**: Docker JWT 默认值加固
+- [ ] **M5**: `$sample` 聚合优化（15K+ 文档全表扫描）
+- [ ] **M6**: 迁移测试到 Vitest 框架
+- [ ] **M7**: 全项目统一使用 logger.js
+
+#### 浏览器验证
+- [ ] 正常通关 → 结算 → 下一关 → 正常循环
+- [ ] Boss 战死亡 → 结算 → 重新挑战 → 返回关卡选择
+- [ ] 结算页 → 返回菜单 → 主菜单无残留贴图
+- [ ] PWA 添加到桌面 + 离线运行
+- [ ] 通义千问 API Key 配置后测试 LLM 干扰项
+
+#### 产品化
+- [ ] PWA 图标文件（icon-192.png / icon-512.png）
+- [ ] ffmpeg 压缩 menu.mp3 (2.3MB) 和 game.mp3 (2.1MB)
+- [ ] TypeScript 迁移
+- [ ] Redis 缓存层
+
+---
+
+### 🚀 快速启动
+
+```bash
+cd /c/Users/sxh/WorkBuddy/2026-05-14-task-5/word-quest
+
+# 启动后端（端口 4000，自动使用内存数据库）
+cd server && node src/app.js &
+
+# 启动前端（端口 3000）
+cd client && npx vite --port 3000 --host 127.0.0.1 &
+
+# 浏览器打开
+# http://localhost:3000
+# 测试账号：test / 123456
+
+# Docker 部署
+docker-compose down && docker-compose up --build -d
+```
+
+### 🧪 测试命令
+
+```bash
+cd server
+npm run test:sm2       # SM-2 算法 35/35
+npm run test:p0        # P0 验收
+npm run test:security  # 安全测试
+npm run test:smoke     # 冒烟测试
+npm run test:enterprise # 企业测试
+```
+
+---
+
+> 💡 **下次继续时**：说"查看 session-notes.md 继续上次的工作"即可恢复上下文。
