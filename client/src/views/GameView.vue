@@ -376,7 +376,8 @@ async function onLevelSelectStart({ chapter, level, difficulty }) {
     // 只有成功启动后才显示教程；如果 startGameLevel 失败并回退到 levelSelect，不显示
     if (uiState.value === 'game') {
       showTutorial.value = true
-      setPhaserInputEnabled(false)  // 防止点击穿透到 Phaser 场景
+      // 暂停 WorldScene — 防止教程期间角色移动、怪物触发答题
+      pauseWorldScene()
     }
   }
 }
@@ -387,7 +388,27 @@ function onLevelSelectBack() {
 
 function onIntroDismiss() {
   showTutorial.value = false
-  setPhaserInputEnabled(true)  // 恢复 Phaser 输入
+  resumeWorldScene()  // 恢复游戏
+}
+
+/** 暂停 WorldScene — 教程期间冻结游戏 */
+function pauseWorldScene() {
+  if (!game) return
+  const scene = game.scene.getScene('WorldScene')
+  if (scene && scene.scene.isActive()) {
+    scene.scene.pause()
+    scene.input.enabled = false
+  }
+}
+
+/** 恢复 WorldScene — 教程结束后继续游戏 */
+function resumeWorldScene() {
+  if (!game) return
+  const scene = game.scene.getScene('WorldScene')
+  if (scene && scene.scene.isActive()) {
+    scene.scene.resume()
+    scene.input.enabled = true
+  }
 }
 
 function onCharacterConfirm() {
