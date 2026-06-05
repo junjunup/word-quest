@@ -119,14 +119,6 @@ export function useQuizFlow(hudData, levelWordsRef, gameStore) {
 
   /** 怪物碰撞 → 显示答题弹窗 */
   async function onShowQuiz(data) {
-    // 校验：必须有怪物索引和有效词汇
-    const word = levelManager.getCurrentWord()
-    if (!word || !word.word) {
-      console.warn('[useQuizFlow] onShowQuiz blocked — no valid word', { word, data })
-      eventBus.emit(EVENTS.RESUME_GAME)
-      return
-    }
-
     currentMonsterIndex.value = data?.monsterIndex ?? -1
     audioManager.pauseBGM(300, 'quiz')
 
@@ -134,9 +126,9 @@ export function useQuizFlow(hudData, levelWordsRef, gameStore) {
     const quizData = await fetchQuizData(data)
     if (!quizData) return
 
-    // 校验：题目数据必须有 word 或 meaning
+    // 防御：题目数据必须至少有 word 或 meaning，避免空弹窗
     if (!quizData.word && !quizData.meaning) {
-      console.warn('[useQuizFlow] onShowQuiz blocked — empty quiz data', quizData)
+      console.warn('[useQuizFlow] onShowQuiz blocked — empty quiz data')
       eventBus.emit(EVENTS.RESUME_GAME)
       return
     }
