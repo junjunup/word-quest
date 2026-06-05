@@ -1,5 +1,5 @@
 <template>
-  <div class="quiz-modal-overlay">
+  <div class="quiz-modal-overlay" v-if="wordData && (wordData.word || wordData.meaning)">
     <div class="quiz-modal" :class="{ shake: shaking }">
       <!-- 倒计时 -->
       <div class="timer-bar">
