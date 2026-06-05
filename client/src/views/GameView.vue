@@ -376,6 +376,7 @@ async function onLevelSelectStart({ chapter, level, difficulty }) {
     // 只有成功启动后才显示教程；如果 startGameLevel 失败并回退到 levelSelect，不显示
     if (uiState.value === 'game') {
       showTutorial.value = true
+      setPhaserInputEnabled(false)  // 防止点击穿透到 Phaser 场景
     }
   }
 }
@@ -386,6 +387,7 @@ function onLevelSelectBack() {
 
 function onIntroDismiss() {
   showTutorial.value = false
+  setPhaserInputEnabled(true)  // 恢复 Phaser 输入
 }
 
 function onCharacterConfirm() {
@@ -455,6 +457,7 @@ async function startGameLevel() {
 // --- Boss Quiz Handlers ---
 
 function onShowBossQuiz(data) {
+  if (!inGameLevel.value) return
   bossQuizData.bossName = data.bossName || '👹 BOSS'
   bossQuizData.questionsNeeded = data.questionsNeeded || 1
   bossQuizData.bossCurrentHp = data.bossCurrentHp || 0
@@ -668,8 +671,12 @@ function onBeforeUnload(e) {
   }
 }
 
-// Quiz flow wrapper — delegates to composable
+// Quiz flow wrapper — delegates to composable (仅在关卡内响应)
 async function onShowQuiz(data) {
+  if (!inGameLevel.value) {
+    console.warn('[GameView] Ignored SHOW_QUIZ — not in game level')
+    return
+  }
   await quiz.onShowQuiz(data)
 }
 
@@ -714,6 +721,7 @@ function onQuizClose() {
 }
 
 function onShowChat(data) {
+  if (!inGameLevel.value) return
   chatContext.triggerType = 'manual'
   chatContext.chapterName = `第${data?.chapter || 1}章`
   audioManager.pauseBGM(300, 'chat')
