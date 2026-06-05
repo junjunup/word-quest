@@ -57,7 +57,14 @@ export default class MenuScene extends Phaser.Scene {
     line.fillRect(width / 2 - 144, 162, 8, 8)
     line.fillRect(width / 2 + 136, 162, 8, 8)
 
-    // 木质按钮
+    // 首次访问：小智欢迎气泡（必须在按钮之前创建，否则全屏dismissZone会拦截按钮点击）
+    const hasVisited = localStorage.getItem('wordquest:hasVisited')
+    if (!hasVisited) {
+      this.showFirstTimeWelcome(width, height)
+      localStorage.setItem('wordquest:hasVisited', 'true')
+    }
+
+    // 木质按钮（在欢迎气泡之后创建，确保按钮在display list上层，获得输入优先权）
     this.createWoodButton(width / 2, 230, '🌿 开 始 冒 险', 0x5b8c3e, 0x3a6b1e, () => {
       eventBus.emit(EVENTS.SHOW_LEVEL_SELECT, { mode: 'new' })
     })
@@ -112,13 +119,6 @@ export default class MenuScene extends Phaser.Scene {
       repeat: -1,
       ease: 'Sine.easeInOut'
     })
-
-    // 首次访问：小智欢迎气泡
-    const hasVisited = localStorage.getItem('wordquest:hasVisited')
-    if (!hasVisited) {
-      this.showFirstTimeWelcome(width, height)
-      localStorage.setItem('wordquest:hasVisited', 'true')
-    }
 
     // 延迟启用输入，等待上一场景残留的指针事件完全排空
     // 使用原生 setTimeout 避免被上一场景 shutdown 的 tweens.killAll() 连带清除
@@ -306,11 +306,10 @@ export default class MenuScene extends Phaser.Scene {
       }
     })
 
-    // 点击气泡或任意位置关闭（depth=-1 确保不拦截按钮点击）
+    // 点击气泡或任意位置关闭（在按钮之前创建，display list 中处于按钮下方，不会拦截按钮点击）
     const dismissZone = this.add.rectangle(width / 2, height / 2, width, height)
       .setInteractive({ useHandCursor: false })
       .setAlpha(0.001)
-      .setDepth(-1)
     dismissZone.once('pointerdown', () => {
       this.tweens.add({
         targets: [bubble, arrow],
