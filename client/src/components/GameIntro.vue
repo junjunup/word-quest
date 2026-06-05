@@ -1,373 +1,168 @@
 <template>
-  <div class="tutorial-overlay" v-if="currentStep > 0">
-    <!-- 半透明遮罩 -->
-    <div class="tutorial-mask" @click.self="handleMaskClick"></div>
-
-    <!-- 步骤1：移动操作引导 -->
-    <div class="tutorial-tooltip step-move" v-if="currentStep === 1">
-      <div class="tooltip-arrow tooltip-arrow-down"></div>
-      <div class="tooltip-content">
-        <div class="tooltip-icon">🎮</div>
-        <h3>移动你的角色！</h3>
-        <div class="key-hints">
-          <span class="key">W</span>
-          <span class="key">A</span>
-          <span class="key">S</span>
-          <span class="key">D</span>
-          <span class="or-text">或</span>
-          <span class="key">↑</span>
-          <span class="key">←</span>
-          <span class="key">↓</span>
-          <span class="key">→</span>
-        </div>
-        <p class="tooltip-desc">使用键盘移动角色，去接触小鸡怪物吧！</p>
-        <div class="step-indicator">步骤 1/3</div>
+  <!-- 新手引导 — 底部非阻塞提示条 -->
+  <div class="newbie-guide" v-if="currentTip < tips.length">
+    <div class="guide-bar">
+      <span class="guide-icon">{{ tips[currentTip].icon }}</span>
+      <div class="guide-text">
+        <strong>{{ tips[currentTip].title }}</strong>
+        <span>{{ tips[currentTip].desc }}</span>
       </div>
-    </div>
-
-    <!-- 步骤2：接近怪物引导 -->
-    <div class="tutorial-tooltip step-monster" v-if="currentStep === 2">
-      <div class="tooltip-arrow tooltip-arrow-up"></div>
-      <div class="tooltip-content">
-        <div class="tooltip-icon">🐔</div>
-        <h3>接触小鸡怪物！</h3>
-        <p class="tooltip-desc">走到 <strong>🐔 小鸡</strong> 旁边触发词汇答题。<br>答对消灭怪物获得分数，答错扣一条命！<br><span class="tutorial-hint" v-if="isTutorial">💡 教程关有无限生命，放心尝试！</span></p>
-        <div class="pulse-arrow">⬆️ 走向附近的怪物</div>
-        <div class="step-indicator">步骤 2/3</div>
-      </div>
-    </div>
-
-    <!-- 步骤3：答题完成后的提示 -->
-    <div class="tutorial-tooltip step-complete" v-if="currentStep === 3">
-      <div class="tooltip-content">
-        <div class="tooltip-icon">🏆</div>
-        <h3>{{ isTutorial ? '🎓 教程完成！' : '太棒了！' }}</h3>
-        <p class="tooltip-desc">
-          🔥 <strong>连续答对</strong>可获得连击加成！<br>
-          ⭐ 根据正确率和用时获得 1-3 颗星<br>
-          💰 更高难度有分数倍率加成<br>
-          🤖 答错时 <strong>小智</strong> 会来帮你讲解<br>
-          <br>
-          消灭所有小怪{{ isTutorial ? '即可通关！之后关卡还有 Boss 等着你' : '和 Boss 即可通关！' }}
-        </p>
-        <button class="btn btn-primary start-adventure-btn" @click="finishTutorial">
-          开始冒险 ⚔️
+      <div class="guide-actions">
+        <span class="guide-progress">{{ currentTip + 1 }}/{{ tips.length }}</span>
+        <button class="guide-next" @click="nextTip">
+          {{ currentTip < tips.length - 1 ? '下一项 →' : '知道了 👍' }}
         </button>
-        <div class="step-indicator">步骤 3/3</div>
       </div>
     </div>
-
-    <!-- 跳过按钮 -->
-    <button class="skip-btn" @click="skipTutorial" v-if="currentStep < 3">
-      跳过引导 →
-    </button>
-
-    <!-- 下次不再显示 -->
-    <label class="skip-forever" v-if="currentStep === 3">
-      <input type="checkbox" v-model="skipNext" /> 下次不再显示引导
-    </label>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import eventBus, { EVENTS } from '@/game/systems/EventBus'
-import { TUTORIAL_CONFIG } from '@/game/config/gameConstants'
 import { safeSetItem } from '@/utils/helpers'
 
-const props = defineProps({
-  isTutorial: { type: Boolean, default: false }
-})
 const emit = defineEmits(['dismiss'])
 
-const currentStep = ref(1)
-const skipNext = ref(false)
-let playerMoved = false
-let quizAnswered = false
-
-// 监听玩家移动（通过键盘事件检测）
-function onKeyDown(e) {
-  const moveKeys = ['w', 'a', 's', 'd', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']
-  if (moveKeys.includes(e.key) && currentStep.value === 1 && !playerMoved) {
-    playerMoved = true
-    // 延迟后进入下一步（让玩家感受移动）
-    setTimeout(() => {
-      if (currentStep.value === 1) {
-        currentStep.value = 2
-      }
-    }, TUTORIAL_CONFIG.moveDetectDelay)
+const tips = [
+  {
+    icon: '🎮',
+    title: '移动角色',
+    desc: '方向键 ↑↓←→ 或 WASD 在田园中移动'
+  },
+  {
+    icon: '🐔',
+    title: '击败怪物',
+    desc: '靠近小鸡触发答题，答对消灭怪物获得分数'
+  },
+  {
+    icon: '👹',
+    title: 'Boss 战',
+    desc: '每关末有 Boss，需连续答对多题才能击败'
+  },
+  {
+    icon: '⭐',
+    title: '星级评价',
+    desc: '根据正确率和速度获得 1-3 星，努力争取三星吧'
+  },
+  {
+    icon: '🐮',
+    title: 'AI 学伴小智',
+    desc: '答错后小智会讲解单词，也可以主动点击 🤖 求助'
   }
-}
+]
 
-// 监听答题完成
-function onQuizAnswered() {
-  if (currentStep.value === 2 && !quizAnswered) {
-    quizAnswered = true
-    // 答题完成后短暂延迟进入最后一步
-    setTimeout(() => {
-      if (currentStep.value === 2) {
-        currentStep.value = 3
-      }
-    }, TUTORIAL_CONFIG.quizCompleteDelay)
+const currentTip = ref(0)
+
+function nextTip() {
+  if (currentTip.value < tips.length - 1) {
+    currentTip.value++
+  } else {
+    finishTutorial()
   }
-}
-
-function handleMaskClick() {
-  // 步骤1点击遮罩不做任何事（需要键盘操作）
-  // 步骤2和3允许点击推进
-  if (currentStep.value === 2) {
-    currentStep.value = 3
-  }
-}
-
-function skipTutorial() {
-  finishTutorial()
 }
 
 function finishTutorial() {
-  if (skipNext.value) {
-    safeSetItem('wordquest:skipIntro', 'true')
-  }
-  currentStep.value = 0
+  // 用户看过引导，不再自动显示
+  safeSetItem('wordquest:skipIntro', 'true')
+  currentTip.value = tips.length  // 隐藏
   emit('dismiss')
 }
 
-onMounted(() => {
-  window.addEventListener('keydown', onKeyDown)
-  eventBus.on(EVENTS.QUIZ_ANSWERED, onQuizAnswered)
-})
+// 键盘快捷键：空格或回车跳过
+function onKeyDown(e) {
+  if (e.key === ' ' || e.key === 'Enter') {
+    e.preventDefault()
+    nextTip()
+  }
+  if (e.key === 'Escape') {
+    finishTutorial()
+  }
+}
 
-onUnmounted(() => {
-  window.removeEventListener('keydown', onKeyDown)
-  eventBus.off(EVENTS.QUIZ_ANSWERED, onQuizAnswered)
-})
+onMounted(() => window.addEventListener('keydown', onKeyDown))
+onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
 </script>
 
 <style scoped lang="scss">
-.tutorial-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 1800;
-  pointer-events: none;
-
-  * {
-    pointer-events: auto;
-  }
-}
-
-.tutorial-mask {
+.newbie-guide {
   position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.35);
-  pointer-events: auto;
-}
-
-.tutorial-tooltip {
-  position: absolute;
-  z-index: 1810;
-  animation: tooltipAppear 0.4s ease;
-}
-
-.step-move {
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -70%);
-}
-
-.step-monster {
-  top: 30%;
+  bottom: 12px;
   left: 50%;
   transform: translateX(-50%);
+  z-index: 1500;
+  width: 920px;
+  max-width: 95%;
+  animation: slideUp 0.3s ease;
 }
 
-.step-complete {
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.tooltip-content {
-  background: linear-gradient(180deg, #e8d5a3 0%, #d4a76a 100%);
-  border: 4px solid #8b6914;
-  border-radius: 12px;
-  padding: 20px 28px;
-  text-align: center;
-  min-width: 320px;
-  max-width: 440px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 60px rgba(255, 200, 71, 0.15);
-}
-
-.tooltip-icon {
-  font-size: 40px;
-  margin-bottom: 8px;
-}
-
-.tooltip-content h3 {
-  font-size: 20px;
-  color: #5b3a1a;
-  margin-bottom: 12px;
-}
-
-.tooltip-desc {
-  color: #5b3a1a;
-  font-size: 14px;
-  line-height: 1.8;
-  margin-bottom: 8px;
-}
-
-.tooltip-arrow {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-
-  &.tooltip-arrow-down {
-    bottom: -12px;
-    border-left: 14px solid transparent;
-    border-right: 14px solid transparent;
-    border-top: 14px solid #8b6914;
-  }
-
-  &.tooltip-arrow-up {
-    top: -12px;
-    border-left: 14px solid transparent;
-    border-right: 14px solid transparent;
-    border-bottom: 14px solid #8b6914;
-  }
-}
-
-.key-hints {
+.guide-bar {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
-  margin-bottom: 12px;
-  flex-wrap: wrap;
-}
-
-.key {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 6px;
-  background: #5b3a1a;
-  color: #f5edd6;
+  gap: 14px;
+  padding: 10px 18px;
+  background: rgba(45, 80, 22, 0.92);
   border: 2px solid #8b6914;
-  font-weight: bold;
-  font-size: 13px;
-  animation: keyBounce 1.5s ease infinite;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
-.or-text {
-  color: #8b6914;
-  font-size: 12px;
-  margin: 0 4px;
+.guide-icon {
+  font-size: 28px;
+  flex-shrink: 0;
 }
 
-.tutorial-hint {
-  display: inline-block;
-  color: #5b8c3e;
-  background: rgba(91, 140, 62, 0.1);
-  border: 1px solid rgba(91, 140, 62, 0.3);
-  border-radius: 4px;
-  padding: 2px 8px;
-  margin-top: 4px;
+.guide-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  strong {
+    color: #ffc847;
+    font-size: 14px;
+    font-family: 'Microsoft YaHei', sans-serif;
+  }
+
+  span {
+    color: #d4c99a;
+    font-size: 12px;
+    font-family: 'Microsoft YaHei', sans-serif;
+  }
 }
 
-.pulse-arrow {
-  color: #ffc847;
-  font-size: 16px;
-  font-weight: bold;
-  margin-top: 8px;
-  animation: pulseUp 1s ease infinite;
+.guide-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
-.step-indicator {
+.guide-progress {
   color: #8b6914;
   font-size: 11px;
-  margin-top: 12px;
-  opacity: 0.7;
+  font-family: 'Microsoft YaHei', sans-serif;
 }
 
-.skip-btn {
-  position: absolute;
-  bottom: 24px;
-  right: 24px;
-  background: rgba(91, 58, 26, 0.8);
-  border: 2px solid #8b6914;
+.guide-next {
+  background: #5b8c3e;
   color: #f5edd6;
-  padding: 8px 20px;
+  border: 2px solid #3a6b1e;
   border-radius: 6px;
+  padding: 6px 14px;
   font-size: 13px;
+  font-family: 'Microsoft YaHei', sans-serif;
   cursor: pointer;
+  white-space: nowrap;
   transition: all 0.2s;
-  z-index: 1820;
 
   &:hover {
-    background: rgba(139, 105, 20, 0.8);
+    background: #6b9c4e;
+    border-color: #ffc847;
   }
 }
 
-.skip-forever {
-  position: absolute;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: #f5edd6;
-  font-size: 12px;
-  cursor: pointer;
-  z-index: 1820;
-  background: rgba(91, 58, 26, 0.7);
-  padding: 6px 14px;
-  border-radius: 4px;
-
-  input { cursor: pointer; }
-}
-
-.start-adventure-btn {
-  margin-top: 12px;
-  padding: 10px 30px;
-  font-size: 16px;
-}
-
-/* Animations */
-@keyframes tooltipAppear {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
-}
-
-.step-move {
-  animation: tooltipAppear 0.4s ease;
-}
-
-.step-monster {
-  animation: tooltipSlideDown 0.4s ease;
-}
-
-@keyframes tooltipSlideDown {
-  from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+@keyframes slideUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(20px); }
   to { opacity: 1; transform: translateX(-50%) translateY(0); }
-}
-
-@keyframes keyBounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-3px); }
-}
-
-@keyframes pulseUp {
-  0%, 100% { opacity: 1; transform: translateY(0); }
-  50% { opacity: 0.6; transform: translateY(-6px); }
 }
 </style>
