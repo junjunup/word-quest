@@ -173,7 +173,20 @@ const showTutorial = ref(false)
 const isTutorialLevel = ref(false)
 const loadError = ref('')
 
-// 使用答题流程 composable
+// HUD 数据（必须在 useQuizFlow 之前定义 — composable 依赖此对象）
+const hudData = reactive({
+  lives: 3,
+  maxLives: 3,
+  score: 0,
+  combo: 0,
+  chapter: 1,
+  level: 1
+})
+
+// 关卡词汇列表（从 API 加载）— 必须在 useQuizFlow 之前定义
+const levelWords = ref([])
+
+// 使用答题流程 composable（hudData + levelWords 已在上面定义，可安全传入）
 const quiz = useQuizFlow(hudData, levelWords, gameStore)
 
 const virtualDirection = reactive({ up: false, down: false, left: false, right: false })
@@ -196,18 +209,6 @@ const bossQuizData = reactive({
 
 // 待启动的关卡参数（关卡选择后暂存，等intro结束再启动）
 const pendingLevelParams = ref(null)
-
-// 关卡词汇列表（从 API 加载）
-const levelWords = ref([])
-
-const hudData = reactive({
-  lives: 3,
-  maxLives: 3,
-  score: 0,
-  combo: 0,
-  chapter: 1,
-  level: 1
-})
 
 const chatContext = reactive({
   currentWord: '',
