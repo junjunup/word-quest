@@ -171,6 +171,7 @@ const showPauseMenu = ref(false)
 const achievementData = ref(null)
 const showTutorial = ref(false)
 const isTutorialLevel = ref(false)
+const isWorldPausedForTutorial = ref(false)  // 教程期间阻止一切游戏交互
 const loadError = ref('')
 
 // HUD 数据（必须在 useQuizFlow 之前定义 — composable 依赖此对象）
@@ -370,14 +371,14 @@ async function onLevelSelectStart({ chapter, level, difficulty }) {
   const skipIntro = safeGetItem(STORAGE_KEYS.skipIntro) === 'true'
   if (skipIntro) {
     await startGameLevel()
+    resumeWorldScene()  // 无教程，直接恢复游戏
   } else {
     // 先启动游戏，然后叠加交互式引导
     await startGameLevel()
     // 只有成功启动后才显示教程；如果 startGameLevel 失败并回退到 levelSelect，不显示
     if (uiState.value === 'game') {
       showTutorial.value = true
-      // 暂停 WorldScene — 防止教程期间角色移动、怪物触发答题
-      pauseWorldScene()
+      // WorldScene 已在 startGameLevel 中暂停，教程结束后 resume
     }
   }
 }
@@ -391,18 +392,24 @@ function onIntroDismiss() {
   resumeWorldScene()  // 恢复游戏
 }
 
-/** 暂停 WorldScene — 教程期间冻结游戏 */
-function pauseWorldScene() {
+/** 暂停 WorldScene — 教程期间冻结游戏（延迟重试以防场景尚未就绪） */
+function pauseWorldScene(retries = 3) {
+  isWorldPausedForTutorial.value = true  // 立即阻止所有游戏事件
   if (!game) return
   const scene = game.scene.getScene('WorldScene')
   if (scene && scene.scene.isActive()) {
     scene.scene.pause()
     scene.input.enabled = false
+    return
+  }
+  if (retries > 0) {
+    setTimeout(() => pauseWorldScene(retries - 1), 50)
   }
 }
 
 /** 恢复 WorldScene — 教程结束后继续游戏 */
 function resumeWorldScene() {
+  isWorldPausedForTutorial.value = false
   if (!game) return
   const scene = game.scene.getScene('WorldScene')
   if (scene && scene.scene.isActive()) {
@@ -465,6 +472,9 @@ async function startGameLevel() {
         level: params.level,
         difficulty: params.difficulty
       })
+      // 启动后立即暂停 — 防止教程显示前物理引擎触发碰撞
+      // 如果 skipIntro，onLevelSelectStart 会立即 resume；否则由 onIntroDismiss resume
+      pauseWorldScene()
     }
   } catch (err) {
     console.error('启动关卡失败:', err)
@@ -692,12 +702,9 @@ function onBeforeUnload(e) {
   }
 }
 
-// Quiz flow wrapper — delegates to composable (仅在关卡内响应)
+// Quiz flow wrapper — 教程暂停或非关卡内时阻止答题
 async function onShowQuiz(data) {
-  if (!inGameLevel.value) {
-    console.warn('[GameView] Ignored SHOW_QUIZ — not in game level')
-    return
-  }
+  if (isWorldPausedForTutorial.value || !inGameLevel.value) return
   await quiz.onShowQuiz(data)
 }
 
