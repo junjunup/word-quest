@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard 诊断</title>
+  <style>
+    body { margin: 0; background: #1a1a2e; color: #ddd; font-family: 'Consolas', monospace; padding: 24px; }
+    h1 { color: #ffd700; font-size: 18px; }
+    h3 { color: #4a90d9; margin-top: 20px; }
+    .log { white-space: pre-wrap; font-size: 13px; line-height: 1.6; background: #0d0d1a; padding: 12px; border-radius: 6px; margin: 8px 0; max-height: 400px; overflow-y: auto; }
+    .ok { color: #4f4; } .err { color: #f44; } .warn { color: #fa0; }
+    .data { color: #8bf; }
+    #charts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
+    .chart-box { background: rgba(255,255,255,0.03); border: 1px solid #333; border-radius: 8px; padding: 12px; }
+    .chart-box h4 { margin: 0 0 8px 0; color: #b8b8d4; font-size: 14px; }
+    .chart-box > div { width: 100%; height: 250px; }
+  </style>
+</head>
+<body>
+  <h1>Dashboard 图表诊断工具</h1>
+  <div id="log" class="log"></div>
+
+  <div id="charts">
+    <div class="chart-box"><h4>饼图</h4><div id="c-pie"></div></div>
+    <div class="chart-box"><h4>折线图</h4><div id="c-line"></div></div>
+    <div class="chart-box" style="grid-column: span 2;"><h4>雷达图</h4><div id="c-radar" style="height:300px;"></div></div>
+  </div>
+
+  <script>
+    const log = document.getElementById('log');
+    function w(msg, cls) {
+      const s = document.createElement('span');
+      s.className = cls || '';
+      s.textContent = msg + '\n';
+      log.appendChild(s);
+    }
+
+    async function main() {
+      // 1. 检查 token
+      w('=== 步骤1: 检查Token ===');
+      const token = localStorage.getItem('token');
+      if (!token) { w('未找到token，请先登录！', 'err'); return; }
+      w('Token: ' + token.substring(0, 40) + '...', 'ok');
+
+      // 解析JWT
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        w('JWT payload: ' + JSON.stringify(payload), 'data');
+        if (payload.exp && payload.exp * 1000 < Date.now()) {
+          w('Token已过期！exp=' + new Date(payload.exp * 1000).toISOString(), 'err');
+          return;
+        }
+        w('Token有效，过期时间: ' + new Date(payload.exp * 1000).toLocaleString(), 'ok');
+      } catch(e) {
+        w('JWT解析失败: ' + e.message, 'err');
+        return;
+      }
+
+      // 2. 测试API调用
+      w('\n=== 步骤2: 测试API ===');
+      const headers = { 'Authorization': 'Bearer ' + token };
+
+      async function fetchApi(url, name) {
+        try {
+          const resp = await fetch('/api' + url, { headers });
+          const text = await resp.text();
+          let data;
+          try { data = JSON.parse(text); } catch(e) { data = text; }
+          if (resp.ok && data.success) {
+            w(`[${name}] ${resp.status} OK: ${JSON.stringify(data.data).substring(0, 200)}`, 'ok');
+            return data.data;
+          } else {
+            w(`[${name}] ${resp.status} FAIL: ${text.substring(0, 200)}`, 'err');
+            return null;
+          }
+        } catch(e) {
+          w(`[${name}] ERROR: ${e.message}`, 'err');
+          return null;
+        }
+      }
+
+      const stats = await fetchApi('/learning/stats', '学习统计');
+      const daily = await fetchApi('/learning/daily-stats?days=30', '每日数据');
+      const chapter = await fetchApi('/learning/chapter-stats', '章节数据');
+      const heatmap = await fetchApi('/learning/heatmap?year=2026', '热力图');
+      const mistakes = await fetchApi('/learning/top-mistakes?limit=10', '易错词汇');
+
+      // 3. 检查echarts
+      w('\n=== 步骤3: ECharts渲染 ===');
+      try {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js';
+        script.onload = () => {
+          w('ECharts CDN加载成功: v' + echarts.version, 'ok');
+          renderCharts(stats, daily, chapter);
+        };
+        script.onerror = () => w('ECharts CDN加载失败！', 'err');
+        document.head.appendChild(script);
+      } catch(e) {
+        w('ECharts加载异常: ' + e.message, 'err');
+      }
+    }
+
+    function renderCharts(stats, daily, chapter) {
+      // 饼图
+      try {
+        const pie = echarts.init(document.getElementById('c-pie'));
+        pie.setOption({
+          backgroundColor: 'transparent',
+          tooltip: { trigger: 'item' },
+          color: ['#7ed321', '#4a90d9', '#666688'],
+          series: [{
+            type: 'pie', radius: ['40%', '70%'],
+            label: { color: '#b8b8d4' },
+            data: [
+              { value: stats?.wordsMastered || 0, name: '已掌握' },
+              { value: (stats?.wordsLearned || 0) - (stats?.wordsMastered || 0), name: '学习中' },
+              { value: Math.max(0, (stats?.totalVocabCount || 400) - (stats?.wordsLearned || 0)), name: '未接触' }
+            ]
+          }]
+        });
+        w('饼图渲染成功', 'ok');
+      } catch(e) { w('饼图失败: ' + e.message, 'err'); }
+
+      // 折线图
+      try {
+        const line = echarts.init(document.getElementById('c-line'));
+        line.setOption({
+          backgroundColor: 'transparent',
+          tooltip: { trigger: 'axis' },
+          grid: { left: 40, right: 20, top: 20, bottom: 30 },
+          xAxis: { type: 'category', data: (daily||[]).map(d => d._id), axisLabel: { color: '#888', fontSize: 10 } },
+          yAxis: { type: 'value', axisLabel: { color: '#888' }, splitLine: { lineStyle: { color: '#222' } } },
+          series: [{ type: 'line', data: (daily||[]).map(d => d.total), smooth: true, lineStyle: { color: '#4a90d9' }, areaStyle: { color: 'rgba(74,144,217,0.1)' }, itemStyle: { color: '#4a90d9' } }]
+        });
+        w('折线图渲染成功', 'ok');
+      } catch(e) { w('折线图失败: ' + e.message, 'err'); }
+
+      // 雷达图
+      try {
+        const chapters = ['Ch1 基础', 'Ch2 自然', 'Ch3 商务', 'Ch4 学术', 'Ch5 易混', 'Ch6 综合'];
+        const radar = echarts.init(document.getElementById('c-radar'));
+        radar.setOption({
+          backgroundColor: 'transparent',
+          radar: {
+            indicator: chapters.map(n => ({ name: n, max: 100 })),
+            axisName: { color: '#b8b8d4', fontSize: 11 },
+            splitLine: { lineStyle: { color: '#333' } },
+            splitArea: { areaStyle: { color: ['rgba(255,255,255,0.02)', 'rgba(255,255,255,0.04)'] } }
+          },
+          series: [{
+            type: 'radar',
+            data: [{
+              value: chapters.map((_, i) => {
+                const ch = (chapter||[]).find(c => c.chapter === i + 1);
+                return ch ? parseFloat(ch.correctRate) : 0;
+              }),
+              name: '正确率',
+              lineStyle: { color: '#4a90d9' },
+              areaStyle: { color: 'rgba(74,144,217,0.2)' },
+              itemStyle: { color: '#4a90d9' }
+            }]
+          }]
+        });
+        w('雷达图渲染成功', 'ok');
+      } catch(e) { w('雷达图失败: ' + e.message, 'err'); }
+
+      w('\n=== 诊断完成 ===', 'warn');
+    }
+
+    main();
+  </script>
+</body>
+</html>

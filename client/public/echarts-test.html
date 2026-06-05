@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ECharts 渲染测试</title>
+  <style>
+    body { margin: 0; background: #1a1a2e; color: #fff; font-family: sans-serif; padding: 20px; }
+    h2 { color: #ffd700; margin-bottom: 16px; }
+    .test-box { background: rgba(255,255,255,0.05); border: 1px solid #333; border-radius: 8px; padding: 16px; margin-bottom: 20px; }
+    #pie-chart, #line-chart, #radar-chart { width: 100%; height: 280px; }
+    .status { padding: 8px 12px; border-radius: 6px; margin-bottom: 8px; font-size: 14px; }
+    .ok { background: rgba(0,200,0,0.15); color: #4f4; }
+    .err { background: rgba(200,0,0,0.15); color: #f44; }
+  </style>
+</head>
+<body>
+  <h2>ECharts 渲染测试</h2>
+  <div id="load-status"></div>
+
+  <div class="test-box">
+    <h4>饼图测试</h4>
+    <div id="pie-chart"></div>
+  </div>
+
+  <div class="test-box">
+    <h4>折线图测试</h4>
+    <div id="line-chart"></div>
+  </div>
+
+  <div class="test-box">
+    <h4>雷达图测试</h4>
+    <div id="radar-chart"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+  <script>
+    const statusEl = document.getElementById('load-status');
+
+    function log(msg, ok) {
+      const d = document.createElement('div');
+      d.className = 'status ' + (ok ? 'ok' : 'err');
+      d.textContent = (ok ? '✓ ' : '✗ ') + msg;
+      statusEl.appendChild(d);
+    }
+
+    try {
+      log('ECharts loaded: v' + echarts.version, true);
+    } catch(e) {
+      log('ECharts load failed: ' + e.message, false);
+    }
+
+    // 饼图
+    try {
+      const pie = echarts.init(document.getElementById('pie-chart'));
+      pie.setOption({
+        tooltip: { trigger: 'item' },
+        color: ['#7ed321', '#4a90d9', '#666688'],
+        series: [{
+          type: 'pie',
+          radius: ['40%', '70%'],
+          label: { color: '#b8b8d4' },
+          data: [
+            { value: 10, name: '已掌握' },
+            { value: 20, name: '学习中' },
+            { value: 370, name: '未接触' }
+          ]
+        }]
+      });
+      log('饼图渲染成功', true);
+    } catch(e) {
+      log('饼图渲染失败: ' + e.message, false);
+    }
+
+    // 折线图
+    try {
+      const line = echarts.init(document.getElementById('line-chart'));
+      line.setOption({
+        tooltip: { trigger: 'axis' },
+        grid: { left: 40, right: 20, top: 20, bottom: 30 },
+        xAxis: {
+          type: 'category',
+          data: ['05-10', '05-11', '05-12', '05-13', '05-14'],
+          axisLabel: { color: '#888' },
+          axisLine: { lineStyle: { color: '#333' } }
+        },
+        yAxis: {
+          type: 'value',
+          axisLabel: { color: '#888' },
+          splitLine: { lineStyle: { color: '#222' } }
+        },
+        series: [{
+          type: 'line',
+          data: [3, 5, 2, 8, 4],
+          smooth: true,
+          lineStyle: { color: '#4a90d9' },
+          areaStyle: { color: 'rgba(74, 144, 217, 0.1)' },
+          itemStyle: { color: '#4a90d9' }
+        }]
+      });
+      log('折线图渲染成功', true);
+    } catch(e) {
+      log('折线图渲染失败: ' + e.message, false);
+    }
+
+    // 雷达图
+    try {
+      const radar = echarts.init(document.getElementById('radar-chart'));
+      radar.setOption({
+        radar: {
+          indicator: [
+            { name: 'Ch1 基础', max: 100 },
+            { name: 'Ch2 自然', max: 100 },
+            { name: 'Ch3 商务', max: 100 },
+            { name: 'Ch4 学术', max: 100 },
+            { name: 'Ch5 易混', max: 100 },
+            { name: 'Ch6 综合', max: 100 }
+          ],
+          axisName: { color: '#b8b8d4', fontSize: 11 },
+          splitLine: { lineStyle: { color: '#333' } },
+          splitArea: { areaStyle: { color: ['rgba(255,255,255,0.02)', 'rgba(255,255,255,0.04)'] } }
+        },
+        series: [{
+          type: 'radar',
+          data: [{
+            value: [50, 30, 0, 0, 0, 0],
+            name: '正确率',
+            lineStyle: { color: '#4a90d9' },
+            areaStyle: { color: 'rgba(74, 144, 217, 0.2)' },
+            itemStyle: { color: '#4a90d9' }
+          }]
+        }]
+      });
+      log('雷达图渲染成功', true);
+    } catch(e) {
+      log('雷达图渲染失败: ' + e.message, false);
+    }
+
+    window.addEventListener('resize', () => {
+      document.querySelectorAll('[_echarts_instance_]').forEach(el => {
+        const inst = echarts.getInstanceByDom(el);
+        if (inst) inst.resize();
+      });
+    });
+  </script>
+</body>
+</html>
