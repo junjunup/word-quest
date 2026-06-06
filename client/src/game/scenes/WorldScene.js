@@ -347,7 +347,7 @@ export default class WorldScene extends Phaser.Scene {
   }
   _tryLockTarget() {
     if (this.targetLocked || !this.player) return
-    let closest = null, closestDist = 150
+    let closest = null, closestDist = 200
     const children = this.monsters.getChildren()
     for (let i = 0; i < children.length; i++) {
       const m = children[i]; const ai = this.monsterAIs[i]
@@ -419,7 +419,7 @@ export default class WorldScene extends Phaser.Scene {
       const label = this.add.text(x, y, `[${i + 1}] ${options[i]}`, {
         fontSize: '13px', fontFamily: 'Microsoft YaHei', color: '#f5edd6'
       }).setOrigin(0.5).setDepth(301).setScrollFactor(0)
-      this._choiceOpts.push({ bg, label })
+      this._choiceOpts.push({ bg, label, x, y })  // store x,y for flash
     }
 
     // Hint
@@ -451,11 +451,12 @@ export default class WorldScene extends Phaser.Scene {
   _flashChoiceRed(idx) {
     const opt = this._choiceOpts?.[idx]
     if (!opt) return
-    opt.bg.clear()
-    opt.bg.fillStyle(0x8b0000, 0.85)
-    opt.bg.fillRoundedRect(opt.bg.x, opt.bg.y, 200, 36, 6)
-    opt.bg.lineStyle(2, 0xff0000)
-    opt.bg.strokeRoundedRect(opt.bg.x, opt.bg.y, 200, 36, 6)
+    const { bg, x, y } = opt
+    bg.clear()
+    bg.fillStyle(0x8b0000, 0.85)
+    bg.fillRoundedRect(x - 100, y - 18, 200, 36, 6)
+    bg.lineStyle(2, 0xff0000)
+    bg.strokeRoundedRect(x - 100, y - 18, 200, 36, 6)
     this.time.delayedCall(300, () => { this._cancelLock() })
   }
 
