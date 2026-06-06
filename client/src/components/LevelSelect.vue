@@ -44,7 +44,10 @@
               <div class="chapter-name">{{ chapter.name }}</div>
               <div class="chapter-theme">{{ chapter.theme }}</div>
               <div class="chapter-stars" v-if="chapter.unlocked">
-                ⭐ {{ getChapterStars(chapter) }}/{{ chapter.levels.length * 3 }}
+                <span>⭐ {{ getChapterStars(chapter) }}/{{ chapter.levels.length * 3 }}</span>
+                <div class="mini-progress">
+                  <div class="mini-progress-fill" :style="{ width: (getChapterStars(chapter) / (chapter.levels.length * 3) * 100) + '%' }"></div>
+                </div>
               </div>
             </div>
           </div>
@@ -55,7 +58,10 @@
           <div class="ls-chapter-header" v-if="selectedChapter">
             <h3 :style="{ color: selectedChapter.color }">{{ selectedChapter.name }}</h3>
             <p class="chapter-desc">{{ selectedChapter.description }}</p>
-            <p class="chapter-progress">共 {{ selectedChapter.levels.length }} 关，当前显示 {{ currentSegmentLabel }}</p>
+            <p class="chapter-progress">共 {{ selectedChapter.levels.length }} 关 · 已获 ⭐ {{ getChapterStars(selectedChapter) }}/{{ selectedChapter.levels.length * 3 }}</p>
+            <div class="chapter-progress-bar">
+              <div class="progress-fill" :style="{ width: (getChapterStars(selectedChapter) / (selectedChapter.levels.length * 3) * 100) + '%' }"></div>
+            </div>
           </div>
 
           <div class="level-segments" v-if="levelSegments.length > 1" role="tablist" aria-label="关卡分段">
@@ -406,7 +412,19 @@ async function loadLevelsData() {
   color: #e8a33c;
   font-size: 11px;
   margin-top: 2px;
+  display: flex; flex-direction: column; gap: 4px;
 }
+
+.mini-progress, .chapter-progress-bar {
+  width: 100%; height: 6px; background: rgba(0,0,0,.25);
+  border-radius: 3px; overflow: hidden;
+}
+.mini-progress-fill, .progress-fill {
+  height: 100%; background: linear-gradient(90deg, #ffc847, #ffd700);
+  border-radius: 3px; transition: width 0.5s ease;
+  min-width: 0;
+}
+.chapter-progress-bar { height: 10px; margin-bottom: 12px; }
 
 .ls-levels {
   flex: 1;
