@@ -51,6 +51,8 @@ export default class WorldScene extends Phaser.Scene {
     this.inputBuffer = ''
 
     this.input.enabled = true
+    // 强制 Canvas 获取焦点，确保键盘事件能触发（修复首次按键无效）
+    this.game.canvas.focus?.()
     // Ensure ResultScene is stopped when entering a new level (belt-and-suspenders)
     const rs = this.game.scene.getScene('ResultScene')
     if (rs && rs.scene.isActive()) rs.scene.stop()
@@ -498,16 +500,17 @@ export default class WorldScene extends Phaser.Scene {
 
     // Check if all monsters defeated → level clear
     if (Object.keys(this.monsterAIs).length === 0) {
+      this._destroyChoicePanel()
       this.isPaused = true
       this.input.enabled = false
       audioManager.play("level_complete")
       audioManager.stopBGM(0)
+      const result = levelManager.getLevelResult()
       window.setTimeout(() => {
-        const finalResult = levelManager.getLevelResult()
         const rr = this.game.scene.getScene("ResultScene")
-        if (rr && rr.scene.isSleeping()) rr.scene.wake(finalResult)
-        this.game.scene.start("ResultScene", finalResult)
-      }, 1000)
+        if (rr && rr.scene.isSleeping()) rr.scene.wake(result)
+        this.game.scene.start("ResultScene", result)
+      }, 1200)
     }
   }
 
