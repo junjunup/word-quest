@@ -472,7 +472,8 @@ async function startGameLevel() {
     }
   } catch (err) {
     console.error('启动关卡失败:', err)
-    alert('启动关卡失败：' + (err?.message || '未知错误'))
+    console.error('Stack:', err?.stack)
+    alert('启动关卡失败：' + (err?.message || err?.toString() || '未知错误'))
     // 回退到关卡选择界面，不要留在空白画面
     uiState.value = 'levelSelect'
     setPhaserInputEnabled(false)
