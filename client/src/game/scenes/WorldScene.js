@@ -329,11 +329,14 @@ export default class WorldScene extends Phaser.Scene {
         this.isPaused = true
         this.input.enabled = false
         if (this.player?.body) this.player.setVelocity(0, 0)
+        this._destroyChoicePanel()
         audioManager.stopBGM(0)
-        const rr = this.game.scene.getScene("ResultScene")
-        if (rr && rr.scene.isSleeping()) rr.scene.wake()
-        this.scene.stop()
-        this.game.scene.start("ResultScene", levelManager.getLevelResult())
+        // Use window.setTimeout to defer scene transition (avoids crash in physics callback)
+        window.setTimeout(() => {
+          const rr = this.game.scene.getScene("ResultScene")
+          if (rr && rr.scene.isSleeping()) rr.scene.wake()
+          this.game.scene.start("ResultScene", levelManager.getLevelResult())
+        }, 100)
       }
     })
   }
