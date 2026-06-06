@@ -17,7 +17,7 @@ export default class WorldScene extends Phaser.Scene {
     this.player = null
     this.cursors = null
     this.monsters = null
-    this.monsterAIs = []
+    this.monsterAIs = {}
     this.npcs = null
     this.doors = null
     this.hudTexts = {}
@@ -350,10 +350,11 @@ export default class WorldScene extends Phaser.Scene {
     let closest = null, closestDist = 250
     const children = this.monsters.getChildren()
     for (let i = 0; i < children.length; i++) {
-      const m = children[i]; const ai = this.monsterAIs[i]
-      if (!m.active || ai?.isDefeated) continue
+      const m = children[i]; const idx = m.getData('index')
+      const ai = this.monsterAIs[idx]
+      if (!m.active || !ai || ai.isDefeated) continue
       const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, m.x, m.y)
-      if (dist < closestDist) { closestDist = dist; closest = { monster: m, ai, idx: i } }
+      if (dist < closestDist) { closestDist = dist; closest = { monster: m, ai, idx } }
     }
     if (!closest) return
 
@@ -478,10 +479,12 @@ export default class WorldScene extends Phaser.Scene {
   _createInputBar() {} // deprecated
   _onKeyDown() {} // deprecated
   _killMonster(idx) {
-    const monster = this.monsters.getChildren()[idx]
     const ai = this.monsterAIs[idx]
-    if (!monster || !ai || ai.isDefeated) return
+    if (!ai || ai.isDefeated) return
+    const monster = ai.monster
+    if (!monster || !monster.active) return
     ai.defeat()
+    delete this.monsterAIs[idx]
     this.tweens.add({ targets: monster, alpha: 0, scale: 0, y: monster.y - 30, duration: 400, ease: "Back.easeIn", onComplete: () => monster.destroy() })
     if (this.monsterLabels[idx]) { this.monsterLabels[idx].destroy(); this.monsterLabels[idx] = null }
     this.spawnCoinEffect(monster.x, monster.y, 100)
@@ -492,7 +495,7 @@ export default class WorldScene extends Phaser.Scene {
 
   createMonsters() {
     this.monsters = this.physics.add.group()
-    this.monsterAIs = []
+    this.monsterAIs = {}
     this.monsterLabels = []
     const mapW = 30 * 32, mapH = 20 * 32
     const isValid = (key) => this.textures.exists(key) && !failedAssetKeys.has(key)
@@ -533,7 +536,7 @@ export default class WorldScene extends Phaser.Scene {
         patrolPoints.push({ x: pos.x + Math.cos(angle) * r, y: pos.y + Math.sin(angle) * r })
       }
       const ai = new MonsterAI(monster, { patrolSpeed: isElite ? 25 : 18, pursueSpeed: isElite ? 55 : 40, perceptionRange: isElite ? 120 : 90, attackDamage: isElite ? 2 : 1, patrolPoints })
-      this.monsterAIs.push(ai)
+      this.monsterAIs[i] = ai
       const label = this.add.text(pos.x, pos.y - 28, isElite ? "👾" : "❓", { fontSize: "16px", stroke: "#000", strokeThickness: 2 }).setOrigin(0.5).setDepth(6)
       this.monsterLabels.push(label)
     }
@@ -831,7 +834,11 @@ export default class WorldScene extends Phaser.Scene {
     if (!this.player) return
     if (this.monsterAIs && this.monsters) {
       const children = this.monsters.getChildren()
-      for (let i = 0; i < this.monsterAIs.length; i++) this.monsterAIs[i].update(this.player, this.game.loop.delta, this.timeScale)
+      for (const m of children) {
+        const idx = m.getData('index')
+        const ai = this.monsterAIs[idx]
+        if (ai && !ai.isDefeated) ai.update(this.player, this.game.loop.delta, this.timeScale)
+      }
     }
 
     const speed = 160
@@ -902,7 +909,7 @@ export default class WorldScene extends Phaser.Scene {
     this.input.enabled = false
     this.tweens.killAll()
     if (this.monsterLabels) { this.monsterLabels.forEach(l => { if (l?.active) l.destroy() }); this.monsterLabels = [] }
-    this.monsterAIs = []
+    this.monsterAIs = {}
     if (this.mapContainer) { this.mapContainer.destroy(true); this.mapContainer = null }
     if (this.decoContainer) { this.decoContainer.destroy(true); this.decoContainer = null }
     this.monsters = null; this.npcs = null; this.walls = null
