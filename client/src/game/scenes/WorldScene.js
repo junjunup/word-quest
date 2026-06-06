@@ -491,6 +491,19 @@ export default class WorldScene extends Phaser.Scene {
     audioManager.play("correct")
     levelManager.score += 100
     eventBus.emit(EVENTS.UPDATE_HUD, { score: levelManager.score, lives: levelManager.lives })
+
+    // Check if all monsters defeated → level clear
+    if (Object.keys(this.monsterAIs).length === 0) {
+      this.isPaused = true
+      this.input.enabled = false
+      audioManager.play("level_complete")
+      audioManager.stopBGM(0)
+      window.setTimeout(() => {
+        const rr = this.game.scene.getScene("ResultScene")
+        if (rr && rr.scene.isSleeping()) rr.scene.wake()
+        this.game.scene.start("ResultScene", levelManager.getLevelResult())
+      }, 1000)
+    }
   }
 
   createMonsters() {
