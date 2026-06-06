@@ -387,17 +387,10 @@ async function onLevelSelectStart({ chapter, level, difficulty }) {
   safeSetItem(STORAGE_KEYS.difficulty, difficulty)
   pendingLevelParams.value = { chapter, level, difficulty }
 
-  // Check if we should show intro
-  const skipIntro = safeGetItem(STORAGE_KEYS.skipIntro) === 'true'
-  if (skipIntro) {
-    await startGameLevel()
-  } else {
-    // 先启动游戏，然后叠加交互式引导
-    await startGameLevel()
-    // 启动成功后显示底部教程提示条（不暂停游戏，玩家可边玩边看）
-    if (uiState.value === 'game') {
-      showTutorial.value = true
-    }
+  // 每次开始新游戏都显示底部教程提示条（非阻塞，可跳过）
+  await startGameLevel()
+  if (uiState.value === 'game') {
+    showTutorial.value = true
   }
 }
 function onLevelSelectBack() {
