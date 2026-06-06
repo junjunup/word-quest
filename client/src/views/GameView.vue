@@ -49,6 +49,12 @@
       </div>
     </div>
 
+    <!-- 每日挑战 -->
+    <div class="daily-challenge-overlay" v-if="showDailyChallenge" @click.self="closeDailyChallenge">
+      <button class="leaderboard-close" @click="closeDailyChallenge">✕</button>
+      <DailyChallengeCard @close="closeDailyChallenge" />
+    </div>
+
     <!-- 答题弹窗 -->
     <QuizModal
       v-if="quiz.showQuiz"
@@ -118,6 +124,7 @@ import ChatPanel from '@/components/ChatPanel.vue'
 import AchievementPopup from '@/components/AchievementPopup.vue'
 import ScoreBoard from '@/components/ScoreBoard.vue'
 import LevelSelect from '@/components/LevelSelect.vue'
+import DailyChallengeCard from '@/components/DailyChallengeCard.vue'
 import GameIntro from '@/components/GameIntro.vue'
 import CharacterSelect from '@/components/CharacterSelect.vue'
 import GameHUD from '@/components/GameHUD.vue'
@@ -172,6 +179,7 @@ const achievementData = ref(null)
 const showTutorial = ref(false)
 const isTutorialLevel = ref(false)
 const loadError = ref('')
+const showDailyChallenge = ref(false)
 
 // HUD 数据（必须在 useQuizFlow 之前定义 — composable 依赖此对象）
 const hudData = reactive({
@@ -356,6 +364,16 @@ function onShowLeaderboard() {
 
 function closeLeaderboard() {
   uiState.value = 'game'
+  setPhaserInputEnabled(true)
+}
+
+function onShowDailyChallenge() {
+  showDailyChallenge.value = true
+  setPhaserInputEnabled(false)
+}
+
+function closeDailyChallenge() {
+  showDailyChallenge.value = false
   setPhaserInputEnabled(true)
 }
 
@@ -596,6 +614,7 @@ onMounted(async () => {
   eventBus.on(EVENTS.SHOW_CHARACTER_SELECT, onShowCharacterSelect)
   eventBus.on(EVENTS.SHOW_BOSS_QUIZ, onShowBossQuiz)
   eventBus.on(EVENTS.TOGGLE_PAUSE, onTogglePause)
+  eventBus.on(EVENTS.SHOW_DAILY_CHALLENGE, onShowDailyChallenge)
 
   if (new URLSearchParams(window.location.search).get('e2eLevelSelect') === '1') {
     uiState.value = 'levelSelect'
@@ -644,6 +663,7 @@ onUnmounted(() => {
   eventBus.off(EVENTS.SHOW_CHARACTER_SELECT, onShowCharacterSelect)
   eventBus.off(EVENTS.SHOW_BOSS_QUIZ, onShowBossQuiz)
   eventBus.off(EVENTS.TOGGLE_PAUSE, onTogglePause)
+  eventBus.off(EVENTS.SHOW_DAILY_CHALLENGE, onShowDailyChallenge)
 
   // 清理安全计时器
   if (chatSafetyTimer) { clearTimeout(chatSafetyTimer); chatSafetyTimer = null }
@@ -992,6 +1012,24 @@ function handleLogout() {
 
   &:hover {
     background: #e06b4e;
+  }
+}
+
+/* 每日挑战浮窗 */
+.daily-challenge-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(45, 80, 22, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.2s ease;
+
+  > button.leaderboard-close {
+    position: fixed;
+    top: 20px;
+    right: 20px;
   }
 }
 

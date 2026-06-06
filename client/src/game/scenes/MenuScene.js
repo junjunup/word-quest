@@ -88,6 +88,10 @@ export default class MenuScene extends Phaser.Scene {
       eventBus.emit(EVENTS.SHOW_LEADERBOARD)
     })
 
+    this.createWoodButton(width / 2, 510, '🔥 每 日 挑 战', 0xd45b3e, 0xa04030, () => {
+      eventBus.emit(EVENTS.SHOW_DAILY_CHALLENGE)
+    })
+
     // 底部信息
     this.add.text(width / 2, height - 40, '🌾 穿越词汇田园，击败遗忘小怪！', {
       fontSize: '13px',

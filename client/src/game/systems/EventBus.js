@@ -70,7 +70,8 @@ export const EVENTS = {
   SHOW_CHARACTER_SELECT: 'show_character_select', // 显示角色选择
   SHOW_BOSS_QUIZ: 'show_boss_quiz',           // 显示Boss答题弹窗
   BOSS_QUIZ_RESULT: 'boss_quiz_result',        // Boss答题结果
-  TOGGLE_PAUSE: 'toggle_pause'                 // 切换暂停菜单
+  TOGGLE_PAUSE: 'toggle_pause',                // 切换暂停菜单
+  SHOW_DAILY_CHALLENGE: 'show_daily_challenge'  // 每日挑战
 }
 
 export default eventBus

@@ -21,10 +21,15 @@
         <strong>{{ challenge.attempt.score }} 分</strong>
         <span>正确 {{ challenge.attempt.correctCount }}/{{ challenge.attempt.questionCount }}</span>
         <span v-if="challenge.attempt.rewardTitle">称号：{{ challenge.attempt.rewardTitle }}</span>
+        <span>+{{ challenge.attempt.rewardExp }} EXP ✨</span>
       </div>
 
       <button class="btn btn-primary challenge-action" :disabled="challenge.completed" @click="startChallenge">
-        {{ challenge.completed ? '今日挑战已提交' : '开始每日挑战' }}
+        {{ challenge.completed ? '✅ 今日挑战已完成' : '开始每日挑战' }}
+      </button>
+
+      <button v-if="challenge.completed" class="btn btn-secondary challenge-action" @click="emit('close')">
+        关闭
       </button>
 
       <ol v-if="leaderboard.length" class="leaderboard-mini">
@@ -80,6 +85,8 @@ import { getDailyChallengeLeaderboard, getTodayDailyChallenge, submitDailyChalle
 const props = defineProps({
   wordbookId: { type: String, default: 'cet4' }
 })
+
+const emit = defineEmits(['close'])
 
 const loading = ref(false)
 const error = ref('')
@@ -202,7 +209,7 @@ h3 { color: #ffd700; margin: 2px 0 0; }
 .challenge-summary span, .completed-panel span { color: #c4b99a; font-size: 12px; }
 .completed-panel { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; color: #f5edd6; margin-bottom: 12px; }
 .completed-panel strong { color: #9be66d; }
-.challenge-action { width: 100%; min-height: 44px; }
+.challenge-action { width: 100%; min-height: 44px; margin-top: 8px; }
 .leaderboard-mini { list-style: none; margin-top: 12px; display: grid; gap: 6px; color: #f5edd6; }
 .leaderboard-mini strong { color: #9be66d; }
 .challenge-modal { position: fixed; inset: 0; background: rgba(10, 14, 20, .82); z-index: 2500; display: flex; align-items: center; justify-content: center; padding: 16px; }
