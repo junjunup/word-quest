@@ -33,7 +33,13 @@
 
       <!-- 已选择: 展示奖励 -->
       <template v-else>
+        <!-- 光柱 + 粒子 -->
+        <div class="bb-particles">
+          <div class="beam"></div>
+          <span v-for="i in 24" :key="i" class="particle" :style="{ '--i': i, '--color': particleColors[i % particleColors.length] }"></span>
+        </div>
         <div class="bb-reveal" :class="'rarity-' + reward.rarity">
+          <div class="reveal-shine"></div>
           <div class="rarity-badge">{{ rarityLabel }}</div>
           <div class="reward-icon">{{ rewardIcon }}</div>
           <h2 class="reward-title">{{ rewardTitle }}</h2>
@@ -90,6 +96,7 @@ const hoverIndex = ref(-1)
 const openingIndex = ref(-1)
 
 const rarityLabels = { common: '🟢 普通宝箱', rare: '🔵 稀有宝箱', epic: '🟣 史诗宝箱', legendary: '🟡 传说宝箱' }
+const particleColors = ['#ffd700','#ffc847','#ffe066','#fff3b0','#ffb800','#ffaa00','#ffd700','#ffe680']
 const rewardIcons = { common: '📦', rare: '💎', epic: '🔮', legendary: '👑' }
 
 const rarityLabel = computed(() => rarityLabels[reward.value.rarity] || '宝箱')
@@ -202,9 +209,30 @@ async function openChest(index) {
   50% { transform: translateX(-50%) translateY(-6px); opacity: 1; }
 }
 
+/* Particle burst */
+.bb-particles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.beam {
+  position: absolute; top: -60%; left: 50%; transform: translateX(-50%);
+  width: 8px; height: 160%;
+  background: linear-gradient(180deg, transparent 0%, rgba(255,215,0,0.6) 40%, rgba(255,200,71,0.8) 50%, rgba(255,215,0,0.6) 60%, transparent 100%);
+  animation: beamPulse 0.6s ease-out forwards; z-index: -1;
+}
+.particle {
+  position: absolute; top: 50%; left: 50%;
+  width: 6px; height: 6px; border-radius: 50%; background: var(--color);
+  animation: particleBurst 1.2s ease-out forwards;
+  animation-delay: calc(var(--i) * 0.04s);
+  opacity: 0;
+}
+.reveal-shine {
+  position: absolute; inset: 0; border-radius: 16px;
+  background: linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.15) 50%, transparent 70%);
+  animation: shineSweep 1.5s ease-in-out infinite; pointer-events: none; z-index: 1;
+}
+
 /* Reveal */
 .bb-reveal {
-  animation: scaleIn 0.5s ease;
+  animation: cardFlipIn 0.6s ease; position: relative; overflow: hidden;
   &.rarity-common { .rarity-badge { color: #aaa; } .reward-icon { filter: drop-shadow(0 0 8px #aaa); } }
   &.rarity-rare { .rarity-badge { color: #69f; } .reward-icon { filter: drop-shadow(0 0 16px #69f); } }
   &.rarity-epic { .rarity-badge { color: #c6f; } .reward-icon { filter: drop-shadow(0 0 24px #c6f); animation: pulse 1s infinite; } }
@@ -231,4 +259,12 @@ async function openChest(index) {
 @keyframes scaleIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
 @keyframes spin { to { transform: rotate(360deg); } }
+@keyframes beamPulse { 0% { opacity: 0; transform: translateX(-50%) scaleY(0.6); } 30% { opacity: 1; transform: translateX(-50%) scaleY(1); } 100% { opacity: 0; transform: translateX(-50%) scaleY(1.1); } }
+@keyframes particleBurst {
+  0% { opacity: 0; transform: translate(0, 0) scale(1); }
+  10% { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc(cos(var(--i) * 15deg) * 180px), calc(sin(var(--i) * 15deg) * 180px - 40px)) scale(0); }
+}
+@keyframes cardFlipIn { 0% { transform: perspective(600px) rotateY(90deg) scale(0.8); opacity: 0; } 60% { transform: perspective(600px) rotateY(-10deg) scale(1.02); } 100% { transform: perspective(600px) rotateY(0) scale(1); opacity: 1; } }
+@keyframes shineSweep { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
 </style>
