@@ -50,6 +50,9 @@
       </div>
     </div>
 
+    <!-- 商店 -->
+    <ShopPanel v-if="showShop" @close="showShop = false; setPhaserInputEnabled(true)" />
+
     <!-- 每日挑战 -->
     <div class="daily-challenge-overlay" v-if="showDailyChallenge" @click.self="closeDailyChallenge">
       <button class="leaderboard-close" @click="closeDailyChallenge">✕</button>
@@ -126,6 +129,7 @@ import AchievementPopup from '@/components/AchievementPopup.vue'
 import ScoreBoard from '@/components/ScoreBoard.vue'
 import LevelSelect from '@/components/LevelSelect.vue'
 import DailyChallengeCard from '@/components/DailyChallengeCard.vue'
+import ShopPanel from '@/components/ShopPanel.vue'
 import GameIntro from '@/components/GameIntro.vue'
 import CharacterSelect from '@/components/CharacterSelect.vue'
 import GameHUD from '@/components/GameHUD.vue'
@@ -182,6 +186,7 @@ const showTutorial = ref(false)
 const isTutorialLevel = ref(false)
 const loadError = ref('')
 const showDailyChallenge = ref(false)
+const showShop = ref(false)
 const playerGold = ref(0)
 
 // HUD 数据（必须在 useQuizFlow 之前定义 — composable 依赖此对象）
@@ -611,6 +616,7 @@ onMounted(async () => {
   eventBus.on(EVENTS.SHOW_BOSS_QUIZ, onShowBossQuiz)
   eventBus.on(EVENTS.TOGGLE_PAUSE, onTogglePause)
   eventBus.on(EVENTS.SHOW_DAILY_CHALLENGE, onShowDailyChallenge)
+  eventBus.on(EVENTS.SHOW_SHOP, () => { showShop.value = true; setPhaserInputEnabled(false) })
 
   if (new URLSearchParams(window.location.search).get('e2eLevelSelect') === '1') {
     uiState.value = 'levelSelect'
@@ -663,6 +669,7 @@ onUnmounted(() => {
   eventBus.off(EVENTS.SHOW_BOSS_QUIZ, onShowBossQuiz)
   eventBus.off(EVENTS.TOGGLE_PAUSE, onTogglePause)
   eventBus.off(EVENTS.SHOW_DAILY_CHALLENGE, onShowDailyChallenge)
+  eventBus.off(EVENTS.SHOW_SHOP, () => {})
 
   // 清理安全计时器
   if (chatSafetyTimer) { clearTimeout(chatSafetyTimer); chatSafetyTimer = null }
