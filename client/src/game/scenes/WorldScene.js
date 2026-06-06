@@ -297,63 +297,18 @@ export default class WorldScene extends Phaser.Scene {
       }
     }
 
-    // Update boss
-    if (this.boss && !this.boss.defeated) {
-      this.boss.update()
-    }
   }
 
   shutdown() {
-    // 1. 事件总线清理 — 防止回调在已销毁场景中触发
-    eventBus.off(EVENTS.QUIZ_ANSWERED, this.boundOnQuizAnswered)
-    eventBus.off(EVENTS.RESUME_GAME, this.boundOnResumeGame)
-    eventBus.off(EVENTS.CHAT_CLOSED, this.boundOnChatClosed)
-    eventBus.off(EVENTS.GAME_OVER, this.boundOnGameOver)
-    eventBus.off(EVENTS.BOSS_QUIZ_RESULT, this.boundOnBossQuizResult)
-
-    // 2. 清理原生定时器（避免场景销毁后仍触发跳转）
-    if (this.gameOverTransitionTimer) { clearTimeout(this.gameOverTransitionTimer); this.gameOverTransitionTimer = null }
-    if (this._completeTimer) { clearTimeout(this._completeTimer); this._completeTimer = null }
-
-    // 3. 清理 ESC 键监听
-    if (this.escKey && this.boundOnEscDown) {
-      this.escKey.off('down', this.boundOnEscDown)
-    }
-
-    // 4. 禁用输入 — 防止场景切换时幽灵点击穿透
+    if (this.escKey) this.escKey.removeAllListeners()
     this.input.enabled = false
-
-    // 5. Kill all tweens — 防止回调在 shutdown 后触发
     this.tweens.killAll()
-
-    // 6. 清理怪物标签
-    if (this.monsterLabels) {
-      this.monsterLabels.forEach(label => { if (label?.active) label.destroy() })
-      this.monsterLabels = []
-    }
-
-    // 7. 显式销毁容器 — 必须在设为 null 之前 destroy，确保内部子对象被递归清理
+    if (this.monsterLabels) { this.monsterLabels.forEach(l => { if (l?.active) l.destroy() }); this.monsterLabels = [] }
+    this.monsterAIs = []
     if (this.mapContainer) { this.mapContainer.destroy(true); this.mapContainer = null }
     if (this.decoContainer) { this.decoContainer.destroy(true); this.decoContainer = null }
-
-    // 8. 无条件清理 Boss（无论是否已被击败）
-    if (this.boss) {
-      this.boss.defeated = true  // 阻止后续 defeat 动画
-      this.boss.cleanupVisuals()
-      if (this.boss.active) this.boss.destroy()
-      this.boss = null
-    }
-
-    // 9. 清理其余引用
-    this.monsters = null
-    this.npcs = null
-    this.walls = null
-    this.player = null
-    this.playerNameText = null
-    this.hudTexts = {}
-
-    // 10. 销毁所有 Display Object — 最终保险，清除场景显示列表中的所有残余对象
-    //    （在容器已显式销毁后执行，确保万无一失）
+    this.monsters = null; this.npcs = null; this.walls = null
+    this.player = null; this.playerNameText = null; this.hudTexts = {}
     this.children.removeAll(true)
   }
 }
