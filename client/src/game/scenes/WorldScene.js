@@ -385,14 +385,13 @@ export default class WorldScene extends Phaser.Scene {
       this.input.enabled = false  // 防止过渡期间幽灵点击
       audioManager.play('level_complete')
       // 使用原生 setTimeout 避免 Phaser Timer 被 shutdown 清除
+      // 注意：不在此处 stop WorldScene——WorldScene 在 MenuScene.create() 安全网中统一清理
       this._completeTimer = setTimeout(() => {
         if (this.game?.scene) {
-          // 先停止 WorldScene（防止后台残留渲染）
-          this.scene.stop()
-          // 确保 ResultScene 走完整 init+create 流程（而非仅 wake 导致 stale data）
+          // 确保 ResultScene 走完整 init+create（而非仅 wake）
           const rs = this.game.scene.getScene('ResultScene')
           if (rs && rs.scene.isSleeping()) {
-            rs.scene.wake()  // SLEEPING → RUNNING，下一行 start() 会触发 shutdown+init+create
+            rs.scene.wake()
           }
           this.game.scene.start('ResultScene', levelManager.getLevelResult())
         }
@@ -911,11 +910,10 @@ export default class WorldScene extends Phaser.Scene {
       this.boss.pauseBehavior()
     }
 
-    // Use a native timer: stop WorldScene first (prevents residual rendering),
-    // then ensure ResultScene restarts fresh (init+create, not just wake).
+    // Use a native timer: ensure ResultScene restarts fresh (init+create, not just wake).
+    // Note: don't stop WorldScene here — MenuScene.create() safety net handles cleanup.
     this.gameOverTransitionTimer = window.setTimeout(() => {
       if (this.game?.scene) {
-        this.scene.stop()
         const rs = this.game.scene.getScene('ResultScene')
         if (rs && rs.scene.isSleeping()) {
           rs.scene.wake()
