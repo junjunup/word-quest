@@ -40,6 +40,14 @@
       </ol>
     </template>
 
+    <!-- 盲盒奖励 -->
+    <BlindBoxReward
+      v-if="showBlindBox"
+      :challenge-id="challenge?.id"
+      @claim="onBlindBoxClaim"
+      @close="showBlindBox = false"
+    />
+
     <div v-if="active" class="challenge-modal">
       <div class="challenge-panel">
         <header>
@@ -81,6 +89,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { getDailyChallengeLeaderboard, getTodayDailyChallenge, submitDailyChallenge } from '@/api/dailyChallenge'
+import BlindBoxReward from '@/components/BlindBoxReward.vue'
 
 const props = defineProps({
   wordbookId: { type: String, default: 'cet4' }
@@ -98,6 +107,7 @@ const answers = ref({})
 const submitting = ref(false)
 const startedAt = ref(0)
 const elapsedSeconds = ref(0)
+const showBlindBox = ref(false)
 let timer = null
 
 const today = new Date().toISOString().slice(0, 10)
@@ -145,6 +155,12 @@ function closeChallenge() {
   stopTimer()
 }
 
+function onBlindBoxClaim(reward) {
+  showBlindBox.value = false
+  // Reload to reflect updated gold/exp
+  loadChallenge()
+}
+
 function stopTimer() {
   if (timer) clearInterval(timer)
   timer = null
@@ -174,6 +190,8 @@ async function submit() {
     challenge.value = res.data
     active.value = false
     stopTimer()
+    // Show blind box reward after successful submission
+    showBlindBox.value = true
     const leaderboardRes = await getDailyChallengeLeaderboard({ wordbookId: props.wordbookId })
     leaderboard.value = leaderboardRes.data || []
   } catch (e) {

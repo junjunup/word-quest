@@ -11,6 +11,7 @@
       :difficulty="gameStore.selectedDifficulty"
       :show-pause="showPauseMenu"
       :is-muted="isMuted"
+      :gold="playerGold"
       :hud-data="hudData"
       @open-chat="openManualChat"
       @go-dashboard="goToDashboard"
@@ -131,6 +132,7 @@ import GameHUD from '@/components/GameHUD.vue'
 import { submitQuizRecord } from '@/api/learning'
 import { saveAchievement, getAdaptiveWords, updateWordMastery } from '@/api/game'
 import { getChapterLevelWords, getChapterWords, getSelectedWordbook } from '@/api/vocabulary'
+import { getInventory } from '@/api/dailyChallenge'
 import { STORAGE_KEYS } from '@/game/config/gameConstants'
 import { safeGetJSON, safeSetJSON, safeGetItem, safeSetItem } from '@/utils/helpers'
 import { flushQueue, getQueueSize } from '@/utils/offlineQueue'
@@ -180,6 +182,7 @@ const showTutorial = ref(false)
 const isTutorialLevel = ref(false)
 const loadError = ref('')
 const showDailyChallenge = ref(false)
+const playerGold = ref(0)
 
 // HUD 数据（必须在 useQuizFlow 之前定义 — composable 依赖此对象）
 const hudData = reactive({
@@ -624,6 +627,9 @@ onMounted(async () => {
   // 异步加载词汇并初始化 LevelManager（不阻塞 Phaser 启动）
   loadWordsAndInitLevel(chapter, level).catch(e => console.warn('初始词汇加载失败:', e))
 
+  // 加载金币余额
+  getInventory().then(res => { playerGold.value = res.data?.gold || 0 }).catch(() => {})
+
   // 浏览器关闭/刷新时提示
   window.addEventListener('beforeunload', onBeforeUnload)
 
@@ -829,6 +835,8 @@ async function onLevelComplete(result) {
   // 保存进度到服务器
   try {
     await gameStore.saveLevelResult(result.chapter, result.level, result.stars, result.score, result.sessionId)
+    // Update gold display
+    getInventory().then(res => { playerGold.value = res.data?.gold || 0 }).catch(() => {})
   } catch (e) {
     console.warn('保存进度失败:', e)
   }

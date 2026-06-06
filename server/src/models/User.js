@@ -11,6 +11,14 @@ const userSchema = new mongoose.Schema({
   level: { type: Number, default: 1 },
   totalExp: { type: Number, default: 0 },
   totalScore: { type: Number, default: 0 },
+  gold: { type: Number, default: 100, min: 0 },  // 金币（可消费货币）
+  inventory: [{  // 道具背包
+    itemId: { type: String, required: true },
+    name: { type: String, required: true },
+    icon: { type: String, default: '📦' },
+    effect: { type: String, required: true },  // shield, time_extend, precision, double_gold, extra_life
+    quantity: { type: Number, default: 1, min: 0 }
+  }],
   dailyRewardDate: { type: String, default: '' }, // YYYY-MM-DD格式，记录上次领取日期
   loginStreak: { type: Number, default: 0 },
   lastLoginAt: { type: Date, default: Date.now },

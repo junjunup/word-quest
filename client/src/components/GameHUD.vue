@@ -14,7 +14,8 @@
           </span>
         </template>
       </span>
-      <span class="hud-score">💰 {{ hudData.score }}</span>
+      <span class="hud-score">⭐ {{ hudData.score }}</span>
+      <span class="hud-gold">🪙 {{ gold }}</span>
       <span class="hud-combo" v-if="hudData.combo > 0">🔥 x{{ hudData.combo }}</span>
     </div>
     <div class="hud-right">
@@ -51,6 +52,7 @@ defineProps({
   difficulty: { type: String, default: 'normal' },
   showPause: { type: Boolean, default: false },
   isMuted: { type: Boolean, default: false },
+  gold: { type: Number, default: 0 },
   hudData: {
     type: Object,
     default: () => ({ lives: 3, maxLives: 3, score: 0, combo: 0, chapter: 1, level: 1 })
@@ -107,6 +109,12 @@ defineEmits(['open-chat', 'go-dashboard', 'toggle-pause', 'toggle-mute', 'back-t
 .hud-score {
   color: #ffc847; font-weight: bold;
   font-family: 'Press Start 2P', monospace; font-size: 13px;
+}
+.hud-gold {
+  color: #ffd700; font-weight: bold;
+  font-family: 'Press Start 2P', monospace; font-size: 11px;
+  background: rgba(255, 215, 0, 0.15); border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 4px; padding: 2px 6px;
 }
 
 .hud-combo {

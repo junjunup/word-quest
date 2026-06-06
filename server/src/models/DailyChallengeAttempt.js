@@ -21,6 +21,8 @@ const dailyChallengeAttemptSchema = new mongoose.Schema({
   streak: { type: Number, default: 1, min: 1 },
   rewardExp: { type: Number, default: 0, min: 0 },
   rewardTitle: { type: String, default: '' },
+  blindBoxOpened: { type: Boolean, default: false },
+  blindBoxReward: { type: mongoose.Schema.Types.Mixed, default: null },
   completedAt: { type: Date, default: Date.now }
 }, { timestamps: true })
 

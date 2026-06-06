@@ -48,7 +48,7 @@ router.get('/progress', authMiddleware, async (req, res) => {
 // H-01 FIX: Server-side score verification — don't blindly trust client score
 router.post('/progress', authMiddleware, async (req, res) => {
   try {
-    const { chapter, level, stars, score: clientScore, sessionId } = req.body
+    const { chapter, level, stars, score: clientScore, sessionId, difficulty = 'normal' } = req.body
     const wordbookId = sanitizeWordbookId(req.body?.wordbookId || 'cet4')
     const validation = validateChapterLevel(chapter, level)
     if (!validation.valid) return res.status(400).json({ success: false, message: validation.message })
@@ -137,6 +137,8 @@ router.post('/progress', authMiddleware, async (req, res) => {
       user.totalScore += scoreDelta
       user.totalExp += Math.floor(scoreDelta / 2)
       user.level = user.getLevelFromExp()
+      const goldEarned = Math.floor(stars * 30 * (difficulty === 'hard' ? 1.5 : difficulty === 'easy' ? 0.8 : 1.0))
+      user.gold = (user.gold || 0) + goldEarned
       await user.save()
     }
 

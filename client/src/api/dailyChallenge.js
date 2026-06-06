@@ -9,3 +9,12 @@ export const submitDailyChallenge = (id, payload) =>
 
 export const getDailyChallengeLeaderboard = (params = {}) =>
   request.get('/daily-challenge/leaderboard', { params: { wordbookId: getSelectedWordbook(), ...params } })
+
+export const openBlindBox = (id) =>
+  request.post(`/daily-challenge/${id}/blind-box`)
+
+export const getInventory = () =>
+  request.get('/auth/inventory')
+
+export const buyItem = (itemId) =>
+  request.post('/auth/buy-item', { itemId })

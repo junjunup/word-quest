@@ -153,15 +153,17 @@ export default class ResultScene extends Phaser.Scene {
 
     // 经验获取动画
     const expGain = Math.floor(score / 2)
-    const expText = this.add.text(width / 2, 485, `+${expGain} EXP ✨`, {
-      fontSize: '20px', fontFamily: '"Press Start 2P", Arial', color: '#5b8c3e', fontStyle: 'bold',
-      stroke: '#fff', strokeThickness: 3
-    }).setOrigin(0.5).setAlpha(0)
+    const diffMult = difficulty === 'hard' ? 1.5 : difficulty === 'easy' ? 0.8 : 1.0
+    const goldGain = Math.floor(stars * 30 * diffMult)
+    const rewardsText = this.add.text(width / 2, 485, `+${expGain} EXP ✨  |  +${goldGain} 🪙`, {
+      fontSize: '18px', fontFamily: '"Press Start 2P", Arial', color: '#ffc847', fontStyle: 'bold',
+      stroke: '#5b3a1a', strokeThickness: 4
+    }).setOrigin(0.5).setAlpha(0).setDepth(200)
 
     this.tweens.add({
-      targets: expText,
+      targets: rewardsText,
       alpha: 1,
-      y: 478,
+      y: 475,
       duration: 600,
       delay: 2500,
       ease: 'Power2'

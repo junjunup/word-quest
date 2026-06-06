@@ -246,6 +246,81 @@ router.post('/:id/submit', authMiddleware, async (req, res) => {
   }
 })
 
+// 盲盒奖励池配置
+const BLIND_BOX_POOL = {
+  common: { weight: 55, goldMin: 50, goldMax: 150, expMin: 0, expMax: 0, items: [], title: '' },
+  rare: { weight: 25, goldMin: 150, goldMax: 400, expMin: 30, expMax: 80, items: [], title: '' },
+  epic: { weight: 15, goldMin: 200, goldMax: 500, expMin: 80, expMax: 150,
+    items: [{ itemId: 'shield', name: '🛡️ 护盾', icon: '🛡️', effect: 'shield' },
+            { itemId: 'time_extend', name: '⏰ 时间宝珠', icon: '⏰', effect: 'time_extend'},
+            { itemId: 'double_gold', name: '💰 双倍金币符', icon: '💰', effect: 'double_gold'}] },
+  legendary: { weight: 5, goldMin: 400, goldMax: 800, expMin: 150, expMax: 300,
+    items: [{ itemId: 'precision', name: '🎯 精准药剂', icon: '🎯', effect: 'precision'},
+            { itemId: 'extra_life', name: '❤️ 生命之泉', icon: '❤️', effect: 'extra_life'}],
+    title: '传说勇者' }
+}
+
+function rollBlindBox() {
+  const totalWeight = Object.values(BLIND_BOX_POOL).reduce((s, t) => s + t.weight, 0)
+  let roll = Math.random() * totalWeight
+  for (const [rarity, config] of Object.entries(BLIND_BOX_POOL)) {
+    roll -= config.weight
+    if (roll <= 0) {
+      const gold = Math.floor(Math.random() * (config.goldMax - config.goldMin + 1)) + config.goldMin
+      const exp = Math.floor(Math.random() * (config.expMax - config.expMin + 1)) + config.expMin
+      const items = config.items.length > 0
+        ? [config.items[Math.floor(Math.random() * config.items.length)]]
+        : []
+      if (rarity === 'legendary' && config.items.length >= 2) {
+        // 传说档给2个道具
+        const second = config.items.filter(i => i.itemId !== items[0].itemId)
+        if (second.length > 0) items.push(second[Math.floor(Math.random() * second.length)])
+      }
+      return { rarity, gold, exp, items, title: config.title }
+    }
+  }
+  return { rarity: 'common', gold: 50, exp: 0, items: [], title: '' }
+}
+
+router.post('/:id/blind-box', authMiddleware, async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ success: false, message: '无效挑战ID' })
+    const challenge = await DailyChallenge.findById(req.params.id)
+    if (!challenge) return res.status(404).json({ success: false, message: '每日挑战不存在' })
+    const attempt = await DailyChallengeAttempt.findOne({ challengeId: challenge._id, userId: req.userId })
+    if (!attempt) return res.status(400).json({ success: false, message: '请先完成每日挑战' })
+    if (attempt.blindBoxOpened) return res.status(400).json({ success: false, message: '盲盒已开启' })
+
+    const reward = rollBlindBox()
+
+    const user = await User.findById(req.userId)
+    if (user) {
+      user.gold = (user.gold || 0) + reward.gold
+      user.totalExp += reward.exp
+      user.level = user.getLevelFromExp()
+      // 添加道具到背包
+      for (const item of reward.items) {
+        const existing = user.inventory.find(i => i.itemId === item.itemId)
+        if (existing) {
+          existing.quantity += 1
+        } else {
+          user.inventory.push({ ...item, quantity: 1 })
+        }
+      }
+      await user.save()
+    }
+
+    attempt.blindBoxOpened = true
+    attempt.blindBoxReward = reward
+    await attempt.save()
+
+    res.json({ success: true, data: { reward, gold: user?.gold, totalExp: user?.totalExp } })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ success: false, message: '盲盒开箱失败' })
+  }
+})
+
 router.get('/leaderboard', authMiddleware, async (req, res) => {
   try {
     const date = /^\d{4}-\d{2}-\d{2}$/.test(String(req.query.date || '')) ? String(req.query.date) : todayString()

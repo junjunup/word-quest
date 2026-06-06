@@ -182,6 +182,50 @@ router.put('/reminder-settings', authMiddleware, async (req, res) => {
     console.error('更新提醒设置失败:', err.message)
     res.status(500).json({ success: false, message: '更新提醒设置失败' })
   }
+
+  // GET inventory — 获取金币和道具背包
+  router.get('/inventory', authMiddleware, async (req, res) => {
+    try {
+      const user = await User.findById(req.userId).select('gold inventory')
+      if (!user) return res.status(404).json({ success: false, message: '用户不存在' })
+      res.json({ success: true, data: { gold: user.gold || 0, inventory: user.inventory || [] } })
+    } catch (err) {
+      res.status(500).json({ success: false, message: '获取背包失败' })
+    }
+  })
+
+  // POST buy item — 金币购买道具
+  router.post('/buy-item', authMiddleware, async (req, res) => {
+    try {
+      const { itemId } = req.body
+      const SHOP_ITEMS = {
+        shield: { price: 100, name: '🛡️ 护盾', icon: '🛡️', effect: 'shield' },
+        time_extend: { price: 75, name: '⏰ 时间宝珠', icon: '⏰', effect: 'time_extend' },
+        precision: { price: 150, name: '🎯 精准药剂', icon: '🎯', effect: 'precision' },
+        double_gold: { price: 120, name: '💰 双倍金币符', icon: '💰', effect: 'double_gold' },
+        extra_life: { price: 200, name: '❤️ 生命之泉', icon: '❤️', effect: 'extra_life' }
+      }
+      const item = SHOP_ITEMS[itemId]
+      if (!item) return res.status(400).json({ success: false, message: '未知商品' })
+
+      const user = await User.findById(req.userId)
+      if (!user) return res.status(404).json({ success: false, message: '用户不存在' })
+      if ((user.gold || 0) < item.price) return res.status(400).json({ success: false, message: '金币不足' })
+
+      user.gold -= item.price
+      const existing = user.inventory.find(i => i.itemId === itemId)
+      if (existing) {
+        existing.quantity += 1
+      } else {
+        user.inventory.push({ itemId, name: item.name, icon: item.icon, effect: item.effect, quantity: 1 })
+      }
+      await user.save()
+
+      res.json({ success: true, data: { gold: user.gold, inventory: user.inventory } })
+    } catch (err) {
+      res.status(500).json({ success: false, message: '购买失败' })
+    }
+  })
 })
 
 export default router
