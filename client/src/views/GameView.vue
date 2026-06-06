@@ -457,10 +457,16 @@ async function startGameLevel() {
       }
       await new Promise(resolve => setTimeout(resolve, 50))
 
+      // 彻底清理: 关闭 ResultScene 并强制其下次启动走 init+create
+      const rs = game.scene.getScene('ResultScene')
+      if (rs) {
+        rs.children.removeAll(true)
+        rs.tweens.killAll()
+        rs.scene.stop()
+        if (rs.scene.isSleeping()) rs.scene.wake()  // wake so next start() triggers full restart
+      }
+
       // 强制 WorldScene 走完整 init+create 流程：
-      // 若 WorldScene 处于 SLEEPING，game.scene.start 只会 wake（不调 create），
-      // 导致场景空白卡死。先 wake 使其 RUNNING，再 start 会走 shutdown+init+create。
-      // 强制 WorldScene 走完整 init+create
       const ws = game.scene.getScene('WorldScene')
       if (ws && ws.scene.isSleeping()) { ws.scene.wake() }
       game.scene.start('WorldScene', {
