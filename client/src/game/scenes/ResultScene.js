@@ -196,8 +196,10 @@ export default class ResultScene extends Phaser.Scene {
 
     // 统一的返回菜单+关卡选择：直接切 Phaser 场景 + 同步通知 Vue
     const goToLevelSelect = (mode, suggestedChapter, suggestedLevel) => {
+      // 确保 MenuScene 走完整 create（而非仅 wake，避免空白菜单+后续卡死）
+      const ms = this.game.scene.getScene('MenuScene')
+      if (ms && ms.scene.isSleeping()) { ms.scene.wake() }
       this.scene.start('MenuScene')
-      // 直接用 requestAnimationFrame 替代 setTimeout，确保 Vue 已收到事件
       eventBus.emit(EVENTS.SHOW_LEVEL_SELECT, { mode, suggestedChapter, suggestedLevel })
     }
 
@@ -236,6 +238,8 @@ export default class ResultScene extends Phaser.Scene {
         audioManager.play('click')
         if (!this.scene.isActive()) return
         this.input.enabled = false
+        const ms = this.game.scene.getScene('MenuScene')
+        if (ms && ms.scene.isSleeping()) { ms.scene.wake() }
         this.scene.start('MenuScene')
       })
       .on('pointerover', function () { this.setColor('#ffc847') })
