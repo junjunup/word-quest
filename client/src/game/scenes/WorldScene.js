@@ -4,6 +4,9 @@ import levelManager from '../systems/LevelManager'
 import { failedAssetKeys } from './BootScene'
 import { CHARACTER_PRESETS } from '../data/characters'
 import MonsterAI from '../entities/MonsterAI'
+import Chest from '../entities/Chest'
+import ExtractionPoint from '../entities/ExtractionPoint'
+import inventory from '../systems/Inventory'
 import audioManager from '../systems/AudioManager'
 import { CHAPTER_THEMES } from '../config/gameConstants'
 
@@ -53,6 +56,10 @@ export default class WorldScene extends Phaser.Scene {
     this.input.enabled = true
     // 强制 Canvas 获取焦点，确保键盘事件能触发（修复首次按键无效）
     this.game.canvas.focus?.()
+    // Apply armor HP bonus
+    const armorBonus = inventory.getArmorBonus()
+    levelManager.lives += armorBonus - 1
+    levelManager.difficultyConfig = { ...levelManager.difficultyConfig, lives: levelManager.difficultyConfig.lives + armorBonus - 1 }
     // Ensure ResultScene is stopped when entering a new level (belt-and-suspenders)
     const rs = this.game.scene.getScene('ResultScene')
     if (rs && rs.scene.isActive()) rs.scene.stop()
@@ -70,8 +77,39 @@ export default class WorldScene extends Phaser.Scene {
       up: Phaser.Input.Keyboard.KeyCodes.W, down: Phaser.Input.Keyboard.KeyCodes.S,
       left: Phaser.Input.Keyboard.KeyCodes.A, right: Phaser.Input.Keyboard.KeyCodes.D
     })
+    // Chests: 2-3 on the map
+    this.chests = []
+    const chestPositions = [
+      { x: 400, y: 400 }, { x: 800, y: 500 }, { x: 600, y: 700 }
+    ]
+    for (const pos of chestPositions) {
+      this.chests.push(new Chest(this, pos.x, pos.y, Phaser.Math.Between(30, 80)))
+    }
+    // Extraction point: far from spawn
+    this.extractionPoint = new ExtractionPoint(this, 1100, 800)
+
     this.eKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E)
-    this.eKey.on('down', () => { if (!this.isPaused && !this.targetLocked) this._tryLockTarget() })
+    this.eKey.on('down', () => {
+      if (this.isPaused || this.isDead) return
+      // Check chest interaction first
+      for (const chest of this.chests) {
+        if (chest.isPlayerNear(this.player)) {
+          const gold = chest.open(inventory)
+          if (gold > 0) {
+            this._showFloatingText(this.player.x, this.player.y - 20, '+' + gold + ' 🪙')
+            eventBus.emit(EVENTS.UPDATE_HUD, { score: levelManager.score, lives: levelManager.lives })
+          }
+          return
+        }
+      }
+      // Check extraction
+      if (this.extractionPoint && this.extractionPoint.isPlayerNear(this.player)) {
+        this._doExtraction()
+        return
+      }
+      // Otherwise try locking a monster
+      if (!this.targetLocked) this._tryLockTarget()
+    })
     this.escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
     this.escKey.on('down', () => {
       if (this.targetLocked) this._cancelLock()
@@ -139,8 +177,8 @@ export default class WorldScene extends Phaser.Scene {
    * 创建Boss
    */
   createPastoralMap() {
-    const mapWidth = 30
-    const mapHeight = 20
+    const mapWidth = 40
+    const mapHeight = 30
     const tileSize = 32
     const theme = CHAPTER_THEMES[this.chapter] || CHAPTER_THEMES[1]
 
@@ -373,6 +411,7 @@ export default class WorldScene extends Phaser.Scene {
         if (this.player?.body) this.player.setVelocity(0, 0)
         this._destroyChoicePanel()
         audioManager.stopBGM(0)
+        inventory.onDeath()
         this.gameOverTimer = window.setTimeout(() => {
           const rr = this.game.scene.getScene("ResultScene")
           const deathResult = levelManager.getLevelResult()
@@ -620,6 +659,27 @@ export default class WorldScene extends Phaser.Scene {
       stroke: '#000', strokeThickness: 1
     }).setOrigin(0.5).setScrollFactor(0).setDepth(100)
   }
+  _showFloatingText(x, y, text) {
+    const t = this.add.text(x, y, text, { fontSize: '16px', fontFamily: '"Press Start 2P", monospace', color: '#ffd700', stroke: '#000', strokeThickness: 3 }).setOrigin(0.5).setDepth(100)
+    this.tweens.add({ targets: t, y: y - 40, alpha: 0, duration: 1200, onComplete: () => t.destroy() })
+  }
+
+  _doExtraction() {
+    if (!this.extractionPoint || this.extractionPoint.used || this.isDead) return
+    this.extractionPoint.triggerExtraction()
+    this.isPaused = true
+    this.input.enabled = false
+    audioManager.stopBGM(0)
+    const goldEarned = Math.floor(levelManager.score / 2)
+    inventory.onExtract(goldEarned)
+    const result = { ...levelManager.getLevelResult(), extracted: true, goldEarned }
+    window.setTimeout(() => {
+      const rr = this.game.scene.getScene("ResultScene")
+      if (rr && rr.scene.isSleeping()) rr.scene.wake(result)
+      this.game.scene.start("ResultScene", result)
+    }, 500)
+  }
+
   spawnCoinEffect(x, y, score) {
     audioManager.play("coin")
     for (let i = 0; i < 5; i++) {
@@ -720,6 +780,8 @@ export default class WorldScene extends Phaser.Scene {
     this.tweens.killAll()
     if (this.monsterLabels) { this.monsterLabels.forEach(l => { if (l?.active) l.destroy() }); this.monsterLabels = [] }
     this.monsterAIs = {}
+    if (this.chests) { this.chests.forEach(c => c.destroy()); this.chests = null }
+    if (this.extractionPoint) { this.extractionPoint.destroy(); this.extractionPoint = null }
     if (this.mapContainer) { this.mapContainer.destroy(true); this.mapContainer = null }
     if (this.decoContainer) { this.decoContainer.destroy(true); this.decoContainer = null }
     this.monsters = null; this.npcs = null; this.walls = null
