@@ -620,6 +620,26 @@ export default class WorldScene extends Phaser.Scene {
       stroke: '#000', strokeThickness: 1
     }).setOrigin(0.5).setScrollFactor(0).setDepth(100)
   }
+  spawnCoinEffect(x, y, score) {
+    audioManager.play("coin")
+    for (let i = 0; i < 5; i++) {
+      const coin = this.add.image(x, y, "coin").setDepth(20).setScale(1.5)
+      this.tweens.add({
+        targets: coin, x: x + Phaser.Math.Between(-40, 40), y: y - Phaser.Math.Between(30, 80),
+        alpha: 0, duration: 800, ease: "Power2", delay: i * 100, onComplete: () => coin.destroy()
+      })
+    }
+    const displayScore = score || 100
+    const scoreText = this.add.text(x, y - 20, "+" + displayScore, {
+      fontSize: "16px", fontFamily: "'Press Start 2P', Arial", color: "#ffc847", fontStyle: "bold",
+      stroke: "#5b3a1a", strokeThickness: 3
+    }).setOrigin(0.5).setDepth(20)
+    this.tweens.add({
+      targets: scoreText, y: y - 60, alpha: 0, duration: 1000,
+      onComplete: () => scoreText.destroy()
+    })
+  }
+
   update() {
     if (!this.player) return
     if (this.monsterAIs && this.monsters) {
