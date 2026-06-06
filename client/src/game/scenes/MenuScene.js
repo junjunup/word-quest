@@ -72,33 +72,32 @@ export default class MenuScene extends Phaser.Scene {
     }
 
     // 木质按钮（在欢迎气泡之后创建，确保按钮在display list上层，获得输入优先权）
-    this.createWoodButton(width / 2, 230, '🌿 开 始 冒 险', 0x5b8c3e, 0x3a6b1e, () => {
+    this.createWoodButton(width / 2, 210, '🌿 开 始 冒 险', 0x5b8c3e, 0x3a6b1e, () => {
       eventBus.emit(EVENTS.SHOW_LEVEL_SELECT, { mode: 'new' })
     })
 
-    this.createWoodButton(width / 2, 300, '📖 继 续 游 戏', 0x7eb55e, 0x5b8c3e, () => {
+    this.createWoodButton(width / 2, 268, '📖 继 续 游 戏', 0x7eb55e, 0x5b8c3e, () => {
       eventBus.emit(EVENTS.SHOW_LEVEL_SELECT, { mode: 'continue' })
     })
 
-    this.createWoodButton(width / 2, 370, '👤 角 色', 0x9b7ed3, 0x7b5eb3, () => {
+    this.createWoodButton(width / 2, 326, '👤 角 色', 0x9b7ed3, 0x7b5eb3, () => {
       eventBus.emit(EVENTS.SHOW_CHARACTER_SELECT)
     })
 
-    this.createWoodButton(width / 2, 440, '🏆 排 行 榜', 0xe8a33c, 0xb8832e, () => {
+    this.createWoodButton(width / 2, 384, '🏆 排 行 榜', 0xe8a33c, 0xb8832e, () => {
       eventBus.emit(EVENTS.SHOW_LEADERBOARD)
     })
 
-    this.createWoodButton(width / 2, 510, '🔥 每 日 挑 战', 0xd45b3e, 0xa04030, () => {
+    this.createWoodButton(width / 2, 442, '🔥 每 日 挑 战', 0xd45b3e, 0xa04030, () => {
       eventBus.emit(EVENTS.SHOW_DAILY_CHALLENGE)
     })
 
-    this.createWoodButton(width / 2, 570, '🛒 商 店', 0x7b5eb3, 0x5b3e93, () => {
+    this.createWoodButton(width / 2, 500, '🛒 商 店', 0x7b5eb3, 0x5b3e93, () => {
       eventBus.emit(EVENTS.SHOW_SHOP)
     })
 
     // 底部信息
-    this.add.text(width / 2, height - 40, '🌾 穿越词汇田园，击败遗忘小怪！', {
-    this.add.text(width / 2, height - 40, '🌾 穿越词汇田园，击败遗忘小怪！', {
+    this.add.text(width / 2, height - 30, '🌾 穿越词汇田园，击败遗忘小怪！', {
       fontSize: '13px',
       fontFamily: 'Microsoft YaHei',
       color: '#c4b99a',
