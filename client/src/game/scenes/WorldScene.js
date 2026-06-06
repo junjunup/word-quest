@@ -385,9 +385,11 @@ export default class WorldScene extends Phaser.Scene {
       this.input.enabled = false  // 防止过渡期间幽灵点击
       audioManager.play('level_complete')
       // 使用原生 setTimeout 避免 Phaser Timer 被 shutdown 清除
+      // 使用 this.scene.start（而非 this.game.scene.start）确保 WorldScene 被正确停止
+      // this.game.scene.start 不会停止当前场景，会导致 WorldScene 残留渲染
       this._completeTimer = setTimeout(() => {
-        if (this.game?.scene) {
-          this.game.scene.start('ResultScene', levelManager.getLevelResult())
+        if (this.scene?.isActive()) {
+          this.scene.start('ResultScene', levelManager.getLevelResult())
         }
         this._completeTimer = null
       }, 1000)
@@ -904,12 +906,12 @@ export default class WorldScene extends Phaser.Scene {
       this.boss.pauseBehavior()
     }
 
-    // Use a native timer + game scene manager instead of Phaser time.delayedCall.
-    // Phaser TimerEvents can be cleared during scene shutdown, which previously left
-    // the game stuck in WorldScene with input disabled after death.
+    // Use a native timer + this.scene.start (NOT this.game.scene.start).
+    // this.scene.start properly stops WorldScene before starting ResultScene,
+    // preventing residual WorldScene graphics from rendering on top of subsequent scenes.
     this.gameOverTransitionTimer = window.setTimeout(() => {
-      if (this.game?.scene) {
-        this.game.scene.start('ResultScene', finalResult)
+      if (this.scene?.isActive()) {
+        this.scene.start('ResultScene', finalResult)
       }
       this.gameOverTransitionTimer = null
     }, 0)
@@ -1025,45 +1027,47 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   shutdown() {
+    // 1. 事件总线清理 — 防止回调在已销毁场景中触发
     eventBus.off(EVENTS.QUIZ_ANSWERED, this.boundOnQuizAnswered)
     eventBus.off(EVENTS.RESUME_GAME, this.boundOnResumeGame)
     eventBus.off(EVENTS.CHAT_CLOSED, this.boundOnChatClosed)
     eventBus.off(EVENTS.GAME_OVER, this.boundOnGameOver)
     eventBus.off(EVENTS.BOSS_QUIZ_RESULT, this.boundOnBossQuizResult)
 
-    // 清理原生定时器（避免场景销毁后仍触发跳转）
+    // 2. 清理原生定时器（避免场景销毁后仍触发跳转）
     if (this.gameOverTransitionTimer) { clearTimeout(this.gameOverTransitionTimer); this.gameOverTransitionTimer = null }
     if (this._completeTimer) { clearTimeout(this._completeTimer); this._completeTimer = null }
 
-    // 清理 ESC 键监听
+    // 3. 清理 ESC 键监听
     if (this.escKey && this.boundOnEscDown) {
       this.escKey.off('down', this.boundOnEscDown)
     }
 
-    // 禁用输入，防止场景切换时幽灵点击穿透
+    // 4. 禁用输入 — 防止场景切换时幽灵点击穿透
     this.input.enabled = false
 
-    // Kill all tweens to prevent callbacks firing after scene shutdown
+    // 5. Kill all tweens — 防止回调在 shutdown 后触发
     this.tweens.killAll()
 
-    // Clean up monster labels
+    // 6. 清理怪物标签
     if (this.monsterLabels) {
       this.monsterLabels.forEach(label => { if (label?.active) label.destroy() })
       this.monsterLabels = []
     }
 
-    // Unconditionally cleanup boss (whether defeated or not)
+    // 7. 显式销毁容器 — 必须在设为 null 之前 destroy，确保内部子对象被递归清理
+    if (this.mapContainer) { this.mapContainer.destroy(true); this.mapContainer = null }
+    if (this.decoContainer) { this.decoContainer.destroy(true); this.decoContainer = null }
+
+    // 8. 无条件清理 Boss（无论是否已被击败）
     if (this.boss) {
-      // Prevent defeat animation from firing post-shutdown
-      this.boss.defeated = true
+      this.boss.defeated = true  // 阻止后续 defeat 动画
       this.boss.cleanupVisuals()
       if (this.boss.active) this.boss.destroy()
       this.boss = null
     }
 
-    // 清理所有容器引用（防止内存泄漏）
-    this.mapContainer = null
-    this.decoContainer = null
+    // 9. 清理其余引用
     this.monsters = null
     this.npcs = null
     this.walls = null
@@ -1071,8 +1075,8 @@ export default class WorldScene extends Phaser.Scene {
     this.playerNameText = null
     this.hudTexts = {}
 
-    // 销毁所有 Display Object — 防止旧场景贴图残留覆盖新场景 UI
-    // MenuScene/ResultScene 的 shutdown 都调用此方法，WorldScene 之前遗漏了
+    // 10. 销毁所有 Display Object — 最终保险，清除场景显示列表中的所有残余对象
+    //    （在容器已显式销毁后执行，确保万无一失）
     this.children.removeAll(true)
   }
 }
