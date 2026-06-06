@@ -80,10 +80,40 @@ export default class WorldScene extends Phaser.Scene {
     this.physics.add.overlap(this.player, this.npcs, this.onNPCInteract, null, this)
     if (this.walls) this.physics.add.collider(this.player, this.walls)
 
+    // Register combat key handler once (not lazily)
+    this._keyHandler = (event) => {
+      if (!this.targetLocked || this.isDead) return
+      if (event.key === 'Escape') { this._cancelLock(); return }
+      const num = parseInt(event.key)
+      if (num >= 1 && num <= 4 && this.lockedTarget) {
+        if (num === this.lockedTarget.correctIdx) {
+          audioManager.play('correct')
+          const wasLast = Object.keys(this.monsterAIs).length === 1
+          this._killMonster(this.lockedTarget.idx)
+          if (!wasLast) this._cancelLock()
+        } else {
+          audioManager.play('wrong')
+          const idx = num - 1
+          if (this._choiceOpts?.[idx]) {
+            const { bg, x, y } = this._choiceOpts[idx]
+            bg.clear(); bg.fillStyle(0x8b0000, 0.85)
+            bg.fillRoundedRect(x - 100, y - 18, 200, 36, 6)
+            bg.lineStyle(2, 0xff0000)
+            bg.strokeRoundedRect(x - 100, y - 18, 200, 36, 6)
+          }
+          this._flashTimer = window.setTimeout(() => {
+            this._flashTimer = null
+            this._cancelLock()
+          }, 300)
+        }
+      }
+    }
+    this.input.keyboard.on('keydown', this._keyHandler)
+
     this.events.once('shutdown', this.shutdown, this)
 
     audioManager.init(this)
-    audioManager.stopBGM(0)  // 先停止旧BGM防止叠加
+    audioManager.stopBGM(0)
     audioManager.playBGM('bgm_game')
 
     eventBus.emit(EVENTS.START_LEVEL, {
@@ -407,8 +437,11 @@ export default class WorldScene extends Phaser.Scene {
     this.targetLocked = false
     this.lockedTarget = null
     this.timeScale = 1.0
-    this.isPaused = false
-    audioManager.resumeBGM(200)
+    // Don't unpause or resume BGM if level is being cleared
+    if (Object.keys(this.monsterAIs).length > 0) {
+      this.isPaused = false
+      audioManager.resumeBGM(200)
+    }
   }
 
   _createChoicePanel(word, options) {
@@ -441,36 +474,6 @@ export default class WorldScene extends Phaser.Scene {
       fontSize: '11px', fontFamily: 'Microsoft YaHei', color: '#c4b99a'
     }).setOrigin(0.5).setDepth(300).setScrollFactor(0)
 
-    // Key handler for 1-4 + Esc
-    if (!this._keyHandler) {
-      this._keyHandler = (event) => {
-        if (!this.targetLocked || this.isDead) return
-        if (event.key === 'Escape') { this._cancelLock(); return }
-        const num = parseInt(event.key)
-        if (num >= 1 && num <= 4 && this.lockedTarget) {
-          if (num === this.lockedTarget.correctIdx) {
-            audioManager.play('correct')
-            this._killMonster(this.lockedTarget.idx)
-            this._cancelLock()
-          } else {
-            audioManager.play('wrong')
-            const idx = num - 1
-            if (this._choiceOpts?.[idx]) {
-              const { bg, x, y } = this._choiceOpts[idx]
-              bg.clear(); bg.fillStyle(0x8b0000, 0.85)
-              bg.fillRoundedRect(x - 100, y - 18, 200, 36, 6)
-              bg.lineStyle(2, 0xff0000)
-              bg.strokeRoundedRect(x - 100, y - 18, 200, 36, 6)
-            }
-            this._flashTimer = window.setTimeout(() => {
-              this._flashTimer = null
-              this._cancelLock()
-            }, 300)
-          }
-        }
-      }
-      this.input.keyboard.on('keydown', this._keyHandler)
-    }
   }
 
   _destroyChoicePanel() {
