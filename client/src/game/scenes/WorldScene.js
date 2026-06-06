@@ -331,13 +331,12 @@ export default class WorldScene extends Phaser.Scene {
         if (this.player?.body) this.player.setVelocity(0, 0)
         this._destroyChoicePanel()
         audioManager.stopBGM(0)
-        // Defer to next frame to avoid physics callback crash, then stop+start properly
-        window.setTimeout(() => {
-          if (!this.scene?.isActive()) return
+        this.gameOverTimer = window.setTimeout(() => {
           const rr = this.game.scene.getScene("ResultScene")
           if (rr && rr.scene.isSleeping()) rr.scene.wake()
-          this.scene.start("ResultScene", levelManager.getLevelResult())
-        }, 100)
+          this.game.scene.start("ResultScene", levelManager.getLevelResult())
+          this.gameOverTimer = null
+        }, 0)
       }
     })
   }
@@ -363,12 +362,20 @@ export default class WorldScene extends Phaser.Scene {
     if (!word) return
     levelManager.nextWord()
 
-    // Generate 4 options (1 correct + 3 random from word list)
+    // Generate 4 options (1 correct + up to 3 distractors)
     const correct = word.meaning
-    const allMeanings = levelManager.words.map(w => w.meaning).filter(m => m && m !== correct)
-    const shuffled = allMeanings.sort(() => Math.random() - 0.5).slice(0, 3)
+    const others = levelManager.words.map(w => w.meaning).filter(m => m && m !== correct)
+    // Deduplicate and shuffle
+    const unique = [...new Set(others)]
+    const shuffled = unique.sort(() => Math.random() - 0.5).slice(0, 3)
+    // Fallback distractors if not enough unique meanings
+    const fallbacks = ['苹果','香蕉','橙子','葡萄','书本','电脑','学校','朋友']
+    while (shuffled.length < 3) {
+      const fb = fallbacks.find(f => f !== correct && !shuffled.includes(f))
+      if (fb) shuffled.push(fb); else break
+    }
     const options = [correct, ...shuffled].sort(() => Math.random() - 0.5)
-    const correctIdx = options.indexOf(correct) + 1 // 1-4
+    const correctIdx = options.indexOf(correct) + 1
 
     this.targetLocked = true
     this.lockedTarget = { ...closest, word, options, correctIdx }
@@ -887,6 +894,7 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   shutdown() {
+    if (this.gameOverTimer) { clearTimeout(this.gameOverTimer); this.gameOverTimer = null }
     if (this._keyHandler) { this.input.keyboard?.off('keydown', this._keyHandler); this._keyHandler = null }
     this._destroyChoicePanel()
     this._destroyInputBar()
