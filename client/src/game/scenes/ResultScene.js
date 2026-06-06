@@ -14,6 +14,8 @@ export default class ResultScene extends Phaser.Scene {
   init(data) {
     this.result = data || {}
     this._pendingTimeouts = []
+    // 标记：如果 create 被调用，reset rebuild flag
+    this._needsRebuild = false
   }
 
   create() {
@@ -23,6 +25,19 @@ export default class ResultScene extends Phaser.Scene {
     // 注册 shutdown 清理
     this.events.once('shutdown', this.shutdown, this)
 
+    // 注册 wake 处理：当场景从 SLEEPING 唤醒时，强制重建 UI
+    this.events.on('wake', (sys, data) => {
+      if (this._needsRebuild) return
+      this._needsRebuild = true
+      if (data) this.result = data
+      this.children.removeAll(true)
+      this.tweens.killAll()
+      this._pendingTimeouts = []
+      this.events.once('shutdown', this.shutdown, this)
+      this._buildUI()
+      this._needsRebuild = false
+    })
+
     // ResultScene must stay interactive even if a later visual/audio setup fails.
     // Ghost-click prevention is handled by delayed button interactivity, not global input disable.
     this.input.enabled = true
@@ -31,6 +46,11 @@ export default class ResultScene extends Phaser.Scene {
     audioManager.init(this)
     audioManager.playBGM('bgm_result')
 
+    this._buildUI()
+  }
+
+  _buildUI() {
+    const { width, height } = this.cameras.main
     const {
       chapter = 1, level = 1, stars = 1, score = 0,
       correctCount = 0, wrongCount = 0, totalWords = 0,
@@ -135,10 +155,10 @@ export default class ResultScene extends Phaser.Scene {
       const y = panelY + 22 + i * 38
       this.add.text(width / 2 - 170, y, stat.label, {
         fontSize: '14px', fontFamily: 'Microsoft YaHei', color: '#8b6914'
-      })
+      }).setDepth(210)
       const valueText = this.add.text(width / 2 + 170, y, stat.value, {
         fontSize: '14px', fontFamily: '"Press Start 2P", Arial', color: stat.color, fontStyle: 'bold'
-      }).setOrigin(1, 0)
+      }).setOrigin(1, 0).setDepth(210)
 
       valueText.setAlpha(0).setX(width / 2 + 210)
       this.tweens.add({
