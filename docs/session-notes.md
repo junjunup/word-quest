@@ -1,5 +1,31 @@
 ---
 
+## 📅 Word Quest 项目状态 — 2026-06-06（第4会话 — 场景切换修复）
+
+### 🎯 会话成果
+
+#### 🔧 Bug 修复：场景残留贴图 + 结算界面不显示
+
+**根因**：`this.game.scene.start()` 不会停止当前场景（仅启动新场景），导致：
+- WorldScene 通关/死亡后仍在后台活跃
+- ResultScene → MenuScene 切换后，WorldScene 渲染覆盖主菜单
+- 成功通关时 ResultScene 被 WorldScene 干扰无法正常显示
+
+**修复** (commit `f6fecac`)：
+| 文件 | 改动 |
+|------|------|
+| `WorldScene.js` `checkLevelComplete()` | `game.scene.start` → `scene.start` |
+| `WorldScene.js` `onGameOver()` | `game.scene.start` → `scene.start` |
+| `WorldScene.js` `shutdown()` | 容器先 destroy 再置 null + 步骤编号 |
+| `MenuScene.js` `create()` | 新增安全网：强行停止残留场景 |
+
+### 🧪 待测试
+- [ ] 正常通关 → 结算界面正常显示 → 返回菜单无残留
+- [ ] Boss 战死亡 → 结算正常 → 返回菜单无残留贴图
+- [ ] 连续多关 → 不刷新页面 → 无累积残留
+
+---
+
 ## 📅 Word Quest 项目状态 — 2026-06-05（第3会话 — 全量优化+盲审）
 
 ### 🎯 会话成果
