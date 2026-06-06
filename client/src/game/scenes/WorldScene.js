@@ -384,6 +384,7 @@ export default class WorldScene extends Phaser.Scene {
       this.isPaused = true
       this.input.enabled = false  // 防止过渡期间幽灵点击
       audioManager.play('level_complete')
+      audioManager.stopBGM(0)  // 立即停止关卡BGM，防止与结算BGM重叠
       // 先 wake 再 game.scene.start，确保数据刷新
       this._completeTimer = setTimeout(() => {
         const rs = this.game.scene.getScene('ResultScene')

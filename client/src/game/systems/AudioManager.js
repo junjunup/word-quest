@@ -15,6 +15,11 @@ class AudioManager {
     this.volume = this.clampVolume(parseFloat(localStorage.getItem('wordquest:volume') || '0.5'))
     this.bgmVolume = this.clampVolume(parseFloat(localStorage.getItem('wordquest:bgmVolume') || '0.3'))
     this.sfxKeys = ['correct', 'wrong', 'boss_appear', 'boss_defeat', 'combo', 'coin', 'level_complete', 'click']
+    // 各音效相对音量系数（部分音频文件响度偏高，需单独压低）
+    this.sfxVolumeMul = {
+      correct: 0.65, combo: 0.5, coin: 0.5, click: 0.7,
+      wrong: 1.0, boss_appear: 1.0, boss_defeat: 1.0, level_complete: 0.85
+    }
   }
 
   /**
@@ -51,7 +56,7 @@ class AudioManager {
     const sound = this.sounds[key]
     if (this.muted || !sound) return
     try {
-      sound.setVolume?.(this.getEffectiveSfxVolume())
+      sound.setVolume?.(this.getEffectiveSfxVolume(key))
       sound.play()
     } catch (e) {
       // Graceful fallback - 音效缺失不影响游戏。
@@ -270,8 +275,9 @@ class AudioManager {
     }
   }
 
-  getEffectiveSfxVolume() {
-    return this.muted ? 0 : this.volume
+  getEffectiveSfxVolume(key = '') {
+    const base = this.muted ? 0 : this.volume
+    return base * (this.sfxVolumeMul[key] || 1.0)
   }
 
   getEffectiveBgmVolume() {
