@@ -385,9 +385,11 @@ export default class WorldScene extends Phaser.Scene {
       this.input.enabled = false  // 防止过渡期间幽灵点击
       audioManager.play('level_complete')
       // 使用原生 setTimeout，this.scene.start() 确保 WorldScene 被正确停止
-      // 且 ResultScene 始终走 init(data)+create(data) 完整流程
+      // 先 wake ResultScene（若 sleeping），确保走 init+create 完整流程拿到新数据
       this._completeTimer = setTimeout(() => {
         if (this.scene?.isActive()) {
+          const rs = this.game.scene.getScene('ResultScene')
+          if (rs && rs.scene.isSleeping()) { rs.scene.wake() }
           this.scene.start('ResultScene', levelManager.getLevelResult())
         }
         this._completeTimer = null
@@ -905,10 +907,11 @@ export default class WorldScene extends Phaser.Scene {
       this.boss.pauseBehavior()
     }
 
-    // Use a native timer: this.scene.start() stops WorldScene + starts ResultScene
-    // with full init(data)+create(data), preserving data integrity.
+    // Use native timer: wake ResultScene if sleeping so start() calls init+create
     this.gameOverTransitionTimer = window.setTimeout(() => {
       if (this.scene?.isActive()) {
+        const rs = this.game.scene.getScene('ResultScene')
+        if (rs && rs.scene.isSleeping()) { rs.scene.wake() }
         this.scene.start('ResultScene', finalResult)
       }
       this.gameOverTransitionTimer = null
