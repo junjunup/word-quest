@@ -331,11 +331,12 @@ export default class WorldScene extends Phaser.Scene {
         if (this.player?.body) this.player.setVelocity(0, 0)
         this._destroyChoicePanel()
         audioManager.stopBGM(0)
-        // Use window.setTimeout to defer scene transition (avoids crash in physics callback)
+        // Defer to next frame to avoid physics callback crash, then stop+start properly
         window.setTimeout(() => {
+          if (!this.scene?.isActive()) return
           const rr = this.game.scene.getScene("ResultScene")
           if (rr && rr.scene.isSleeping()) rr.scene.wake()
-          this.game.scene.start("ResultScene", levelManager.getLevelResult())
+          this.scene.start("ResultScene", levelManager.getLevelResult())
         }, 100)
       }
     })
@@ -347,7 +348,7 @@ export default class WorldScene extends Phaser.Scene {
   }
   _tryLockTarget() {
     if (this.targetLocked || !this.player) return
-    let closest = null, closestDist = 200
+    let closest = null, closestDist = 250
     const children = this.monsters.getChildren()
     for (let i = 0; i < children.length; i++) {
       const m = children[i]; const ai = this.monsterAIs[i]
@@ -457,7 +458,7 @@ export default class WorldScene extends Phaser.Scene {
     bg.fillRoundedRect(x - 100, y - 18, 200, 36, 6)
     bg.lineStyle(2, 0xff0000)
     bg.strokeRoundedRect(x - 100, y - 18, 200, 36, 6)
-    this.time.delayedCall(300, () => { this._cancelLock() })
+    window.setTimeout(() => { if (this.scene?.isActive()) this._cancelLock() }, 300)
   }
 
   _destroyChoicePanel() {
