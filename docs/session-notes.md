@@ -1,5 +1,48 @@
 ---
 
+## 📅 Word Quest 项目状态 — 2026-06-07（第5会话 — Word Dungeon 重构）
+
+### 🎯 会话成果
+
+#### Phase 1+2: 战术暂停战斗系统 MVP
+**分支**: `word-dungeon-v2`
+
+| 功能 | 状态 | Commit |
+|------|------|--------|
+| MonsterAI 状态机 (PATROL/PURSUE/ATTACK) | ✅ | `d914822` |
+| 怪物巡逻+追击+触碰扣血 | ✅ | `50d1eb0` |
+| E键锁定 + 时间减速 | ✅ | `50d1eb0` |
+| 选择题战斗 (1-4选中文释义) | ✅ | `264063e` |
+| 关卡通关检测 | ✅ | `4167c95` |
+| 死亡结算 | ✅ | `1ffeac0` |
+| AI索引Map修复 (消除虚影小鸡) | ✅ | `de67917` |
+| 结算数据传递修复 | ✅ | `144b88b` |
+| ResultScene显式停止 | ✅ | `b33bb3a` |
+
+#### 已知遗留问题
+- 第二关开始可能弹旧结算 (已加多层防御，待验证)
+- 退出菜单卡死 (偶发)
+- 拼写输入模式未实现 (当前用选择题)
+- 撤离/装备系统未做 (Step 3)
+
+### 🚀 快速启动
+```bash
+cd /c/Users/sxh/WorkBuddy/2026-05-14-task-5/word-quest
+git checkout word-dungeon-v2
+cd server && node src/app.js &        # 后端 :4000
+cd client && npm run dev &            # 前端 :3000
+```
+
+### 🔑 关键技术模式
+- **MonsterAI**: 状态机 PATROL→PURSUE→ATTACK，onHitPlayer 扣血+击退
+- **锁定系统**: E键→时间减速20%→显示英文单词+4选项→1-4选择
+- **AI索引**: `monsterAIs = {}` keyed by `monster.getData('index')`，避免数组移位
+- **死亡跳转**: `game.scene.start` + 0ms setTimeout (不在物理回调中 scene.stop)
+- **通关检测**: `Object.keys(monsterAIs).length === 0`
+- **结算刷新**: `wake(data)` 传数据 + ResultScene.init 中 `children.removeAll(true)`
+
+---
+
 ## 📅 Word Quest 项目状态 — 2026-06-06（第4会话 — 场景切换修复）
 
 ### 🎯 会话成果
