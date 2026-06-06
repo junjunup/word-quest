@@ -6,6 +6,7 @@ import { CHARACTER_PRESETS } from '../data/characters'
 import MonsterAI from '../entities/MonsterAI'
 import audioManager from '../systems/AudioManager'
 import { CHAPTER_THEMES } from '../config/gameConstants'
+
 /**
  * 主世界地图场景 - 田园像素风
  * 玩家在田园地图中移动，遇到怪物触发答题战斗
@@ -16,21 +17,24 @@ export default class WorldScene extends Phaser.Scene {
     this.player = null
     this.cursors = null
     this.monsters = null
+    this.monsterAIs = []
     this.npcs = null
     this.doors = null
-    this.boss = null
-    this.monsterAIs = []
-    this.playerDirection = 'down'
+    this.hudTexts = {}
     this.isPaused = false
-    this.gameOverTransitionTimer = null
+    this.playerDirection = 'down'
     this.invincible = false
-    this.continueGame = data?.continueGame || false
-    this.chapter = data?.chapter || levelManager.currentChapter || 1
+    this.virtualDirection = { up: false, down: false, left: false, right: false }
     this.timeScale = 1.0
     this.targetLocked = false
     this.lockedTarget = null
     this.inputBuffer = ''
-    this.virtualDirection = { up: false, down: false, left: false, right: false }
+  }
+
+  init(data) {
+    this.continueGame = data?.continueGame || false
+    this.chapter = data?.chapter || levelManager.currentChapter || 1
+    this.level = data?.level || levelManager.currentLevel || 1
     this.difficulty = data?.difficulty || 'normal'
     this.isTutorial = false
     this.virtualDirection = { up: false, down: false, left: false, right: false }
@@ -39,36 +43,27 @@ export default class WorldScene extends Phaser.Scene {
   create() {
     const { width, height } = this.cameras.main
     this.isPaused = false
-    this.encounterCooldown = false
-    this.npcCooldown = false
     this.invincible = false
-    this.isGameOverTransitioning = false
-    this.gameOverTransitionTimer = null
+    this.timeScale = 1.0
+    this.targetLocked = false
+    this.lockedTarget = null
+    this.inputBuffer = ''
 
-    // 显式启用输入 —— shutdown() 会设 input.enabled = false，
-    // Phaser 场景重启时不会自动重置该状态，导致键盘/鼠标完全失效
     this.input.enabled = true
-
-    // 生成田园地图
     this.createPastoralMap()
-
-    // 创建玩家（使用 Sprout Lands 角色）
     this.createPlayer()
-
-    // 创建怪物（使用小鸡 sprite）
     const wordCount = levelManager.getTotalWords()
     const baseCount = wordCount > 0 ? Math.min(wordCount, 10) : Math.min(6 + this.level, 10)
     this.monsterCount = levelManager.getMonsterCount(baseCount)
     this.createMonsters()
     this.createNPC()
     this.createHUD()
-    this.wasd = this.input.keyboard.addKeys({
-      up: Phaser.Input.Keyboard.KeyCodes.W,
-    this.createHUD()
-      left: Phaser.Input.Keyboard.KeyCodes.A,
-      right: Phaser.Input.Keyboard.KeyCodes.D
-    })
 
+    this.cursors = this.input.keyboard.createCursorKeys()
+    this.wasd = this.input.keyboard.addKeys({
+      up: Phaser.Input.Keyboard.KeyCodes.W, down: Phaser.Input.Keyboard.KeyCodes.S,
+      left: Phaser.Input.Keyboard.KeyCodes.A, right: Phaser.Input.Keyboard.KeyCodes.D
+    })
     this.eKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E)
     this.eKey.on('down', () => { if (!this.isPaused && !this.targetLocked) this._tryLockTarget() })
     this.escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
@@ -76,80 +71,60 @@ export default class WorldScene extends Phaser.Scene {
       if (this.targetLocked) this._cancelLock()
       else if (!this.isPaused) eventBus.emit(EVENTS.TOGGLE_PAUSE)
     })
-    this.escKey.on('down', this.boundOnEscDown)
 
-    // 碰撞检测
-    this.physics.add.overlap(this.player, this.monsters, this.onMonsterEncounter, null, this)
-    this.physics.add.overlap(this.player, this.npcs, this.onNPCInteract, null, this)
-    // 玩家与围墙碰撞（walls 在 createPastoralMap 中创建）
-    if (this.walls) {
-      this.physics.add.collider(this.player, this.walls)
-    }
-
-    // Boss碰撞
-    if (this.boss) {
-      this.physics.add.overlap(this.player, this.boss, this.onBossEncounter, null, this)
     this.physics.add.overlap(this.player, this.monsters, this._onMonsterHit, null, this)
-      // Turret boss bullet collision
-      if (this.boss.bullets) {
-        this.physics.add.overlap(this.player, this.boss.bullets, this.onBulletHit, null, this)
-      }
-    }
-    eventBus.on(EVENTS.CHAT_CLOSED, this.boundOnChatClosed)
-    eventBus.on(EVENTS.GAME_OVER, this.boundOnGameOver)
-    // Quiz events removed - using direct combat system
-      level: this.level,
-      continueGame: this.continueGame,
-      difficulty: this.difficulty,
-      isTutorial: this.isTutorial
-    })
+    this.physics.add.overlap(this.player, this.npcs, this.onNPCInteract, null, this)
+    if (this.walls) this.physics.add.collider(this.player, this.walls)
 
-    // 发送初始HUD数据
+    this.events.once('shutdown', this.shutdown, this)
+
+    audioManager.init(this)
+    audioManager.playBGM('bgm_game')
+
+    eventBus.emit(EVENTS.START_LEVEL, {
+      chapter: this.chapter, level: this.level,
+      continueGame: this.continueGame, difficulty: this.difficulty, isTutorial: false
+    })
     eventBus.emit(EVENTS.UPDATE_HUD, {
-      lives: levelManager.lives,
-      maxLives: levelManager.difficultyConfig.lives,
-      score: levelManager.score,
-      combo: levelManager.combo,
-      chapter: this.chapter,
-      level: this.level,
-      progress: levelManager.getProgress()
+      lives: levelManager.lives, maxLives: levelManager.difficultyConfig.lives,
+      score: levelManager.score, combo: levelManager.combo,
+      chapter: this.chapter, level: this.level, progress: levelManager.getProgress()
     })
   }
 
   /**
    * 创建Boss
    */
-  createBoss() {
-    // Get level config from levels.json
-    const chapterData = levelsData.chapters.find(c => c.id === this.chapter)
-    const levelData = chapterData?.levels.find(l => l.id === this.level)
+  createPastoralMap() {
+    const mapWidth = 30
+    const mapHeight = 20
+    const tileSize = 32
+    const theme = CHAPTER_THEMES[this.chapter] || CHAPTER_THEMES[1]
 
-    if (!levelData) return
+    this.mapContainer = this.add.container(0, 0)
+    this.decoContainer = this.add.container(0, 0).setDepth(2)
 
-    // 检测教程关
-    this.isTutorial = levelData.isTutorial || false
-    if (this.isTutorial) return  // 教程关无 Boss
+    this.cameras.main.setBackgroundColor(theme.bgColor)
 
-    const bossType = levelData.bossType || getBossTypeForLevel(this.chapter, this.level)
-    const bossConfig = levelData.bossConfig || { name: 'Boss', baseHp: 3, speed: 30 }
+    const isValid = (key) => this.textures.exists(key) && !failedAssetKeys.has(key)
+    const hasGrassTileset = isValid('grass_tileset')
+    const hasFenceSheet = isValid('fence_sheet')
+    const hasGrassDecor = isValid('grass_decor')
 
-    // Adjust boss HP for difficulty
-    let baseHp = bossConfig.baseHp || 3
-    if (this.difficulty === 'hard') baseHp += 2
-    if (this.difficulty === 'easy') baseHp = Math.max(2, baseHp - 1)
+    if (hasGrassTileset && !this.textures.exists('grass_v0')) {
+      const grassSource = this.textures.get('grass_tileset').getSourceImage()
+      for (let v = 0; v < 4; v++) {
+        const canvas = document.createElement('canvas')
+        canvas.width = 16
+        canvas.height = 16
+        const ctx = canvas.getContext('2d')
+        const sx = 48 + (v % 2) * 16
+        const sy = 32 + Math.floor(v / 2) * 16
+        ctx.drawImage(grassSource, sx, sy, 16, 16, 0, 0, 16, 16)
+        this.textures.addCanvas(`grass_v${v}`, canvas)
+      }
+    }
 
-    // Boss spawn: pick random zone with minimum distance enforcement
-    const playerSpawnX = 80, playerSpawnY = 300
-    let bossX, bossY
-    let spawnAttempts = 0
-    const maxAttempts = 20
-
-    do {
-      const zone = BOSS_SPAWN.zones[Phaser.Math.Between(0, BOSS_SPAWN.zones.length - 1)]
-      bossX = Phaser.Math.Between(zone.minX, zone.maxX)
-      bossY = Phaser.Math.Between(zone.minY, zone.maxY)
-      spawnAttempts++
-    } while (
     for (let y = 0; y < mapHeight; y++) {
       for (let x = 0; x < mapWidth; x++) {
         const px = x * tileSize + 16
@@ -338,41 +313,9 @@ export default class WorldScene extends Phaser.Scene {
     }).setOrigin(0.5).setDepth(11)
   }
 
-  createMonsters() {
-    this.monsters = this.physics.add.group()
-    this.monsterLabels = []
-
-    const positions = this.generateSpacedPositions(
-      this.monsterCount, 180, 600, 80, 550, 60,
-      [{ x: 80, y: 300 }, { x: 700, y: 300 }]
-    )
-
-    const isValid = (key) => this.textures.exists(key) && !failedAssetKeys.has(key)
-    const hasChicken = isValid('chicken_sheet')
-
-    for (let i = 0; i < this.monsterCount; i++) {
-      let monster
-      if (hasChicken) {
-        monster = this.monsters.create(positions[i].x, positions[i].y, 'chicken_sheet', 0)
-        monster.setScale(3.5)
-        // 缩小碰撞箱到小鸡身体中心区域（原始帧 16x16，取中间 10x10）
-        monster.body.setSize(10, 10)
-        monster.body.setOffset(3, 4)
-        if (this.anims.exists('chicken_idle')) {
-          monster.play('chicken_idle')
-        }
-      } else {
-        monster = this.monsters.create(positions[i].x, positions[i].y, 'monster')
-        monster.setScale(1.2)
-        monster.body.setSize(20, 20)
-        monster.body.setOffset(6, 6)
-      }
-
-      monster.setData('index', i)
-
   _onMonsterHit(player, monster) {
     if (this.invincible || !monster.active) return
-    const idx = monster.getData('index')
+    const idx = monster.getData("index")
     if (idx == null) return
     const ai = this.monsterAIs[idx]
     if (!ai || ai.isDefeated) return
@@ -380,11 +323,11 @@ export default class WorldScene extends Phaser.Scene {
       const result = levelManager.loseLife()
       this._startInvincibility(1500)
       if (this.targetLocked) this._cancelLock()
-      if (result === 'game_over') {
+      if (result === "game_over") {
         audioManager.stopBGM(0)
-        const rr = this.game.scene.getScene('ResultScene')
+        const rr = this.game.scene.getScene("ResultScene")
         if (rr && rr.scene.isSleeping()) rr.scene.wake()
-        this.game.scene.start('ResultScene', levelManager.getLevelResult())
+        this.game.scene.start("ResultScene", levelManager.getLevelResult())
       }
     })
   }
@@ -405,15 +348,15 @@ export default class WorldScene extends Phaser.Scene {
     }
     if (!closest) return
     this.targetLocked = true; this.lockedTarget = closest
-    this.timeScale = 0.2; this.inputBuffer = ''; this.isPaused = true
+    this.timeScale = 0.2; this.inputBuffer = ""; this.isPaused = true
     audioManager.pauseBGM(200)
-    this.monsterLabels[closest.idx]?.setText('🎯')
+    this.monsterLabels[closest.idx]?.setText("🎯")
   }
   _cancelLock() {
     if (!this.targetLocked) return
-    if (this.lockedTarget && this.monsterLabels[this.lockedTarget.idx]) this.monsterLabels[this.lockedTarget.idx].setText('❓')
+    if (this.lockedTarget && this.monsterLabels[this.lockedTarget.idx]) this.monsterLabels[this.lockedTarget.idx].setText("❓")
     this.targetLocked = false; this.lockedTarget = null
-    this.timeScale = 1.0; this.inputBuffer = ''; this.isPaused = false
+    this.timeScale = 1.0; this.inputBuffer = ""; this.isPaused = false
     audioManager.resumeBGM(200)
   }
   _killMonster(idx) {
@@ -421,10 +364,10 @@ export default class WorldScene extends Phaser.Scene {
     const ai = this.monsterAIs[idx]
     if (!monster || !ai || ai.isDefeated) return
     ai.defeat()
-    this.tweens.add({ targets: monster, alpha: 0, scale: 0, y: monster.y - 30, duration: 400, ease: 'Back.easeIn', onComplete: () => monster.destroy() })
+    this.tweens.add({ targets: monster, alpha: 0, scale: 0, y: monster.y - 30, duration: 400, ease: "Back.easeIn", onComplete: () => monster.destroy() })
     if (this.monsterLabels[idx]) { this.monsterLabels[idx].destroy(); this.monsterLabels[idx] = null }
     this.spawnCoinEffect(monster.x, monster.y, 100)
-    audioManager.play('correct')
+    audioManager.play("correct")
     levelManager.score += 100
     eventBus.emit(EVENTS.UPDATE_HUD, { score: levelManager.score, lives: levelManager.lives })
   }
@@ -435,7 +378,7 @@ export default class WorldScene extends Phaser.Scene {
     this.monsterLabels = []
     const mapW = 30 * 32, mapH = 20 * 32
     const isValid = (key) => this.textures.exists(key) && !failedAssetKeys.has(key)
-    const hasChicken = isValid('chicken_sheet')
+    const hasChicken = isValid("chicken_sheet")
     const positions = []
     for (let i = 0; i < this.monsterCount; i++) {
       let x, y, attempts = 0
@@ -453,16 +396,16 @@ export default class WorldScene extends Phaser.Scene {
       const pos = positions[i]
       let monster
       if (hasChicken) {
-        monster = this.monsters.create(pos.x, pos.y, 'chicken_sheet', 0)
+        monster = this.monsters.create(pos.x, pos.y, "chicken_sheet", 0)
         monster.setScale(isElite ? 4.5 : 3.5)
         monster.body.setSize(10, 10); monster.body.setOffset(3, 4)
-        if (this.anims.exists('chicken_idle')) monster.play('chicken_idle')
+        if (this.anims.exists("chicken_idle")) monster.play("chicken_idle")
       } else {
-        monster = this.monsters.create(pos.x, pos.y, 'monster')
+        monster = this.monsters.create(pos.x, pos.y, "monster")
         monster.setScale(isElite ? 1.5 : 1.2)
         monster.body.setSize(20, 20); monster.body.setOffset(6, 6)
       }
-      monster.setData('index', i)
+      monster.setData("index", i)
       monster.setImmovable(false)
       monster.setDepth(5)
       const patrolPoints = []
@@ -473,12 +416,41 @@ export default class WorldScene extends Phaser.Scene {
       }
       const ai = new MonsterAI(monster, { patrolSpeed: isElite ? 40 : 30, pursueSpeed: isElite ? 100 : 80, perceptionRange: isElite ? 200 : 150, attackDamage: isElite ? 2 : 1, patrolPoints })
       this.monsterAIs.push(ai)
-      const label = this.add.text(pos.x, pos.y - 28, isElite ? '👾' : '❓', { fontSize: '16px', stroke: '#000', strokeThickness: 2 }).setOrigin(0.5).setDepth(6)
+      const label = this.add.text(pos.x, pos.y - 28, isElite ? "👾" : "❓", { fontSize: "16px", stroke: "#000", strokeThickness: 2 }).setOrigin(0.5).setDepth(6)
       this.monsterLabels.push(label)
     }
   }
 
+  createNPC() {
+    this.npcs = this.physics.add.group()
 
+    const isValidNpc = (key) => this.textures.exists(key) && !failedAssetKeys.has(key)
+    const hasCow = isValidNpc('cow_sheet')
+    let npc
+
+    if (hasCow) {
+      npc = this.npcs.create(700, 300, 'cow_sheet', 0)
+      npc.setScale(2)
+      // 缩小碰撞箱到奶牛身体中心（原始帧 32x32，取中间 20x18）
+      npc.body.setSize(20, 18)
+      npc.body.setOffset(6, 10)
+      if (this.anims.exists('cow_idle')) {
+        npc.play('cow_idle')
+      }
+    } else {
+      npc = this.npcs.create(700, 300, 'npc')
+      npc.setScale(1.5)
+    }
+
+    npc.setImmovable(true)
+    npc.setDepth(5)
+    npc.setData('type', 'wisdom')
+
+    this.add.text(700, 260, '🌟 小智', {
+      fontSize: '11px',
+      fontFamily: '"Press Start 2P", Microsoft YaHei',
+      color: '#5b8c3e',
+      stroke: '#fff',
       strokeThickness: 2
     }).setOrigin(0.5).setDepth(6)
 
@@ -558,6 +530,184 @@ export default class WorldScene extends Phaser.Scene {
     const dy = player.y - npc.y
     const dist = Math.hypot(dx, dy) || 1
     player.setVelocity((dx / dist) * 300, (dy / dist) * 300)
+    this.time.delayedCall(200, () => {
+      if (player.active) player.setVelocity(0, 0)
+    })
+
+    eventBus.emit(EVENTS.SHOW_CHAT, {
+      npcType: npc.getData('type'),
+      chapter: this.chapter,
+      level: this.level
+    })
+  }
+
+  onQuizAnswered(data) {
+    if (!this.scene?.isActive()) return
+    const { monsterIndex, isCorrect, score, gameOver = false } = data
+
+    if (gameOver) {
+      audioManager.play(isCorrect ? 'correct' : 'wrong')
+      return
+    }
+
+    const monster = this.monsters.getChildren().find(m => m.getData('index') === monsterIndex)
+
+    if (isCorrect) {
+      if (monster) {
+        monster.setData('defeated', true)
+        this.tweens.add({
+          targets: monster,
+          alpha: 0,
+          scale: 0,
+          y: monster.y - 30,
+          duration: 500,
+          ease: 'Back.easeIn',
+          onComplete: () => monster.destroy()
+        })
+        if (this.monsterLabels[monsterIndex]) {
+          this.monsterLabels[monsterIndex].destroy()
+          this.monsterLabels[monsterIndex] = null
+        }
+        this.spawnCoinEffect(monster.x, monster.y, score)
+      }
+
+      audioManager.play('correct')
+      if (data.combo > 0 && data.combo % 5 === 0) audioManager.play('combo')
+
+      // 先检查关卡是否完成，完成则不恢复游戏状态
+      const levelDone = this.checkLevelComplete()
+      if (!levelDone) {
+        this.isPaused = false
+        this.resetEncounterCooldown()
+      }
+    } else {
+      audioManager.play('wrong')
+      if (monster) {
+        // If boss already defeated, mark monster as defeated anyway (answered wrong but progressing)
+        if (this.boss && this.boss.defeated) {
+          monster.setData('defeated', true)
+          monster.setAlpha(0.3)
+          if (this.monsterLabels[monsterIndex]) {
+            this.monsterLabels[monsterIndex].setText('💀')
+          }
+          this.time.delayedCall(1000, () => {
+            this.checkLevelComplete()
+          })
+        } else {
+          // Normal wrong: monster goes semi-transparent then respawns
+          monster.setAlpha(0.3)
+          if (this.monsterLabels[monsterIndex]) {
+            this.monsterLabels[monsterIndex].setText('💀')
+          }
+          this.time.delayedCall(2000, () => {
+            if (monster && monster.active) {
+              monster.setData('defeated', false)
+              monster.setAlpha(1)
+              if (this.monsterLabels[monsterIndex]) {
+                this.monsterLabels[monsterIndex].setText('❓')
+              }
+            }
+          })
+        }
+      }
+      this.resetEncounterCooldown()
+    }
+  }
+
+  onResumeGame() {
+    if (!this.scene?.isActive()) return
+    this.isPaused = false
+    this.resetEncounterCooldown()
+    this.resetNpcCooldown()
+    audioManager.resumeBGM(300, 'quiz')
+    audioManager.resumeBGM(300, 'default')
+    // 恢复 Boss 行为
+    if (this.boss && !this.boss.defeated && this.boss.resumeBehavior) {
+      this.boss.resumeBehavior()
+    }
+  }
+
+  onChatClosed() {
+    if (!this.scene?.isActive()) return
+    this.isPaused = false
+    this.resetEncounterCooldown()
+    this.resetNpcCooldown()
+    audioManager.resumeBGM(300, 'chat')
+    // 恢复 Boss 行为
+    if (this.boss && !this.boss.defeated && this.boss.resumeBehavior) {
+      this.boss.resumeBehavior()
+    }
+  }
+
+  onGameOver(result) {
+    if (!this.scene?.isActive() || this.isGameOverTransitioning) return
+    this.isGameOverTransitioning = true
+    const finalResult = result || levelManager.getLevelResult()
+    this.isPaused = true
+    this.encounterCooldown = true  // prevent any new encounters
+    this.npcCooldown = true
+    this.invincible = true  // prevent damage during transition
+    this.input.enabled = false
+    if (this.player?.body) this.player.setVelocity(0, 0)
+    audioManager.stopBGM(0)
+    // Pause boss
+    if (this.boss && !this.boss.defeated && this.boss.pauseBehavior) {
+      this.boss.pauseBehavior()
+    }
+
+    // 使用 game.scene.start 保持 WorldScene 运行（MenuScene 安全网会清理）
+    // 这是已多次验证可行的最稳定方案，不引入 isActive/wake 等额外检查
+    this.gameOverTransitionTimer = window.setTimeout(() => {
+      // 先 wake ResultScene 确保数据刷新
+      const rs = this.game.scene.getScene('ResultScene')
+      if (rs && rs.scene.isSleeping()) { rs.scene.wake() }
+      this.game.scene.start('ResultScene', finalResult)
+      this.gameOverTransitionTimer = null
+    }, 0)
+  }
+
+  resetEncounterCooldown() {
+    this.time.delayedCall(500, () => {
+      this.encounterCooldown = false
+    })
+  }
+
+  resetNpcCooldown() {
+    this.time.delayedCall(1500, () => {
+      this.npcCooldown = false
+    })
+  }
+
+  spawnCoinEffect(x, y, score) {
+    audioManager.play('coin')
+    for (let i = 0; i < 5; i++) {
+      const coin = this.add.image(x, y, 'coin').setDepth(20).setScale(1.5)
+      this.tweens.add({
+        targets: coin,
+        x: x + Phaser.Math.Between(-40, 40),
+        y: y - Phaser.Math.Between(30, 80),
+        alpha: 0,
+        duration: 800,
+        ease: 'Power2',
+        delay: i * 100,
+        onComplete: () => coin.destroy()
+      })
+    }
+
+    const displayScore = score || 100
+    const scoreText = this.add.text(x, y - 20, `+${displayScore}`, {
+      fontSize: '16px', fontFamily: '"Press Start 2P", Arial', color: '#ffc847', fontStyle: 'bold',
+      stroke: '#5b3a1a', strokeThickness: 3
+    }).setOrigin(0.5).setDepth(20)
+
+    this.tweens.add({
+      targets: scoreText,
+      y: y - 60,
+      alpha: 0,
+      duration: 1000,
+      onComplete: () => scoreText.destroy()
+    })
+  }
 
   update() {
     if (!this.player) return
@@ -565,7 +715,6 @@ export default class WorldScene extends Phaser.Scene {
       const children = this.monsters.getChildren()
       for (let i = 0; i < this.monsterAIs.length; i++) this.monsterAIs[i].update(this.player, this.game.loop.delta, this.timeScale)
     }
-    if (!this.isPaused && !this.targetLocked) {
 
     const speed = 160
     let vx = 0
@@ -624,7 +773,6 @@ export default class WorldScene extends Phaser.Scene {
       }
     }
 
-
   }
 
   shutdown() {
@@ -637,58 +785,6 @@ export default class WorldScene extends Phaser.Scene {
     if (this.decoContainer) { this.decoContainer.destroy(true); this.decoContainer = null }
     this.monsters = null; this.npcs = null; this.walls = null
     this.player = null; this.playerNameText = null; this.hudTexts = {}
-    this.children.removeAll(true)
-  }
-    // replaced
-    eventBus.off(EVENTS.QUIZ_ANSWERED, this.boundOnQuizAnswered)
-    eventBus.off(EVENTS.RESUME_GAME, this.boundOnResumeGame)
-    eventBus.off(EVENTS.CHAT_CLOSED, this.boundOnChatClosed)
-    eventBus.off(EVENTS.GAME_OVER, this.boundOnGameOver)
-    eventBus.off(EVENTS.BOSS_QUIZ_RESULT, this.boundOnBossQuizResult)
-
-    // 2. 清理原生定时器（避免场景销毁后仍触发跳转）
-    if (this.gameOverTransitionTimer) { clearTimeout(this.gameOverTransitionTimer); this.gameOverTransitionTimer = null }
-    if (this._completeTimer) { clearTimeout(this._completeTimer); this._completeTimer = null }
-
-    // 3. 清理 ESC 键监听
-    if (this.escKey && this.boundOnEscDown) {
-      this.escKey.off('down', this.boundOnEscDown)
-    }
-
-    // 4. 禁用输入 — 防止场景切换时幽灵点击穿透
-    this.input.enabled = false
-
-    // 5. Kill all tweens — 防止回调在 shutdown 后触发
-    this.tweens.killAll()
-
-    // 6. 清理怪物标签
-    if (this.monsterLabels) {
-      this.monsterLabels.forEach(label => { if (label?.active) label.destroy() })
-      this.monsterLabels = []
-    }
-
-    // 7. 显式销毁容器 — 必须在设为 null 之前 destroy，确保内部子对象被递归清理
-    if (this.mapContainer) { this.mapContainer.destroy(true); this.mapContainer = null }
-    if (this.decoContainer) { this.decoContainer.destroy(true); this.decoContainer = null }
-
-    // 8. 无条件清理 Boss（无论是否已被击败）
-    if (this.boss) {
-      this.boss.defeated = true  // 阻止后续 defeat 动画
-      this.boss.cleanupVisuals()
-      if (this.boss.active) this.boss.destroy()
-      this.boss = null
-    }
-
-    // 9. 清理其余引用
-    this.monsters = null
-    this.npcs = null
-    this.walls = null
-    this.player = null
-    this.playerNameText = null
-    this.hudTexts = {}
-
-    // 10. 销毁所有 Display Object — 最终保险，清除场景显示列表中的所有残余对象
-    //    （在容器已显式销毁后执行，确保万无一失）
     this.children.removeAll(true)
   }
 }
