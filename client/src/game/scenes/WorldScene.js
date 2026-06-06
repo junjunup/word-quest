@@ -333,8 +333,9 @@ export default class WorldScene extends Phaser.Scene {
         audioManager.stopBGM(0)
         this.gameOverTimer = window.setTimeout(() => {
           const rr = this.game.scene.getScene("ResultScene")
-          if (rr && rr.scene.isSleeping()) rr.scene.wake()
-          this.game.scene.start("ResultScene", levelManager.getLevelResult())
+          const deathResult = levelManager.getLevelResult()
+          if (rr && rr.scene.isSleeping()) rr.scene.wake(deathResult)
+          this.game.scene.start("ResultScene", deathResult)
           this.gameOverTimer = null
         }, 0)
       }
@@ -499,9 +500,10 @@ export default class WorldScene extends Phaser.Scene {
       audioManager.play("level_complete")
       audioManager.stopBGM(0)
       window.setTimeout(() => {
+        const finalResult = levelManager.getLevelResult()
         const rr = this.game.scene.getScene("ResultScene")
-        if (rr && rr.scene.isSleeping()) rr.scene.wake()
-        this.game.scene.start("ResultScene", levelManager.getLevelResult())
+        if (rr && rr.scene.isSleeping()) rr.scene.wake(finalResult)
+        this.game.scene.start("ResultScene", finalResult)
       }, 1000)
     }
   }

@@ -460,10 +460,9 @@ async function startGameLevel() {
       // 强制 WorldScene 走完整 init+create 流程：
       // 若 WorldScene 处于 SLEEPING，game.scene.start 只会 wake（不调 create），
       // 导致场景空白卡死。先 wake 使其 RUNNING，再 start 会走 shutdown+init+create。
+      // 强制 WorldScene 走完整 init+create
       const ws = game.scene.getScene('WorldScene')
-      if (ws && ws.scene.isSleeping()) {
-        ws.scene.wake()
-      }
+      if (ws && ws.scene.isSleeping()) { ws.scene.wake() }
       game.scene.start('WorldScene', {
         chapter: params.chapter,
         level: params.level,
