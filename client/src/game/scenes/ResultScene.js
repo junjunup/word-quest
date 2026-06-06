@@ -14,8 +14,9 @@ export default class ResultScene extends Phaser.Scene {
   init(data) {
     this.result = data || {}
     this._pendingTimeouts = []
-    // 标记：如果 create 被调用，reset rebuild flag
     this._needsRebuild = false
+    // Defensive: clear any stale display objects from previous session
+    this.children.removeAll(true)
   }
 
   create() {

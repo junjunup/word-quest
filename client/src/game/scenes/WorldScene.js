@@ -51,6 +51,9 @@ export default class WorldScene extends Phaser.Scene {
     this.inputBuffer = ''
 
     this.input.enabled = true
+    // Ensure ResultScene is stopped when entering a new level (belt-and-suspenders)
+    const rs = this.game.scene.getScene('ResultScene')
+    if (rs && rs.scene.isActive()) rs.scene.stop()
     this.createPastoralMap()
     this.createPlayer()
     const wordCount = levelManager.getTotalWords()
