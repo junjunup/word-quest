@@ -437,7 +437,14 @@ async function startGameLevel() {
         }
       }
       await new Promise(resolve => setTimeout(resolve, 50))
-      // 使用 game.scene.start（而非已停止的 scene.scene.start）确保数据正确传递
+
+      // 强制 WorldScene 走完整 init+create 流程：
+      // 若 WorldScene 处于 SLEEPING，game.scene.start 只会 wake（不调 create），
+      // 导致场景空白卡死。先 wake 使其 RUNNING，再 start 会走 shutdown+init+create。
+      const ws = game.scene.getScene('WorldScene')
+      if (ws && ws.scene.isSleeping()) {
+        ws.scene.wake()
+      }
       game.scene.start('WorldScene', {
         chapter: params.chapter,
         level: params.level,
@@ -847,12 +854,18 @@ async function backToMenu() {
   quiz.reset()  // 统一重置答题状态
   audioManager.stopBGM(300)
   if (game) {
-    const scene = game.scene.getScene('WorldScene')
-    if (scene && scene.scene.isActive()) {
-      scene.scene.stop()
-      await new Promise(resolve => setTimeout(resolve, 50))
-      game.scene.start('MenuScene')
+    // 停止 WorldScene（无论是否活跃）
+    const ws = game.scene.getScene('WorldScene')
+    if (ws && ws.scene.isActive()) {
+      ws.scene.stop()
     }
+    await new Promise(resolve => setTimeout(resolve, 50))
+    // 强制 MenuScene 走完整 init+create（而非仅 wake，避免空白菜单）
+    const ms = game.scene.getScene('MenuScene')
+    if (ms && ms.scene.isSleeping()) {
+      ms.scene.wake()
+    }
+    game.scene.start('MenuScene')
   }
 }
 
