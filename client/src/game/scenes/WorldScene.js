@@ -84,16 +84,22 @@ export default class WorldScene extends Phaser.Scene {
 
     // Register combat key handler once (not lazily)
     this._keyHandler = (event) => {
+      console.log('[Combat] key:', event.key, 'locked:', this.targetLocked, 'lt:', !!this.lockedTarget)
       if (!this.targetLocked || this.isDead) return
       if (event.key === 'Escape') { this._cancelLock(); return }
       const num = parseInt(event.key)
+      console.log('[Combat] num:', num, 'correctIdx:', this.lockedTarget?.correctIdx)
       if (num >= 1 && num <= 4 && this.lockedTarget) {
         if (num === this.lockedTarget.correctIdx) {
+          console.log('[Combat] CORRECT, monsters left:', Object.keys(this.monsterAIs).length)
+          levelManager.correctCount++
           audioManager.play('correct')
           const wasLast = Object.keys(this.monsterAIs).length === 1
           this._killMonster(this.lockedTarget.idx)
           if (!wasLast) this._cancelLock()
         } else {
+          console.log('[Combat] WRONG')
+          levelManager.wrongCount++
           audioManager.play('wrong')
           const idx = num - 1
           if (this._choiceOpts?.[idx]) {
@@ -500,6 +506,7 @@ export default class WorldScene extends Phaser.Scene {
 
     // Check if all monsters defeated → level clear
     if (Object.keys(this.monsterAIs).length === 0) {
+      console.log('[LevelClear] All monsters defeated! Result:', JSON.stringify(levelManager.getLevelResult()))
       this._destroyChoicePanel()
       this.isPaused = true
       this.input.enabled = false
@@ -507,8 +514,9 @@ export default class WorldScene extends Phaser.Scene {
       audioManager.stopBGM(0)
       const result = levelManager.getLevelResult()
       window.setTimeout(() => {
+        console.log('[LevelClear] Timer fired, starting ResultScene')
         const rr = this.game.scene.getScene("ResultScene")
-        if (rr && rr.scene.isSleeping()) rr.scene.wake(result)
+        if (rr && rr.scene.isSleeping()) { console.log('[LevelClear] waking ResultScene'); rr.scene.wake(result) }
         this.game.scene.start("ResultScene", result)
       }, 1200)
     }
