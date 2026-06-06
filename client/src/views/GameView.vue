@@ -380,6 +380,11 @@ function onShowDailyChallenge() {
   setPhaserInputEnabled(false)
 }
 
+function onShowShop() {
+  showShop.value = true
+  setPhaserInputEnabled(false)
+}
+
 function closeDailyChallenge() {
   showDailyChallenge.value = false
   setPhaserInputEnabled(true)
@@ -457,18 +462,17 @@ async function startGameLevel() {
       }
       await new Promise(resolve => setTimeout(resolve, 50))
 
-      // 彻底清理: 关闭 ResultScene 并强制其下次启动走 init+create
+      // 清理 ResultScene：停止并清空，确保下次启动走 init+create
       const rs = game.scene.getScene('ResultScene')
       if (rs) {
         rs.children.removeAll(true)
         rs.tweens.killAll()
-        rs.scene.stop()
-        if (rs.scene.isSleeping()) rs.scene.wake()  // wake so next start() triggers full restart
+        if (rs.scene.isActive()) rs.scene.stop()
       }
 
-      // 强制 WorldScene 走完整 init+create 流程：
+      // 强制 WorldScene 走完整 init+create
       const ws = game.scene.getScene('WorldScene')
-      if (ws && ws.scene.isSleeping()) { ws.scene.wake() }
+      if (ws && ws.scene.isSleeping()) ws.scene.wake()
       game.scene.start('WorldScene', {
         chapter: params.chapter,
         level: params.level,
@@ -622,7 +626,7 @@ onMounted(async () => {
   eventBus.on(EVENTS.SHOW_BOSS_QUIZ, onShowBossQuiz)
   eventBus.on(EVENTS.TOGGLE_PAUSE, onTogglePause)
   eventBus.on(EVENTS.SHOW_DAILY_CHALLENGE, onShowDailyChallenge)
-  eventBus.on(EVENTS.SHOW_SHOP, () => { showShop.value = true; setPhaserInputEnabled(false) })
+  eventBus.on(EVENTS.SHOW_SHOP, onShowShop)
 
   if (new URLSearchParams(window.location.search).get('e2eLevelSelect') === '1') {
     uiState.value = 'levelSelect'
@@ -675,7 +679,7 @@ onUnmounted(() => {
   eventBus.off(EVENTS.SHOW_BOSS_QUIZ, onShowBossQuiz)
   eventBus.off(EVENTS.TOGGLE_PAUSE, onTogglePause)
   eventBus.off(EVENTS.SHOW_DAILY_CHALLENGE, onShowDailyChallenge)
-  eventBus.off(EVENTS.SHOW_SHOP, () => {})
+  eventBus.off(EVENTS.SHOW_SHOP, onShowShop)
 
   // 清理安全计时器
   if (chatSafetyTimer) { clearTimeout(chatSafetyTimer); chatSafetyTimer = null }

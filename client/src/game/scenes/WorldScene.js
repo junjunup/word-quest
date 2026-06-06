@@ -83,6 +83,7 @@ export default class WorldScene extends Phaser.Scene {
     this.events.once('shutdown', this.shutdown, this)
 
     audioManager.init(this)
+    audioManager.stopBGM(0)  // 先停止旧BGM防止叠加
     audioManager.playBGM('bgm_game')
 
     eventBus.emit(EVENTS.START_LEVEL, {
@@ -448,29 +449,28 @@ export default class WorldScene extends Phaser.Scene {
         const num = parseInt(event.key)
         if (num >= 1 && num <= 4 && this.lockedTarget) {
           if (num === this.lockedTarget.correctIdx) {
+            audioManager.play('correct')
             this._killMonster(this.lockedTarget.idx)
+            this._cancelLock()
           } else {
-            // Wrong choice: flash red briefly
             audioManager.play('wrong')
-            this._flashChoiceRed(num - 1)
+            const idx = num - 1
+            if (this._choiceOpts?.[idx]) {
+              const { bg, x, y } = this._choiceOpts[idx]
+              bg.clear(); bg.fillStyle(0x8b0000, 0.85)
+              bg.fillRoundedRect(x - 100, y - 18, 200, 36, 6)
+              bg.lineStyle(2, 0xff0000)
+              bg.strokeRoundedRect(x - 100, y - 18, 200, 36, 6)
+            }
+            this._flashTimer = window.setTimeout(() => {
+              this._flashTimer = null
+              this._cancelLock()
+            }, 300)
           }
-          this._cancelLock()
         }
       }
       this.input.keyboard.on('keydown', this._keyHandler)
     }
-  }
-
-  _flashChoiceRed(idx) {
-    const opt = this._choiceOpts?.[idx]
-    if (!opt) return
-    const { bg, x, y } = opt
-    bg.clear()
-    bg.fillStyle(0x8b0000, 0.85)
-    bg.fillRoundedRect(x - 100, y - 18, 200, 36, 6)
-    bg.lineStyle(2, 0xff0000)
-    bg.strokeRoundedRect(x - 100, y - 18, 200, 36, 6)
-    window.setTimeout(() => { if (this.scene?.isActive()) this._cancelLock() }, 300)
   }
 
   _destroyChoicePanel() {
@@ -479,9 +479,6 @@ export default class WorldScene extends Phaser.Scene {
     if (this._choiceHint) { this._choiceHint.destroy(); this._choiceHint = null }
   }
 
-  _updateInputDisplay() {} // deprecated
-  _createInputBar() {} // deprecated
-  _onKeyDown() {} // deprecated
   _killMonster(idx) {
     const ai = this.monsterAIs[idx]
     if (!ai || ai.isDefeated) return
@@ -609,245 +606,6 @@ export default class WorldScene extends Phaser.Scene {
       stroke: '#000', strokeThickness: 1
     }).setOrigin(0.5).setScrollFactor(0).setDepth(100)
   }
-
-  generateSpacedPositions(count, minX, maxX, minY, maxY, minDist, excludeZones = []) {
-    const positions = []
-    const maxAttempts = 100
-    const excludeDist = 80
-
-    for (let i = 0; i < count; i++) {
-      let placed = false
-      for (let attempt = 0; attempt < maxAttempts; attempt++) {
-        const x = Phaser.Math.Between(minX, maxX)
-        const y = Phaser.Math.Between(minY, maxY)
-        const tooCloseToOther = positions.some(p => Math.hypot(p.x - x, p.y - y) < minDist)
-        const tooCloseToExcluded = excludeZones.some(p => Math.hypot(p.x - x, p.y - y) < excludeDist)
-        if (!tooCloseToOther && !tooCloseToExcluded) {
-          positions.push({ x, y })
-          placed = true
-          break
-        }
-      }
-      if (!placed) {
-        positions.push({
-          x: Phaser.Math.Between(minX, maxX),
-          y: Phaser.Math.Between(minY, maxY)
-        })
-      }
-    }
-    return positions
-  }
-
-  onMonsterEncounter(player, monster) {
-    if (monster.getData('defeated') || this.isPaused || this.encounterCooldown) return
-
-    this.isPaused = true
-    this.encounterCooldown = true
-    player.setVelocity(0, 0)
-    audioManager.pauseBGM(300, 'quiz')
-
-    // 暂停 Boss 行为（防止答题期间 Boss 子弹/冲锋命中玩家）
-    if (this.boss && !this.boss.defeated && this.boss.pauseBehavior) {
-      this.boss.pauseBehavior()
-    }
-
-    eventBus.emit(EVENTS.SHOW_QUIZ, {
-      monsterIndex: monster.getData('index'),
-      chapter: this.chapter,
-      level: this.level
-    })
-  }
-
-  onNPCInteract(player, npc) {
-    if (this.isPaused || this.npcCooldown) return
-    this.isPaused = true
-    this.npcCooldown = true
-    player.setVelocity(0, 0)
-    audioManager.pauseBGM(300, 'chat')
-
-    const dx = player.x - npc.x
-    const dy = player.y - npc.y
-    const dist = Math.hypot(dx, dy) || 1
-    player.setVelocity((dx / dist) * 300, (dy / dist) * 300)
-    this.time.delayedCall(200, () => {
-      if (player.active) player.setVelocity(0, 0)
-    })
-
-    eventBus.emit(EVENTS.SHOW_CHAT, {
-      npcType: npc.getData('type'),
-      chapter: this.chapter,
-      level: this.level
-    })
-  }
-
-  onQuizAnswered(data) {
-    if (!this.scene?.isActive()) return
-    const { monsterIndex, isCorrect, score, gameOver = false } = data
-
-    if (gameOver) {
-      audioManager.play(isCorrect ? 'correct' : 'wrong')
-      return
-    }
-
-    const monster = this.monsters.getChildren().find(m => m.getData('index') === monsterIndex)
-
-    if (isCorrect) {
-      if (monster) {
-        monster.setData('defeated', true)
-        this.tweens.add({
-          targets: monster,
-          alpha: 0,
-          scale: 0,
-          y: monster.y - 30,
-          duration: 500,
-          ease: 'Back.easeIn',
-          onComplete: () => monster.destroy()
-        })
-        if (this.monsterLabels[monsterIndex]) {
-          this.monsterLabels[monsterIndex].destroy()
-          this.monsterLabels[monsterIndex] = null
-        }
-        this.spawnCoinEffect(monster.x, monster.y, score)
-      }
-
-      audioManager.play('correct')
-      if (data.combo > 0 && data.combo % 5 === 0) audioManager.play('combo')
-
-      // 先检查关卡是否完成，完成则不恢复游戏状态
-      const levelDone = this.checkLevelComplete()
-      if (!levelDone) {
-        this.isPaused = false
-        this.resetEncounterCooldown()
-      }
-    } else {
-      audioManager.play('wrong')
-      if (monster) {
-        // If boss already defeated, mark monster as defeated anyway (answered wrong but progressing)
-        if (this.boss && this.boss.defeated) {
-          monster.setData('defeated', true)
-          monster.setAlpha(0.3)
-          if (this.monsterLabels[monsterIndex]) {
-            this.monsterLabels[monsterIndex].setText('💀')
-          }
-          this.time.delayedCall(1000, () => {
-            this.checkLevelComplete()
-          })
-        } else {
-          // Normal wrong: monster goes semi-transparent then respawns
-          monster.setAlpha(0.3)
-          if (this.monsterLabels[monsterIndex]) {
-            this.monsterLabels[monsterIndex].setText('💀')
-          }
-          this.time.delayedCall(2000, () => {
-            if (monster && monster.active) {
-              monster.setData('defeated', false)
-              monster.setAlpha(1)
-              if (this.monsterLabels[monsterIndex]) {
-                this.monsterLabels[monsterIndex].setText('❓')
-              }
-            }
-          })
-        }
-      }
-      this.resetEncounterCooldown()
-    }
-  }
-
-  onResumeGame() {
-    if (!this.scene?.isActive()) return
-    this.isPaused = false
-    this.resetEncounterCooldown()
-    this.resetNpcCooldown()
-    audioManager.resumeBGM(300, 'quiz')
-    audioManager.resumeBGM(300, 'default')
-    // 恢复 Boss 行为
-    if (this.boss && !this.boss.defeated && this.boss.resumeBehavior) {
-      this.boss.resumeBehavior()
-    }
-  }
-
-  onChatClosed() {
-    if (!this.scene?.isActive()) return
-    this.isPaused = false
-    this.resetEncounterCooldown()
-    this.resetNpcCooldown()
-    audioManager.resumeBGM(300, 'chat')
-    // 恢复 Boss 行为
-    if (this.boss && !this.boss.defeated && this.boss.resumeBehavior) {
-      this.boss.resumeBehavior()
-    }
-  }
-
-  onGameOver(result) {
-    if (!this.scene?.isActive() || this.isGameOverTransitioning) return
-    this.isGameOverTransitioning = true
-    const finalResult = result || levelManager.getLevelResult()
-    this.isPaused = true
-    this.encounterCooldown = true  // prevent any new encounters
-    this.npcCooldown = true
-    this.invincible = true  // prevent damage during transition
-    this.input.enabled = false
-    if (this.player?.body) this.player.setVelocity(0, 0)
-    audioManager.stopBGM(0)
-    // Pause boss
-    if (this.boss && !this.boss.defeated && this.boss.pauseBehavior) {
-      this.boss.pauseBehavior()
-    }
-
-    // 使用 game.scene.start 保持 WorldScene 运行（MenuScene 安全网会清理）
-    // 这是已多次验证可行的最稳定方案，不引入 isActive/wake 等额外检查
-    this.gameOverTransitionTimer = window.setTimeout(() => {
-      // 先 wake ResultScene 确保数据刷新
-      const rs = this.game.scene.getScene('ResultScene')
-      if (rs && rs.scene.isSleeping()) { rs.scene.wake() }
-      this.game.scene.start('ResultScene', finalResult)
-      this.gameOverTransitionTimer = null
-    }, 0)
-  }
-
-  resetEncounterCooldown() {
-    this.time.delayedCall(500, () => {
-      this.encounterCooldown = false
-    })
-  }
-
-  resetNpcCooldown() {
-    this.time.delayedCall(1500, () => {
-      this.npcCooldown = false
-    })
-  }
-
-  spawnCoinEffect(x, y, score) {
-    audioManager.play('coin')
-    for (let i = 0; i < 5; i++) {
-      const coin = this.add.image(x, y, 'coin').setDepth(20).setScale(1.5)
-      this.tweens.add({
-        targets: coin,
-        x: x + Phaser.Math.Between(-40, 40),
-        y: y - Phaser.Math.Between(30, 80),
-        alpha: 0,
-        duration: 800,
-        ease: 'Power2',
-        delay: i * 100,
-        onComplete: () => coin.destroy()
-      })
-    }
-
-    const displayScore = score || 100
-    const scoreText = this.add.text(x, y - 20, `+${displayScore}`, {
-      fontSize: '16px', fontFamily: '"Press Start 2P", Arial', color: '#ffc847', fontStyle: 'bold',
-      stroke: '#5b3a1a', strokeThickness: 3
-    }).setOrigin(0.5).setDepth(20)
-
-    this.tweens.add({
-      targets: scoreText,
-      y: y - 60,
-      alpha: 0,
-      duration: 1000,
-      onComplete: () => scoreText.destroy()
-    })
-  }
-
   update() {
     if (!this.player) return
     if (this.monsterAIs && this.monsters) {
@@ -919,10 +677,10 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   shutdown() {
+    if (this._flashTimer) { clearTimeout(this._flashTimer); this._flashTimer = null }
     if (this.gameOverTimer) { clearTimeout(this.gameOverTimer); this.gameOverTimer = null }
     if (this._keyHandler) { this.input.keyboard?.off('keydown', this._keyHandler); this._keyHandler = null }
     this._destroyChoicePanel()
-    this._destroyInputBar()
     if (this.escKey) this.escKey.removeAllListeners()
     this.input.enabled = false
     this.tweens.killAll()
