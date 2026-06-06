@@ -27,7 +27,9 @@ class EventBus {
 
   emit(event, data) {
     if (!this.listeners.has(event)) return
-    this.listeners.get(event).forEach(cb => cb(data))
+    this.listeners.get(event).forEach(cb => {
+      try { cb(data) } catch (e) { console.error(`[EventBus] ${event} handler error:`, e) }
+    })
   }
 
   once(event, callback) {

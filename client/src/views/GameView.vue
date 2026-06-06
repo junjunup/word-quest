@@ -190,7 +190,7 @@ const levelWords = ref([])
 const quiz = useQuizFlow(hudData, levelWords, gameStore)
 
 const virtualDirection = reactive({ up: false, down: false, left: false, right: false })
-const showVirtualControls = computed(() => uiState.value === 'game' && inGameLevel.value && !quiz.showQuiz.value && !showBossQuiz.value && !showChatPanel.value && !showPauseMenu.value)
+const showVirtualControls = computed(() => uiState.value === 'game' && inGameLevel.value && !quiz.showQuiz && !showBossQuiz.value && !showChatPanel.value && !showPauseMenu.value)
 
 // 音效
 const isMuted = ref(audioManager.muted)
@@ -482,10 +482,10 @@ function onBossQuizComplete(result) {
       submitQuizRecord({
         wordId: record.wordId,
         word: record.word,
-        questionType: quiz.currentQuestionType.value,
+        questionType: quiz.currentQuestionType,
         isCorrect: record.isCorrect,
         responseTime: record.responseTime,
-        difficulty: quiz.currentDifficulty.value,
+        difficulty: quiz.currentDifficulty,
         hintUsed: false,
         npcInteraction: false,
         sessionId: levelManager.sessionId,
@@ -511,7 +511,7 @@ function onBossQuizClose() {
 }
 
 function onTogglePause() {
-  if (uiState.value === 'game' && !quiz.showQuiz.value && !showBossQuiz.value && !showChatPanel.value) {
+  if (uiState.value === 'game' && !quiz.showQuiz && !showBossQuiz.value && !showChatPanel.value) {
     showPauseMenu.value = !showPauseMenu.value
     if (showPauseMenu.value) {
       audioManager.pauseBGM(300, 'pause_menu')
@@ -669,10 +669,14 @@ function onBeforeUnload(e) {
   }
 }
 
-// Quiz flow wrapper — 仅在关卡内响应
+// Quiz flow wrapper — 仅在关卡内响应（await 后再次验证，防止期间 game over）
 async function onShowQuiz(data) {
   if (!inGameLevel.value) return
   await quiz.onShowQuiz(data)
+  // 异步获取期间可能已触发 game over，不再显示答题
+  if (!inGameLevel.value) {
+    quiz.showQuiz = false
+  }
 }
 
 async function onQuizAnswer(result) {
@@ -688,8 +692,8 @@ async function onQuizAnswer(result) {
   }
 
   if (!outcome.isGameOver && !result.isCorrect) {
-    // 答错：准备 chat context
-    const ctx = quiz.getChatContext(outcome)
+    // 答错：准备 chat context — 合并 result(含answer) + outcome(含correctAnswerForType)
+    const ctx = quiz.getChatContext({ ...result, ...outcome })
     Object.assign(chatContext, ctx)
   }
 }
@@ -701,6 +705,7 @@ function onQuizClose() {
     clearPendingWrong()
     audioManager.pauseBGM(300, 'chat')
     showChatPanel.value = true
+    if (chatSafetyTimer) { clearTimeout(chatSafetyTimer); chatSafetyTimer = null }
     chatSafetyTimer = setTimeout(() => {
       if (showChatPanel.value) {
         showChatPanel.value = false
@@ -764,7 +769,7 @@ async function onLevelComplete(result) {
 
   // 关闭可能残留的 UI 面板
   showChatPanel.value = false
-  quiz.showQuiz.value = false
+  quiz.showQuiz = false
   showBossQuiz.value = false
   showPauseMenu.value = false
   inGameLevel.value = false  // 离开关卡，隐藏 HUD
@@ -794,16 +799,16 @@ async function onLevelComplete(result) {
 
 async function onGameOver(result) {
   console.log('游戏结束:', result)
-  quiz.showQuiz.value = false
+  quiz.showQuiz = false
   showBossQuiz.value = false
   showChatPanel.value = false
   showPauseMenu.value = false
   inGameLevel.value = false  // 离开关卡，隐藏 HUD
 
   // 重置答题状态，防止跨局残留导致下一局异常
-  quiz.pendingWrongAnswer.value = false
-  quiz.consecutiveWrong.value = 0
-  quiz.currentMonsterIndex.value = -1
+  quiz.pendingWrongAnswer = false
+  quiz.consecutiveWrong = 0
+  quiz.currentMonsterIndex = -1
   virtualDirection.up = false
   virtualDirection.down = false
   virtualDirection.left = false
@@ -836,13 +841,13 @@ function goToDashboard() {
 
 async function backToMenu() {
   showPauseMenu.value = false
-  quiz.showQuiz.value = false
+  quiz.showQuiz = false
   showBossQuiz.value = false
   showChatPanel.value = false
   inGameLevel.value = false  // 离开关卡，隐藏 HUD
-  quiz.pendingWrongAnswer.value = false
-  quiz.consecutiveWrong.value = 0
-  quiz.currentMonsterIndex.value = -1
+  quiz.pendingWrongAnswer = false
+  quiz.consecutiveWrong = 0
+  quiz.currentMonsterIndex = -1
   audioManager.stopBGM(300)
   if (game) {
     const scene = game.scene.getScene('WorldScene')

@@ -292,10 +292,11 @@ export function useQuizFlow(hudData, levelWordsRef, gameStore) {
     latestAdaptiveDifficulty.value = null
   }
 
-  return {
+  // reactive() 包裹确保模板中 ref 自动解包（vue3 只对 reactive 属性自动 unwrap）
+  return reactive({
     showQuiz, currentQuizData, currentDifficulty, currentMonsterIndex,
     pendingWrongAnswer, consecutiveWrong, currentQuestionType,
     adaptiveQuestionType, latestAdaptiveDifficulty,
     onShowQuiz, handleQuizAnswer, closeQuiz, getChatContext, reset
-  }
+  })
 }

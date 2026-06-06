@@ -1,6 +1,5 @@
 import Phaser from 'phaser'
 import eventBus, { EVENTS } from '../systems/EventBus'
-import levelManager from '../systems/LevelManager'
 import audioManager from '../systems/AudioManager'
 
 /**
