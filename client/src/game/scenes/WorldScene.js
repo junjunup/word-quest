@@ -97,6 +97,7 @@ export default class WorldScene extends Phaser.Scene {
           const gold = chest.open(inventory)
           if (gold > 0) {
             this._showFloatingText(this.player.x, this.player.y - 20, '+' + gold + ' 🪙')
+            if (this._goldText) this._goldText.setText('🪙 ' + inventory.getGold())
             eventBus.emit(EVENTS.UPDATE_HUD, { score: levelManager.score, lives: levelManager.lives })
           }
           return
@@ -109,6 +110,19 @@ export default class WorldScene extends Phaser.Scene {
       }
       // Otherwise try locking a monster
       if (!this.targetLocked) this._tryLockTarget()
+    })
+
+    // Q key: use health potion
+    this.qKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q)
+    this.qKey.on('down', () => {
+      const potion = inventory.getConsumables().find(c => c.id === 'health_potion' && c.qty > 0)
+      if (potion && levelManager.lives < levelManager.difficultyConfig.lives) {
+        levelManager.lives = Math.min(levelManager.lives + potion.value, levelManager.difficultyConfig.lives)
+        inventory.data.consumables.find(c => c.id === 'health_potion').qty--
+        inventory._save()
+        eventBus.emit(EVENTS.UPDATE_HUD, { lives: levelManager.lives })
+        this._showFloatingText(this.player.x, this.player.y - 20, '+' + potion.value + ' ❤️')
+      }
     })
     this.escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
     this.escKey.on('down', () => {
@@ -654,8 +668,27 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   createHUD() {
-    this.add.text(480, 620, '🌿 方向键/WASD 移动  |  接触小鸡答题  |  找到小智获得帮助', {
-      fontSize: '10px', fontFamily: 'Microsoft YaHei', color: '#3a6b1e',
+    // Top bar: gold + consumables
+    const topBar = this.add.graphics().setScrollFactor(0).setDepth(110)
+    topBar.fillStyle(0x000000, 0.5)
+    topBar.fillRect(0, 0, 960, 28)
+    this._goldText = this.add.text(10, 5, '🪙 ' + inventory.getGold(), {
+      fontSize: '14px', fontFamily: '"Press Start 2P", monospace', color: '#ffd700'
+    }).setScrollFactor(0).setDepth(111)
+
+    // Consumable slots
+    const consumables = inventory.getConsumables()
+    const slotX = 200
+    consumables.forEach((c, i) => {
+      const x = slotX + i * 110
+      this.add.text(x, 5, c.icon + ' ' + c.name + ' x' + c.qty, {
+        fontSize: '11px', fontFamily: 'Microsoft YaHei', color: c.qty > 0 ? '#f5edd6' : '#666'
+      }).setScrollFactor(0).setDepth(111)
+    })
+
+    // Bottom bar
+    this.add.text(480, 620, 'WASD移动 | E:开箱/锁怪/撤离 | 1-4:答题 | Q:药水 | Esc:暂停', {
+      fontSize: '9px', fontFamily: 'Microsoft YaHei', color: '#3a6b1e',
       stroke: '#000', strokeThickness: 1
     }).setOrigin(0.5).setScrollFactor(0).setDepth(100)
   }
