@@ -752,7 +752,15 @@ function closeChatPanel() {
   achievementContext.npcChats++
   scoreSystem.checkAchievements(achievementContext)
   persistAchievementContext()
-  eventBus.emit(EVENTS.CHAT_CLOSED)
+
+  // 答错→NPC对话→关闭：重新弹出同一道题（紧密学习闭环）
+  if (quiz.retryQuizAfterChat) {
+    quiz.retryQuizAfterChat = false
+    quiz.showQuiz = true
+    // 不 emit CHAT_CLOSED — 游戏保持暂停状态，等待重新答题
+  } else {
+    eventBus.emit(EVENTS.CHAT_CLOSED)
+  }
 }
 
 function onUpdateHud(data) {

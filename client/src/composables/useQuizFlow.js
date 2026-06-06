@@ -24,6 +24,8 @@ export function useQuizFlow(hudData, levelWordsRef, gameStore) {
   const currentQuestionType = ref('choice_en2cn')
   const adaptiveQuestionType = ref('choice_en2cn')
   const latestAdaptiveDifficulty = ref(null)
+  // 答错→NPC对话→关闭后自动重出题标记
+  const retryQuizAfterChat = ref(false)
 
   /** 死亡螺旋保护 + 题型选择 */
   function selectQuestionType() {
@@ -187,6 +189,7 @@ export function useQuizFlow(hudData, levelWordsRef, gameStore) {
       }
     } else if (status !== 'game_over') {
       pendingWrongAnswer.value = true
+      retryQuizAfterChat.value = true  // 关闭NPC对话后自动重出题
     }
 
     if (achievementContext) {
@@ -290,13 +293,14 @@ export function useQuizFlow(hudData, levelWordsRef, gameStore) {
     consecutiveWrong.value = 0
     currentMonsterIndex.value = -1
     latestAdaptiveDifficulty.value = null
+    retryQuizAfterChat.value = false
   }
 
   // reactive() 包裹确保模板中 ref 自动解包（vue3 只对 reactive 属性自动 unwrap）
   return reactive({
     showQuiz, currentQuizData, currentDifficulty, currentMonsterIndex,
     pendingWrongAnswer, consecutiveWrong, currentQuestionType,
-    adaptiveQuestionType, latestAdaptiveDifficulty,
+    adaptiveQuestionType, latestAdaptiveDifficulty, retryQuizAfterChat,
     onShowQuiz, handleQuizAnswer, closeQuiz, getChatContext, reset
   })
 }
