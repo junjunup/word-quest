@@ -354,30 +354,29 @@ export default class WorldScene extends Phaser.Scene {
     }
     if (!closest) return
 
-    // Get word for this monster
+    // Get word + generate choices (staff mode: pick correct meaning)
     const word = levelManager.getCurrentWord()
-    if (!word) return  // No words available
+    if (!word) return
     levelManager.nextWord()
 
+    // Generate 4 options (1 correct + 3 random from word list)
+    const correct = word.meaning
+    const allMeanings = levelManager.words.map(w => w.meaning).filter(m => m && m !== correct)
+    const shuffled = allMeanings.sort(() => Math.random() - 0.5).slice(0, 3)
+    const options = [correct, ...shuffled].sort(() => Math.random() - 0.5)
+    const correctIdx = options.indexOf(correct) + 1 // 1-4
+
     this.targetLocked = true
-    this.lockedTarget = { ...closest, word }
+    this.lockedTarget = { ...closest, word, options, correctIdx }
     this.timeScale = 0.2
-    this.inputBuffer = ""
     this.isPaused = true
     audioManager.pauseBGM(200)
 
-    // Show word hint above monster
-    this.monsterLabels[closest.idx]?.setText(word.meaning || word.word)
+    // Show English word above monster
+    this.monsterLabels[closest.idx]?.setText(word.word)
 
-    // Create input bar
-    this._createInputBar()
-    this._updateInputDisplay()
-
-    // Register keyboard listener for typing
-    if (!this._keyHandler) {
-      this._keyHandler = (event) => this._onKeyDown(event)
-      this.input.keyboard.on('keydown', this._keyHandler)
-    }
+    // Create choice panel
+    this._createChoicePanel(word.word, options)
   }
 
   _cancelLock() {
@@ -387,57 +386,85 @@ export default class WorldScene extends Phaser.Scene {
       const ai = this.monsterAIs[lt.idx]
       this.monsterLabels[lt.idx].setText(ai?.isDefeated ? '💀' : '❓')
     }
-    this._destroyInputBar()
+    this._destroyChoicePanel()
     this.targetLocked = false
     this.lockedTarget = null
     this.timeScale = 1.0
-    this.inputBuffer = ""
     this.isPaused = false
     audioManager.resumeBGM(200)
   }
 
-  _onKeyDown(event) {
-    if (!this.targetLocked || this.isDead) return
-    const key = event.key
-    if (key === 'Escape') { this._cancelLock(); return }
-    if (key === 'Backspace') { this.inputBuffer = this.inputBuffer.slice(0, -1); this._updateInputDisplay(); return }
-    if (key.length === 1 && key >= 'a' && key <= 'z') {
-      this.inputBuffer += key
-      this._updateInputDisplay()
-      // Check match
-      if (this.lockedTarget?.word && this.inputBuffer === this.lockedTarget.word.word.toLowerCase()) {
-        this._killMonster(this.lockedTarget.idx)
-        this._cancelLock()
-      }
-    }
-  }
-
-  _createInputBar() {
+  _createChoicePanel(word, options) {
     const { width, height } = this.cameras.main
-    this._inputBarBg = this.add.graphics().setDepth(300).setScrollFactor(0)
-    this._inputBarBg.fillStyle(0x000000, 0.6)
-    this._inputBarBg.fillRoundedRect(width / 2 - 200, height - 60, 400, 44, 8)
-    this._inputBarBg.lineStyle(2, 0xffc847)
-    this._inputBarBg.strokeRoundedRect(width / 2 - 200, height - 60, 400, 44, 8)
-    this._inputBarText = this.add.text(width / 2, height - 38, '', {
-      fontSize: '22px', fontFamily: '"Press Start 2P", monospace', color: '#ffd700'
-    }).setOrigin(0.5).setDepth(301).setScrollFactor(0)
-    this._inputHint = this.add.text(width / 2, height - 72, '输入英文单词 · Esc取消', {
-      fontSize: '11px', fontFamily: 'Microsoft YaHei', color: '#c4b99a'
-    }).setOrigin(0.5).setDepth(301).setScrollFactor(0)
-  }
+    // Word display at top
+    this._choiceWordText = this.add.text(width / 2, height - 115, word, {
+      fontSize: '26px', fontFamily: '"Press Start 2P", monospace', color: '#ffd700', fontStyle: 'bold',
+      stroke: '#000', strokeThickness: 4
+    }).setOrigin(0.5).setDepth(300).setScrollFactor(0)
 
-  _updateInputDisplay() {
-    if (this._inputBarText) {
-      this._inputBarText.setText(this.inputBuffer + (this.inputBuffer.length > 0 ? '_' : ''))
+    // 4 option buttons
+    this._choiceOpts = []
+    const btnW = 200, btnH = 36, gap = 10, totalW = btnW * 4 + gap * 3
+    const startX = width / 2 - totalW / 2 + btnW / 2
+    for (let i = 0; i < 4; i++) {
+      const x = startX + i * (btnW + gap), y = height - 55
+      const bg = this.add.graphics().setDepth(300).setScrollFactor(0)
+      bg.fillStyle(0x2d5016, 0.85)
+      bg.fillRoundedRect(x - btnW / 2, y - btnH / 2, btnW, btnH, 6)
+      bg.lineStyle(2, 0x8b6914)
+      bg.strokeRoundedRect(x - btnW / 2, y - btnH / 2, btnW, btnH, 6)
+      const label = this.add.text(x, y, `[${i + 1}] ${options[i]}`, {
+        fontSize: '13px', fontFamily: 'Microsoft YaHei', color: '#f5edd6'
+      }).setOrigin(0.5).setDepth(301).setScrollFactor(0)
+      this._choiceOpts.push({ bg, label })
+    }
+
+    // Hint
+    this._choiceHint = this.add.text(width / 2, height - 130, '选择正确中文释义 · 1-4 数字键 · Esc取消', {
+      fontSize: '11px', fontFamily: 'Microsoft YaHei', color: '#c4b99a'
+    }).setOrigin(0.5).setDepth(300).setScrollFactor(0)
+
+    // Key handler for 1-4 + Esc
+    if (!this._keyHandler) {
+      this._keyHandler = (event) => {
+        if (!this.targetLocked || this.isDead) return
+        if (event.key === 'Escape') { this._cancelLock(); return }
+        const num = parseInt(event.key)
+        if (num >= 1 && num <= 4 && this.lockedTarget) {
+          if (num === this.lockedTarget.correctIdx) {
+            this._killMonster(this.lockedTarget.idx)
+          } else {
+            // Wrong choice: flash red briefly
+            audioManager.play('wrong')
+            this._flashChoiceRed(num - 1)
+          }
+          this._cancelLock()
+        }
+      }
+      this.input.keyboard.on('keydown', this._keyHandler)
     }
   }
 
-  _destroyInputBar() {
-    if (this._inputBarBg) { this._inputBarBg.destroy(); this._inputBarBg = null }
-    if (this._inputBarText) { this._inputBarText.destroy(); this._inputBarText = null }
-    if (this._inputHint) { this._inputHint.destroy(); this._inputHint = null }
+  _flashChoiceRed(idx) {
+    const opt = this._choiceOpts?.[idx]
+    if (!opt) return
+    opt.bg.clear()
+    opt.bg.fillStyle(0x8b0000, 0.85)
+    opt.bg.fillRoundedRect(opt.bg.x, opt.bg.y, 200, 36, 6)
+    opt.bg.lineStyle(2, 0xff0000)
+    opt.bg.strokeRoundedRect(opt.bg.x, opt.bg.y, 200, 36, 6)
+    this.time.delayedCall(300, () => { this._cancelLock() })
   }
+
+  _destroyChoicePanel() {
+    if (this._choiceWordText) { this._choiceWordText.destroy(); this._choiceWordText = null }
+    if (this._choiceOpts) { this._choiceOpts.forEach(o => { o.bg.destroy(); o.label.destroy() }); this._choiceOpts = null }
+    if (this._choiceHint) { this._choiceHint.destroy(); this._choiceHint = null }
+  }
+
+  _updateInputDisplay() {} // deprecated
+  _createInputBar() {} // deprecated
+  _onKeyDown() {} // deprecated
   _killMonster(idx) {
     const monster = this.monsters.getChildren()[idx]
     const ai = this.monsterAIs[idx]
@@ -856,6 +883,7 @@ export default class WorldScene extends Phaser.Scene {
 
   shutdown() {
     if (this._keyHandler) { this.input.keyboard?.off('keydown', this._keyHandler); this._keyHandler = null }
+    this._destroyChoicePanel()
     this._destroyInputBar()
     if (this.escKey) this.escKey.removeAllListeners()
     this.input.enabled = false
