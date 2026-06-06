@@ -411,6 +411,7 @@ async function startGameLevel() {
       alert('词汇加载失败，请检查网络连接后重试')
       uiState.value = 'levelSelect'
       setPhaserInputEnabled(false)
+      pendingLevelParams.value = null
       return
     }
 
@@ -449,6 +450,7 @@ async function startGameLevel() {
     // 回退到关卡选择界面，不要留在空白画面
     uiState.value = 'levelSelect'
     setPhaserInputEnabled(false)
+    pendingLevelParams.value = null
   }
 }
 
@@ -805,10 +807,8 @@ async function onGameOver(result) {
   showPauseMenu.value = false
   inGameLevel.value = false  // 离开关卡，隐藏 HUD
 
-  // 重置答题状态，防止跨局残留导致下一局异常
-  quiz.pendingWrongAnswer = false
-  quiz.consecutiveWrong = 0
-  quiz.currentMonsterIndex = -1
+  // 统一重置答题状态，防止跨局残留导致下一局异常
+  quiz.reset()
   virtualDirection.up = false
   virtualDirection.down = false
   virtualDirection.left = false
@@ -841,13 +841,10 @@ function goToDashboard() {
 
 async function backToMenu() {
   showPauseMenu.value = false
-  quiz.showQuiz = false
   showBossQuiz.value = false
   showChatPanel.value = false
-  inGameLevel.value = false  // 离开关卡，隐藏 HUD
-  quiz.pendingWrongAnswer = false
-  quiz.consecutiveWrong = 0
-  quiz.currentMonsterIndex = -1
+  inGameLevel.value = false
+  quiz.reset()  // 统一重置答题状态
   audioManager.stopBGM(300)
   if (game) {
     const scene = game.scene.getScene('WorldScene')

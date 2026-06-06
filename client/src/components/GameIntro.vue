@@ -20,6 +20,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { safeSetItem } from '@/utils/helpers'
+import { STORAGE_KEYS } from '@/game/config/gameConstants'
 
 const emit = defineEmits(['dismiss'])
 
@@ -63,7 +64,7 @@ function nextTip() {
 
 function finishTutorial() {
   // 用户看过引导，不再自动显示
-  safeSetItem('wordquest:skipIntro', 'true')
+  safeSetItem(STORAGE_KEYS.skipIntro, 'true')
   currentTip.value = tips.length  // 隐藏
   emit('dismiss')
 }
