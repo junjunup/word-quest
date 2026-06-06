@@ -11,10 +11,17 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue'
+import audioManager from '@/game/systems/AudioManager'
+
 defineProps({
   achievement: { type: Object, required: true }
 })
 defineEmits(['close'])
+
+onMounted(() => {
+  audioManager.play('level_complete')
+})
 </script>
 
 <style scoped lang="scss">

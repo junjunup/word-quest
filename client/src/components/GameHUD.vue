@@ -8,7 +8,10 @@
           <span class="heart-infinity">∞</span>
         </template>
         <template v-else>
-          <span v-for="i in hudData.maxLives" :key="i" class="heart" :class="{ lost: i > hudData.lives }">❤️</span>
+          <span class="hp-bar-wrap">
+            <span class="hp-bar-fill" :style="{ width: (hudData.lives / hudData.maxLives * 100) + '%' }"></span>
+            <span class="hp-label">{{ hudData.lives }}/{{ hudData.maxLives }}</span>
+          </span>
         </template>
       </span>
       <span class="hud-score">💰 {{ hudData.score }}</span>
@@ -35,6 +38,7 @@
       </button>
       <button class="btn btn-gold pause-btn" @click="$emit('back-to-menu')">🏠 返回菜单</button>
       <button class="btn pause-btn logout-btn" @click="$emit('logout')">🚪 退出登录</button>
+      <p class="pause-hint">💡 ESC 继续 · 方向键/WASD 移动 · 触碰怪物答题</p>
     </div>
   </div>
 </template>
@@ -74,6 +78,24 @@ defineEmits(['open-chat', 'go-dashboard', 'toggle-pause', 'toggle-mute', 'back-t
 }
 
 .hud-left { display: flex; align-items: center; gap: 16px; }
+
+/* HP bar */
+.hp-bar-wrap {
+  display: inline-flex; align-items: center; position: relative;
+  width: 100px; height: 16px; background: #3a1a1a;
+  border: 2px solid #8b6914; border-radius: 3px; overflow: hidden;
+}
+.hp-bar-fill {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  background: linear-gradient(90deg, #d44, #e66);
+  transition: width 0.3s ease; border-radius: 1px;
+}
+.hp-label {
+  position: relative; z-index: 1; margin: 0 auto;
+  color: #f5edd6; font-size: 10px; font-weight: bold;
+  font-family: 'Press Start 2P', monospace;
+  text-shadow: 0 0 4px #000;
+}
 
 .heart.lost { filter: grayscale(100%); opacity: 0.3; }
 
@@ -125,6 +147,10 @@ defineEmits(['open-chat', 'go-dashboard', 'toggle-pause', 'toggle-mute', 'back-t
 .logout-btn {
   background: #d45b3e; border-color: #a04030; color: #f5edd6;
   &:hover { background: #e06b4e; }
+}
+
+.pause-hint {
+  color: #c4b99a; font-size: 11px; margin-top: 16px; opacity: 0.7;
 }
 
 @keyframes hudPulse {

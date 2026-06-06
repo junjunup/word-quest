@@ -12,7 +12,7 @@
         v-for="(player, index) in leaderboard"
         :key="player._id"
         class="player-row"
-        :class="{ top3: index < 3 }"
+        :class="{ top3: index < 3, 'is-self': player._id === userStore.userInfo?.id }"
       >
         <span class="rank">
           <template v-if="index === 0">🥇</template>
@@ -35,9 +35,11 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { getLeaderboard } from '@/api/game'
+import { useUserStore } from '@/stores/user'
 
 const activeTab = ref('total')
 const leaderboard = ref([])
+const userStore = useUserStore()
 
 onMounted(() => loadLeaderboard('total'))
 
@@ -100,6 +102,7 @@ async function loadLeaderboard(type) {
 
   &:hover { background: rgba(255, 255, 255, 0.03); }
   &.top3 { background: rgba(255, 215, 0, 0.05); }
+  &.is-self { background: rgba(255, 200, 71, 0.15); border: 1px solid #ffc847; border-radius: 6px; }
 }
 
 .rank {
