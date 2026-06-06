@@ -44,6 +44,7 @@ export default class WorldScene extends Phaser.Scene {
     const { width, height } = this.cameras.main
     this.isPaused = false
     this.invincible = false
+    this.isDead = false
     this.timeScale = 1.0
     this.targetLocked = false
     this.lockedTarget = null
@@ -314,7 +315,7 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   _onMonsterHit(player, monster) {
-    if (this.invincible || !monster.active) return
+    if (this.isDead || this.invincible || !monster.active) return
     const idx = monster.getData("index")
     if (idx == null) return
     const ai = this.monsterAIs[idx]
@@ -323,10 +324,15 @@ export default class WorldScene extends Phaser.Scene {
       const result = levelManager.loseLife()
       this._startInvincibility(1500)
       if (this.targetLocked) this._cancelLock()
-      if (result === "game_over") {
+      if (result === "game_over" && !this.isDead) {
+        this.isDead = true
+        this.isPaused = true
+        this.input.enabled = false
+        if (this.player?.body) this.player.setVelocity(0, 0)
         audioManager.stopBGM(0)
         const rr = this.game.scene.getScene("ResultScene")
         if (rr && rr.scene.isSleeping()) rr.scene.wake()
+        this.scene.stop()
         this.game.scene.start("ResultScene", levelManager.getLevelResult())
       }
     })
@@ -414,7 +420,7 @@ export default class WorldScene extends Phaser.Scene {
         const r = Phaser.Math.Between(40, 100)
         patrolPoints.push({ x: pos.x + Math.cos(angle) * r, y: pos.y + Math.sin(angle) * r })
       }
-      const ai = new MonsterAI(monster, { patrolSpeed: isElite ? 40 : 30, pursueSpeed: isElite ? 100 : 80, perceptionRange: isElite ? 200 : 150, attackDamage: isElite ? 2 : 1, patrolPoints })
+      const ai = new MonsterAI(monster, { patrolSpeed: isElite ? 25 : 18, pursueSpeed: isElite ? 55 : 40, perceptionRange: isElite ? 120 : 90, attackDamage: isElite ? 2 : 1, patrolPoints })
       this.monsterAIs.push(ai)
       const label = this.add.text(pos.x, pos.y - 28, isElite ? "👾" : "❓", { fontSize: "16px", stroke: "#000", strokeThickness: 2 }).setOrigin(0.5).setDepth(6)
       this.monsterLabels.push(label)
