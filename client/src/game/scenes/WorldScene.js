@@ -353,17 +353,90 @@ export default class WorldScene extends Phaser.Scene {
       if (dist < closestDist) { closestDist = dist; closest = { monster: m, ai, idx: i } }
     }
     if (!closest) return
-    this.targetLocked = true; this.lockedTarget = closest
-    this.timeScale = 0.2; this.inputBuffer = ""; this.isPaused = true
+
+    // Get word for this monster
+    const word = levelManager.getCurrentWord()
+    if (!word) return  // No words available
+    levelManager.nextWord()
+
+    this.targetLocked = true
+    this.lockedTarget = { ...closest, word }
+    this.timeScale = 0.2
+    this.inputBuffer = ""
+    this.isPaused = true
     audioManager.pauseBGM(200)
-    this.monsterLabels[closest.idx]?.setText("🎯")
+
+    // Show word hint above monster
+    this.monsterLabels[closest.idx]?.setText(word.meaning || word.word)
+
+    // Create input bar
+    this._createInputBar()
+    this._updateInputDisplay()
+
+    // Register keyboard listener for typing
+    if (!this._keyHandler) {
+      this._keyHandler = (event) => this._onKeyDown(event)
+      this.input.keyboard.on('keydown', this._keyHandler)
+    }
   }
+
   _cancelLock() {
     if (!this.targetLocked) return
-    if (this.lockedTarget && this.monsterLabels[this.lockedTarget.idx]) this.monsterLabels[this.lockedTarget.idx].setText("❓")
-    this.targetLocked = false; this.lockedTarget = null
-    this.timeScale = 1.0; this.inputBuffer = ""; this.isPaused = false
+    const lt = this.lockedTarget
+    if (lt && this.monsterLabels[lt.idx]) {
+      const ai = this.monsterAIs[lt.idx]
+      this.monsterLabels[lt.idx].setText(ai?.isDefeated ? '💀' : '❓')
+    }
+    this._destroyInputBar()
+    this.targetLocked = false
+    this.lockedTarget = null
+    this.timeScale = 1.0
+    this.inputBuffer = ""
+    this.isPaused = false
     audioManager.resumeBGM(200)
+  }
+
+  _onKeyDown(event) {
+    if (!this.targetLocked || this.isDead) return
+    const key = event.key
+    if (key === 'Escape') { this._cancelLock(); return }
+    if (key === 'Backspace') { this.inputBuffer = this.inputBuffer.slice(0, -1); this._updateInputDisplay(); return }
+    if (key.length === 1 && key >= 'a' && key <= 'z') {
+      this.inputBuffer += key
+      this._updateInputDisplay()
+      // Check match
+      if (this.lockedTarget?.word && this.inputBuffer === this.lockedTarget.word.word.toLowerCase()) {
+        this._killMonster(this.lockedTarget.idx)
+        this._cancelLock()
+      }
+    }
+  }
+
+  _createInputBar() {
+    const { width, height } = this.cameras.main
+    this._inputBarBg = this.add.graphics().setDepth(300).setScrollFactor(0)
+    this._inputBarBg.fillStyle(0x000000, 0.6)
+    this._inputBarBg.fillRoundedRect(width / 2 - 200, height - 60, 400, 44, 8)
+    this._inputBarBg.lineStyle(2, 0xffc847)
+    this._inputBarBg.strokeRoundedRect(width / 2 - 200, height - 60, 400, 44, 8)
+    this._inputBarText = this.add.text(width / 2, height - 38, '', {
+      fontSize: '22px', fontFamily: '"Press Start 2P", monospace', color: '#ffd700'
+    }).setOrigin(0.5).setDepth(301).setScrollFactor(0)
+    this._inputHint = this.add.text(width / 2, height - 72, '输入英文单词 · Esc取消', {
+      fontSize: '11px', fontFamily: 'Microsoft YaHei', color: '#c4b99a'
+    }).setOrigin(0.5).setDepth(301).setScrollFactor(0)
+  }
+
+  _updateInputDisplay() {
+    if (this._inputBarText) {
+      this._inputBarText.setText(this.inputBuffer + (this.inputBuffer.length > 0 ? '_' : ''))
+    }
+  }
+
+  _destroyInputBar() {
+    if (this._inputBarBg) { this._inputBarBg.destroy(); this._inputBarBg = null }
+    if (this._inputBarText) { this._inputBarText.destroy(); this._inputBarText = null }
+    if (this._inputHint) { this._inputHint.destroy(); this._inputHint = null }
   }
   _killMonster(idx) {
     const monster = this.monsters.getChildren()[idx]
@@ -782,6 +855,8 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   shutdown() {
+    if (this._keyHandler) { this.input.keyboard?.off('keydown', this._keyHandler); this._keyHandler = null }
+    this._destroyInputBar()
     if (this.escKey) this.escKey.removeAllListeners()
     this.input.enabled = false
     this.tweens.killAll()
