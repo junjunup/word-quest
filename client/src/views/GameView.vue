@@ -453,7 +453,7 @@ async function startGameLevel() {
     // Start WorldScene via Phaser
     if (game) {
       // Stop all active scenes first
-      const sceneNames = ['MenuScene', 'WorldScene', 'ResultScene', 'BootScene']
+      const sceneNames = ['MenuScene', 'PreparationScene', 'WorldScene', 'ResultScene', 'BootScene']
       for (const sceneName of sceneNames) {
         const scene = game.scene.getScene(sceneName)
         if (scene && scene.scene.isActive()) {
@@ -473,7 +473,7 @@ async function startGameLevel() {
       // 强制 WorldScene 走完整 init+create
       const ws = game.scene.getScene('WorldScene')
       if (ws && ws.scene.isSleeping()) ws.scene.wake()
-      game.scene.start('WorldScene', {
+      game.scene.start('PreparationScene', {
         chapter: params.chapter,
         level: params.level,
         difficulty: params.difficulty

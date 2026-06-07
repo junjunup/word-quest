@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 import BootScene from './scenes/BootScene'
 import MenuScene from './scenes/MenuScene'
+import PreparationScene from './scenes/PreparationScene'
 import WorldScene from './scenes/WorldScene'
 import ResultScene from './scenes/ResultScene'
 
@@ -47,6 +48,6 @@ export function createGameConfig(parentElement) {
         }
       }
     },
-    scene: [BootScene, MenuScene, WorldScene, ResultScene]
+    scene: [BootScene, MenuScene, PreparationScene, WorldScene, ResultScene]
   }
 }

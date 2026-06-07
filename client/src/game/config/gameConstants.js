@@ -129,3 +129,22 @@ export const BOSS_SPAWN = {
   /** 与玩家出生点(80,300)的最小距离 */
   minPlayerDistance: 300
 }
+
+// ============ 章节怪物配置 ============
+// types 数组中每项对应一只怪物的类型，按比例混合
+// 例：['melee','melee','ranged'] → 2/3 近战, 1/3 远程
+export const CHAPTER_MONSTER_CONFIG = {
+  1: { types: ['melee'],              speedMult: 1.0, eliteChance: 0.08, label: '田园鸡群' },
+  2: { types: ['melee', 'melee', 'ranged'], speedMult: 1.1, eliteChance: 0.15, label: '森林猎手' },
+  3: { types: ['melee', 'ranged'],    speedMult: 1.2, eliteChance: 0.20, label: '集市守卫' },
+  4: { types: ['ranged', 'caster'],   speedMult: 1.3, eliteChance: 0.25, label: '塔楼术士' },
+  5: { types: ['caster', 'ranged', 'melee'], speedMult: 1.4, eliteChance: 0.35, label: '深渊暗影' },
+  6: { types: ['melee', 'ranged', 'caster'], speedMult: 1.5, eliteChance: 0.50, label: '终极军团' }
+}
+
+/** 怪物类型定义 */
+export const MONSTER_TYPES = {
+  melee:  { texture: 'monster_melee',  icon: '👾', label: '近战', color: 0xd45b3e },
+  ranged: { texture: 'monster_ranged', icon: '👁️', label: '远程', color: 0x4488cc },
+  caster: { texture: 'monster_caster', icon: '🔮', label: '法术', color: 0x8844aa }
+}

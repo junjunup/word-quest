@@ -195,15 +195,12 @@ export default class ResultScene extends Phaser.Scene {
     const MAX_LEVELS = 5
     const MAX_CHAPTERS = 6
 
-    // 统一的返回菜单+关卡选择：直接切 Phaser 场景 + 同步通知 Vue
+    // 返回菜单+关卡选择：必须 setTimeout，因为 scene.start 会销毁当前场景的 displayObjects，
+    // 如果在 pointerdown handler 中同步调用，会销毁正在处理输入事件的 game object → 卡死
     const goToLevelSelect = (mode, suggestedChapter, suggestedLevel) => {
-      // 先强制停止当前 ResultScene，消除残留渲染
-      this.scene.stop()
-      // 确保 MenuScene 走完整 create（而非仅 wake，避免空白菜单+后续卡死）
-      const ms = this.game.scene.getScene('MenuScene')
-      if (ms && ms.scene.isSleeping()) { ms.scene.wake() }
-      this.game.scene.start('MenuScene')
       eventBus.emit(EVENTS.SHOW_LEVEL_SELECT, { mode, suggestedChapter, suggestedLevel })
+      const game = this.game
+      window.setTimeout(() => game.scene.start('MenuScene'), 0)
     }
 
     // 死亡结算不允许直接进入下一关，只提供重试与关卡选择
@@ -213,7 +210,8 @@ export default class ResultScene extends Phaser.Scene {
       if (!this.scene.isActive()) return
       this.input.enabled = false
       if (isLastLevel) {
-        this.scene.start('MenuScene')
+        const game = this.game
+        window.setTimeout(() => game.scene.start('MenuScene'), 0)
         return
       }
       if (isGameOver) {
@@ -233,18 +231,15 @@ export default class ResultScene extends Phaser.Scene {
     }, 3200)
 
     // 返回菜单（depth=200）
-    this.add.text(width / 2, 590, '🏠 返回菜单', {
-      fontSize: '13px', fontFamily: 'Microsoft YaHei', color: '#c4b99a',
+    this.add.text(width / 2, 590, '🏠 Main Menu', {
+      fontSize: '13px', fontFamily: '"Press Start 2P", monospace', color: '#c4b99a',
       stroke: '#2d5016', strokeThickness: 2
     }).setOrigin(0.5).setDepth(200).setInteractive({ useHandCursor: true })
       .on('pointerdown', () => {
         audioManager.play('click')
         if (!this.scene.isActive()) return
-        this.input.enabled = false
-        this.scene.stop()
-        const ms = this.game.scene.getScene('MenuScene')
-        if (ms && ms.scene.isSleeping()) { ms.scene.wake() }
-        this.game.scene.start('MenuScene')
+        const game = this.game
+        window.setTimeout(() => game.scene.start('MenuScene'), 0)
       })
       .on('pointerover', function () { this.setColor('#ffc847') })
       .on('pointerout', function () { this.setColor('#c4b99a') })

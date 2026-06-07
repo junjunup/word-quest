@@ -8,7 +8,7 @@ import Chest from '../entities/Chest'
 import ExtractionPoint from '../entities/ExtractionPoint'
 import inventory from '../systems/Inventory'
 import audioManager from '../systems/AudioManager'
-import { CHAPTER_THEMES } from '../config/gameConstants'
+import { CHAPTER_THEMES, CHAPTER_MONSTER_CONFIG, MONSTER_TYPES } from '../config/gameConstants'
 
 /**
  * 主世界地图场景 - 田园像素风
@@ -41,6 +41,11 @@ export default class WorldScene extends Phaser.Scene {
     this.difficulty = data?.difficulty || 'normal'
     this.isTutorial = false
     this.virtualDirection = { up: false, down: false, left: false, right: false }
+    // 装备与祝福（来自 PreparationScene）
+    this.weaponId = data?.weaponId || 'sword'
+    this.armorId = data?.armorId || 'cloth'
+    this.blessingId = data?.blessingId || null
+    this._firstHitFree = this.blessingId === 'guard'
   }
 
   create() {
@@ -56,10 +61,17 @@ export default class WorldScene extends Phaser.Scene {
     this.input.enabled = true
     // 强制 Canvas 获取焦点，确保键盘事件能触发（修复首次按键无效）
     this.game.canvas.focus?.()
-    // Apply armor HP bonus
-    const armorBonus = inventory.getArmorBonus()
-    levelManager.lives += armorBonus - 1
-    levelManager.difficultyConfig = { ...levelManager.difficultyConfig, lives: levelManager.difficultyConfig.lives + armorBonus - 1 }
+    // Apply armor HP bonus (using selected armor from PreparationScene)
+    const armors = inventory.getArmors()
+    const activeArmor = armors.find(a => a.id === this.armorId) || { hpBonus: 1 }
+    const armorHpBonus = (activeArmor.hpBonus || 1) - 1  // base armor gives +0 extra
+    levelManager.lives += armorHpBonus
+    levelManager.difficultyConfig = { ...levelManager.difficultyConfig, lives: levelManager.difficultyConfig.lives + armorHpBonus }
+    // Apply blessing: +2 HP
+    if (this.blessingId === 'health') {
+      levelManager.lives += 2
+      levelManager.difficultyConfig.lives += 2
+    }
     // Ensure ResultScene is stopped when entering a new level (belt-and-suspenders)
     const rs = this.game.scene.getScene('ResultScene')
     if (rs && rs.scene.isActive()) rs.scene.stop()
@@ -94,9 +106,16 @@ export default class WorldScene extends Phaser.Scene {
       // Check chest interaction first
       for (const chest of this.chests) {
         if (chest.isPlayerNear(this.player)) {
-          const gold = chest.open(inventory)
-          if (gold > 0) {
-            this._showFloatingText(this.player.x, this.player.y - 20, '+' + gold + ' 🪙')
+          const baseGold = chest.open(inventory)
+          let displayGold = baseGold
+          // 财富祝福：宝箱金币 1.5x
+          if (this.blessingId === 'wealth' && baseGold > 0) {
+            const bonusGold = Math.floor(baseGold * 0.5)
+            inventory.addGold(bonusGold)
+            displayGold = baseGold + bonusGold
+          }
+          if (displayGold > 0) {
+            this._showFloatingText(this.player.x, this.player.y - 20, '+' + displayGold + ' 🪙')
             if (this._goldText) this._goldText.setText('🪙 ' + inventory.getGold())
             eventBus.emit(EVENTS.UPDATE_HUD, { score: levelManager.score, lives: levelManager.lives })
           }
@@ -130,7 +149,14 @@ export default class WorldScene extends Phaser.Scene {
       else if (!this.isPaused) eventBus.emit(EVENTS.TOGGLE_PAUSE)
     })
 
+    // 弹幕组（远程怪物发射的子弹）
+    this.projectiles = this.physics.add.group({ runChildUpdate: false })
+    this._activeProjectiles = []
+    // AOE 区域列表
+    this._activeAOEs = []
+
     this.physics.add.overlap(this.player, this.monsters, this._onMonsterHit, null, this)
+    this.physics.add.overlap(this.player, this.projectiles, this._onProjectileHit, null, this)
     this.physics.add.overlap(this.player, this.npcs, this.onNPCInteract, null, this)
     if (this.walls) this.physics.add.collider(this.player, this.walls)
 
@@ -147,7 +173,19 @@ export default class WorldScene extends Phaser.Scene {
           levelManager.correctCount++
           audioManager.play('correct')
           const wasLast = Object.keys(this.monsterAIs).length === 1
-          this._killMonster(this.lockedTarget.idx)
+          // Weapon effects
+          let bonusGold = 0
+          if (this.weaponId === 'sword') {
+            levelManager.score += 20  // 剑：额外 +20 score
+          }
+          if (this.weaponId === 'hammer' && Math.random() < 0.5) {
+            bonusGold = 100  // 锤：50% 双倍金币
+          }
+          if (this.weaponId === 'staff' && Math.random() < 0.3) {
+            // 法杖：30% 冰冻随机另一只怪物 2s
+            this._freezeRandomMonster(this.lockedTarget.idx)
+          }
+          this._killMonster(this.lockedTarget.idx, bonusGold)
           if (!wasLast) this._cancelLock()
         } else {
           console.log('[Combat] WRONG')
@@ -410,6 +448,13 @@ export default class WorldScene extends Phaser.Scene {
 
   _onMonsterHit(player, monster) {
     if (this.isDead || this.invincible || !monster.active) return
+    // 守护祝福：首次受击免伤
+    if (this._firstHitFree) {
+      this._firstHitFree = false
+      this._showFloatingText(player.x, player.y - 20, '🛡️ 免伤')
+      this._startInvincibility(1500)
+      return
+    }
     const idx = monster.getData("index")
     if (idx == null) return
     const ai = this.monsterAIs[idx]
@@ -443,7 +488,8 @@ export default class WorldScene extends Phaser.Scene {
   }
   _tryLockTarget() {
     if (this.targetLocked || !this.player) return
-    let closest = null, closestDist = 250
+    const lockRange = this.weaponId === 'bow' ? 500 : 250
+    let closest = null, closestDist = lockRange
     const children = this.monsters.getChildren()
     for (let i = 0; i < children.length; i++) {
       const m = children[i]; const idx = m.getData('index')
@@ -543,35 +589,178 @@ export default class WorldScene extends Phaser.Scene {
     if (this._choiceHint) { this._choiceHint.destroy(); this._choiceHint = null }
   }
 
-  _killMonster(idx) {
+  _killMonster(idx, bonusGold = 0) {
     const ai = this.monsterAIs[idx]
     if (!ai || ai.isDefeated) return
     const monster = ai.monster
     if (!monster || !monster.active) return
     ai.defeat()
     delete this.monsterAIs[idx]
-    this.tweens.add({ targets: monster, alpha: 0, scale: 0, y: monster.y - 30, duration: 400, ease: "Back.easeIn", onComplete: () => monster.destroy() })
+    // Death particle burst
+    for (let i = 0; i < 6; i++) {
+      const px = monster.x + Phaser.Math.Between(-10, 10)
+      const py = monster.y + Phaser.Math.Between(-10, 10)
+      const part = this.add.image(px, py, 'boss_particle').setDepth(20).setScale(1.5)
+      this.tweens.add({
+        targets: part, alpha: 0, scale: 0,
+        x: px + Phaser.Math.Between(-20, 20),
+        y: py - Phaser.Math.Between(10, 30),
+        duration: 400, delay: i * 40,
+        onComplete: () => part.destroy()
+      })
+    }
+    this.tweens.add({ targets: monster, alpha: 0, scale: 0, y: monster.y - 30, duration: 400, ease: "Back.easeIn", onComplete: () => {
+      // Clean up shadow
+      const shadow = monster.getData('shadow')
+      if (shadow) shadow.destroy()
+      monster.destroy()
+    }})
     if (this.monsterLabels[idx]) { this.monsterLabels[idx].destroy(); this.monsterLabels[idx] = null }
-    this.spawnCoinEffect(monster.x, monster.y, 100)
+    // Gold: base 100 + weapon bonuses, apply wealth blessing multiplier
+    const wealthMult = this.blessingId === 'wealth' ? 1.5 : 1.0
+    const totalGold = Math.floor((100 + bonusGold) * wealthMult)
+    this.spawnCoinEffect(monster.x, monster.y, totalGold)
     audioManager.play("correct")
     levelManager.score += 100
     eventBus.emit(EVENTS.UPDATE_HUD, { score: levelManager.score, lives: levelManager.lives })
 
-    // Check if all monsters defeated → level clear
+    // Check if all monsters defeated → activate extraction point
     if (Object.keys(this.monsterAIs).length === 0) {
-      console.log('[LevelClear] All monsters defeated! Result:', JSON.stringify(levelManager.getLevelResult()))
+      console.log('[LevelClear] All monsters defeated! Extraction point activated.')
       this._destroyChoicePanel()
-      this.isPaused = true
-      this.input.enabled = false
-      audioManager.play("level_complete")
-      audioManager.stopBGM(0)
-      const result = levelManager.getLevelResult()
-      window.setTimeout(() => {
-        console.log('[LevelClear] Timer fired, starting ResultScene')
-        const rr = this.game.scene.getScene("ResultScene")
-        if (rr && rr.scene.isSleeping()) { console.log('[LevelClear] waking ResultScene'); rr.scene.wake(result) }
-        this.game.scene.start("ResultScene", result)
-      }, 1200)
+      this.targetLocked = false
+      this.lockedTarget = null
+      this.timeScale = 1.0
+      this.isPaused = false
+      audioManager.resumeBGM(200)
+      audioManager.play('level_complete')
+      // Activate extraction point
+      if (this.extractionPoint) {
+        this.extractionPoint.activate()
+        this._showFloatingText(this.player.x, this.player.y - 20, 'All clear! Go extract!')
+      }
+    }
+  }
+
+  /** 生成弹幕（远程怪物开火） */
+  _spawnProjectile({ x, y, tx, ty, speed, damage }) {
+    const angle = Phaser.Math.Angle.Between(x, y, tx, ty)
+    const bullet = this.projectiles.create(x, y, 'boss_bullet')
+    if (!bullet) return
+    bullet.setScale(1.5).setDepth(15)
+    bullet.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed)
+    bullet.setData('damage', damage || 1)
+    // 3秒后自动销毁
+    this.time.delayedCall(3000, () => { if (bullet.active) bullet.destroy() })
+  }
+
+  /** 弹幕命中玩家 */
+  _onProjectileHit(player, projectile) {
+    if (this.isDead || this.invincible || !projectile.active) return
+    // 守护祝福首次免伤
+    if (this._firstHitFree) {
+      this._firstHitFree = false
+      this._showFloatingText(player.x, player.y - 20, '🛡️ 免伤')
+      this._startInvincibility(1500)
+      projectile.destroy()
+      return
+    }
+    const dmg = projectile.getData('damage') || 1
+    projectile.destroy()
+    // 扣血
+    for (let i = 0; i < dmg; i++) {
+      const result = levelManager.loseLife()
+      if (result === 'game_over' && !this.isDead) {
+        this.isDead = true
+        this.isPaused = true
+        this.input.enabled = false
+        if (this.player?.body) this.player.setVelocity(0, 0)
+        this._destroyChoicePanel()
+        audioManager.stopBGM(0)
+        inventory.onDeath()
+        this.gameOverTimer = window.setTimeout(() => {
+          const rr = this.game.scene.getScene('ResultScene')
+          const deathResult = levelManager.getLevelResult()
+          if (rr && rr.scene.isSleeping()) rr.scene.wake(deathResult)
+          this.game.scene.start('ResultScene', deathResult)
+          this.gameOverTimer = null
+        }, 0)
+      }
+    }
+    this._startInvincibility(800)
+    this._showFloatingText(player.x, player.y - 20, `-${dmg} 💔`)
+  }
+
+  /** 生成法术AOE（预警圈 → 延迟伤害） */
+  _spawnAOE({ x, y, radius, damage, delay }) {
+    // 预警圈
+    const warnCircle = this.add.graphics().setDepth(50)
+    warnCircle.lineStyle(2, 0xff4444, 0.7)
+    warnCircle.strokeCircle(x, y, radius)
+    warnCircle.fillStyle(0xff0000, 0.1)
+    warnCircle.fillCircle(x, y, radius)
+
+    // 脉冲效果
+    this.tweens.add({
+      targets: warnCircle, alpha: 0.3, duration: 200, yoyo: true, repeat: Math.floor(delay / 400),
+      onComplete: () => {
+        warnCircle.destroy()
+        // 伤害判定
+        if (this.isDead || !this.player?.active) return
+        const playerDist = Phaser.Math.Distance.Between(this.player.x, this.player.y, x, y)
+        if (playerDist <= radius) {
+          // 守护祝福
+          if (this._firstHitFree) {
+            this._firstHitFree = false
+            this._showFloatingText(this.player.x, this.player.y - 20, '🛡️ 免伤')
+            this._startInvincibility(1500)
+            return
+          }
+          for (let i = 0; i < damage; i++) {
+            const result = levelManager.loseLife()
+            if (result === 'game_over' && !this.isDead) {
+              this.isDead = true; this.isPaused = true; this.input.enabled = false
+              if (this.player?.body) this.player.setVelocity(0, 0)
+              this._destroyChoicePanel()
+              audioManager.stopBGM(0); inventory.onDeath()
+              this.gameOverTimer = window.setTimeout(() => {
+                const rr = this.game.scene.getScene('ResultScene')
+                const dr = levelManager.getLevelResult()
+                if (rr && rr.scene.isSleeping()) rr.scene.wake(dr)
+                this.game.scene.start('ResultScene', dr)
+              }, 0)
+            }
+          }
+          this._startInvincibility(800)
+          this._showFloatingText(this.player.x, this.player.y - 20, `-${damage} 💥`)
+        }
+        // 爆炸视觉
+        const boom = this.add.graphics().setDepth(50)
+        boom.fillStyle(0xff6600, 0.4)
+        boom.fillCircle(x, y, radius * 0.8)
+        this.tweens.add({ targets: boom, alpha: 0, scale: 1.5, duration: 400, onComplete: () => boom.destroy() })
+      }
+    })
+  }
+
+  /** 法杖效果：随机冻结一只活着的怪物（排除当前击杀的） */
+  _freezeRandomMonster(excludeIdx) {
+    const keys = Object.keys(this.monsterAIs).filter(k => String(k) !== String(excludeIdx))
+    if (keys.length === 0) return
+    const targetIdx = keys[Phaser.Math.Between(0, keys.length - 1)]
+    const ai = this.monsterAIs[targetIdx]
+    if (ai && !ai.isDefeated) {
+      ai.freeze(2000)
+      // 在标签上显示冰冻效果
+      if (this.monsterLabels[targetIdx]) {
+        const orig = this.monsterLabels[targetIdx].text
+        this.monsterLabels[targetIdx].setText('❄️')
+        this.time.delayedCall(2000, () => {
+          if (this.monsterLabels[targetIdx] && this.monsterLabels[targetIdx].active) {
+            this.monsterLabels[targetIdx].setText('❓')
+          }
+        })
+      }
     }
   }
 
@@ -581,7 +770,20 @@ export default class WorldScene extends Phaser.Scene {
     this.monsterLabels = []
     const mapW = 30 * 32, mapH = 20 * 32
     const isValid = (key) => this.textures.exists(key) && !failedAssetKeys.has(key)
-    const hasChicken = isValid("chicken_sheet")
+    const hasChicken = isValid('chicken_sheet')
+
+    // 章节怪物配置
+    const chConfig = CHAPTER_MONSTER_CONFIG[this.chapter] || CHAPTER_MONSTER_CONFIG[1]
+    const speedMult = chConfig.speedMult || 1.0
+
+    // 为每只怪物分配类型
+    const typeList = chConfig.types || ['melee']
+    const monsterTypes = []
+    for (let i = 0; i < this.monsterCount; i++) {
+      monsterTypes.push(typeList[i % typeList.length])
+    }
+
+    // 生成位置（远离玩家/NPC出生点）
     const positions = []
     for (let i = 0; i < this.monsterCount; i++) {
       let x, y, attempts = 0
@@ -594,32 +796,86 @@ export default class WorldScene extends Phaser.Scene {
         if (!tooClose || attempts++ > 50) { positions.push({ x, y }); break }
       } while (true)
     }
+
+    // 创建每只怪物
     for (let i = 0; i < this.monsterCount; i++) {
-      const isElite = i === 0 && this.level > 3
+      const mType = monsterTypes[i]
+      const typeDef = MONSTER_TYPES[mType] || MONSTER_TYPES.melee
+      const isElite = i === 0 && Math.random() < chConfig.eliteChance
       const pos = positions[i]
+
+      // 选择纹理
+      let textureKey = 'monster', useSheet = false
+      if (hasChicken && mType === 'melee') {
+        textureKey = 'chicken_sheet'; useSheet = true
+      } else if (this.textures.exists(typeDef.texture)) {
+        textureKey = typeDef.texture
+      } else if (hasChicken) {
+        textureKey = 'chicken_sheet'; useSheet = true
+      }
+
       let monster
-      if (hasChicken) {
-        monster = this.monsters.create(pos.x, pos.y, "chicken_sheet", 0)
+      if (useSheet) {
+        monster = this.monsters.create(pos.x, pos.y, textureKey, 0)
         monster.setScale(isElite ? 4.5 : 3.5)
         monster.body.setSize(10, 10); monster.body.setOffset(3, 4)
-        if (this.anims.exists("chicken_idle")) monster.play("chicken_idle")
+        if (this.anims.exists('chicken_idle')) monster.play('chicken_idle')
+        // 非近战鸡：添加颜色区分
+        if (mType !== 'melee') monster.setTint(typeDef.color)
       } else {
-        monster = this.monsters.create(pos.x, pos.y, "monster")
-        monster.setScale(isElite ? 1.5 : 1.2)
+        monster = this.monsters.create(pos.x, pos.y, textureKey)
+        monster.setScale(isElite ? 1.8 : 1.4)
         monster.body.setSize(20, 20); monster.body.setOffset(6, 6)
       }
-      monster.setData("index", i)
+      // Ground shadow
+      if (this.textures.exists('shadow')) {
+        const shadow = this.add.image(pos.x, pos.y + 10, 'shadow').setDepth(3).setAlpha(0.6)
+        monster.setData('shadow', shadow)
+        // Shadow follows monster position (updated below in label tracking)
+      }
+      monster.setData('index', i)
       monster.setImmovable(false)
       monster.setDepth(5)
+
+      // 巡逻点
       const patrolPoints = []
       for (let p = 0; p < 4; p++) {
         const angle = (p / 4) * Math.PI * 2 + Math.random()
         const r = Phaser.Math.Between(40, 100)
         patrolPoints.push({ x: pos.x + Math.cos(angle) * r, y: pos.y + Math.sin(angle) * r })
       }
-      const ai = new MonsterAI(monster, { patrolSpeed: isElite ? 25 : 18, pursueSpeed: isElite ? 55 : 40, perceptionRange: isElite ? 120 : 90, attackDamage: isElite ? 2 : 1, patrolPoints })
+
+      // 创建 AI
+      const ai = new MonsterAI(monster, {
+        monsterType: mType,
+        patrolSpeed: (isElite ? 25 : 18) * speedMult,
+        pursueSpeed: (isElite ? 55 : 40) * speedMult,
+        perceptionRange: isElite ? 120 : 90,
+        attackDamage: isElite ? 2 : 1,
+        patrolPoints,
+        preferredDistance: 100 + Math.random() * 60,
+        projectileSpeed: 120 + this.chapter * 10,
+        fireRate: 2200 - this.chapter * 100,
+        castCooldown: 3200 - this.chapter * 100,
+        castRadius: 60 + this.chapter * 4,
+        castWarnTime: 1000
+      })
+
+      // 设置弹幕和法术回调
+      ai.onFireProjectile = (data) => this._spawnProjectile(data)
+      ai.onCastArea = (data) => this._spawnAOE(data)
+
       this.monsterAIs[i] = ai
-      const label = this.add.text(pos.x, pos.y - 28, isElite ? "👾" : "❓", { fontSize: "16px", stroke: "#000", strokeThickness: 2 }).setOrigin(0.5).setDepth(6)
+
+      // 标签：类型图标 + 精英标记
+      const labelIcon = isElite ? '👑' : typeDef.icon
+      const label = this.add.text(pos.x, pos.y - 28, labelIcon, {
+        fontSize: '16px', stroke: '#000', strokeThickness: 2
+      }).setOrigin(0.5).setDepth(6)
+      // 精英怪物发光标签
+      if (isElite) {
+        this.tweens.add({ targets: label, alpha: 0.6, duration: 500, yoyo: true, repeat: -1 })
+      }
       this.monsterLabels.push(label)
     }
   }
@@ -687,7 +943,7 @@ export default class WorldScene extends Phaser.Scene {
     })
 
     // Bottom bar
-    this.add.text(480, 620, 'WASD移动 | E:开箱/锁怪/撤离 | 1-4:答题 | Q:药水 | Esc:暂停', {
+    this.add.text(480, 620, 'WASD:Move | E:Interact/Lock/Extract | 1-4:Answer | Q:Potion | Esc:Pause', {
       fontSize: '9px', fontFamily: 'Microsoft YaHei', color: '#3a6b1e',
       stroke: '#000', strokeThickness: 1
     }).setOrigin(0.5).setScrollFactor(0).setDepth(100)
@@ -699,17 +955,18 @@ export default class WorldScene extends Phaser.Scene {
 
   _doExtraction() {
     if (!this.extractionPoint || this.extractionPoint.used || this.isDead) return
+    const allClear = Object.keys(this.monsterAIs).length === 0
     this.extractionPoint.triggerExtraction()
     this.isPaused = true
     this.input.enabled = false
     audioManager.stopBGM(0)
-    const goldEarned = Math.floor(levelManager.score / 2)
+    const goldEarned = allClear ? levelManager.score : Math.floor(levelManager.score / 2)
     inventory.onExtract(goldEarned)
-    const result = { ...levelManager.getLevelResult(), extracted: true, goldEarned }
+    const result = { ...levelManager.getLevelResult(), extracted: !allClear, fullClear: allClear, goldEarned, allClear }
+    // 500ms 撤离动画后跳转。必须用 window.setTimeout：延迟回调 + 脱离 Phaser 事件循环
+    const game = this.game
     window.setTimeout(() => {
-      const rr = this.game.scene.getScene("ResultScene")
-      if (rr && rr.scene.isSleeping()) rr.scene.wake(result)
-      this.game.scene.start("ResultScene", result)
+      game.scene.start('ResultScene', result)
     }, 500)
   }
 
@@ -733,8 +990,20 @@ export default class WorldScene extends Phaser.Scene {
     })
   }
 
-  update() {
+  update(time, delta) {
     if (!this.player) return
+    // Update extraction point particles
+    if (this.extractionPoint) this.extractionPoint.update(time, delta)
+    // 清理越界弹幕
+    if (this.projectiles) {
+      const bounds = this.physics.world.bounds
+      this.projectiles.getChildren().forEach(p => {
+        if (p.active && (p.x < bounds.x - 20 || p.x > bounds.right + 20 ||
+            p.y < bounds.y - 20 || p.y > bounds.bottom + 20)) {
+          p.destroy()
+        }
+      })
+    }
     if (this.monsterAIs && this.monsters) {
       const children = this.monsters.getChildren()
       for (const m of children) {
@@ -788,7 +1057,7 @@ export default class WorldScene extends Phaser.Scene {
       this.playerNameText.setPosition(this.player.x, this.player.y - 30)
     }
 
-    // 更新怪物标签位置（跟随浮动动画）
+    // 更新怪物标签和阴影位置
     if (this.monsterLabels) {
       const children = this.monsters.getChildren()
       for (const monster of children) {
@@ -797,6 +1066,10 @@ export default class WorldScene extends Phaser.Scene {
         const label = this.monsterLabels[idx]
         if (label && label.active) {
           label.setPosition(monster.x, monster.y - 28)
+        }
+        const shadow = monster.getData('shadow')
+        if (shadow && shadow.active) {
+          shadow.setPosition(monster.x, monster.y + 10)
         }
       }
     }
@@ -811,7 +1084,17 @@ export default class WorldScene extends Phaser.Scene {
     if (this.escKey) this.escKey.removeAllListeners()
     this.input.enabled = false
     this.tweens.killAll()
+    // 清理弹幕和AOE
+    if (this.projectiles) { this.projectiles.clear(true, true); this.projectiles = null }
+    this._activeProjectiles = []
+    this._activeAOEs = []
     if (this.monsterLabels) { this.monsterLabels.forEach(l => { if (l?.active) l.destroy() }); this.monsterLabels = [] }
+    // Clean up monster shadows
+    if (this.monsters) {
+      this.monsters.getChildren().forEach(m => {
+        const s = m.getData?.('shadow'); if (s?.active) s.destroy()
+      })
+    }
     this.monsterAIs = {}
     if (this.chests) { this.chests.forEach(c => c.destroy()); this.chests = null }
     if (this.extractionPoint) { this.extractionPoint.destroy(); this.extractionPoint = null }

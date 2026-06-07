@@ -411,6 +411,37 @@ export default class BootScene extends Phaser.Scene {
       mg.destroy()
     }
 
+    // === 多种怪物类型纹理（用于视觉差异化） ===
+    // 近战 (红棕色) — 带角
+    const meleeG = this.make.graphics({ add: false })
+    meleeG.fillStyle(0xd45b3e, 1); meleeG.fillRect(2, 6, 28, 22)
+    meleeG.fillStyle(0xffc847, 1); meleeG.fillRect(8, 10, 6, 6); meleeG.fillRect(18, 10, 6, 6)
+    meleeG.fillStyle(0x993300, 1); meleeG.fillTriangle(4, 6, 12, 0, 16, 6)
+    meleeG.fillTriangle(16, 6, 24, 0, 28, 6)
+    meleeG.generateTexture('monster_melee', 32, 32); meleeG.destroy()
+
+    // 远程 (蓝色) — 眼睛更大
+    const rangedG = this.make.graphics({ add: false })
+    rangedG.fillStyle(0x4488cc, 1); rangedG.fillRect(2, 4, 28, 24)
+    rangedG.fillStyle(0xffdd44, 1); rangedG.fillCircle(10, 14, 6); rangedG.fillCircle(22, 14, 6)
+    rangedG.fillStyle(0x000000, 1); rangedG.fillCircle(10, 14, 3); rangedG.fillCircle(22, 14, 3)
+    rangedG.generateTexture('monster_ranged', 32, 32); rangedG.destroy()
+
+    // 法术 (紫色) — 菱形身体
+    const casterG = this.make.graphics({ add: false })
+    casterG.fillStyle(0x8844aa, 1)
+    casterG.fillTriangle(16, 2, 30, 14, 16, 26)
+    casterG.fillTriangle(2, 14, 16, 2, 16, 30)
+    casterG.fillStyle(0xcc88ff, 1); casterG.fillCircle(16, 14, 5)
+    casterG.fillStyle(0xffffff, 1); casterG.fillCircle(16, 14, 2)
+    casterG.generateTexture('monster_caster', 32, 32); casterG.destroy()
+
+    // 地面阴影（怪物脚下）
+    const shadowG = this.make.graphics({ add: false })
+    shadowG.fillStyle(0x000000, 0.25)
+    shadowG.fillEllipse(12, 6, 24, 10)
+    shadowG.generateTexture('shadow', 24, 12); shadowG.destroy()
+
     if (!this.isAssetValid('cow_sheet')) {
       // Fallback NPC
       const ng = this.make.graphics({ add: false })
