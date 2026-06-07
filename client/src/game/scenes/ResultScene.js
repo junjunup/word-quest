@@ -195,8 +195,12 @@ export default class ResultScene extends Phaser.Scene {
     const MAX_LEVELS = 5
     const MAX_CHAPTERS = 6
 
-    // 返回菜单+关卡选择：必须 setTimeout，因为 scene.start 会销毁当前场景的 displayObjects，
-    // 如果在 pointerdown handler 中同步调用，会销毁正在处理输入事件的 game object → 卡死
+    // 返回主菜单
+    const backToMenu = () => {
+      window.setTimeout(() => this.scene.start('MenuScene'), 0)
+    }
+
+    // 关卡选择过渡：先 emit 让 Vue 显示关卡界面，再跳 MenuScene
     const goToLevelSelect = (mode, suggestedChapter, suggestedLevel) => {
       eventBus.emit(EVENTS.SHOW_LEVEL_SELECT, { mode, suggestedChapter, suggestedLevel })
       window.setTimeout(() => this.scene.start('MenuScene'), 0)
@@ -208,14 +212,8 @@ export default class ResultScene extends Phaser.Scene {
     this.createWoodButton(width / 2 - 140, btnY, nextBtnText, 0x5b8c3e, 0x3a6b1e, () => {
       if (!this.scene.isActive()) return
       this.input.enabled = false
-      if (isLastLevel) {
-        window.setTimeout(() => this.scene.start('MenuScene'), 0)
-        return
-      }
-      if (isGameOver) {
-        goToLevelSelect('retry', chapter, level)
-        return
-      }
+      if (isLastLevel) { backToMenu(); return }
+      if (isGameOver) { goToLevelSelect('retry', chapter, level); return }
       const nextLevel = level < MAX_LEVELS ? level + 1 : 1
       const nextChapter = level >= MAX_LEVELS ? chapter + 1 : chapter
       goToLevelSelect('continue', nextChapter, nextLevel)
@@ -237,7 +235,7 @@ export default class ResultScene extends Phaser.Scene {
         audioManager.play('click')
         if (!this.scene.isActive()) return
         this.input.enabled = false
-        window.setTimeout(() => this.scene.start('MenuScene'), 0)
+        backToMenu()
       })
       .on('pointerover', function () { this.setColor('#ffc847') })
       .on('pointerout', function () { this.setColor('#c4b99a') })
