@@ -577,6 +577,27 @@ function onTogglePause() {
   }
 }
 
+/** 返回主菜单：Vue 层安全切换场景（避开 Phaser 事件循环死锁） */
+function onShowMainMenu() {
+  if (!game) return
+  // 休眠所有关卡场景，防止后台残留
+  for (const key of ['WorldScene', 'ResultScene', 'PreparationScene']) {
+    const s = game.scene.getScene(key)
+    if (s) {
+      try { s.scene.sleep() } catch (e) {}
+      try { s.scene.setVisible(false) } catch (e) {}
+    }
+  }
+  // 启动 MenuScene
+  game.scene.start('MenuScene')
+  // 隐藏所有 Vue 覆盖层
+  showBossQuiz.value = false
+  showPauseMenu.value = false
+  showChatPanel.value = false
+  uiState.value = 'game'
+  setPhaserInputEnabled(true)
+}
+
 onMounted(async () => {
   // 加载游戏进度
   try {
@@ -630,6 +651,7 @@ onMounted(async () => {
   eventBus.on(EVENTS.TOGGLE_PAUSE, onTogglePause)
   eventBus.on(EVENTS.SHOW_DAILY_CHALLENGE, onShowDailyChallenge)
   eventBus.on(EVENTS.SHOW_SHOP, onShowShop)
+  eventBus.on(EVENTS.SHOW_MAIN_MENU, onShowMainMenu)
 
   if (new URLSearchParams(window.location.search).get('e2eLevelSelect') === '1') {
     uiState.value = 'levelSelect'
@@ -683,6 +705,7 @@ onUnmounted(() => {
   eventBus.off(EVENTS.TOGGLE_PAUSE, onTogglePause)
   eventBus.off(EVENTS.SHOW_DAILY_CHALLENGE, onShowDailyChallenge)
   eventBus.off(EVENTS.SHOW_SHOP, onShowShop)
+  eventBus.off(EVENTS.SHOW_MAIN_MENU, onShowMainMenu)
 
   // 清理安全计时器
   if (chatSafetyTimer) { clearTimeout(chatSafetyTimer); chatSafetyTimer = null }

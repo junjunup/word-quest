@@ -72,7 +72,8 @@ export const EVENTS = {
   BOSS_QUIZ_RESULT: 'boss_quiz_result',        // Boss答题结果
   TOGGLE_PAUSE: 'toggle_pause',                // 切换暂停菜单
   SHOW_DAILY_CHALLENGE: 'show_daily_challenge', // 每日挑战
-  SHOW_SHOP: 'show_shop'                         // 商店
+  SHOW_SHOP: 'show_shop',                        // 商店
+  SHOW_MAIN_MENU: 'show_main_menu'               // 返回主菜单（Vue层控制场景切换）
 }
 
 export default eventBus

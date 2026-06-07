@@ -198,20 +198,15 @@ export default class ResultScene extends Phaser.Scene {
     const MAX_LEVELS = 5
     const MAX_CHAPTERS = 6
 
-    // 返回主菜单：sleep 当前场景后启动 MenuScene
-    // 使用 sleep 而非 start，避免 ResultScene 被 shutdown 后又 wake 回来
+    // 返回主菜单：委托 Vue 层做场景切换（避开 Phaser 事件循环死锁）
     const backToMenu = () => {
-      const game = this.game
-      this.scene.sleep()
-      window.setTimeout(() => game.scene.start('MenuScene'), 0)
+      eventBus.emit(EVENTS.SHOW_MAIN_MENU)
     }
 
-    // 关卡选择过渡：先 emit 让 Vue 显示关卡界面，再跳 MenuScene
+    // 关卡选择过渡：委托 Vue 层显示关卡选择界面
     const goToLevelSelect = (mode, suggestedChapter, suggestedLevel) => {
       eventBus.emit(EVENTS.SHOW_LEVEL_SELECT, { mode, suggestedChapter, suggestedLevel })
-      const game = this.game
-      this.scene.sleep()
-      window.setTimeout(() => game.scene.start('MenuScene'), 0)
+      eventBus.emit(EVENTS.SHOW_MAIN_MENU)
     }
 
     // 死亡结算不允许直接进入下一关，只提供重试与关卡选择
