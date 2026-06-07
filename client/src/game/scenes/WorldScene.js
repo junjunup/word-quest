@@ -139,17 +139,8 @@ export default class WorldScene extends Phaser.Scene {
         this._doExtraction()
         return
       }
-      // Don't E-key near boss — boss is collision-only
-      let nearBoss = false
-      if (this.bossGroup) {
-        const boss = this.bossGroup.getFirstAlive()
-        if (boss) {
-          const bossDist = Phaser.Math.Distance.Between(this.player.x, this.player.y, boss.x, boss.y)
-          nearBoss = bossDist < 80
-        }
-      }
       // Otherwise try locking a monster
-      if (!this.targetLocked && !nearBoss) this._tryLockTarget()
+      if (!this.targetLocked) this._tryLockTarget()
     })
 
     // Q key: use health potion
@@ -324,9 +315,12 @@ export default class WorldScene extends Phaser.Scene {
         this._destroyChoicePanel()
         audioManager.stopBGM(0)
         inventory.onDeath()
-        const game = this.game
+        this.scene.stop()
         this.gameOverTimer = window.setTimeout(() => {
-          game.scene.start('ResultScene', levelManager.getLevelResult())
+          const rr = this.game.scene.getScene("ResultScene")
+          const deathResult = levelManager.getLevelResult()
+          if (rr && rr.scene.isSleeping()) rr.scene.wake(deathResult)
+          this.game.scene.start("ResultScene", deathResult)
           this.gameOverTimer = null
         }, 0)
       }
@@ -377,9 +371,12 @@ export default class WorldScene extends Phaser.Scene {
         this._destroyChoicePanel()
         audioManager.stopBGM(0)
         inventory.onDeath()
-        const game = this.game
+        this.scene.stop()
         this.gameOverTimer = window.setTimeout(() => {
-          game.scene.start('ResultScene', levelManager.getLevelResult())
+          const rr = this.game.scene.getScene('ResultScene')
+          const deathResult = levelManager.getLevelResult()
+          if (rr && rr.scene.isSleeping()) rr.scene.wake(deathResult)
+          this.game.scene.start('ResultScene', deathResult)
           this.gameOverTimer = null
         }, 0)
       }
@@ -420,8 +417,12 @@ export default class WorldScene extends Phaser.Scene {
               if (this.player?.body) this.player.setVelocity(0, 0)
               this._destroyChoicePanel()
               audioManager.stopBGM(0); inventory.onDeath()
+              this.scene.stop()
               this.gameOverTimer = window.setTimeout(() => {
-                this.scene.start('ResultScene', levelManager.getLevelResult())
+                const rr = this.game.scene.getScene('ResultScene')
+                const dr = levelManager.getLevelResult()
+                if (rr && rr.scene.isSleeping()) rr.scene.wake(dr)
+                this.game.scene.start('ResultScene', dr)
               }, 0)
             }
           }
@@ -443,8 +444,6 @@ export default class WorldScene extends Phaser.Scene {
     const bossData = bossSprite.getData('bossData')
     if (!bossData || bossData.defeated) return
 
-    // ⚠️ 无伤触碰：立即无敌 + 冻结
-    this.invincible = true
     this._bossQuizActive = true
     this.isPaused = true
     this.input.enabled = false
@@ -457,7 +456,12 @@ export default class WorldScene extends Phaser.Scene {
     bossSprite.body.enable = false
     this.tweens.getTweensOf(bossSprite).forEach(t => t.pause())
 
-    // ⚡ Boss 战开场特效（1秒后进答题）
+    // 无敌 + 轻微击退（不扣血）
+    this._startInvincibility(800)
+    const angle = Phaser.Math.Angle.Between(bossSprite.x, bossSprite.y, player.x, player.y)
+    player.setVelocity(Math.cos(angle) * 80, Math.sin(angle) * 80)
+
+    // Boss 开场特效
     this.cameras.main.shake(400, 0.02)
     this.cameras.main.flash(300, 255, 0, 0, true)
     const { width, height } = this.cameras.main
@@ -470,23 +474,17 @@ export default class WorldScene extends Phaser.Scene {
       onComplete: () => bossWarning.destroy()
     })
 
-    // 轻微击退（无敌保护）
-    const angle = Phaser.Math.Angle.Between(bossSprite.x, bossSprite.y, player.x, player.y)
-    player.setVelocity(Math.cos(angle) * 80, Math.sin(angle) * 80)
-
     audioManager.pauseBGM(300)
 
-    // ⏱ 特效播放1秒后再弹出 BossQuizModal
-    const bossHp = bossData.hp
-    const bossMaxHp = bossData.maxHp
-    const bossName = bossData.name
-    const bossType = bossData.bossType
+    // 1秒延迟后弹出 BossQuizModal
+    const bHp = bossData.hp; const bMaxHp = bossData.maxHp
+    const bName = bossData.name; const bType = bossData.bossType
     const timeLimit = Math.max(15000, levelManager.difficultyConfig.timer - 5000)
     this.time.delayedCall(1000, () => {
-      if (!this._bossQuizActive) return  // 玩家可能已死亡
+      if (!this._bossQuizActive) return
       eventBus.emit(EVENTS.SHOW_BOSS_QUIZ, {
-        bossName, bossType,
-        questionsNeeded: bossHp, bossCurrentHp: bossHp, bossMaxHp,
+        bossName: bName, bossType: bType,
+        questionsNeeded: bHp, bossCurrentHp: bHp, bossMaxHp: bMaxHp,
         timeLimit
       })
     })
@@ -534,9 +532,13 @@ export default class WorldScene extends Phaser.Scene {
         if (this.player?.body) this.player.setVelocity(0, 0)
         this._destroyChoicePanel()
         audioManager.stopBGM(0); inventory.onDeath()
+        this.scene.stop()
         const game = this.game
         this.gameOverTimer = window.setTimeout(() => {
-          game.scene.start('ResultScene', levelManager.getLevelResult())
+          const rr = game.scene.getScene('ResultScene')
+          const dr = levelManager.getLevelResult()
+          if (rr && rr.scene.isSleeping()) rr.scene.wake(dr)
+          game.scene.start('ResultScene', dr)
         }, 0)
         return
       }
@@ -846,12 +848,12 @@ export default class WorldScene extends Phaser.Scene {
     const goldEarned = allClear ? levelManager.score : Math.floor(levelManager.score / 2)
     inventory.onExtract(goldEarned)
     const result = { ...levelManager.getLevelResult(), extracted: !allClear, fullClear: allClear, goldEarned, allClear }
-    // 撤离动画后跳转。必须用 window.setTimeout + game.scene.start，
-    // 因为 this.scene.start 在 E-key handler 调用链中会卡死
+    // 500ms 撤离动画后跳转。必须用 window.setTimeout：延迟回调 + 脱离 Phaser 事件循环
+    this.scene.stop()
     const game = this.game
     window.setTimeout(() => {
       game.scene.start('ResultScene', result)
-    }, 800)
+    }, 500)
   }
 
   spawnCoinEffect(x, y, score) { this._combat.spawnCoinEffect(x, y, score) }
