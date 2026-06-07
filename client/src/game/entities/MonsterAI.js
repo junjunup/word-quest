@@ -53,6 +53,7 @@ export default class MonsterAI {
     this.lostTargetTimer = 0
     this.target = null
     this.isDefeated = false
+    this.isPaused = false    // Boss 战期间暂停
     this._frozen = false
     this._casting = false
 
@@ -90,7 +91,7 @@ export default class MonsterAI {
    * 每帧由 WorldScene.update 调用
    */
   update(player, delta, timeScale = 1.0) {
-    if (this.isDefeated || this._frozen || !this.monster.active) return
+    if (this.isDefeated || this.isPaused || this._frozen || !this.monster.active) return
 
     const dist = player ? Phaser.Math.Distance.Between(this.monster.x, this.monster.y, player.x, player.y) : Infinity
 

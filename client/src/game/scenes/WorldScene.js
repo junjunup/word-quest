@@ -458,7 +458,7 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   _onMonsterHit(player, monster) {
-    if (this.isDead || this.invincible || !monster.active) return
+    if (this.isDead || this._bossQuizActive || this.invincible || !monster.active) return
     // 守护祝福：首次受击免伤
     if (this._firstHitFree) {
       this._firstHitFree = false
@@ -667,7 +667,7 @@ export default class WorldScene extends Phaser.Scene {
 
   /** 弹幕命中玩家 */
   _onProjectileHit(player, projectile) {
-    if (this.isDead || this.invincible || !projectile.active) return
+    if (this.isDead || this._bossQuizActive || this.invincible || !projectile.active) return
     // 守护祝福首次免伤
     if (this._firstHitFree) {
       this._firstHitFree = false
@@ -766,10 +766,19 @@ export default class WorldScene extends Phaser.Scene {
     if (this.player?.body) this.player.setVelocity(0, 0)
     if (this.targetLocked) this._cancelLock()
 
+    // 冻结所有怪物 AI（Boss 战期间）
+    Object.values(this.monsterAIs).forEach(ai => { if (!ai.isDefeated) ai.isPaused = true })
+    // 冻结 Boss
+    bossSprite.body.setVelocity(0, 0)
+    bossSprite.body.enable = false
+    this.tweens.getTweensOf(bossSprite).forEach(t => t.pause())
+
     // 启动无敌防止连续触发，同时击退玩家
     this._startInvincibility(800)
     const angle = Phaser.Math.Angle.Between(bossSprite.x, bossSprite.y, player.x, player.y)
     player.setVelocity(Math.cos(angle) * 120, Math.sin(angle) * 120)
+
+    audioManager.pauseBGM(300)
 
     // 发送 Boss 数据到 Vue 层
     eventBus.emit(EVENTS.SHOW_BOSS_QUIZ, {
@@ -793,7 +802,13 @@ export default class WorldScene extends Phaser.Scene {
     if (!bossData || bossData.defeated) return
 
     if (result.cancelled) {
-      // 玩家关闭了答题 → 恢复游戏
+      // 玩家关闭了答题 → 恢复所有状态
+      Object.values(this.monsterAIs).forEach(ai => { if (!ai.isDefeated) ai.isPaused = false })
+      if (bossSprite.active) {
+        bossSprite.body.enable = true
+        this.tweens.getTweensOf(bossSprite).forEach(t => t.resume())
+      }
+      audioManager.resumeBGM(300)
       this.isPaused = false
       this.input.enabled = true
       return
@@ -828,6 +843,15 @@ export default class WorldScene extends Phaser.Scene {
         return
       }
     }
+
+    // 恢复所有怪物 AI
+    Object.values(this.monsterAIs).forEach(ai => { if (!ai.isDefeated) ai.isPaused = false })
+    // 恢复 Boss（如果未被击败）
+    if (bossSprite.active) {
+      bossSprite.body.enable = true
+      this.tweens.getTweensOf(bossSprite).forEach(t => t.resume())
+    }
+    audioManager.resumeBGM(300)
 
     // 回复游戏
     this.isPaused = false
@@ -865,8 +889,6 @@ export default class WorldScene extends Phaser.Scene {
     levelManager.score += bonusGold
     audioManager.play('level_complete')
     this._showFloatingText(x, y - 30, `👹 +${bonusGold} 🪙`)
-
-    console.log(`[Boss] ${bossData.name} defeated! +${bonusGold} gold`)
 
     // Boss 击败后检查是否全部清除（若没有普通怪物则激活撤离）
     if (Object.keys(this.monsterAIs).length === 0 && this.extractionPoint) {
@@ -1026,9 +1048,12 @@ export default class WorldScene extends Phaser.Scene {
     const by = Phaser.Math.Between(zone.minY, zone.maxY)
 
     this.bossGroup = this.physics.add.group()
-    const bossSprite = this.bossGroup.create(bx, by, 'monster')
-    bossSprite.setScale(3).setDepth(8).setImmovable(true)
+    // 使用 cow_sheet 或生成纹理作为 Boss 贴图
+    const texKey = this.textures.exists('cow_sheet') ? 'cow_sheet' : (this.textures.exists('monster_ranged') ? 'monster_ranged' : 'monster')
+    const bossSprite = this.bossGroup.create(bx, by, texKey, 0)
+    bossSprite.setScale(3.5).setDepth(8).setImmovable(true)
     bossSprite.body.setSize(24, 24)
+    if (this.anims.exists('cow_idle')) bossSprite.play('cow_idle')
 
     // 存储 Boss 配置数据（不实例化 Boss 类，避免复杂生命周期管理）
     const hpPerDifficulty = { easy: 2, normal: 3, hard: 5 }
@@ -1051,8 +1076,6 @@ export default class WorldScene extends Phaser.Scene {
       color: '#ff4444', stroke: '#000', strokeThickness: 3
     }).setOrigin(0.5).setDepth(10)
     bossSprite.setData('label', bossLabel)
-
-    console.log(`[Boss] Spawned ${bossType} at (${bx},${by}) HP=${bossData.hp}`)
   }
 
   createNPC() {
