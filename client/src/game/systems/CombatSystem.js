@@ -94,6 +94,7 @@ export function createCombatSystem(scene) {
     if (Object.keys(scene.monsterAIs || {}).length > 0) {
       scene.isPaused = false
       audioManager.resumeBGM(200)
+      scene.game.canvas.focus?.()
     }
   }
 
@@ -305,8 +306,10 @@ function showSpellInput(scene, word) {
 
 function hideSpellInput(scene) {
   if (scene._spellInput) {
+    scene._spellInput.blur()
     scene._spellInput.remove()
     scene._spellInput = null
+    scene.game.canvas.focus?.()
   }
 }
 

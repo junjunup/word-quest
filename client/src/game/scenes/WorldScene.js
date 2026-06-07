@@ -70,8 +70,11 @@ export default class WorldScene extends Phaser.Scene {
     this._combat = createCombatSystem(this)
 
     this.input.enabled = true
-    // 强制 Canvas 获取焦点，确保键盘事件能触发（修复首次按键无效）
+    // 强制 Canvas 获取焦点，确保键盘事件能触发
     this.game.canvas.focus?.()
+    // 防御：清除上次可能残留的拼写输入 DOM
+    const staleInput = document.getElementById('wordquest-spell-input')
+    if (staleInput) staleInput.remove()
     // Apply armor HP bonus (using selected armor from PreparationScene)
     const armors = inventory.getArmors()
     const activeArmor = armors.find(a => a.id === this.armorId) || { hpBonus: 1 }
@@ -510,6 +513,7 @@ export default class WorldScene extends Phaser.Scene {
       audioManager.resumeBGM(300)
       this.isPaused = false
       this.input.enabled = true
+      this.game.canvas.focus?.()
       return
     }
 
@@ -556,6 +560,7 @@ export default class WorldScene extends Phaser.Scene {
     // 回复游戏
     this.isPaused = false
     this.input.enabled = true
+    this.game.canvas.focus?.()
     eventBus.emit(EVENTS.UPDATE_HUD, { lives: levelManager.lives, score: levelManager.score })
   }
 
