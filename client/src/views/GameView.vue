@@ -580,13 +580,19 @@ function onTogglePause() {
 /** 返回主菜单：Vue 层安全切换场景（避开 Phaser 事件循环死锁） */
 function onShowMainMenu() {
   if (!game) return
-  // 休眠所有关卡场景，防止后台残留
-  for (const key of ['WorldScene', 'ResultScene', 'PreparationScene']) {
+  // 彻底停止所有关卡场景，释放资源，确保下次进入时完整 init+create
+  for (const key of ['WorldScene', 'PreparationScene']) {
     const s = game.scene.getScene(key)
     if (s) {
-      try { s.scene.sleep() } catch (e) {}
+      try { s.scene.stop() } catch (e) {}
       try { s.scene.setVisible(false) } catch (e) {}
     }
+  }
+  // ResultScene 只用 sleep — 它是当前触发场景，stop 会连锁反应
+  const rs = game.scene.getScene('ResultScene')
+  if (rs) {
+    try { rs.scene.sleep() } catch (e) {}
+    try { rs.scene.setVisible(false) } catch (e) {}
   }
   // 启动 MenuScene
   game.scene.start('MenuScene')
