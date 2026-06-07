@@ -3,6 +3,7 @@
     <div class="boss-quiz-modal" :class="{ shake: shaking }">
       <!-- Boss Header -->
       <div class="boss-header">
+        <button class="escape-btn" @click="$emit('close')" title="逃跑">🏃 逃跑</button>
         <div class="boss-info">
           <span class="boss-icon">👹</span>
           <span class="boss-name">{{ bossName }}</span>
@@ -14,7 +15,13 @@
           </div>
           <div class="hp-text">{{ displayCurrentHp }}/{{ displayMaxHp }}</div>
         </div>
-        <div class="progress-text">本次答题 {{ correctCount }}/{{ bossHp }}</div>
+        <div class="progress-text">已答对 {{ correctCount }}/{{ bossHp }}</div>
+      </div>
+
+      <!-- 小智辅助提示（连续答错时出现） -->
+      <div v-if="showZhiHelp" class="zhi-help-bubble">
+        <span class="zhi-icon">🌟</span>
+        <span class="zhi-text">{{ zhiHelpText }}</span>
       </div>
 
       <!-- Timer bar -->
@@ -25,7 +32,7 @@
       <!-- Word display -->
       <div class="word-display" v-if="currentWord">
         <!-- choice_en2cn / spell_hint: 显示英文单词 -->
-        <template v-if="['choice_en2cn', 'spell_hint'].includes(questionType)">
+        <template v-if="['choice_en2cn', 'spell_hint'].includes(currentQuestionType)">
           <h2 class="word-text">{{ currentWord.word }}</h2>
           <p class="phonetic" v-if="currentWord.phonetic">{{ currentWord.phonetic }}</p>
         </template>
@@ -58,7 +65,7 @@
 
       <!-- 拼写/翻译输入模式 -->
       <div class="input-area" v-else-if="currentWord && !isChoiceType">
-        <p class="spell-hint" v-if="questionType === 'spell_hint'">
+        <p class="spell-hint" v-if="currentQuestionType === 'spell_hint'">
           💡 提示：{{ hintText }}
         </p>
         <div class="input-row">
@@ -77,7 +84,7 @@
       <div v-if="answered" class="result-feedback" :class="isCorrect ? 'correct' : 'wrong'">
         <p class="result-icon">{{ resultTitle }}</p>
         <p v-if="answerQuality === 'near'" class="near-answer">{{ fuzzyFeedback }}，本题按部分分记录</p>
-        <p v-if="!isCorrect && isChoiceType" class="correct-answer">正确答案：{{ questionType === 'choice_cn2en' ? currentWord?.word : currentWord?.meaning }}</p>
+        <p v-if="!isCorrect && isChoiceType" class="correct-answer">正确答案：{{ currentQuestionType === 'choice_cn2en' ? currentWord?.word : currentWord?.meaning }}</p>
 
         <!-- 例句区块 -->
         <div v-if="currentWord?.example" class="example-block">
@@ -122,6 +129,7 @@ const selectedIndex = ref(-1)
 const shaking = ref(false)
 const bossDefeated = ref(false)
 const wrongCount = ref(0)
+const consecutiveWrong = ref(0)
 const typedAnswer = ref('')
 const spellInput = ref(null)
 const answerQuality = ref('wrong')
@@ -129,11 +137,16 @@ const editDistance = ref(null)
 const similarity = ref(0)
 const scoreRatio = ref(1)
 const fuzzyFeedback = ref('')
-const answerRecords = ref([])  // 收集每道题的答题记录，用于上报后端
+const answerRecords = ref([])
+// 当前题目题型（每题随机，避免卡死在单一题型）
+const currentQuestionType = ref('choice_en2cn')
+// 小智辅助
+const showZhiHelp = ref(false)
+const zhiHelpText = ref('')
 
-// 计算属性
+// 计算属性 — 基于当前题目动态题型
 const isChoiceType = computed(() =>
-  ['choice_en2cn', 'choice_cn2en'].includes(props.questionType))
+  ['choice_en2cn', 'choice_cn2en'].includes(currentQuestionType.value))
 
 const promptText = computed(() => ({
   choice_en2cn: '请选择正确的中文释义：',
@@ -141,7 +154,7 @@ const promptText = computed(() => ({
   spell_hint:   '请根据提示拼写单词：',
   spell_full:   '请拼写对应的英文单词：',
   translate:    '请输入对应的英文翻译：'
-}[props.questionType] || '请选择正确的中文释义：'))
+}[currentQuestionType.value] || '请选择正确的中文释义：'))
 
 const hintText = computed(() => {
   const w = currentWord.value?.word || ''
@@ -183,6 +196,19 @@ function getNextWord() {
 }
 
 async function loadQuestion() {
+  // 每题随机题型：优先选择题（避免卡死在拼写），连续错2次后强制降级为最简单题型
+  const allTypes = ['choice_en2cn', 'choice_cn2en', 'spell_hint']
+  const easyTypes = ['choice_en2cn', 'choice_cn2en']
+  if (consecutiveWrong.value >= 2) {
+    currentQuestionType.value = 'choice_en2cn'  // 降级：英→中选择题
+    showZhiHelp.value = true
+    zhiHelpText.value = '别急！小智帮你换成了最简单的英译中选择题，加油！💪'
+  } else {
+    currentQuestionType.value = easyTypes[Math.floor(Math.random() * easyTypes.length)]
+    showZhiHelp.value = false
+    zhiHelpText.value = ''
+  }
+
   answered.value = false
   selectedIndex.value = -1
   isCorrect.value = false
@@ -202,7 +228,7 @@ async function loadQuestion() {
   currentWord.value = word
 
   // 拼写/翻译题不需要选项
-  if (['spell_hint', 'spell_full', 'translate'].includes(props.questionType)) {
+  if (['spell_hint', 'spell_full', 'translate'].includes(currentQuestionType)) {
     currentOptions.value = []
     startTimer()
     nextTick(() => spellInput.value?.focus())
@@ -212,10 +238,10 @@ async function loadQuestion() {
   // Try API for quiz data
   try {
     if (word._id) {
-      const res = await getQuizForWord(word._id, props.questionType)
+      const res = await getQuizForWord(word._id, currentQuestionType)
       if (res.data) {
         const { question, distractors } = res.data
-        if (props.questionType === 'choice_cn2en') {
+        if (currentQuestionType === 'choice_cn2en') {
           currentOptions.value = shuffle([
             { text: question.word, correct: true },
             ...distractors.map(d => ({ text: d.word, correct: false }))
@@ -237,7 +263,7 @@ async function loadQuestion() {
   // Local fallback - use proper distractor generation
   const otherWords = props.levelWords.filter(w => w.word !== word.word && w.meaning !== word.meaning)
 
-  if (props.questionType === 'choice_cn2en') {
+  if (currentQuestionType === 'choice_cn2en') {
     currentOptions.value = buildChoiceOptions('correct', word.word, otherWords, 'word')
   } else {
     currentOptions.value = buildChoiceOptions('correct', word.meaning, otherWords, 'meaning')
@@ -273,12 +299,15 @@ function selectOption(index, option) {
 
   if (option.correct) {
     correctCount.value++
+    consecutiveWrong.value = 0
+    showZhiHelp.value = false
     currentHp.value--
     if (currentHp.value <= 0) {
       bossDefeated.value = true
     }
   } else {
     wrongCount.value++
+    consecutiveWrong.value++
     shaking.value = true
     setTimeout(() => shaking.value = false, 500)
   }
@@ -290,7 +319,7 @@ function selectOption(index, option) {
     isCorrect: option.correct,
     responseTime: props.timeLimit - remainingTime.value,
     playerAnswer: option.text || '',
-    correctAnswer: props.questionType === 'choice_cn2en'
+    correctAnswer: currentQuestionType === 'choice_cn2en'
       ? currentWord.value?.word : currentWord.value?.meaning,
     answerQuality: answerQuality.value,
     editDistance: editDistance.value,
@@ -321,12 +350,15 @@ function submitTypedAnswer() {
 
   if (isCorrect.value) {
     correctCount.value++
+    consecutiveWrong.value = 0
+    showZhiHelp.value = false
     currentHp.value--
     if (currentHp.value <= 0) {
       bossDefeated.value = true
     }
   } else {
     wrongCount.value++
+    consecutiveWrong.value++
     shaking.value = true
     setTimeout(() => shaking.value = false, 500)
   }
@@ -358,6 +390,7 @@ function handleTimeout() {
   fuzzyFeedback.value = '答题超时'
   totalAnswered.value++
   wrongCount.value++
+  consecutiveWrong.value++
   if (timerInterval) clearInterval(timerInterval)
 
   // 收集超时答题记录
@@ -421,9 +454,53 @@ onUnmounted(() => {
 }
 
 .boss-header {
+  position: relative;
   padding: 16px 20px;
   background: rgba(204, 68, 68, 0.15);
   border-bottom: 2px solid rgba(204, 68, 68, 0.3);
+}
+
+.escape-btn {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  padding: 4px 12px;
+  font-size: 13px;
+  font-family: 'Microsoft YaHei', sans-serif;
+  background: rgba(139, 0, 0, 0.7);
+  color: #ffcccc;
+  border: 1px solid #cc4444;
+  border-radius: 6px;
+  cursor: pointer;
+  z-index: 10;
+  transition: background 0.2s;
+  &:hover { background: rgba(180, 0, 0, 0.9); color: #fff; }
+}
+
+.zhi-help-bubble {
+  margin: 8px 20px 0;
+  padding: 10px 14px;
+  background: rgba(255, 200, 50, 0.15);
+  border: 1px solid rgba(255, 200, 50, 0.3);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: fadeInDown 0.3s ease;
+}
+
+.zhi-icon { font-size: 20px; }
+
+.zhi-text {
+  font-size: 13px;
+  font-family: 'Microsoft YaHei', sans-serif;
+  color: #ffd700;
+  line-height: 1.4;
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .boss-info {
