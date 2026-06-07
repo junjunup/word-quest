@@ -300,7 +300,7 @@ function showSpellInput(scene, word) {
     }
   })
   document.body.appendChild(input)
-  setTimeout(() => input.focus(), 50)
+  // 不自动 focus — 用户点击输入框后再输入，避免偷走 canvas 键盘焦点
   scene._spellInput = input
 }
 

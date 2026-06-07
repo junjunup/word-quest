@@ -104,6 +104,9 @@ export default class WorldScene extends Phaser.Scene {
       up: Phaser.Input.Keyboard.KeyCodes.W, down: Phaser.Input.Keyboard.KeyCodes.S,
       left: Phaser.Input.Keyboard.KeyCodes.A, right: Phaser.Input.Keyboard.KeyCodes.D
     })
+    // 延迟确保 canvas 获得焦点（覆盖所有异步初始化的 DOM 干扰）
+    window.setTimeout(() => this.game.canvas.focus?.(), 100)
+    window.setTimeout(() => this.game.canvas.focus?.(), 500)
     // Chests: 2-3 on the map
     this.chests = []
     const chestPositions = [
