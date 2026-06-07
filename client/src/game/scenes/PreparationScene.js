@@ -409,9 +409,12 @@ export default class PreparationScene extends Phaser.Scene {
     this.cameras.main.once('camerafadeoutcomplete', () => {
       const rs = game.scene.getScene('ResultScene')
       if (rs) { rs.children.removeAll(true); rs.tweens.killAll(); if (rs.scene.isActive()) rs.scene.stop() }
-      // 强制 stop WorldScene（SceneManager.stop 对 sleeping 也有效，ScenePlugin.stop 是 no-op）
+      // 清理 WorldScene 残留状态。sleeping 时先 wake 再 stop（ScenePlugin.stop 对 sleeping 是 no-op）
       const ws = game.scene.getScene('WorldScene')
-      if (ws && (ws.scene.isActive() || ws.scene.isSleeping())) game.scene.stop('WorldScene')
+      if (ws) {
+        if (ws.scene.isSleeping()) { ws.scene.wake(); ws.scene.stop() }
+        else if (ws.scene.isActive()) ws.scene.stop()
+      }
       window.setTimeout(() => game.scene.start('WorldScene', data), 0)
     })
   }

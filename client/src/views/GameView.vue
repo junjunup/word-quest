@@ -470,9 +470,7 @@ async function startGameLevel() {
         if (rs.scene.isActive()) rs.scene.stop()
       }
 
-      // 强制 WorldScene 走完整 init+create：用 SceneManager（非 ScenePlugin，后者对 sleeping 是 no-op）
-      const ws = game.scene.getScene('WorldScene')
-      if (ws && (ws.scene.isActive() || ws.scene.isSleeping())) game.scene.stop('WorldScene')
+      // 直接启动 PreparationScene（其 _startAdventure 会处理 WorldScene 清理）
       game.scene.start('PreparationScene', {
         chapter: params.chapter,
         level: params.level,
@@ -580,13 +578,10 @@ function onTogglePause() {
 /** 返回主菜单：Vue 层安全切换场景（避开 Phaser 事件循环死锁） */
 function onShowMainMenu() {
   if (!game) return
-  // 全部用 sleep，不用 stop（stop 在 EventBus 同步回调中仍会卡死）
+  // sleep 关卡场景（sleep 保留状态但不渲染，start() 时可正常唤醒）
   for (const key of ['WorldScene', 'ResultScene', 'PreparationScene']) {
     const s = game.scene.getScene(key)
-    if (s) {
-      try { s.scene.sleep() } catch (e) {}
-      try { s.scene.setVisible(false) } catch (e) {}
-    }
+    if (s) { try { s.scene.sleep() } catch (e) {} }
   }
   game.scene.start('MenuScene')
   showBossQuiz.value = false
@@ -924,10 +919,11 @@ async function backToMenu() {
   quiz.reset()  // 统一重置答题状态
   audioManager.stopBGM(300)
   if (game) {
-    // 停止 WorldScene（SceneManager.stop 处理 active + sleeping）
+    // 清理 WorldScene 残留状态
     const ws = game.scene.getScene('WorldScene')
-    if (ws && (ws.scene.isActive() || ws.scene.isSleeping())) {
-      game.scene.stop('WorldScene')
+    if (ws) {
+      if (ws.scene.isSleeping()) { ws.scene.wake(); ws.scene.stop() }
+      else if (ws.scene.isActive()) ws.scene.stop()
     }
     await new Promise(resolve => setTimeout(resolve, 50))
     // 强制 MenuScene 走完整 init+create（而非仅 wake，避免空白菜单）
