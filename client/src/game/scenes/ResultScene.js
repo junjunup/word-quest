@@ -214,8 +214,10 @@ export default class ResultScene extends Phaser.Scene {
       this.input.enabled = false
       if (isLastLevel) {
         const game = this.game
-        game.scene.stop('ResultScene')
-        window.setTimeout(() => game.scene.start('MenuScene'), 0)
+        window.setTimeout(() => {
+          game.scene.stop('ResultScene')
+          game.scene.start('MenuScene')
+        }, 0)
         return
       }
       if (isGameOver) {
@@ -244,8 +246,10 @@ export default class ResultScene extends Phaser.Scene {
         if (!this.scene.isActive()) return
         this.input.enabled = false
         const game = this.game
-        game.scene.stop('ResultScene')
-        window.setTimeout(() => game.scene.start('MenuScene'), 0)
+        window.setTimeout(() => {
+          game.scene.stop('ResultScene')
+          game.scene.start('MenuScene')
+        }, 0)
       })
       .on('pointerover', function () { this.setColor('#ffc847') })
       .on('pointerout', function () { this.setColor('#c4b99a') })
