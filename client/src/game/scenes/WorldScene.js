@@ -4,11 +4,12 @@ import levelManager from '../systems/LevelManager'
 import { failedAssetKeys } from './BootScene'
 import { CHARACTER_PRESETS } from '../data/characters'
 import MonsterAI from '../entities/MonsterAI'
+import { createBoss, getBossTypeForLevel } from '../entities/BossFactory'
 import Chest from '../entities/Chest'
 import ExtractionPoint from '../entities/ExtractionPoint'
 import inventory from '../systems/Inventory'
 import audioManager from '../systems/AudioManager'
-import { CHAPTER_THEMES, CHAPTER_MONSTER_CONFIG, MONSTER_TYPES } from '../config/gameConstants'
+import { CHAPTER_THEMES, CHAPTER_MONSTER_CONFIG, MONSTER_TYPES, BOSS_SPAWN } from '../config/gameConstants'
 
 /**
  * 主世界地图场景 - 田园像素风
@@ -32,6 +33,11 @@ export default class WorldScene extends Phaser.Scene {
     this.targetLocked = false
     this.lockedTarget = null
     this.inputBuffer = ''
+    // Boss 相关状态
+    this.boss = null
+    this.bossGroup = null
+    this._bossQuizActive = false
+    this._onBossQuizResult = null
   }
 
   init(data) {
@@ -81,6 +87,7 @@ export default class WorldScene extends Phaser.Scene {
     const baseCount = wordCount > 0 ? Math.min(wordCount, 10) : Math.min(6 + this.level, 10)
     this.monsterCount = levelManager.getMonsterCount(baseCount)
     this.createMonsters()
+    this.createBoss()
     this.createNPC()
     this.createHUD()
 
@@ -159,17 +166,22 @@ export default class WorldScene extends Phaser.Scene {
     this.physics.add.overlap(this.player, this.projectiles, this._onProjectileHit, null, this)
     this.physics.add.overlap(this.player, this.npcs, this.onNPCInteract, null, this)
     if (this.walls) this.physics.add.collider(this.player, this.walls)
+    if (this.bossGroup) {
+      this.physics.add.overlap(this.player, this.bossGroup, this._onBossCollide, null, this)
+      if (this.walls) this.physics.add.collider(this.bossGroup, this.walls)
+    }
+
+    // Boss quiz result listener
+    this._onBossQuizResult = (result) => this._handleBossQuizResult(result)
+    eventBus.on(EVENTS.BOSS_QUIZ_RESULT, this._onBossQuizResult)
 
     // Register combat key handler once (not lazily)
     this._keyHandler = (event) => {
-      console.log('[Combat] key:', event.key, 'locked:', this.targetLocked, 'lt:', !!this.lockedTarget)
       if (!this.targetLocked || this.isDead) return
       if (event.key === 'Escape') { this._cancelLock(); return }
       const num = parseInt(event.key)
-      console.log('[Combat] num:', num, 'correctIdx:', this.lockedTarget?.correctIdx)
       if (num >= 1 && num <= 4 && this.lockedTarget) {
         if (num === this.lockedTarget.correctIdx) {
-          console.log('[Combat] CORRECT, monsters left:', Object.keys(this.monsterAIs).length)
           levelManager.correctCount++
           audioManager.play('correct')
           const wasLast = Object.keys(this.monsterAIs).length === 1
@@ -188,7 +200,6 @@ export default class WorldScene extends Phaser.Scene {
           this._killMonster(this.lockedTarget.idx, bonusGold)
           if (!wasLast) this._cancelLock()
         } else {
-          console.log('[Combat] WRONG')
           levelManager.wrongCount++
           audioManager.play('wrong')
           const idx = num - 1
@@ -226,7 +237,7 @@ export default class WorldScene extends Phaser.Scene {
   }
 
   /**
-   * 创建Boss
+   * 创建田园地图（瓦片、围栏、装饰物、树）
    */
   createPastoralMap() {
     const mapWidth = 40
@@ -743,6 +754,127 @@ export default class WorldScene extends Phaser.Scene {
     })
   }
 
+  /** Boss 碰撞 → 触发 Vue BossQuizModal */
+  _onBossCollide(player, bossSprite) {
+    if (this.isDead || this._bossQuizActive || this.invincible) return
+    const bossData = bossSprite.getData('bossData')
+    if (!bossData || bossData.defeated) return
+
+    this._bossQuizActive = true
+    this.isPaused = true
+    this.input.enabled = false
+    if (this.player?.body) this.player.setVelocity(0, 0)
+    if (this.targetLocked) this._cancelLock()
+
+    // 启动无敌防止连续触发，同时击退玩家
+    this._startInvincibility(800)
+    const angle = Phaser.Math.Angle.Between(bossSprite.x, bossSprite.y, player.x, player.y)
+    player.setVelocity(Math.cos(angle) * 120, Math.sin(angle) * 120)
+
+    // 发送 Boss 数据到 Vue 层
+    eventBus.emit(EVENTS.SHOW_BOSS_QUIZ, {
+      bossName: bossData.name,
+      bossType: bossData.bossType,
+      questionsNeeded: bossData.hp,
+      bossCurrentHp: bossData.hp,
+      bossMaxHp: bossData.maxHp,
+      timeLimit: levelManager.difficultyConfig.timer
+    })
+  }
+
+  /** 处理 BossQuizModal 的答题结果 */
+  _handleBossQuizResult(result) {
+    this._bossQuizActive = false
+    if (!this.bossGroup) return
+
+    const bossSprite = this.bossGroup.getFirstAlive()
+    if (!bossSprite) return
+    const bossData = bossSprite.getData('bossData')
+    if (!bossData || bossData.defeated) return
+
+    if (result.cancelled) {
+      // 玩家关闭了答题 → 恢复游戏
+      this.isPaused = false
+      this.input.enabled = true
+      return
+    }
+
+    // 扣 Boss HP
+    const correctHits = result.correctCount || 0
+    bossData.hp -= correctHits
+    if (bossData.hp <= 0) {
+      // Boss 击败！
+      bossData.defeated = true
+      bossData.hp = 0
+      this._killBoss(bossSprite, bossData)
+    }
+
+    // 答错扣玩家血
+    const wrongHits = result.wrongCount || 0
+    for (let i = 0; i < wrongHits; i++) {
+      const r = levelManager.loseLife()
+      if (r === 'game_over' && !this.isDead) {
+        this.isDead = true; this.isPaused = true; this.input.enabled = false
+        if (this.player?.body) this.player.setVelocity(0, 0)
+        this._destroyChoicePanel()
+        audioManager.stopBGM(0); inventory.onDeath()
+        const game = this.game
+        this.gameOverTimer = window.setTimeout(() => {
+          const rr = game.scene.getScene('ResultScene')
+          const dr = levelManager.getLevelResult()
+          if (rr && rr.scene.isSleeping()) rr.scene.wake(dr)
+          game.scene.start('ResultScene', dr)
+        }, 0)
+        return
+      }
+    }
+
+    // 回复游戏
+    this.isPaused = false
+    this.input.enabled = true
+    eventBus.emit(EVENTS.UPDATE_HUD, { lives: levelManager.lives, score: levelManager.score })
+  }
+
+  /** Boss 击败：动画 + 大量金币 + 检查通关 */
+  _killBoss(bossSprite, bossData) {
+    const { x, y } = bossSprite
+    // 大型粒子爆炸
+    for (let i = 0; i < 12; i++) {
+      const px = x + Phaser.Math.Between(-20, 20)
+      const py = y + Phaser.Math.Between(-20, 20)
+      const part = this.add.image(px, py, 'boss_particle').setDepth(20).setScale(2)
+      this.tweens.add({
+        targets: part, alpha: 0, scale: 0,
+        x: px + Phaser.Math.Between(-50, 50),
+        y: py - Phaser.Math.Between(20, 60),
+        duration: 600, delay: i * 50,
+        onComplete: () => part.destroy()
+      })
+    }
+    // Boss 本体消失动画
+    this.tweens.add({ targets: bossSprite, alpha: 0, scale: 0, angle: 360, duration: 800, ease: 'Power2', onComplete: () => {
+      const label = bossSprite.getData('label')
+      if (label?.active) label.destroy()
+      bossSprite.destroy()
+    }})
+    // 奖励金币
+    const bonusGold = 500 + this.chapter * 100
+    this.spawnCoinEffect(x, y, bonusGold)
+    inventory.addGold(bonusGold)
+    if (this._goldText) this._goldText.setText('🪙 ' + inventory.getGold())
+    levelManager.score += bonusGold
+    audioManager.play('level_complete')
+    this._showFloatingText(x, y - 30, `👹 +${bonusGold} 🪙`)
+
+    console.log(`[Boss] ${bossData.name} defeated! +${bonusGold} gold`)
+
+    // Boss 击败后检查是否全部清除（若没有普通怪物则激活撤离）
+    if (Object.keys(this.monsterAIs).length === 0 && this.extractionPoint) {
+      this.extractionPoint.activate()
+      this._showFloatingText(this.player.x, this.player.y - 20, 'Boss down! Go extract!')
+    }
+  }
+
   /** 法杖效果：随机冻结一只活着的怪物（排除当前击杀的） */
   _freezeRandomMonster(excludeIdx) {
     const keys = Object.keys(this.monsterAIs).filter(k => String(k) !== String(excludeIdx))
@@ -878,6 +1010,49 @@ export default class WorldScene extends Phaser.Scene {
       }
       this.monsterLabels.push(label)
     }
+  }
+
+  /**
+   * 创建Boss — 基于关卡配置从 BossFactory 生成
+   * Boss 放入独立物理组，碰撞触发 Vue 层的 BossQuizModal
+   */
+  createBoss() {
+    const bossType = getBossTypeForLevel(this.chapter, this.level)
+    if (!bossType) return
+
+    // 从 BOSS_SPAWN 区域中选择一个远离玩家的位置
+    const zone = BOSS_SPAWN.zones[Phaser.Math.Between(0, BOSS_SPAWN.zones.length - 1)]
+    const bx = Phaser.Math.Between(zone.minX, zone.maxX)
+    const by = Phaser.Math.Between(zone.minY, zone.maxY)
+
+    this.bossGroup = this.physics.add.group()
+    const bossSprite = this.bossGroup.create(bx, by, 'monster')
+    bossSprite.setScale(3).setDepth(8).setImmovable(true)
+    bossSprite.body.setSize(24, 24)
+
+    // 存储 Boss 配置数据（不实例化 Boss 类，避免复杂生命周期管理）
+    const hpPerDifficulty = { easy: 2, normal: 3, hard: 5 }
+    const bossData = {
+      bossType,
+      name: bossType === 'roaming' ? '漫游巨兽' : bossType === 'turret' ? '炮塔守卫' : '冲锋恶魔',
+      hp: hpPerDifficulty[this.difficulty] || 3,
+      maxHp: hpPerDifficulty[this.difficulty] || 3,
+      defeated: false
+    }
+    bossSprite.setData('bossData', bossData)
+    // 根据类型着色
+    const tints = { roaming: 0xff6666, turret: 0xaa66ff, charging: 0xff9933 }
+    bossSprite.setTint(tints[bossType] || 0xff6666)
+    // 脉冲发光
+    this.tweens.add({ targets: bossSprite, alpha: { from: 0.7, to: 1 }, duration: 1000, yoyo: true, repeat: -1 })
+    // Boss 名称标签
+    const bossLabel = this.add.text(bx, by - 50, `👹 ${bossData.name}`, {
+      fontSize: '12px', fontFamily: '"Press Start 2P", Microsoft YaHei',
+      color: '#ff4444', stroke: '#000', strokeThickness: 3
+    }).setOrigin(0.5).setDepth(10)
+    bossSprite.setData('label', bossLabel)
+
+    console.log(`[Boss] Spawned ${bossType} at (${bx},${by}) HP=${bossData.hp}`)
   }
 
   createNPC() {
@@ -1074,6 +1249,15 @@ export default class WorldScene extends Phaser.Scene {
       }
     }
 
+    // 更新 Boss 标签位置
+    if (this.bossGroup) {
+      this.bossGroup.getChildren().forEach(boss => {
+        if (!boss.active) return
+        const label = boss.getData('label')
+        if (label?.active) label.setPosition(boss.x, boss.y - 50)
+      })
+    }
+
   }
 
   shutdown() {
@@ -1082,6 +1266,9 @@ export default class WorldScene extends Phaser.Scene {
     if (this._keyHandler) { this.input.keyboard?.off('keydown', this._keyHandler); this._keyHandler = null }
     this._destroyChoicePanel()
     if (this.escKey) this.escKey.removeAllListeners()
+    // Boss quiz listener cleanup
+    if (this._onBossQuizResult) { eventBus.off(EVENTS.BOSS_QUIZ_RESULT, this._onBossQuizResult); this._onBossQuizResult = null }
+    this._bossQuizActive = false
     this.input.enabled = false
     this.tweens.killAll()
     // 清理弹幕和AOE
@@ -1089,6 +1276,14 @@ export default class WorldScene extends Phaser.Scene {
     this._activeProjectiles = []
     this._activeAOEs = []
     if (this.monsterLabels) { this.monsterLabels.forEach(l => { if (l?.active) l.destroy() }); this.monsterLabels = [] }
+    // Clean up Boss
+    if (this.bossGroup) {
+      this.bossGroup.getChildren().forEach(b => {
+        const label = b.getData('label'); if (label?.active) label.destroy()
+      })
+      this.bossGroup.clear(true, true); this.bossGroup = null
+    }
+    this.boss = null
     // Clean up monster shadows
     if (this.monsters) {
       this.monsters.getChildren().forEach(m => {
