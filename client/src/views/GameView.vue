@@ -470,9 +470,9 @@ async function startGameLevel() {
         if (rs.scene.isActive()) rs.scene.stop()
       }
 
-      // 强制 WorldScene 走完整 init+create
+      // 强制 WorldScene 走完整 init+create：先 stop 再让 PreparationScene 触发完整 start
       const ws = game.scene.getScene('WorldScene')
-      if (ws && ws.scene.isSleeping()) ws.scene.wake()
+      if (ws && (ws.scene.isActive() || ws.scene.isSleeping())) ws.scene.stop()
       game.scene.start('PreparationScene', {
         chapter: params.chapter,
         level: params.level,
