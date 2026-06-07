@@ -196,13 +196,23 @@ function getNextWord() {
 }
 
 async function loadQuestion() {
-  // 每题随机题型：优先选择题（避免卡死在拼写），连续错2次后强制降级为最简单题型
-  const allTypes = ['choice_en2cn', 'choice_cn2en', 'spell_hint']
+  // Boss 战题型：优先选择题，拼写仅在有把握时出现
+  // 第1题永远是 choice_en2cn，连续错2次后降级，正常时随机 choice 二选一
   const easyTypes = ['choice_en2cn', 'choice_cn2en']
-  if (consecutiveWrong.value >= 2) {
-    currentQuestionType.value = 'choice_en2cn'  // 降级：英→中选择题
+  if (totalAnswered.value === 0) {
+    // 第一题：永远英→中，最友好
+    currentQuestionType.value = 'choice_en2cn'
+    showZhiHelp.value = false
+    zhiHelpText.value = ''
+  } else if (consecutiveWrong.value >= 2) {
+    currentQuestionType.value = 'choice_en2cn'
     showZhiHelp.value = true
     zhiHelpText.value = '别急！小智帮你换成了最简单的英译中选择题，加油！💪'
+  } else if (consecutiveWrong.value === 0 && correctCount.value >= 2) {
+    // 连对2题以上 → 30% 拼写挑战
+    currentQuestionType.value = Math.random() < 0.3 ? 'spell_hint' : easyTypes[Math.floor(Math.random() * easyTypes.length)]
+    showZhiHelp.value = false
+    zhiHelpText.value = ''
   } else {
     currentQuestionType.value = easyTypes[Math.floor(Math.random() * easyTypes.length)]
     showZhiHelp.value = false

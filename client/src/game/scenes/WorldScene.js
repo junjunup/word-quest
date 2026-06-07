@@ -139,8 +139,17 @@ export default class WorldScene extends Phaser.Scene {
         this._doExtraction()
         return
       }
+      // Don't E-key near boss — boss is collision-only
+      let nearBoss = false
+      if (this.bossGroup) {
+        const boss = this.bossGroup.getFirstAlive()
+        if (boss) {
+          const bossDist = Phaser.Math.Distance.Between(this.player.x, this.player.y, boss.x, boss.y)
+          nearBoss = bossDist < 80
+        }
+      }
       // Otherwise try locking a monster
-      if (!this.targetLocked) this._tryLockTarget()
+      if (!this.targetLocked && !nearBoss) this._tryLockTarget()
     })
 
     // Q key: use health potion
@@ -315,8 +324,9 @@ export default class WorldScene extends Phaser.Scene {
         this._destroyChoicePanel()
         audioManager.stopBGM(0)
         inventory.onDeath()
+        const game = this.game
         this.gameOverTimer = window.setTimeout(() => {
-          this.scene.start('ResultScene', levelManager.getLevelResult())
+          game.scene.start('ResultScene', levelManager.getLevelResult())
           this.gameOverTimer = null
         }, 0)
       }
@@ -367,8 +377,9 @@ export default class WorldScene extends Phaser.Scene {
         this._destroyChoicePanel()
         audioManager.stopBGM(0)
         inventory.onDeath()
+        const game = this.game
         this.gameOverTimer = window.setTimeout(() => {
-          this.scene.start('ResultScene', levelManager.getLevelResult())
+          game.scene.start('ResultScene', levelManager.getLevelResult())
           this.gameOverTimer = null
         }, 0)
       }
@@ -521,8 +532,9 @@ export default class WorldScene extends Phaser.Scene {
         if (this.player?.body) this.player.setVelocity(0, 0)
         this._destroyChoicePanel()
         audioManager.stopBGM(0); inventory.onDeath()
+        const game = this.game
         this.gameOverTimer = window.setTimeout(() => {
-          this.scene.start('ResultScene', levelManager.getLevelResult())
+          game.scene.start('ResultScene', levelManager.getLevelResult())
         }, 0)
         return
       }
@@ -832,10 +844,12 @@ export default class WorldScene extends Phaser.Scene {
     const goldEarned = allClear ? levelManager.score : Math.floor(levelManager.score / 2)
     inventory.onExtract(goldEarned)
     const result = { ...levelManager.getLevelResult(), extracted: !allClear, fullClear: allClear, goldEarned, allClear }
-    // 500ms 撤离动画后跳转。window.setTimeout + this.scene.start 安全组合
+    // 撤离动画后跳转。必须用 window.setTimeout + game.scene.start，
+    // 因为 this.scene.start 在 E-key handler 调用链中会卡死
+    const game = this.game
     window.setTimeout(() => {
-      this.scene.start('ResultScene', result)
-    }, 500)
+      game.scene.start('ResultScene', result)
+    }, 800)
   }
 
   spawnCoinEffect(x, y, score) { this._combat.spawnCoinEffect(x, y, score) }
