@@ -315,12 +315,8 @@ export default class WorldScene extends Phaser.Scene {
         this._destroyChoicePanel()
         audioManager.stopBGM(0)
         inventory.onDeath()
-        this.scene.stop()
         this.gameOverTimer = window.setTimeout(() => {
-          const rr = this.game.scene.getScene("ResultScene")
-          const deathResult = levelManager.getLevelResult()
-          if (rr && rr.scene.isSleeping()) rr.scene.wake(deathResult)
-          this.game.scene.start("ResultScene", deathResult)
+          this.scene.start('ResultScene', levelManager.getLevelResult())
           this.gameOverTimer = null
         }, 0)
       }
@@ -371,12 +367,8 @@ export default class WorldScene extends Phaser.Scene {
         this._destroyChoicePanel()
         audioManager.stopBGM(0)
         inventory.onDeath()
-        this.scene.stop()
         this.gameOverTimer = window.setTimeout(() => {
-          const rr = this.game.scene.getScene('ResultScene')
-          const deathResult = levelManager.getLevelResult()
-          if (rr && rr.scene.isSleeping()) rr.scene.wake(deathResult)
-          this.game.scene.start('ResultScene', deathResult)
+          this.scene.start('ResultScene', levelManager.getLevelResult())
           this.gameOverTimer = null
         }, 0)
       }
@@ -417,12 +409,8 @@ export default class WorldScene extends Phaser.Scene {
               if (this.player?.body) this.player.setVelocity(0, 0)
               this._destroyChoicePanel()
               audioManager.stopBGM(0); inventory.onDeath()
-              this.scene.stop()
               this.gameOverTimer = window.setTimeout(() => {
-                const rr = this.game.scene.getScene('ResultScene')
-                const dr = levelManager.getLevelResult()
-                if (rr && rr.scene.isSleeping()) rr.scene.wake(dr)
-                this.game.scene.start('ResultScene', dr)
+                this.scene.start('ResultScene', levelManager.getLevelResult())
               }, 0)
             }
           }
@@ -440,24 +428,25 @@ export default class WorldScene extends Phaser.Scene {
 
   /** Boss 碰撞 → 触发 Vue BossQuizModal */
   _onBossCollide(player, bossSprite) {
-    if (this.isDead || this._bossQuizActive || this.invincible) return
+    if (this.isDead || this._bossQuizActive || this.invincible || this.targetLocked) return
     const bossData = bossSprite.getData('bossData')
     if (!bossData || bossData.defeated) return
 
+    // ⚠️ 立即无敌，防止击退碰撞到其他怪物扣血
+    this.invincible = true
     this._bossQuizActive = true
     this.isPaused = true
     this.input.enabled = false
     if (this.player?.body) this.player.setVelocity(0, 0)
     if (this.targetLocked) this._cancelLock()
 
-    // 冻结所有怪物 AI（Boss 战期间）
+    // 冻结所有怪物 AI + Boss
     Object.values(this.monsterAIs).forEach(ai => { if (!ai.isDefeated) ai.isPaused = true })
-    // 冻结 Boss
     bossSprite.body.setVelocity(0, 0)
     bossSprite.body.enable = false
     this.tweens.getTweensOf(bossSprite).forEach(t => t.pause())
 
-    // ⚡ Boss 战开场特效：屏幕震动 + 红色闪光 + 警告文字
+    // ⚡ Boss 战开场特效
     this.cameras.main.shake(400, 0.02)
     this.cameras.main.flash(300, 255, 0, 0, true)
     const { width, height } = this.cameras.main
@@ -470,10 +459,11 @@ export default class WorldScene extends Phaser.Scene {
       onComplete: () => bossWarning.destroy()
     })
 
-    // 启动无敌防止连续触发，同时击退玩家
-    this._startInvincibility(1200)
+    // 击退玩家（无敌已激活，不会扣血）
     const angle = Phaser.Math.Angle.Between(bossSprite.x, bossSprite.y, player.x, player.y)
     player.setVelocity(Math.cos(angle) * 120, Math.sin(angle) * 120)
+    // 视觉闪烁代替 _startInvincibility
+    this.tweens.add({ targets: this.player, alpha: { from: 0.3, to: 1 }, duration: 150, yoyo: true, repeat: 4, onComplete: () => { if (this.player?.active) { this.player.setAlpha(1); this.invincible = false } } })
 
     audioManager.pauseBGM(300)
     audioManager.play('wrong')  // Boss 专属音效
@@ -531,13 +521,8 @@ export default class WorldScene extends Phaser.Scene {
         if (this.player?.body) this.player.setVelocity(0, 0)
         this._destroyChoicePanel()
         audioManager.stopBGM(0); inventory.onDeath()
-        this.scene.stop()
-        const game = this.game
         this.gameOverTimer = window.setTimeout(() => {
-          const rr = game.scene.getScene('ResultScene')
-          const dr = levelManager.getLevelResult()
-          if (rr && rr.scene.isSleeping()) rr.scene.wake(dr)
-          game.scene.start('ResultScene', dr)
+          this.scene.start('ResultScene', levelManager.getLevelResult())
         }, 0)
         return
       }
@@ -847,11 +832,9 @@ export default class WorldScene extends Phaser.Scene {
     const goldEarned = allClear ? levelManager.score : Math.floor(levelManager.score / 2)
     inventory.onExtract(goldEarned)
     const result = { ...levelManager.getLevelResult(), extracted: !allClear, fullClear: allClear, goldEarned, allClear }
-    // 500ms 撤离动画后跳转。必须用 window.setTimeout：延迟回调 + 脱离 Phaser 事件循环
-    this.scene.stop()
-    const game = this.game
+    // 500ms 撤离动画后跳转。window.setTimeout + this.scene.start 安全组合
     window.setTimeout(() => {
-      game.scene.start('ResultScene', result)
+      this.scene.start('ResultScene', result)
     }, 500)
   }
 
