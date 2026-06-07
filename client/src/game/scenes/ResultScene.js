@@ -200,8 +200,10 @@ export default class ResultScene extends Phaser.Scene {
     const goToLevelSelect = (mode, suggestedChapter, suggestedLevel) => {
       eventBus.emit(EVENTS.SHOW_LEVEL_SELECT, { mode, suggestedChapter, suggestedLevel })
       const game = this.game
-      game.scene.stop('ResultScene')
-      window.setTimeout(() => game.scene.start('MenuScene'), 0)
+      window.setTimeout(() => {
+        game.scene.stop('ResultScene')
+        game.scene.start('MenuScene')
+      }, 0)
     }
 
     // 死亡结算不允许直接进入下一关，只提供重试与关卡选择
