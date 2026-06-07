@@ -517,31 +517,34 @@ export default class WorldScene extends Phaser.Scene {
       return
     }
 
-    // 先扣血再杀 Boss：避免 Boss 击败后被扣血截断动画/结算
-    const wrongHits = result.wrongCount || 0
-    for (let i = 0; i < wrongHits; i++) {
-      const r = levelManager.loseLife()
-      if (r === 'game_over' && !this.isDead) {
-        this.isDead = true; this.isPaused = true; this.input.enabled = false
-        if (this.player?.body) this.player.setVelocity(0, 0)
-        this._destroyChoicePanel()
-        audioManager.stopBGM(0); inventory.onDeath()
-        this.scene.stop()
-        const game = this.game
-        this.gameOverTimer = window.setTimeout(() => {
-          game.scene.start('ResultScene', levelManager.getLevelResult())
-        }, 0)
-        return
-      }
-    }
-
-    // 扣 Boss HP（玩家存活）
+    // 先扣 Boss HP
     const correctHits = result.correctCount || 0
     bossData.hp -= correctHits
-    if (bossData.hp <= 0) {
+    const bossDefeated = bossData.hp <= 0
+    if (bossDefeated) {
       bossData.defeated = true
       bossData.hp = 0
       this._killBoss(bossSprite, bossData)
+    }
+
+    // Boss 已击败 → 不扣血（参考普通战斗：答错不扣命，死亡只来自碰撞）
+    if (!bossDefeated) {
+      const wrongHits = result.wrongCount || 0
+      for (let i = 0; i < wrongHits; i++) {
+        const r = levelManager.loseLife()
+        if (r === 'game_over' && !this.isDead) {
+          this.isDead = true; this.isPaused = true; this.input.enabled = false
+          if (this.player?.body) this.player.setVelocity(0, 0)
+          this._destroyChoicePanel()
+          audioManager.stopBGM(0); inventory.onDeath()
+          this.scene.stop()
+          const game = this.game
+          this.gameOverTimer = window.setTimeout(() => {
+            game.scene.start('ResultScene', levelManager.getLevelResult())
+          }, 0)
+          return
+        }
+      }
     }
 
     // 恢复所有怪物 AI
