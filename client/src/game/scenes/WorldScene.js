@@ -49,9 +49,9 @@ export default class WorldScene extends Phaser.Scene {
     this.difficulty = data?.difficulty || 'normal'
     this.isTutorial = false
     this.virtualDirection = { up: false, down: false, left: false, right: false }
-    // 装备与祝福（来自 PreparationScene）
-    this.weaponId = data?.weaponId || 'sword'
-    this.armorId = data?.armorId || 'cloth'
+    // 装备与祝福：优先 PreparationScene 传参，否则用 Inventory 持久化的上次选择
+    this.weaponId = data?.weaponId || inventory.getEquippedWeapon()
+    this.armorId = data?.armorId || inventory.getEquippedArmor()
     this.blessingId = data?.blessingId || null
     this._firstHitFree = this.blessingId === 'guard'
   }
@@ -310,6 +310,7 @@ export default class WorldScene extends Phaser.Scene {
         this._destroyChoicePanel()
         audioManager.stopBGM(0)
         inventory.onDeath()
+        this.scene.stop()
         this.gameOverTimer = window.setTimeout(() => {
           const rr = this.game.scene.getScene("ResultScene")
           const deathResult = levelManager.getLevelResult()
@@ -365,6 +366,7 @@ export default class WorldScene extends Phaser.Scene {
         this._destroyChoicePanel()
         audioManager.stopBGM(0)
         inventory.onDeath()
+        this.scene.stop()
         this.gameOverTimer = window.setTimeout(() => {
           const rr = this.game.scene.getScene('ResultScene')
           const deathResult = levelManager.getLevelResult()
@@ -410,6 +412,7 @@ export default class WorldScene extends Phaser.Scene {
               if (this.player?.body) this.player.setVelocity(0, 0)
               this._destroyChoicePanel()
               audioManager.stopBGM(0); inventory.onDeath()
+              this.scene.stop()
               this.gameOverTimer = window.setTimeout(() => {
                 const rr = this.game.scene.getScene('ResultScene')
                 const dr = levelManager.getLevelResult()
@@ -509,6 +512,7 @@ export default class WorldScene extends Phaser.Scene {
         if (this.player?.body) this.player.setVelocity(0, 0)
         this._destroyChoicePanel()
         audioManager.stopBGM(0); inventory.onDeath()
+        this.scene.stop()
         const game = this.game
         this.gameOverTimer = window.setTimeout(() => {
           const rr = game.scene.getScene('ResultScene')
@@ -555,6 +559,8 @@ export default class WorldScene extends Phaser.Scene {
     this.tweens.add({ targets: bossSprite, alpha: 0, scale: 0, angle: 360, duration: 800, ease: 'Power2', onComplete: () => {
       const label = bossSprite.getData('label')
       if (label?.active) label.destroy()
+      const arrow = bossSprite.getData('arrow')
+      if (arrow?.active) arrow.destroy()
       bossSprite.destroy()
     }})
     // 奖励金币
@@ -700,16 +706,15 @@ export default class WorldScene extends Phaser.Scene {
     const bossType = getBossTypeForLevel(this.chapter, this.level)
     if (!bossType) return
 
-    // 从 BOSS_SPAWN 区域中选择一个远离玩家的位置
-    const zone = BOSS_SPAWN.zones[Phaser.Math.Between(0, BOSS_SPAWN.zones.length - 1)]
-    const bx = Phaser.Math.Between(zone.minX, zone.maxX)
-    const by = Phaser.Math.Between(zone.minY, zone.maxY)
+    // Boss 生成在玩家前进方向的显眼位置（中上部区域）
+    const bx = Phaser.Math.Between(500, 900)
+    const by = Phaser.Math.Between(150, 350)
 
     this.bossGroup = this.physics.add.group()
     // 使用 cow_sheet 或生成纹理作为 Boss 贴图
     const texKey = this.textures.exists('cow_sheet') ? 'cow_sheet' : (this.textures.exists('monster_ranged') ? 'monster_ranged' : 'monster')
     const bossSprite = this.bossGroup.create(bx, by, texKey, 0)
-    bossSprite.setScale(3.5).setDepth(8).setImmovable(true)
+    bossSprite.setScale(4.5).setDepth(8).setImmovable(true)
     bossSprite.body.setSize(24, 24)
     if (this.anims.exists('cow_idle')) bossSprite.play('cow_idle')
 
@@ -734,6 +739,13 @@ export default class WorldScene extends Phaser.Scene {
       color: '#ff4444', stroke: '#000', strokeThickness: 3
     }).setOrigin(0.5).setDepth(10)
     bossSprite.setData('label', bossLabel)
+
+    // 世界空间引导箭头（指向 Boss）
+    const arrow = this.add.text(bx, by - 80, '▼', {
+      fontSize: '24px', color: '#ff0000', stroke: '#000', strokeThickness: 4
+    }).setOrigin(0.5).setDepth(11)
+    this.tweens.add({ targets: arrow, y: by - 90, duration: 600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' })
+    bossSprite.setData('arrow', arrow)
   }
 
   createNPC() {
@@ -817,6 +829,7 @@ export default class WorldScene extends Phaser.Scene {
     inventory.onExtract(goldEarned)
     const result = { ...levelManager.getLevelResult(), extracted: !allClear, fullClear: allClear, goldEarned, allClear }
     // 500ms 撤离动画后跳转。必须用 window.setTimeout：延迟回调 + 脱离 Phaser 事件循环
+    this.scene.stop()
     const game = this.game
     window.setTimeout(() => {
       game.scene.start('ResultScene', result)
@@ -909,12 +922,14 @@ export default class WorldScene extends Phaser.Scene {
       }
     }
 
-    // 更新 Boss 标签位置
+    // 更新 Boss 标签和箭头位置
     if (this.bossGroup) {
       this.bossGroup.getChildren().forEach(boss => {
         if (!boss.active) return
         const label = boss.getData('label')
         if (label?.active) label.setPosition(boss.x, boss.y - 50)
+        const arrow = boss.getData('arrow')
+        if (arrow?.active) arrow.setPosition(boss.x, boss.y - 80)
       })
     }
 
@@ -940,6 +955,7 @@ export default class WorldScene extends Phaser.Scene {
     if (this.bossGroup) {
       this.bossGroup.getChildren().forEach(b => {
         const label = b.getData('label'); if (label?.active) label.destroy()
+        const arrow = b.getData('arrow'); if (arrow?.active) arrow.destroy()
       })
       this.bossGroup.clear(true, true); this.bossGroup = null
     }
