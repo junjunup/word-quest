@@ -443,7 +443,7 @@ export default class WorldScene extends Phaser.Scene {
     const bossData = bossSprite.getData('bossData')
     if (!bossData || bossData.defeated) return
 
-    // ⚠️ 立即无敌，防止击退碰撞到其他怪物扣血
+    // ⚠️ 无伤触碰：立即无敌 + 冻结
     this.invincible = true
     this._bossQuizActive = true
     this.isPaused = true
@@ -457,7 +457,7 @@ export default class WorldScene extends Phaser.Scene {
     bossSprite.body.enable = false
     this.tweens.getTweensOf(bossSprite).forEach(t => t.pause())
 
-    // ⚡ Boss 战开场特效
+    // ⚡ Boss 战开场特效（1秒后进答题）
     this.cameras.main.shake(400, 0.02)
     this.cameras.main.flash(300, 255, 0, 0, true)
     const { width, height } = this.cameras.main
@@ -466,27 +466,29 @@ export default class WorldScene extends Phaser.Scene {
       color: '#ff0000', stroke: '#000', strokeThickness: 6
     }).setOrigin(0.5).setDepth(500).setScrollFactor(0)
     this.tweens.add({
-      targets: bossWarning, alpha: 0, scale: 1.5, duration: 800, delay: 600,
+      targets: bossWarning, alpha: 0, scale: 1.5, duration: 600, delay: 600,
       onComplete: () => bossWarning.destroy()
     })
 
-    // 击退玩家（无敌已激活，不会扣血）
+    // 轻微击退（无敌保护）
     const angle = Phaser.Math.Angle.Between(bossSprite.x, bossSprite.y, player.x, player.y)
-    player.setVelocity(Math.cos(angle) * 120, Math.sin(angle) * 120)
-    // 视觉闪烁代替 _startInvincibility
-    this.tweens.add({ targets: this.player, alpha: { from: 0.3, to: 1 }, duration: 150, yoyo: true, repeat: 4, onComplete: () => { if (this.player?.active) { this.player.setAlpha(1); this.invincible = false } } })
+    player.setVelocity(Math.cos(angle) * 80, Math.sin(angle) * 80)
 
     audioManager.pauseBGM(300)
-    audioManager.play('wrong')  // Boss 专属音效
 
-    // 发送 Boss 数据到 Vue 层（Boss 限时比普通短 5s）
-    eventBus.emit(EVENTS.SHOW_BOSS_QUIZ, {
-      bossName: bossData.name,
-      bossType: bossData.bossType,
-      questionsNeeded: bossData.hp,
-      bossCurrentHp: bossData.hp,
-      bossMaxHp: bossData.maxHp,
-      timeLimit: Math.max(15000, levelManager.difficultyConfig.timer - 5000)
+    // ⏱ 特效播放1秒后再弹出 BossQuizModal
+    const bossHp = bossData.hp
+    const bossMaxHp = bossData.maxHp
+    const bossName = bossData.name
+    const bossType = bossData.bossType
+    const timeLimit = Math.max(15000, levelManager.difficultyConfig.timer - 5000)
+    this.time.delayedCall(1000, () => {
+      if (!this._bossQuizActive) return  // 玩家可能已死亡
+      eventBus.emit(EVENTS.SHOW_BOSS_QUIZ, {
+        bossName, bossType,
+        questionsNeeded: bossHp, bossCurrentHp: bossHp, bossMaxHp,
+        timeLimit
+      })
     })
   }
 

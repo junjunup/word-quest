@@ -248,10 +248,10 @@ async function loadQuestion() {
   // Try API for quiz data
   try {
     if (word._id) {
-      const res = await getQuizForWord(word._id, currentQuestionType)
+      const res = await getQuizForWord(word._id, currentQuestionType.value)
       if (res.data) {
         const { question, distractors } = res.data
-        if (currentQuestionType === 'choice_cn2en') {
+        if (currentQuestionType.value === 'choice_cn2en') {
           currentOptions.value = shuffle([
             { text: question.word, correct: true },
             ...distractors.map(d => ({ text: d.word, correct: false }))
@@ -273,7 +273,7 @@ async function loadQuestion() {
   // Local fallback - use proper distractor generation
   const otherWords = props.levelWords.filter(w => w.word !== word.word && w.meaning !== word.meaning)
 
-  if (currentQuestionType === 'choice_cn2en') {
+  if (currentQuestionType.value === 'choice_cn2en') {
     currentOptions.value = buildChoiceOptions('correct', word.word, otherWords, 'word')
   } else {
     currentOptions.value = buildChoiceOptions('correct', word.meaning, otherWords, 'meaning')
@@ -329,7 +329,7 @@ function selectOption(index, option) {
     isCorrect: option.correct,
     responseTime: props.timeLimit - remainingTime.value,
     playerAnswer: option.text || '',
-    correctAnswer: currentQuestionType === 'choice_cn2en'
+    correctAnswer: currentQuestionType.value === 'choice_cn2en'
       ? currentWord.value?.word : currentWord.value?.meaning,
     answerQuality: answerQuality.value,
     editDistance: editDistance.value,
