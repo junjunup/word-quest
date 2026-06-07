@@ -9,7 +9,9 @@ import Chest from '../entities/Chest'
 import ExtractionPoint from '../entities/ExtractionPoint'
 import inventory from '../systems/Inventory'
 import audioManager from '../systems/AudioManager'
-import { CHAPTER_THEMES, CHAPTER_MONSTER_CONFIG, MONSTER_TYPES, BOSS_SPAWN } from '../config/gameConstants'
+import { CHAPTER_MONSTER_CONFIG, MONSTER_TYPES, BOSS_SPAWN } from '../config/gameConstants'
+import { generatePastoralMap } from '../systems/WorldMap'
+import { createCombatSystem } from '../systems/CombatSystem'
 
 /**
  * 主世界地图场景 - 田园像素风
@@ -63,6 +65,9 @@ export default class WorldScene extends Phaser.Scene {
     this.targetLocked = false
     this.lockedTarget = null
     this.inputBuffer = ''
+
+    // 初始化战斗系统
+    this._combat = createCombatSystem(this)
 
     this.input.enabled = true
     // 强制 Canvas 获取焦点，确保键盘事件能触发（修复首次按键无效）
@@ -188,16 +193,15 @@ export default class WorldScene extends Phaser.Scene {
           // Weapon effects
           let bonusGold = 0
           if (this.weaponId === 'sword') {
-            levelManager.score += 20  // 剑：额外 +20 score
+            levelManager.score += 20
           }
           if (this.weaponId === 'hammer' && Math.random() < 0.5) {
-            bonusGold = 100  // 锤：50% 双倍金币
+            bonusGold = 100
           }
           if (this.weaponId === 'staff' && Math.random() < 0.3) {
-            // 法杖：30% 冰冻随机另一只怪物 2s
-            this._freezeRandomMonster(this.lockedTarget.idx)
+            this._combat.freezeRandomMonster(this.lockedTarget.idx)
           }
-          this._killMonster(this.lockedTarget.idx, bonusGold)
+          this._combat.killMonster(this.lockedTarget.idx, bonusGold)
           if (!wasLast) this._cancelLock()
         } else {
           levelManager.wrongCount++
@@ -236,185 +240,9 @@ export default class WorldScene extends Phaser.Scene {
     })
   }
 
-  /**
-   * 创建田园地图（瓦片、围栏、装饰物、树）
-   */
+  /** 创建田园地图 — 委托 WorldMap 模块 */
   createPastoralMap() {
-    const mapWidth = 40
-    const mapHeight = 30
-    const tileSize = 32
-    const theme = CHAPTER_THEMES[this.chapter] || CHAPTER_THEMES[1]
-
-    this.mapContainer = this.add.container(0, 0)
-    this.decoContainer = this.add.container(0, 0).setDepth(2)
-
-    this.cameras.main.setBackgroundColor(theme.bgColor)
-
-    const isValid = (key) => this.textures.exists(key) && !failedAssetKeys.has(key)
-    const hasGrassTileset = isValid('grass_tileset')
-    const hasFenceSheet = isValid('fence_sheet')
-    const hasGrassDecor = isValid('grass_decor')
-
-    if (hasGrassTileset && !this.textures.exists('grass_v0')) {
-      const grassSource = this.textures.get('grass_tileset').getSourceImage()
-      for (let v = 0; v < 4; v++) {
-        const canvas = document.createElement('canvas')
-        canvas.width = 16
-        canvas.height = 16
-        const ctx = canvas.getContext('2d')
-        const sx = 48 + (v % 2) * 16
-        const sy = 32 + Math.floor(v / 2) * 16
-        ctx.drawImage(grassSource, sx, sy, 16, 16, 0, 0, 16, 16)
-        this.textures.addCanvas(`grass_v${v}`, canvas)
-      }
-    }
-
-    for (let y = 0; y < mapHeight; y++) {
-      for (let x = 0; x < mapWidth; x++) {
-        const px = x * tileSize + 16
-        const py = y * tileSize + 16
-        const isWall = (y === 0 || y === mapHeight - 1 || x === 0 || x === mapWidth - 1)
-
-        if (isWall) {
-          if (hasFenceSheet) {
-            let fenceFrame = 0
-            if (y === 0 && x === 0) fenceFrame = 0
-            else if (y === 0 && x === mapWidth - 1) fenceFrame = 2
-            else if (y === mapHeight - 1 && x === 0) fenceFrame = 8
-            else if (y === mapHeight - 1 && x === mapWidth - 1) fenceFrame = 10
-            else if (y === 0 || y === mapHeight - 1) fenceFrame = 1
-            else fenceFrame = 4
-
-            const fence = this.add.image(px, py, 'fence_sheet', fenceFrame).setScale(2)
-            this.mapContainer.add(fence)
-          } else {
-            const wall = this.add.image(px, py, 'wall_tile').setScale(2)
-            this.mapContainer.add(wall)
-          }
-        } else {
-          if (hasGrassTileset && this.textures.exists('grass_v0')) {
-            const v = Phaser.Math.Between(0, 3)
-            const tile = this.add.image(px, py, `grass_v${v}`).setScale(2)
-            this.mapContainer.add(tile)
-          } else {
-            const grassColors = theme.grassColors
-            const color = grassColors[Phaser.Math.Between(0, grassColors.length - 1)]
-            const tile = this.add.rectangle(px, py, tileSize, tileSize, color)
-            this.mapContainer.add(tile)
-          }
-        }
-      }
-    }
-
-    this.addDecorations(mapWidth, mapHeight, tileSize, hasGrassDecor)
-
-    this.walls = this.physics.add.staticGroup()
-    for (let x = 0; x < mapWidth; x++) {
-      const wallTop = this.walls.create(x * tileSize + 16, 16, null)
-      wallTop.setSize(tileSize, tileSize).setVisible(false).refreshBody()
-      const wallBot = this.walls.create(x * tileSize + 16, (mapHeight - 1) * tileSize + 16, null)
-      wallBot.setSize(tileSize, tileSize).setVisible(false).refreshBody()
-    }
-    for (let y = 1; y < mapHeight - 1; y++) {
-      const wallLeft = this.walls.create(16, y * tileSize + 16, null)
-      wallLeft.setSize(tileSize, tileSize).setVisible(false).refreshBody()
-      const wallRight = this.walls.create((mapWidth - 1) * tileSize + 16, y * tileSize + 16, null)
-      wallRight.setSize(tileSize, tileSize).setVisible(false).refreshBody()
-    }
-
-    this.physics.world.setBounds(0, 0, mapWidth * tileSize, mapHeight * tileSize)
-    this.cameras.main.setBounds(0, 0, mapWidth * tileSize, mapHeight * tileSize)
-  }
-
-  addDecorations(mapWidth, mapHeight, tileSize, hasGrassDecor) {
-    const theme = CHAPTER_THEMES[this.chapter] || CHAPTER_THEMES[1]
-    const padding = 3  // 离墙壁的最小距离（格数）
-    const playerSpawn = { x: 80, y: 300 }
-    const npcSpawn = { x: 700, y: 300 }
-    const exclusionDist = 120  // 与玩家/NPC出生点的排斥距离
-
-    // ─── 树定义：绿树帧[0,1,2,9,10,11]，粉树帧[3,4,5,12,13,14] ───
-    // 每棵树由 3列×2行 的 16x16 帧拼成，实际尺寸 48x32（scale 2 后 96x64）
-    const TREE_FRAMES = {
-      green: { topRow: [0, 1, 2], bottomRow: [9, 10, 11] },
-      pink:  { topRow: [3, 4, 5], bottomRow: [12, 13, 14] }
-    }
-
-    // ─── 1. 放置完整的多帧树 ───
-    if (hasGrassDecor && theme.treeTypes && theme.treeCount > 0) {
-      const treePositions = []
-      const treeExclusionDist = 120  // 树与树之间的最小距离
-
-      for (let t = 0; t < theme.treeCount; t++) {
-        const treeType = theme.treeTypes[t % theme.treeTypes.length]
-        const frames = TREE_FRAMES[treeType]
-        if (!frames) continue
-
-        // 找一个合适的位置
-        let placed = false
-        for (let attempt = 0; attempt < 50; attempt++) {
-          const gx = Phaser.Math.Between(padding, mapWidth - padding - 3)
-          const gy = Phaser.Math.Between(padding, mapHeight - padding - 2)
-          const px = gx * tileSize + 16
-          const py = gy * tileSize + 16
-
-          // 检查排斥：玩家、NPC、其他树
-          if (Math.hypot(px - playerSpawn.x, py - playerSpawn.y) < exclusionDist) continue
-          if (Math.hypot(px - npcSpawn.x, py - npcSpawn.y) < exclusionDist) continue
-          if (treePositions.some(p => Math.hypot(p.x - px, p.y - py) < treeExclusionDist)) continue
-
-          // 放置 3×2 帧组成的完整树
-          const scale = 2
-          const frameW = 16
-          for (let row = 0; row < 2; row++) {
-            const rowFrames = row === 0 ? frames.topRow : frames.bottomRow
-            for (let col = 0; col < 3; col++) {
-              const fx = px + (col - 1) * frameW * scale
-              const fy = py + (row - 0.5) * frameW * scale
-              const treePart = this.add.image(fx, fy, 'grass_decor', rowFrames[col]).setScale(scale)
-              treePart.setDepth(3)
-              this.decoContainer.add(treePart)
-            }
-          }
-
-          treePositions.push({ x: px, y: py })
-          placed = true
-          break
-        }
-      }
-    }
-
-    // ─── 2. 放置单帧小装饰（花、蘑菇、石头等） ───
-    const decoCount = theme.decoCount || 20
-    for (let i = 0; i < decoCount; i++) {
-      const gx = Phaser.Math.Between(padding, mapWidth - padding - 1)
-      const gy = Phaser.Math.Between(padding, mapHeight - padding - 1)
-      const px = gx * tileSize + 16
-      const py = gy * tileSize + 16
-
-      if (Math.hypot(px - playerSpawn.x, py - playerSpawn.y) < 80) continue
-      if (Math.hypot(px - npcSpawn.x, py - npcSpawn.y) < 80) continue
-
-      if (hasGrassDecor && theme.decoFrames && theme.decoFrames.length > 0) {
-        const frame = theme.decoFrames[Phaser.Math.Between(0, theme.decoFrames.length - 1)]
-        const deco = this.add.image(px, py, 'grass_decor', frame).setScale(2)
-        deco.setAlpha(0.9)
-        this.decoContainer.add(deco)
-      } else {
-        const decoType = Phaser.Math.Between(0, 3)
-        let deco
-        switch (decoType) {
-          case 0: deco = this.add.circle(px, py, 4, 0xff9999); break
-          case 1: deco = this.add.circle(px, py, 5, 0xd4a373); break
-          case 2: deco = this.add.circle(px, py, 6, 0x999999); break
-          case 3: deco = this.add.rectangle(px, py, 10, 8, 0x3a6b1e); break
-        }
-        if (deco) {
-          deco.setAlpha(0.7)
-          this.decoContainer.add(deco)
-        }
-      }
-    }
+    generatePastoralMap(this, { chapter: this.chapter })
   }
 
   createPlayer() {
@@ -497,172 +325,9 @@ export default class WorldScene extends Phaser.Scene {
     this.invincible = true
     this.tweens.add({ targets: this.player, alpha: { from: 0.3, to: 1 }, duration: 150, yoyo: true, repeat: Math.floor(duration / 300), onComplete: () => { if (this.player?.active) { this.player.setAlpha(1); this.invincible = false } } })
   }
-  _tryLockTarget() {
-    if (this.targetLocked || !this.player) return
-    const lockRange = this.weaponId === 'bow' ? 500 : 250
-    let closest = null, closestDist = lockRange
-    const children = this.monsters.getChildren()
-    for (let i = 0; i < children.length; i++) {
-      const m = children[i]; const idx = m.getData('index')
-      const ai = this.monsterAIs[idx]
-      if (!m.active || !ai || ai.isDefeated) continue
-      const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, m.x, m.y)
-      if (dist < closestDist) { closestDist = dist; closest = { monster: m, ai, idx } }
-    }
-    if (!closest) return
-
-    const word = levelManager.getCurrentWord()
-    if (!word) return
-    levelManager.nextWord()
-
-    // 随机题型：50% 英→中, 50% 中→英
-    const qType = Math.random() < 0.5 ? 'choice_en2cn' : 'choice_cn2en'
-    const others = levelManager.words.filter(w =>
-      (qType === 'choice_en2cn' ? w.meaning : w.word) !== (qType === 'choice_en2cn' ? word.meaning : word.word)
-    )
-    const correct = qType === 'choice_en2cn' ? word.meaning : word.word
-    const distractorKey = qType === 'choice_en2cn' ? 'meaning' : 'word'
-
-    // Generate 4 options
-    const unique = [...new Set(others.map(w => w[distractorKey]).filter(Boolean))]
-    const shuffled = unique.sort(() => Math.random() - 0.5).slice(0, 3)
-    const fallbacksCn = ['苹果','香蕉','橙子','葡萄','书本','电脑','学校','朋友']
-    const fallbacksEn = ['apple','banana','orange','grape','book','computer','school','friend']
-    const fallbacks = qType === 'choice_en2cn' ? fallbacksCn : fallbacksEn
-    while (shuffled.length < 3) {
-      const fb = fallbacks.find(f => f !== correct && !shuffled.includes(f))
-      if (fb) shuffled.push(fb); else break
-    }
-    const options = [correct, ...shuffled].sort(() => Math.random() - 0.5)
-    const correctIdx = options.indexOf(correct) + 1
-
-    this.targetLocked = true
-    this.lockedTarget = { ...closest, word, options, correctIdx, qType }
-    this.timeScale = 0.2
-    this.isPaused = true
-    audioManager.pauseBGM(200)
-
-    // Show prompt above monster
-    const promptText = qType === 'choice_en2cn' ? word.word : word.meaning
-    this.monsterLabels[closest.idx]?.setText(promptText)
-
-    // Create choice panel
-    this._createChoicePanel(promptText, options, qType)
-  }
-
-  _cancelLock() {
-    if (!this.targetLocked) return
-    const lt = this.lockedTarget
-    if (lt && this.monsterLabels[lt.idx]) {
-      const ai = this.monsterAIs[lt.idx]
-      this.monsterLabels[lt.idx].setText(ai?.isDefeated ? '💀' : '❓')
-    }
-    this._destroyChoicePanel()
-    this.targetLocked = false
-    this.lockedTarget = null
-    this.timeScale = 1.0
-    // Don't unpause or resume BGM if level is being cleared
-    if (Object.keys(this.monsterAIs).length > 0) {
-      this.isPaused = false
-      audioManager.resumeBGM(200)
-    }
-  }
-
-  _createChoicePanel(displayText, options, qType = 'choice_en2cn') {
-    const { width, height } = this.cameras.main
-    const isCn2En = qType === 'choice_cn2en'
-    // Word/meaning display at top
-    this._choiceWordText = this.add.text(width / 2, height - 115, displayText, {
-      fontSize: isCn2En ? '20px' : '26px',
-      fontFamily: isCn2En ? 'Microsoft YaHei' : '"Press Start 2P", monospace',
-      color: '#ffd700', fontStyle: 'bold',
-      stroke: '#000', strokeThickness: 4
-    }).setOrigin(0.5).setDepth(300).setScrollFactor(0)
-
-    // 4 option buttons
-    this._choiceOpts = []
-    const btnW = 200, btnH = 36, gap = 10, totalW = btnW * 4 + gap * 3
-    const startX = width / 2 - totalW / 2 + btnW / 2
-    const optFontSize = isCn2En ? '11px' : '13px'
-    const optFontFamily = isCn2En ? '"Press Start 2P", monospace' : 'Microsoft YaHei'
-    for (let i = 0; i < 4; i++) {
-      const x = startX + i * (btnW + gap), y = height - 55
-      const bg = this.add.graphics().setDepth(300).setScrollFactor(0)
-      bg.fillStyle(0x2d5016, 0.85)
-      bg.fillRoundedRect(x - btnW / 2, y - btnH / 2, btnW, btnH, 6)
-      bg.lineStyle(2, 0x8b6914)
-      bg.strokeRoundedRect(x - btnW / 2, y - btnH / 2, btnW, btnH, 6)
-      const label = this.add.text(x, y, `[${i + 1}] ${options[i]}`, {
-        fontSize: optFontSize, fontFamily: optFontFamily, color: '#f5edd6'
-      }).setOrigin(0.5).setDepth(301).setScrollFactor(0)
-      this._choiceOpts.push({ bg, label, x, y })
-    }
-
-    // Hint text adapts to question type
-    const hint = isCn2En ? '选择正确英文单词 · 1-4 数字键 · Esc取消' : '选择正确中文释义 · 1-4 数字键 · Esc取消'
-    this._choiceHint = this.add.text(width / 2, height - 130, hint, {
-      fontSize: '11px', fontFamily: 'Microsoft YaHei', color: '#c4b99a'
-    }).setOrigin(0.5).setDepth(300).setScrollFactor(0)
-  }
-
-  _destroyChoicePanel() {
-    if (this._choiceWordText) { this._choiceWordText.destroy(); this._choiceWordText = null }
-    if (this._choiceOpts) { this._choiceOpts.forEach(o => { o.bg.destroy(); o.label.destroy() }); this._choiceOpts = null }
-    if (this._choiceHint) { this._choiceHint.destroy(); this._choiceHint = null }
-  }
-
-  _killMonster(idx, bonusGold = 0) {
-    const ai = this.monsterAIs[idx]
-    if (!ai || ai.isDefeated) return
-    const monster = ai.monster
-    if (!monster || !monster.active) return
-    ai.defeat()
-    delete this.monsterAIs[idx]
-    // Death particle burst
-    for (let i = 0; i < 6; i++) {
-      const px = monster.x + Phaser.Math.Between(-10, 10)
-      const py = monster.y + Phaser.Math.Between(-10, 10)
-      const part = this.add.image(px, py, 'boss_particle').setDepth(20).setScale(1.5)
-      this.tweens.add({
-        targets: part, alpha: 0, scale: 0,
-        x: px + Phaser.Math.Between(-20, 20),
-        y: py - Phaser.Math.Between(10, 30),
-        duration: 400, delay: i * 40,
-        onComplete: () => part.destroy()
-      })
-    }
-    this.tweens.add({ targets: monster, alpha: 0, scale: 0, y: monster.y - 30, duration: 400, ease: "Back.easeIn", onComplete: () => {
-      // Clean up shadow
-      const shadow = monster.getData('shadow')
-      if (shadow) shadow.destroy()
-      monster.destroy()
-    }})
-    if (this.monsterLabels[idx]) { this.monsterLabels[idx].destroy(); this.monsterLabels[idx] = null }
-    // Gold: base 100 + weapon bonuses, apply wealth blessing multiplier
-    const wealthMult = this.blessingId === 'wealth' ? 1.5 : 1.0
-    const totalGold = Math.floor((100 + bonusGold) * wealthMult)
-    this.spawnCoinEffect(monster.x, monster.y, totalGold)
-    audioManager.play("correct")
-    levelManager.score += 100
-    eventBus.emit(EVENTS.UPDATE_HUD, { score: levelManager.score, lives: levelManager.lives })
-
-    // Check if all monsters defeated → activate extraction point
-    if (Object.keys(this.monsterAIs).length === 0) {
-      console.log('[LevelClear] All monsters defeated! Extraction point activated.')
-      this._destroyChoicePanel()
-      this.targetLocked = false
-      this.lockedTarget = null
-      this.timeScale = 1.0
-      this.isPaused = false
-      audioManager.resumeBGM(200)
-      audioManager.play('level_complete')
-      // Activate extraction point
-      if (this.extractionPoint) {
-        this.extractionPoint.activate()
-        this._showFloatingText(this.player.x, this.player.y - 20, 'All clear! Go extract!')
-      }
-    }
-  }
+  _tryLockTarget() { this._combat.tryLockTarget() }
+  _cancelLock() { this._combat.cancelLock() }
+  _destroyChoicePanel() { this._combat.destroyChoicePanel() }
 
   /** 生成弹幕（远程怪物开火） */
   _spawnProjectile({ x, y, tx, ty, speed, damage }) {
@@ -908,26 +573,8 @@ export default class WorldScene extends Phaser.Scene {
     }
   }
 
-  /** 法杖效果：随机冻结一只活着的怪物（排除当前击杀的） */
-  _freezeRandomMonster(excludeIdx) {
-    const keys = Object.keys(this.monsterAIs).filter(k => String(k) !== String(excludeIdx))
-    if (keys.length === 0) return
-    const targetIdx = keys[Phaser.Math.Between(0, keys.length - 1)]
-    const ai = this.monsterAIs[targetIdx]
-    if (ai && !ai.isDefeated) {
-      ai.freeze(2000)
-      // 在标签上显示冰冻效果
-      if (this.monsterLabels[targetIdx]) {
-        const orig = this.monsterLabels[targetIdx].text
-        this.monsterLabels[targetIdx].setText('❄️')
-        this.time.delayedCall(2000, () => {
-          if (this.monsterLabels[targetIdx] && this.monsterLabels[targetIdx].active) {
-            this.monsterLabels[targetIdx].setText('❓')
-          }
-        })
-      }
-    }
-  }
+  /** 法杖效果：委托 CombatSystem */
+  _freezeRandomMonster(excludeIdx) { this._combat.freezeRandomMonster(excludeIdx) }
 
   createMonsters() {
     this.monsters = this.physics.add.group()
@@ -1157,10 +804,7 @@ export default class WorldScene extends Phaser.Scene {
       stroke: '#000', strokeThickness: 1
     }).setOrigin(0.5).setScrollFactor(0).setDepth(100)
   }
-  _showFloatingText(x, y, text) {
-    const t = this.add.text(x, y, text, { fontSize: '16px', fontFamily: '"Press Start 2P", monospace', color: '#ffd700', stroke: '#000', strokeThickness: 3 }).setOrigin(0.5).setDepth(100)
-    this.tweens.add({ targets: t, y: y - 40, alpha: 0, duration: 1200, onComplete: () => t.destroy() })
-  }
+  _showFloatingText(x, y, text) { this._combat.showFloatingText(x, y, text) }
 
   _doExtraction() {
     if (!this.extractionPoint || this.extractionPoint.used || this.isDead) return
@@ -1179,25 +823,7 @@ export default class WorldScene extends Phaser.Scene {
     }, 500)
   }
 
-  spawnCoinEffect(x, y, score) {
-    audioManager.play("coin")
-    for (let i = 0; i < 5; i++) {
-      const coin = this.add.image(x, y, "coin").setDepth(20).setScale(1.5)
-      this.tweens.add({
-        targets: coin, x: x + Phaser.Math.Between(-40, 40), y: y - Phaser.Math.Between(30, 80),
-        alpha: 0, duration: 800, ease: "Power2", delay: i * 100, onComplete: () => coin.destroy()
-      })
-    }
-    const displayScore = score || 100
-    const scoreText = this.add.text(x, y - 20, "+" + displayScore, {
-      fontSize: "16px", fontFamily: "'Press Start 2P', Arial", color: "#ffc847", fontStyle: "bold",
-      stroke: "#5b3a1a", strokeThickness: 3
-    }).setOrigin(0.5).setDepth(20)
-    this.tweens.add({
-      targets: scoreText, y: y - 60, alpha: 0, duration: 1000,
-      onComplete: () => scoreText.destroy()
-    })
-  }
+  spawnCoinEffect(x, y, score) { this._combat.spawnCoinEffect(x, y, score) }
 
   update(time, delta) {
     if (!this.player) return
