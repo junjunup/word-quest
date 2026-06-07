@@ -18,11 +18,11 @@ export default class MenuScene extends Phaser.Scene {
     // 注册 shutdown 清理
     this.events.once('shutdown', this.shutdown, this)
 
-    // 安全网：确保 WorldScene、ResultScene、PreparationScene 已被停止，防止后台残留渲染
+    // 安全网：确保其他场景已休眠（改用 sleep 避免 stop 连锁反应）
     for (const key of ['WorldScene', 'ResultScene', 'PreparationScene']) {
       const s = this.game.scene.getScene(key)
       if (s && s.scene.isActive()) {
-        s.scene.stop()
+        s.scene.sleep()
       }
     }
 
