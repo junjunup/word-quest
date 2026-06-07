@@ -15,8 +15,11 @@ export default class ResultScene extends Phaser.Scene {
     this.result = data || {}
     this._pendingTimeouts = []
     this._needsRebuild = false
-    // Defensive: clear any stale display objects from previous session
+    // 清理上次 session 的事件监听器（sleep 不触发 shutdown，防止堆积）
+    this.events.off('shutdown', this.shutdown, this)
+    this.events.off('wake', this._onWake, this)
     this.children.removeAll(true)
+    this.tweens.killAll()
   }
 
   create() {
