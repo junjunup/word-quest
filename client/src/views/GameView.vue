@@ -470,9 +470,9 @@ async function startGameLevel() {
         if (rs.scene.isActive()) rs.scene.stop()
       }
 
-      // 强制 WorldScene 走完整 init+create：先 stop 再让 PreparationScene 触发完整 start
+      // 强制 WorldScene 走完整 init+create：用 SceneManager（非 ScenePlugin，后者对 sleeping 是 no-op）
       const ws = game.scene.getScene('WorldScene')
-      if (ws && (ws.scene.isActive() || ws.scene.isSleeping())) ws.scene.stop()
+      if (ws && (ws.scene.isActive() || ws.scene.isSleeping())) game.scene.stop('WorldScene')
       game.scene.start('PreparationScene', {
         chapter: params.chapter,
         level: params.level,
@@ -924,10 +924,10 @@ async function backToMenu() {
   quiz.reset()  // 统一重置答题状态
   audioManager.stopBGM(300)
   if (game) {
-    // 停止 WorldScene（无论是否活跃）
+    // 停止 WorldScene（SceneManager.stop 处理 active + sleeping）
     const ws = game.scene.getScene('WorldScene')
-    if (ws && ws.scene.isActive()) {
-      ws.scene.stop()
+    if (ws && (ws.scene.isActive() || ws.scene.isSleeping())) {
+      game.scene.stop('WorldScene')
     }
     await new Promise(resolve => setTimeout(resolve, 50))
     // 强制 MenuScene 走完整 init+create（而非仅 wake，避免空白菜单）
