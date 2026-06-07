@@ -318,8 +318,10 @@ export default class WorldScene extends Phaser.Scene {
         this._destroyChoicePanel()
         audioManager.stopBGM(0)
         inventory.onDeath()
+        this.scene.stop()
+        const game = this.game
         this.gameOverTimer = window.setTimeout(() => {
-          this.scene.start('ResultScene', levelManager.getLevelResult())
+          game.scene.start('ResultScene', levelManager.getLevelResult())
           this.gameOverTimer = null
         }, 0)
       }
@@ -370,8 +372,10 @@ export default class WorldScene extends Phaser.Scene {
         this._destroyChoicePanel()
         audioManager.stopBGM(0)
         inventory.onDeath()
+        this.scene.stop()
+        const game = this.game
         this.gameOverTimer = window.setTimeout(() => {
-          this.scene.start('ResultScene', levelManager.getLevelResult())
+          game.scene.start('ResultScene', levelManager.getLevelResult())
           this.gameOverTimer = null
         }, 0)
       }
@@ -412,8 +416,10 @@ export default class WorldScene extends Phaser.Scene {
               if (this.player?.body) this.player.setVelocity(0, 0)
               this._destroyChoicePanel()
               audioManager.stopBGM(0); inventory.onDeath()
+              this.scene.stop()
+              const game = this.game
               this.gameOverTimer = window.setTimeout(() => {
-                this.scene.start('ResultScene', levelManager.getLevelResult())
+                game.scene.start('ResultScene', levelManager.getLevelResult())
               }, 0)
             }
           }
@@ -525,8 +531,10 @@ export default class WorldScene extends Phaser.Scene {
           if (this.player?.body) this.player.setVelocity(0, 0)
           this._destroyChoicePanel()
           audioManager.stopBGM(0); inventory.onDeath()
+          this.scene.stop()
+          const game = this.game
           this.gameOverTimer = window.setTimeout(() => {
-            this.scene.start('ResultScene', levelManager.getLevelResult())
+            game.scene.start('ResultScene', levelManager.getLevelResult())
           }, 0)
           return
         }
@@ -838,12 +846,11 @@ export default class WorldScene extends Phaser.Scene {
     const goldEarned = allClear ? levelManager.score : Math.floor(levelManager.score / 2)
     inventory.onExtract(goldEarned)
     const result = { ...levelManager.getLevelResult(), extracted: !allClear, fullClear: allClear, goldEarned, allClear }
-    // 撤离动画后跳转。键盘回调中 this.scene.stop() 安全（不涉及display object销毁）
-    // 然后 setTimeout 启动 ResultScene，脱离 Phaser 事件循环
-    this.scene.stop()
-    const g4 = this.game
+    // 撤离动画后跳转。原始模式（381a6b4）：不提前 stop，仅 game.scene.start
+    // ResultScene 自动渲染在最上层，MenuScene 安全网负责清理残留 WorldScene
+    const game = this.game
     window.setTimeout(() => {
-      g4.scene.start('ResultScene', result)
+      game.scene.start('ResultScene', result)
     }, 500)
   }
 
