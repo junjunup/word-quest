@@ -200,6 +200,7 @@ export default class ResultScene extends Phaser.Scene {
     const goToLevelSelect = (mode, suggestedChapter, suggestedLevel) => {
       eventBus.emit(EVENTS.SHOW_LEVEL_SELECT, { mode, suggestedChapter, suggestedLevel })
       const game = this.game
+      game.scene.stop('ResultScene')
       window.setTimeout(() => game.scene.start('MenuScene'), 0)
     }
 
@@ -211,6 +212,7 @@ export default class ResultScene extends Phaser.Scene {
       this.input.enabled = false
       if (isLastLevel) {
         const game = this.game
+        game.scene.stop('ResultScene')
         window.setTimeout(() => game.scene.start('MenuScene'), 0)
         return
       }
@@ -240,6 +242,7 @@ export default class ResultScene extends Phaser.Scene {
         if (!this.scene.isActive()) return
         this.input.enabled = false
         const game = this.game
+        game.scene.stop('ResultScene')
         window.setTimeout(() => game.scene.start('MenuScene'), 0)
       })
       .on('pointerover', function () { this.setColor('#ffc847') })
