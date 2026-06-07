@@ -238,6 +238,7 @@ export default class ResultScene extends Phaser.Scene {
       .on('pointerdown', () => {
         audioManager.play('click')
         if (!this.scene.isActive()) return
+        this.input.enabled = false
         const game = this.game
         window.setTimeout(() => game.scene.start('MenuScene'), 0)
       })
