@@ -517,17 +517,7 @@ export default class WorldScene extends Phaser.Scene {
       return
     }
 
-    // 扣 Boss HP
-    const correctHits = result.correctCount || 0
-    bossData.hp -= correctHits
-    if (bossData.hp <= 0) {
-      // Boss 击败！
-      bossData.defeated = true
-      bossData.hp = 0
-      this._killBoss(bossSprite, bossData)
-    }
-
-    // 答错扣玩家血
+    // 先扣血再杀 Boss：避免 Boss 击败后被扣血截断动画/结算
     const wrongHits = result.wrongCount || 0
     for (let i = 0; i < wrongHits; i++) {
       const r = levelManager.loseLife()
@@ -539,13 +529,19 @@ export default class WorldScene extends Phaser.Scene {
         this.scene.stop()
         const game = this.game
         this.gameOverTimer = window.setTimeout(() => {
-          const rr = game.scene.getScene('ResultScene')
-          const dr = levelManager.getLevelResult()
-          if (rr && rr.scene.isSleeping()) rr.scene.wake(dr)
-          game.scene.start('ResultScene', dr)
+          game.scene.start('ResultScene', levelManager.getLevelResult())
         }, 0)
         return
       }
+    }
+
+    // 扣 Boss HP（玩家存活）
+    const correctHits = result.correctCount || 0
+    bossData.hp -= correctHits
+    if (bossData.hp <= 0) {
+      bossData.defeated = true
+      bossData.hp = 0
+      this._killBoss(bossSprite, bossData)
     }
 
     // 恢复所有怪物 AI
