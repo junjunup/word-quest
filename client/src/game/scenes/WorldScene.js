@@ -511,19 +511,24 @@ export default class WorldScene extends Phaser.Scene {
     }
     if (!closest) return
 
-    // Get word + generate choices (staff mode: pick correct meaning)
     const word = levelManager.getCurrentWord()
     if (!word) return
     levelManager.nextWord()
 
-    // Generate 4 options (1 correct + up to 3 distractors)
-    const correct = word.meaning
-    const others = levelManager.words.map(w => w.meaning).filter(m => m && m !== correct)
-    // Deduplicate and shuffle
-    const unique = [...new Set(others)]
+    // 随机题型：50% 英→中, 50% 中→英
+    const qType = Math.random() < 0.5 ? 'choice_en2cn' : 'choice_cn2en'
+    const others = levelManager.words.filter(w =>
+      (qType === 'choice_en2cn' ? w.meaning : w.word) !== (qType === 'choice_en2cn' ? word.meaning : word.word)
+    )
+    const correct = qType === 'choice_en2cn' ? word.meaning : word.word
+    const distractorKey = qType === 'choice_en2cn' ? 'meaning' : 'word'
+
+    // Generate 4 options
+    const unique = [...new Set(others.map(w => w[distractorKey]).filter(Boolean))]
     const shuffled = unique.sort(() => Math.random() - 0.5).slice(0, 3)
-    // Fallback distractors if not enough unique meanings
-    const fallbacks = ['苹果','香蕉','橙子','葡萄','书本','电脑','学校','朋友']
+    const fallbacksCn = ['苹果','香蕉','橙子','葡萄','书本','电脑','学校','朋友']
+    const fallbacksEn = ['apple','banana','orange','grape','book','computer','school','friend']
+    const fallbacks = qType === 'choice_en2cn' ? fallbacksCn : fallbacksEn
     while (shuffled.length < 3) {
       const fb = fallbacks.find(f => f !== correct && !shuffled.includes(f))
       if (fb) shuffled.push(fb); else break
@@ -532,16 +537,17 @@ export default class WorldScene extends Phaser.Scene {
     const correctIdx = options.indexOf(correct) + 1
 
     this.targetLocked = true
-    this.lockedTarget = { ...closest, word, options, correctIdx }
+    this.lockedTarget = { ...closest, word, options, correctIdx, qType }
     this.timeScale = 0.2
     this.isPaused = true
     audioManager.pauseBGM(200)
 
-    // Show English word above monster
-    this.monsterLabels[closest.idx]?.setText(word.word)
+    // Show prompt above monster
+    const promptText = qType === 'choice_en2cn' ? word.word : word.meaning
+    this.monsterLabels[closest.idx]?.setText(promptText)
 
     // Create choice panel
-    this._createChoicePanel(word.word, options)
+    this._createChoicePanel(promptText, options, qType)
   }
 
   _cancelLock() {
@@ -562,11 +568,14 @@ export default class WorldScene extends Phaser.Scene {
     }
   }
 
-  _createChoicePanel(word, options) {
+  _createChoicePanel(displayText, options, qType = 'choice_en2cn') {
     const { width, height } = this.cameras.main
-    // Word display at top
-    this._choiceWordText = this.add.text(width / 2, height - 115, word, {
-      fontSize: '26px', fontFamily: '"Press Start 2P", monospace', color: '#ffd700', fontStyle: 'bold',
+    const isCn2En = qType === 'choice_cn2en'
+    // Word/meaning display at top
+    this._choiceWordText = this.add.text(width / 2, height - 115, displayText, {
+      fontSize: isCn2En ? '20px' : '26px',
+      fontFamily: isCn2En ? 'Microsoft YaHei' : '"Press Start 2P", monospace',
+      color: '#ffd700', fontStyle: 'bold',
       stroke: '#000', strokeThickness: 4
     }).setOrigin(0.5).setDepth(300).setScrollFactor(0)
 
@@ -574,6 +583,8 @@ export default class WorldScene extends Phaser.Scene {
     this._choiceOpts = []
     const btnW = 200, btnH = 36, gap = 10, totalW = btnW * 4 + gap * 3
     const startX = width / 2 - totalW / 2 + btnW / 2
+    const optFontSize = isCn2En ? '11px' : '13px'
+    const optFontFamily = isCn2En ? '"Press Start 2P", monospace' : 'Microsoft YaHei'
     for (let i = 0; i < 4; i++) {
       const x = startX + i * (btnW + gap), y = height - 55
       const bg = this.add.graphics().setDepth(300).setScrollFactor(0)
@@ -582,16 +593,16 @@ export default class WorldScene extends Phaser.Scene {
       bg.lineStyle(2, 0x8b6914)
       bg.strokeRoundedRect(x - btnW / 2, y - btnH / 2, btnW, btnH, 6)
       const label = this.add.text(x, y, `[${i + 1}] ${options[i]}`, {
-        fontSize: '13px', fontFamily: 'Microsoft YaHei', color: '#f5edd6'
+        fontSize: optFontSize, fontFamily: optFontFamily, color: '#f5edd6'
       }).setOrigin(0.5).setDepth(301).setScrollFactor(0)
-      this._choiceOpts.push({ bg, label, x, y })  // store x,y for flash
+      this._choiceOpts.push({ bg, label, x, y })
     }
 
-    // Hint
-    this._choiceHint = this.add.text(width / 2, height - 130, '选择正确中文释义 · 1-4 数字键 · Esc取消', {
+    // Hint text adapts to question type
+    const hint = isCn2En ? '选择正确英文单词 · 1-4 数字键 · Esc取消' : '选择正确中文释义 · 1-4 数字键 · Esc取消'
+    this._choiceHint = this.add.text(width / 2, height - 130, hint, {
       fontSize: '11px', fontFamily: 'Microsoft YaHei', color: '#c4b99a'
     }).setOrigin(0.5).setDepth(300).setScrollFactor(0)
-
   }
 
   _destroyChoicePanel() {
