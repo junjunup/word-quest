@@ -199,11 +199,7 @@ export default class ResultScene extends Phaser.Scene {
     // 如果在 pointerdown handler 中同步调用，会销毁正在处理输入事件的 game object → 卡死
     const goToLevelSelect = (mode, suggestedChapter, suggestedLevel) => {
       eventBus.emit(EVENTS.SHOW_LEVEL_SELECT, { mode, suggestedChapter, suggestedLevel })
-      const game = this.game
-      window.setTimeout(() => {
-        game.scene.stop('ResultScene')
-        game.scene.start('MenuScene')
-      }, 0)
+      window.setTimeout(() => this.scene.start('MenuScene'), 0)
     }
 
     // 死亡结算不允许直接进入下一关，只提供重试与关卡选择
@@ -213,11 +209,7 @@ export default class ResultScene extends Phaser.Scene {
       if (!this.scene.isActive()) return
       this.input.enabled = false
       if (isLastLevel) {
-        const game = this.game
-        window.setTimeout(() => {
-          game.scene.stop('ResultScene')
-          game.scene.start('MenuScene')
-        }, 0)
+        window.setTimeout(() => this.scene.start('MenuScene'), 0)
         return
       }
       if (isGameOver) {
@@ -245,11 +237,7 @@ export default class ResultScene extends Phaser.Scene {
         audioManager.play('click')
         if (!this.scene.isActive()) return
         this.input.enabled = false
-        const game = this.game
-        window.setTimeout(() => {
-          game.scene.stop('ResultScene')
-          game.scene.start('MenuScene')
-        }, 0)
+        window.setTimeout(() => this.scene.start('MenuScene'), 0)
       })
       .on('pointerover', function () { this.setColor('#ffc847') })
       .on('pointerout', function () { this.setColor('#c4b99a') })
