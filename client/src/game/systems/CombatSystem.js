@@ -7,6 +7,7 @@ import audioManager from './AudioManager'
 import levelManager from './LevelManager'
 import eventBus, { EVENTS } from './EventBus'
 import inventory from './Inventory'
+import { evaluateSpellingAnswer } from '../../utils/helpers'
 
 /**
  * 在 scene 上创建战斗系统
@@ -36,36 +37,46 @@ export function createCombatSystem(scene) {
     if (!word) return
     levelManager.nextWord()
 
-    // 随机题型：50% 英→中, 50% 中→英
-    const qType = Math.random() < 0.5 ? 'choice_en2cn' : 'choice_cn2en'
-    const others = levelManager.words.filter(w =>
-      (qType === 'choice_en2cn' ? w.meaning : w.word) !== (qType === 'choice_en2cn' ? word.meaning : word.word)
-    )
-    const correct = qType === 'choice_en2cn' ? word.meaning : word.word
-    const distractorKey = qType === 'choice_en2cn' ? 'meaning' : 'word'
-
-    const unique = [...new Set(others.map(w => w[distractorKey]).filter(Boolean))]
-    const shuffled = unique.sort(() => Math.random() - 0.5).slice(0, 3)
-    const fallbacksCn = ['苹果','香蕉','橙子','葡萄','书本','电脑','学校','朋友']
-    const fallbacksEn = ['apple','banana','orange','grape','book','computer','school','friend']
-    const fallbacks = qType === 'choice_en2cn' ? fallbacksCn : fallbacksEn
-    while (shuffled.length < 3) {
-      const fb = fallbacks.find(f => f !== correct && !shuffled.includes(f))
-      if (fb) shuffled.push(fb); else break
-    }
-    const options = [correct, ...shuffled].sort(() => Math.random() - 0.5)
-    const correctIdx = options.indexOf(correct) + 1
+    // 随机题型：40% 英→中, 35% 中→英, 25% 拼写
+    const roll = Math.random()
+    const qType = roll < 0.4 ? 'choice_en2cn' : roll < 0.75 ? 'choice_cn2en' : 'spell_hint'
 
     scene.targetLocked = true
-    scene.lockedTarget = { ...closest, word, options, correctIdx, qType }
+    scene.lockedTarget = { ...closest, word, qType }
     scene.timeScale = 0.2
     scene.isPaused = true
     audioManager.pauseBGM(200)
 
-    const promptText = qType === 'choice_en2cn' ? word.word : word.meaning
-    scene.monsterLabels?.[closest.idx]?.setText(promptText)
+    if (qType === 'spell_hint') {
+      // 拼写模式：显示英文单词，玩家输入
+      scene.lockedTarget.correctAnswer = word.word
+      scene.monsterLabels?.[closest.idx]?.setText(word.word)
+      showSpellInput(scene, word)
+    } else {
+      // 选择题模式
+      const others = levelManager.words.filter(w =>
+        (qType === 'choice_en2cn' ? w.meaning : w.word) !== (qType === 'choice_en2cn' ? word.meaning : word.word)
+      )
+      const correct = qType === 'choice_en2cn' ? word.meaning : word.word
+      const distractorKey = qType === 'choice_en2cn' ? 'meaning' : 'word'
 
-    createChoicePanel(scene, promptText, options, qType)
+      const unique = [...new Set(others.map(w => w[distractorKey]).filter(Boolean))]
+      const shuffled = unique.sort(() => Math.random() - 0.5).slice(0, 3)
+      const fallbacksCn = ['苹果','香蕉','橙子','葡萄','书本','电脑','学校','朋友']
+      const fallbacksEn = ['apple','banana','orange','grape','book','computer','school','friend']
+      const fallbacks = qType === 'choice_en2cn' ? fallbacksCn : fallbacksEn
+      while (shuffled.length < 3) {
+        const fb = fallbacks.find(f => f !== correct && !shuffled.includes(f))
+        if (fb) shuffled.push(fb); else break
+      }
+      const options = [correct, ...shuffled].sort(() => Math.random() - 0.5)
+      scene.lockedTarget.options = options
+      scene.lockedTarget.correctIdx = options.indexOf(correct) + 1
+
+      const promptText = qType === 'choice_en2cn' ? word.word : word.meaning
+      scene.monsterLabels?.[closest.idx]?.setText(promptText)
+      createChoicePanel(scene, promptText, options, qType)
+    }
   }
 
   /** 取消锁定 */
@@ -186,10 +197,16 @@ export function createCombatSystem(scene) {
   }
 
   /** 清理选择面板 */
-  api.destroyChoicePanel = () => destroyChoicePanel(scene)
+  api.destroyChoicePanel = () => { destroyChoicePanel(scene); hideSpellInput(scene) }
 
-  /** 检查是否有活跃战斗 */
-  api.isActive = () => scene.targetLocked
+  /** 提交拼写答案 */
+  api.submitSpell = (inputText) => handleSpellSubmit(scene, api, inputText)
+
+  /** 取消拼写 */
+  api.cancelSpell = () => hideSpellInput(scene)
+
+  /** 检查是否拼写模式 */
+  api.isSpellMode = () => scene.targetLocked && scene.lockedTarget?.qType === 'spell_hint'
 
   return api
 }
@@ -234,4 +251,98 @@ function destroyChoicePanel(scene) {
   if (scene._choiceWordText) { scene._choiceWordText.destroy(); scene._choiceWordText = null }
   if (scene._choiceOpts) { scene._choiceOpts.forEach(o => { o.bg.destroy(); o.label.destroy() }); scene._choiceOpts = null }
   if (scene._choiceHint) { scene._choiceHint.destroy(); scene._choiceHint = null }
+}
+
+// ─── 拼写输入 DOM 管理 ───
+
+function showSpellInput(scene, word) {
+  hideSpellInput(scene) // 清理旧的
+
+  const { width, height } = scene.cameras.main
+  const canvas = scene.game.canvas
+  const canvasRect = canvas.getBoundingClientRect()
+  const scaleX = canvasRect.width / width
+  const scaleY = canvasRect.height / height
+
+  // 提示文字（Canvas）
+  scene._choiceWordText = scene.add.text(width / 2, height - 130, `拼写: ${word.word}`, {
+    fontSize: '20px', fontFamily: '"Press Start 2P", monospace',
+    color: '#ffd700', stroke: '#000', strokeThickness: 4
+  }).setOrigin(0.5).setDepth(300).setScrollFactor(0)
+
+  scene._choiceHint = scene.add.text(width / 2, height - 105, '输入英文单词 · Enter提交 · Esc取消', {
+    fontSize: '11px', fontFamily: 'Microsoft YaHei', color: '#c4b99a'
+  }).setOrigin(0.5).setDepth(300).setScrollFactor(0)
+
+  // DOM 输入框
+  const input = document.createElement('input')
+  input.type = 'text'
+  input.id = 'wordquest-spell-input'
+  input.style.cssText = `
+    position: fixed; left: ${canvasRect.left + canvasRect.width / 2 - 150}px;
+    top: ${canvasRect.top + canvasRect.height * 0.75}px;
+    width: 300px; height: 40px; font-size: 20px; text-align: center;
+    font-family: 'Press Start 2P', monospace; background: rgba(45,80,22,0.9);
+    color: #ffd700; border: 2px solid #8b6914; border-radius: 6px;
+    z-index: 9999; outline: none;
+  `
+  input.setAttribute('autocomplete', 'off')
+  input.setAttribute('spellcheck', 'false')
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      handleSpellSubmit(scene, input.value)
+    } else if (e.key === 'Escape') {
+      e.preventDefault()
+      hideSpellInput(scene)
+      scene._combat?.cancelLock()
+    }
+  })
+  document.body.appendChild(input)
+  setTimeout(() => input.focus(), 50)
+  scene._spellInput = input
+}
+
+function hideSpellInput(scene) {
+  if (scene._spellInput) {
+    scene._spellInput.remove()
+    scene._spellInput = null
+  }
+}
+
+function handleSpellSubmit(scene, inputText) {
+  const combat = scene._combat
+  if (!combat || !scene.targetLocked || !scene.lockedTarget) return
+  const correctWord = scene.lockedTarget.correctAnswer || scene.lockedTarget.word?.word
+  if (!correctWord) return
+
+  const result = evaluateSpellingAnswer(inputText.trim(), correctWord)
+  hideSpellInput(scene)
+
+  if (result.isCorrect) {
+    levelManager.correctCount++
+    audioManager.play('correct')
+    const wasLast = Object.keys(scene.monsterAIs || {}).length === 1
+    let bonusGold = 0
+    if (scene.weaponId === 'sword') levelManager.score += 20
+    if (scene.weaponId === 'hammer' && Math.random() < 0.5) bonusGold = 100
+    if (scene.weaponId === 'staff' && Math.random() < 0.3) {
+      combat.freezeRandomMonster(scene.lockedTarget.idx)
+    }
+    combat.killMonster(scene.lockedTarget.idx, bonusGold)
+    if (!wasLast) combat.cancelLock()
+  } else {
+    levelManager.wrongCount++
+    audioManager.play('wrong')
+    const { width, height } = scene.cameras.main
+    const feedback = scene.add.text(width / 2, height - 60, `✗ 正确答案: ${correctWord}`, {
+      fontSize: '14px', fontFamily: 'Microsoft YaHei', color: '#ff4444',
+      stroke: '#000', strokeThickness: 3
+    }).setOrigin(0.5).setDepth(302).setScrollFactor(0)
+    scene._flashTimer = window.setTimeout(() => {
+      if (feedback.active) feedback.destroy()
+      scene._flashTimer = null
+      combat.cancelLock()
+    }, 800)
+  }
 }

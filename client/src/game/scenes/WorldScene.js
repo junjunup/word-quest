@@ -183,6 +183,11 @@ export default class WorldScene extends Phaser.Scene {
     // Register combat key handler once (not lazily)
     this._keyHandler = (event) => {
       if (!this.targetLocked || this.isDead) return
+      // 拼写模式：DOM input 处理所有输入，这里只处理 Escape
+      if (this.lockedTarget?.qType === 'spell_hint') {
+        if (event.key === 'Escape') this._cancelLock()
+        return
+      }
       if (event.key === 'Escape') { this._cancelLock(); return }
       const num = parseInt(event.key)
       if (num >= 1 && num <= 4 && this.lockedTarget) {
@@ -940,6 +945,9 @@ export default class WorldScene extends Phaser.Scene {
     if (this.gameOverTimer) { clearTimeout(this.gameOverTimer); this.gameOverTimer = null }
     if (this._keyHandler) { this.input.keyboard?.off('keydown', this._keyHandler); this._keyHandler = null }
     this._destroyChoicePanel()
+    // 清理拼写输入 DOM（防御：即使 _destroyChoicePanel 已调用也确保清理）
+    const spellEl = document.getElementById('wordquest-spell-input')
+    if (spellEl) spellEl.remove()
     if (this.escKey) this.escKey.removeAllListeners()
     // Boss quiz listener cleanup
     if (this._onBossQuizResult) { eventBus.off(EVENTS.BOSS_QUIZ_RESULT, this._onBossQuizResult); this._onBossQuizResult = null }
