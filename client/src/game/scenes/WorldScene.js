@@ -457,21 +457,35 @@ export default class WorldScene extends Phaser.Scene {
     bossSprite.body.enable = false
     this.tweens.getTweensOf(bossSprite).forEach(t => t.pause())
 
+    // ⚡ Boss 战开场特效：屏幕震动 + 红色闪光 + 警告文字
+    this.cameras.main.shake(400, 0.02)
+    this.cameras.main.flash(300, 255, 0, 0, true)
+    const { width, height } = this.cameras.main
+    const bossWarning = this.add.text(width / 2, height / 2 - 60, '⚠️  BOSS  ⚠️', {
+      fontSize: '36px', fontFamily: '"Press Start 2P", monospace',
+      color: '#ff0000', stroke: '#000', strokeThickness: 6
+    }).setOrigin(0.5).setDepth(500).setScrollFactor(0)
+    this.tweens.add({
+      targets: bossWarning, alpha: 0, scale: 1.5, duration: 800, delay: 600,
+      onComplete: () => bossWarning.destroy()
+    })
+
     // 启动无敌防止连续触发，同时击退玩家
-    this._startInvincibility(800)
+    this._startInvincibility(1200)
     const angle = Phaser.Math.Angle.Between(bossSprite.x, bossSprite.y, player.x, player.y)
     player.setVelocity(Math.cos(angle) * 120, Math.sin(angle) * 120)
 
     audioManager.pauseBGM(300)
+    audioManager.play('wrong')  // Boss 专属音效
 
-    // 发送 Boss 数据到 Vue 层
+    // 发送 Boss 数据到 Vue 层（Boss 限时比普通短 5s）
     eventBus.emit(EVENTS.SHOW_BOSS_QUIZ, {
       bossName: bossData.name,
       bossType: bossData.bossType,
       questionsNeeded: bossData.hp,
       bossCurrentHp: bossData.hp,
       bossMaxHp: bossData.maxHp,
-      timeLimit: levelManager.difficultyConfig.timer
+      timeLimit: Math.max(15000, levelManager.difficultyConfig.timer - 5000)
     })
   }
 

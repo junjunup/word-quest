@@ -499,6 +499,9 @@ function onShowBossQuiz(data) {
   bossQuizData.bossCurrentHp = data.bossCurrentHp || 0
   bossQuizData.bossMaxHp = data.bossMaxHp || 0
   bossQuizData.timeLimit = data.timeLimit || gameStore.difficultyConfig.timer
+  // Boss 战随机题型
+  const bossTypes = ['choice_en2cn', 'choice_cn2en', 'spell_hint', 'spell_full']
+  quiz.currentQuestionType = bossTypes[Math.floor(Math.random() * bossTypes.length)]
   audioManager.pauseBGM(300, 'boss_quiz')
   showBossQuiz.value = true
 }
