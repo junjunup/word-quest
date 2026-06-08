@@ -151,6 +151,7 @@ const achievementContext = reactive({
   maxCombo: 0,
   wordsLearned: 0,
   fastestCorrect: 0,
+  fastestNonChoiceCorrect: 0, // 仅统计拼写/翻译题的最快答对，用于 speed_demon
   chaptersCompleted: 0,
   loginStreak: 0,
   npcChats: 0

@@ -43,6 +43,11 @@ class LevelManager {
     return false
   }
 
+  // 死亡前挨救判定（修复时序 bug）：未用过恩赐生命 + 已无命 + 本关至少答对过1题 + 非教程
+  shouldGraceRescue() {
+    return !this.graceLifeUsed && this.lives <= 0 && this.correctCount >= 1 && !this.isTutorial
+  }
+
   /**
    * 教程模式：99命、60秒
    */
@@ -116,13 +121,27 @@ class LevelManager {
       this.lives = Math.max(0, this.lives - 1)
     }
 
-    // 更新HUD
+    // 死亡螺旋保护（时序修复）：扣命后已无命但满足挨救条件，则续 1 命。
+    // 挨救判定必须在 UPDATE_HUD 之前，以免续命时 HUD 先闪一帧 0 命。
+    let rescued = false
+    if (this.lives <= 0 && this.shouldGraceRescue()) {
+      this.lives = 1
+      this.graceLifeUsed = true
+      rescued = true
+    }
+
+    // 更新HUD（使用挨救后的最终 lives）
     eventBus.emit(EVENTS.UPDATE_HUD, {
       lives: this.lives,
       score: this.score,
       combo: this.combo,
       progress: this.getProgress()
     })
+
+    if (rescued) {
+      eventBus.emit(EVENTS.GRACE_RESCUE, { lives: this.lives })
+      return 'grace_rescued'
+    }
 
     // 检查生命
     if (this.lives <= 0) {

@@ -55,6 +55,7 @@ export const EVENTS = {
   SHOW_CHAT: 'show_chat',             // 显示NPC对话
   LEVEL_COMPLETE: 'level_complete',     // 关卡完成
   GAME_OVER: 'game_over',             // 游戏结束(生命耗尽)
+  GRACE_RESCUE: 'grace_rescue',       // 死亡螺旋恩赐生命挨救
   UPDATE_HUD: 'update_hud',           // 更新HUD信息
   SHOW_ACHIEVEMENT: 'show_achievement', // 显示成就弹窗
 

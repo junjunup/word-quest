@@ -68,7 +68,8 @@ class ScoreSystem {
           unlocked = context.wordsLearned >= 400
           break
         case 'speed_demon':
-          unlocked = context.fastestCorrect > 0 && context.fastestCorrect <= 3000
+          // 仅非选择题（3秒内答对）才解锁，避免奖励选择题秒选/蒙对
+          unlocked = context.fastestNonChoiceCorrect > 0 && context.fastestNonChoiceCorrect <= 3000
           break
         case 'chapter_1':
           unlocked = context.chaptersCompleted >= 1

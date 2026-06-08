@@ -27,19 +27,28 @@ export function useQuizFlow(hudData, levelWordsRef, gameStore) {
   // 答错→NPC对话→关闭后自动重出题标记
   const retryQuizAfterChat = ref(false)
 
+  // T3: 记录后端推荐题型 与 本题是否因死亡螺旋被降级
+  const recommendedType = ref('choice_en2cn')
+  const wasDowngraded = ref(false)
+
   /** 死亡螺旋保护 + 题型选择 */
   function selectQuestionType() {
+    const backendRecommend = adaptiveQuestionType.value || 'choice_en2cn'
+    recommendedType.value = backendRecommend
+    wasDowngraded.value = false
     if (consecutiveWrong.value >= DEATH_SPIRAL.forceEasyThreshold) {
       currentQuestionType.value = DEATH_SPIRAL.downgradeType
       currentDifficulty.value = DEATH_SPIRAL.forcedDifficulty
+      wasDowngraded.value = (DEATH_SPIRAL.downgradeType !== backendRecommend)
       const granted = levelManager.grantGraceLife()
       if (granted && hudData) hudData.lives = levelManager.lives
     } else if (consecutiveWrong.value >= DEATH_SPIRAL.downgradeThreshold) {
-      const adaptive = adaptiveQuestionType.value || 'choice_en2cn'
-      const typeConfig = QUESTION_TYPES[adaptive]
-      currentQuestionType.value = (typeConfig && !typeConfig.isChoice) ? DEATH_SPIRAL.downgradeType : adaptive
+      const typeConfig = QUESTION_TYPES[backendRecommend]
+      const picked = (typeConfig && !typeConfig.isChoice) ? DEATH_SPIRAL.downgradeType : backendRecommend
+      currentQuestionType.value = picked
+      wasDowngraded.value = (picked !== backendRecommend)
     } else {
-      currentQuestionType.value = adaptiveQuestionType.value || 'choice_en2cn'
+      currentQuestionType.value = backendRecommend
     }
   }
 
@@ -186,6 +195,13 @@ export function useQuizFlow(hudData, levelWordsRef, gameStore) {
         if (responseTime < achievementContext.fastestCorrect || achievementContext.fastestCorrect === 0) {
           achievementContext.fastestCorrect = responseTime
         }
+        // T2: 仅非选择题（拼写/翻译）计入 speed_demon 的最快答对
+        const _qtCfg = QUESTION_TYPES[currentQuestionType.value]
+        if (_qtCfg && _qtCfg.isChoice === false) {
+          if (responseTime < achievementContext.fastestNonChoiceCorrect || !achievementContext.fastestNonChoiceCorrect) {
+            achievementContext.fastestNonChoiceCorrect = responseTime
+          }
+        }
       }
     } else if (status !== 'game_over') {
       pendingWrongAnswer.value = true
@@ -222,7 +238,13 @@ export function useQuizFlow(hudData, levelWordsRef, gameStore) {
       sessionId: levelManager.sessionId,
       chapter: hudData?.chapter, level: hudData?.level,
       playerAnswer: answer, correctAnswer: correctAnswerForType,
-      answerQuality, editDistance, similarity, scoreRatio, fuzzyFeedback
+      answerQuality, editDistance, similarity, scoreRatio, fuzzyFeedback,
+      // T3: 区分后端推荐题型与实际呈现题型，避免降级污染 SM-2
+      recommendedType: recommendedType.value,
+      presentedType: currentQuestionType.value,
+      wasDowngraded: wasDowngraded.value,
+      // T4: 学习效果度量埋点（recall=主动回忆 / recognition=再认）
+      recallMode: (QUESTION_TYPES[currentQuestionType.value]?.isChoice === false) ? 'recall' : 'recognition'
     }
     try {
       const res = await submitQuizRecord(payload)
