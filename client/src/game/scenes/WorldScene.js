@@ -956,6 +956,31 @@ export default class WorldScene extends Phaser.Scene {
 
   }
 
+  _safeGetGroupChildren(group) {
+    if (!group) return []
+    try {
+      return group.children ? group.getChildren() : []
+    } catch (e) {
+      return []
+    }
+  }
+
+  _safeClearGroup(group, destroyChildren = true) {
+    if (!group) return
+    try {
+      if (group.children) {
+        group.clear(true, destroyChildren)
+        return
+      }
+    } catch (e) {
+      // Phaser may already have released group.children during scene shutdown.
+    }
+
+    this._safeGetGroupChildren(group).forEach(child => {
+      if (child?.active && child.destroy) child.destroy()
+    })
+  }
+
   shutdown() {
     if (this._flashTimer) { clearTimeout(this._flashTimer); this._flashTimer = null }
     if (this.gameOverTimer) { clearTimeout(this.gameOverTimer); this.gameOverTimer = null }
@@ -971,22 +996,22 @@ export default class WorldScene extends Phaser.Scene {
     this.input.enabled = false
     this.tweens.killAll()
     // 清理弹幕和AOE
-    if (this.projectiles) { this.projectiles.clear(true, true); this.projectiles = null }
+    if (this.projectiles) { this._safeClearGroup(this.projectiles); this.projectiles = null }
     this._activeProjectiles = []
     this._activeAOEs = []
     if (this.monsterLabels) { this.monsterLabels.forEach(l => { if (l?.active) l.destroy() }); this.monsterLabels = [] }
     // Clean up Boss
     if (this.bossGroup) {
-      this.bossGroup.getChildren().forEach(b => {
+      this._safeGetGroupChildren(this.bossGroup).forEach(b => {
         const label = b.getData('label'); if (label?.active) label.destroy()
         const arrow = b.getData('arrow'); if (arrow?.active) arrow.destroy()
       })
-      this.bossGroup.clear(true, true); this.bossGroup = null
+      this._safeClearGroup(this.bossGroup); this.bossGroup = null
     }
     this.boss = null
     // Clean up monster shadows
     if (this.monsters) {
-      this.monsters.getChildren().forEach(m => {
+      this._safeGetGroupChildren(this.monsters).forEach(m => {
         const s = m.getData?.('shadow'); if (s?.active) s.destroy()
       })
     }

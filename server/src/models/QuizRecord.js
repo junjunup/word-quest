@@ -2,6 +2,13 @@ import mongoose from 'mongoose'
 
 const sourceModes = ['mainline', 'boss', 'review', 'daily', 'pk', 'pronunciation', 'endless']
 const errorTypes = ['unknown', 'spelling_near', 'meaning_confusion', 'timeout', 'pronunciation', 'other']
+const questionTypes = ['choice_en2cn', 'choice_cn2en', 'spell_hint', 'spell_full', 'fill_blank', 'translate', 'pronunciation']
+const recallModes = ['recognition', 'recall']
+const recognitionTypes = new Set(['choice_en2cn', 'choice_cn2en'])
+
+function inferRecallMode(questionType) {
+  return recognitionTypes.has(questionType) ? 'recognition' : 'recall'
+}
 
 const quizRecordSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -10,8 +17,24 @@ const quizRecordSchema = new mongoose.Schema({
   word: { type: String, required: true },
   questionType: {
     type: String,
-    enum: ['choice_en2cn', 'choice_cn2en', 'spell_hint', 'spell_full', 'fill_blank', 'translate', 'pronunciation'],
+    enum: questionTypes,
     required: true
+  },
+  recommendedType: { type: String, enum: questionTypes, default: null },
+  presentedType: {
+    type: String,
+    enum: questionTypes,
+    default: function defaultPresentedType() {
+      return this.questionType
+    }
+  },
+  wasDowngraded: { type: Boolean, default: false },
+  recallMode: {
+    type: String,
+    enum: recallModes,
+    default: function defaultRecallMode() {
+      return inferRecallMode(this.presentedType || this.questionType)
+    }
   },
   sourceMode: { type: String, enum: sourceModes, default: 'mainline', index: true },
   errorType: { type: String, enum: errorTypes, default: 'unknown', index: true },
@@ -44,6 +67,8 @@ quizRecordSchema.index({ userId: 1, wordId: 1 })
 quizRecordSchema.index({ userId: 1, chapter: 1 })
 quizRecordSchema.index({ userId: 1, wordbookId: 1, sourceMode: 1, createdAt: -1 })
 quizRecordSchema.index({ userId: 1, wordbookId: 1, errorType: 1, createdAt: -1 })
+quizRecordSchema.index({ userId: 1, wordbookId: 1, recallMode: 1, createdAt: -1 })
+quizRecordSchema.index({ userId: 1, wordbookId: 1, wasDowngraded: 1, createdAt: -1 })
 quizRecordSchema.index({ sessionId: 1, sourceMode: 1 })
 
 export default mongoose.model('QuizRecord', quizRecordSchema)

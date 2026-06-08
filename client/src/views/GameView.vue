@@ -110,6 +110,15 @@
       :achievement="achievementData"
       @close="achievementData = null"
     />
+
+    <!-- 死亡螺旋救援提示 -->
+    <div class="grace-rescue-toast" v-if="graceRescueToast.visible">
+      <div class="grace-icon">🛡️</div>
+      <div class="grace-copy">
+        <strong>小智救援生效</strong>
+        <span>保留 1 点生命，这个词会进入重点复习。</span>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -173,6 +182,7 @@ const gameStore = useGameStore()
 const phaserContainer = ref(null)
 let game = null
 let chatSafetyTimer = null
+let graceRescueTimer = null
 
 // UI状态机: 'game' | 'levelSelect' | 'characterSelect' | 'intro' | 'leaderboard'
 const uiState = ref('game')
@@ -185,6 +195,10 @@ const showPauseMenu = ref(false)
 const achievementData = ref(null)
 const showTutorial = ref(false)
 const isTutorialLevel = ref(false)
+const graceRescueToast = reactive({
+  visible: false,
+  lives: 0
+})
 const loadError = ref('')
 const showDailyChallenge = ref(false)
 const showShop = ref(false)
@@ -336,6 +350,10 @@ async function onStartLevel(data) {
     hudData.maxLives = 99
     hudData.lives = 99
   }
+
+  if (!isTutorial && uiState.value === 'game') {
+    showTutorial.value = true
+  }
 }
 
 // --- UI Panel Event Handlers ---
@@ -353,6 +371,18 @@ function setPhaserInputEnabled(enabled) {
     if (scene && scene.scene.isActive()) {
       scene.input.enabled = enabled
     }
+  }
+}
+
+function stopSceneIfRunning(sceneName) {
+  if (!game) return
+  const scene = game.scene.getScene(sceneName)
+  if (!scene) return
+  try {
+    if (scene.scene.isSleeping()) scene.scene.wake()
+    if (scene.scene.isActive() || scene.scene.isSleeping()) scene.scene.stop()
+  } catch (e) {
+    console.warn(`停止场景失败: ${sceneName}`, e)
   }
 }
 
@@ -397,12 +427,9 @@ async function onLevelSelectStart({ chapter, level, difficulty }) {
   // Persist difficulty preference to localStorage
   safeSetItem(STORAGE_KEYS.difficulty, difficulty)
   pendingLevelParams.value = { chapter, level, difficulty }
+  showTutorial.value = false
 
-  // 每次开始新游戏都显示底部教程提示条（非阻塞，可跳过）
   await startGameLevel()
-  if (uiState.value === 'game') {
-    showTutorial.value = true
-  }
 }
 function onLevelSelectBack() {
   uiState.value = 'game'
@@ -456,10 +483,7 @@ async function startGameLevel() {
       // Stop all active scenes first
       const sceneNames = ['MenuScene', 'PreparationScene', 'WorldScene', 'ResultScene', 'BootScene']
       for (const sceneName of sceneNames) {
-        const scene = game.scene.getScene(sceneName)
-        if (scene && scene.scene.isActive()) {
-          scene.scene.stop()
-        }
+        stopSceneIfRunning(sceneName)
       }
       await new Promise(resolve => setTimeout(resolve, 50))
 
@@ -636,6 +660,7 @@ onMounted(async () => {
   eventBus.on(EVENTS.UPDATE_HUD, onUpdateHud)
   eventBus.on(EVENTS.LEVEL_COMPLETE, onLevelComplete)
   eventBus.on(EVENTS.GAME_OVER, onGameOver)
+  eventBus.on(EVENTS.GRACE_RESCUE, onGraceRescue)
   eventBus.on(EVENTS.SHOW_ACHIEVEMENT, onShowAchievement)
   eventBus.on(EVENTS.START_LEVEL, onStartLevel)
   eventBus.on(EVENTS.SHOW_LEADERBOARD, onShowLeaderboard)
@@ -690,6 +715,7 @@ onUnmounted(() => {
   eventBus.off(EVENTS.UPDATE_HUD, onUpdateHud)
   eventBus.off(EVENTS.LEVEL_COMPLETE, onLevelComplete)
   eventBus.off(EVENTS.GAME_OVER, onGameOver)
+  eventBus.off(EVENTS.GRACE_RESCUE, onGraceRescue)
   eventBus.off(EVENTS.SHOW_ACHIEVEMENT, onShowAchievement)
   eventBus.off(EVENTS.START_LEVEL, onStartLevel)
   eventBus.off(EVENTS.SHOW_LEADERBOARD, onShowLeaderboard)
@@ -703,6 +729,7 @@ onUnmounted(() => {
 
   // 清理安全计时器
   if (chatSafetyTimer) { clearTimeout(chatSafetyTimer); chatSafetyTimer = null }
+  if (graceRescueTimer) { clearTimeout(graceRescueTimer); graceRescueTimer = null }
 
   // 移除浏览器关闭拦截
   window.removeEventListener('beforeunload', onBeforeUnload)
@@ -908,6 +935,16 @@ function onShowAchievement(data) {
   }
 }
 
+function onGraceRescue(data = {}) {
+  graceRescueToast.lives = data.lives || 1
+  graceRescueToast.visible = true
+  if (graceRescueTimer) clearTimeout(graceRescueTimer)
+  graceRescueTimer = setTimeout(() => {
+    graceRescueToast.visible = false
+    graceRescueTimer = null
+  }, 3000)
+}
+
 function goToDashboard() {
   router.push('/dashboard')
 }
@@ -922,10 +959,7 @@ async function backToMenu() {
   if (game) {
     // 清理 WorldScene 残留状态
     const ws = game.scene.getScene('WorldScene')
-    if (ws) {
-      if (ws.scene.isSleeping()) { ws.scene.wake(); ws.scene.stop() }
-      else if (ws.scene.isActive()) ws.scene.stop()
-    }
+    if (ws) stopSceneIfRunning('WorldScene')
     await new Promise(resolve => setTimeout(resolve, 50))
     // 强制 MenuScene 走完整 init+create（而非仅 wake，避免空白菜单）
     const ms = game.scene.getScene('MenuScene')
@@ -972,6 +1006,66 @@ function handleLogout() {
   canvas {
     display: block;
     image-rendering: pixelated;
+  }
+}
+
+.grace-rescue-toast {
+  position: absolute;
+  top: 72px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1800;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 320px;
+  max-width: min(520px, 92vw);
+  padding: 12px 16px;
+  border: 2px solid #ffc847;
+  border-radius: 8px;
+  background: rgba(45, 80, 22, 0.94);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.42);
+  animation: graceDrop 0.22s ease-out;
+  pointer-events: none;
+}
+
+.grace-icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  background: rgba(255, 200, 71, 0.18);
+  font-size: 22px;
+}
+
+.grace-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+
+  strong {
+    color: #ffc847;
+    font-size: 15px;
+    font-family: 'Microsoft YaHei', sans-serif;
+  }
+
+  span {
+    color: #f5edd6;
+    font-size: 12px;
+    line-height: 1.4;
+    font-family: 'Microsoft YaHei', sans-serif;
+  }
+}
+
+@keyframes graceDrop {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
   }
 }
 

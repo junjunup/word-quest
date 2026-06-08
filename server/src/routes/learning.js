@@ -13,9 +13,24 @@ import { updateFromQuizRecord, updateFromQuizRecords, getMasterySummary, getMast
 
 const router = express.Router()
 const SOURCE_MODES = ['mainline', 'boss', 'review', 'daily', 'pk', 'pronunciation', 'endless']
+const QUESTION_TYPES = ['choice_en2cn', 'choice_cn2en', 'spell_hint', 'spell_full', 'fill_blank', 'translate', 'pronunciation']
+const RECALL_MODES = ['recognition', 'recall']
+const RECOGNITION_TYPES = new Set(['choice_en2cn', 'choice_cn2en'])
 
 function normalizeSourceMode(value) {
   return SOURCE_MODES.includes(value) ? value : 'mainline'
+}
+
+function normalizeQuestionType(value, fallback = null) {
+  return QUESTION_TYPES.includes(value) ? value : fallback
+}
+
+function inferRecallMode(questionType) {
+  return RECOGNITION_TYPES.has(questionType) ? 'recognition' : 'recall'
+}
+
+function normalizeRecallMode(value, questionType) {
+  return RECALL_MODES.includes(value) ? value : inferRecallMode(questionType)
 }
 
 function normalizeReviewWord(item) {
@@ -114,13 +129,22 @@ router.post('/quiz-record', authMiddleware, async (req, res) => {
       fuzzyFeedback: clientFuzzyFeedback,
       sourceMode,
       wordbookId,
+      recommendedType,
+      presentedType,
+      wasDowngraded,
+      recallMode,
       metadata
     } = req.body
     const safeWordbookId = sanitizeWordbookId(wordbookId || 'cet4')
     const safeSourceMode = normalizeSourceMode(sourceMode || (req.body?.isBossQuiz ? 'boss' : 'mainline'))
+    const safeQuestionType = normalizeQuestionType(questionType, 'choice_en2cn')
+    const safeRecommendedType = normalizeQuestionType(recommendedType, null)
+    const safePresentedType = normalizeQuestionType(presentedType, safeQuestionType)
+    const safeWasDowngraded = Boolean(wasDowngraded)
+    const safeRecallMode = normalizeRecallMode(recallMode, safePresentedType)
 
     // ── 服务端答案验证 ──
-    const verification = await verifyAnswer(wordId, playerAnswer, questionType, { responseTime, timeLimit })
+    const verification = await verifyAnswer(wordId, playerAnswer, safeQuestionType, { responseTime, timeLimit })
 
     // verified=true → 使用服务端结果；否则降级使用客户端值（wordId 未知/找不到时）
     const isCorrect = verification.verified ? verification.isCorrect : !!clientIsCorrect
@@ -134,7 +158,7 @@ router.post('/quiz-record', authMiddleware, async (req, res) => {
     const safeEditDistance = editDistance === null || editDistance === undefined ? null : Math.max(0, Math.min(Math.round(Number(editDistance) || 0), 100))
     const safeSimilarity = Math.max(0, Math.min(Number(similarity) || 0, 1))
     const safeScoreRatio = Math.max(0, Math.min(Number(scoreRatio) || 0, 1))
-    const errorType = verification.errorType || classifyError({ questionType, playerAnswer, correctAnswer, answerQuality: safeAnswerQuality, responseTime, timeLimit, isCorrect })
+    const errorType = verification.errorType || classifyError({ questionType: safeQuestionType, playerAnswer, correctAnswer, answerQuality: safeAnswerQuality, responseTime, timeLimit, isCorrect })
 
     // ── 服务端计算分数 ──
     const serverScore = calculateServerScore(isCorrect, responseTime, combo, difficulty, hintUsed, safeScoreRatio)
@@ -144,7 +168,11 @@ router.post('/quiz-record', authMiddleware, async (req, res) => {
       wordId,
       wordbookId: safeWordbookId,
       word,
-      questionType,
+      questionType: safeQuestionType,
+      recommendedType: safeRecommendedType,
+      presentedType: safePresentedType,
+      wasDowngraded: safeWasDowngraded,
+      recallMode: safeRecallMode,
       sourceMode: safeSourceMode,
       errorType,
       isCorrect,
@@ -173,7 +201,18 @@ router.post('/quiz-record', authMiddleware, async (req, res) => {
     await new LearningLog({
       userId: req.userId,
       eventType: 'quiz',
-      eventData: { wordId, wordbookId: safeWordbookId, isCorrect, difficulty, sourceMode: safeSourceMode, errorType },
+      eventData: {
+        wordId,
+        wordbookId: safeWordbookId,
+        isCorrect,
+        difficulty,
+        sourceMode: safeSourceMode,
+        errorType,
+        recommendedType: safeRecommendedType,
+        presentedType: safePresentedType,
+        wasDowngraded: safeWasDowngraded,
+        recallMode: safeRecallMode
+      },
       sessionId
     }).save()
 
@@ -191,6 +230,10 @@ router.post('/quiz-record', authMiddleware, async (req, res) => {
         serverScore,
         errorType,
         answerQuality: safeAnswerQuality,
+        recommendedType: safeRecommendedType,
+        presentedType: safePresentedType,
+        wasDowngraded: safeWasDowngraded,
+        recallMode: safeRecallMode,
         editDistance: safeEditDistance,
         similarity: safeSimilarity,
         scoreRatio: safeScoreRatio,

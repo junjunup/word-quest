@@ -52,6 +52,11 @@ function calculateStreaks(records) {
   return { consecutiveCorrect, consecutiveWrong }
 }
 
+function selectAbilityRecords(records) {
+  const cleanRecords = records.filter(record => !record.wasDowngraded)
+  return cleanRecords.length >= 5 ? cleanRecords : records
+}
+
 function speedScore(avgResponseTime) {
   if (!Number.isFinite(avgResponseTime) || avgResponseTime <= 0) return 0.5
   if (avgResponseTime <= 3000) return 1
@@ -106,15 +111,17 @@ export async function getAdaptiveDifficulty(userId) {
     }
   }
 
-  const { consecutiveCorrect, consecutiveWrong } = calculateStreaks(recentRecords)
-  const recentCorrectRate = recentRecords.filter(r => r.isCorrect).length / recentRecords.length
-  const avgQuality = recentRecords.reduce((sum, record) => sum + qualityWeight(record), 0) / recentRecords.length
-  const avgResponseTime = recentRecords.reduce((sum, r) => sum + (Number(r.responseTime) || 0), 0) / recentRecords.length
-  const currentDifficulty = clamp(Number(recentRecords[0].difficulty) || 1, 1, 5)
+  const downgradedCount = recentRecords.filter(record => record.wasDowngraded).length
+  const abilityRecords = selectAbilityRecords(recentRecords)
+  const { consecutiveCorrect, consecutiveWrong } = calculateStreaks(abilityRecords)
+  const recentCorrectRate = abilityRecords.filter(r => r.isCorrect).length / abilityRecords.length
+  const avgQuality = abilityRecords.reduce((sum, record) => sum + qualityWeight(record), 0) / abilityRecords.length
+  const avgResponseTime = abilityRecords.reduce((sum, r) => sum + (Number(r.responseTime) || 0), 0) / abilityRecords.length
+  const currentDifficulty = clamp(Number(abilityRecords[0].difficulty) || Number(recentRecords[0].difficulty) || 1, 1, 5)
 
   const speed = speedScore(avgResponseTime)
   const streak = streakScore(consecutiveCorrect, consecutiveWrong)
-  const sampleConfidence = clamp(recentRecords.length / 10, 0.45, 1)
+  const sampleConfidence = clamp(abilityRecords.length / 10, 0.45, 1)
 
   const rawAbilityScore = (
     recentCorrectRate * 0.42 +
@@ -144,7 +151,9 @@ export async function getAdaptiveDifficulty(userId) {
       speedScore: speed.toFixed(2),
       streakScore: streak.toFixed(2),
       avgResponseTime: Math.round(avgResponseTime),
-      targetDifficulty
+      targetDifficulty,
+      observedSamples: abilityRecords.length,
+      downgradedSamples: downgradedCount
     }
   }
 }

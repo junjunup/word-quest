@@ -40,8 +40,6 @@ export function useQuizFlow(hudData, levelWordsRef, gameStore) {
       currentQuestionType.value = DEATH_SPIRAL.downgradeType
       currentDifficulty.value = DEATH_SPIRAL.forcedDifficulty
       wasDowngraded.value = (DEATH_SPIRAL.downgradeType !== backendRecommend)
-      const granted = levelManager.grantGraceLife()
-      if (granted && hudData) hudData.lives = levelManager.lives
     } else if (consecutiveWrong.value >= DEATH_SPIRAL.downgradeThreshold) {
       const typeConfig = QUESTION_TYPES[backendRecommend]
       const picked = (typeConfig && !typeConfig.isChoice) ? DEATH_SPIRAL.downgradeType : backendRecommend
