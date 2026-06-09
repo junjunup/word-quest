@@ -1,29 +1,39 @@
 <template>
-  <div class="achievement-popup" @click="$emit('close')">
+  <div
+    class="achievement-popup"
+    @pointerdown.stop
+    @mousedown.stop
+    @click.stop="safeClose"
+  >
     <!-- 粒子 -->
     <div class="ach-particles">
       <span v-for="i in 16" :key="i" class="ach-particle" :style="{ '--i': i, '--c': colors[i % 4] }"></span>
     </div>
-    <div class="achievement-card" @click.stop>
+    <div class="achievement-card" @click.stop @pointerdown.stop @mousedown.stop>
       <div class="card-shine"></div>
       <div class="card-border-glow"></div>
       <div class="achievement-icon">{{ achievement?.icon || '🏆' }}</div>
       <h3 class="achievement-title">🎉 成就解锁！</h3>
       <p class="achievement-name">{{ achievement?.name }}</p>
       <p class="achievement-desc">{{ achievement?.description }}</p>
-      <button class="ach-btn" @click="$emit('close')">🌟 太棒了！</button>
+      <button class="ach-btn" @click.stop="safeClose">🌟 太棒了！</button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, nextTick } from 'vue'
 import audioManager from '@/game/systems/AudioManager'
 
 defineProps({
   achievement: { type: Object, required: true }
 })
-defineEmits(['close'])
+const emit = defineEmits(['close'])
+
+// 延迟关闭防止 click 事件穿透到 Phaser 层
+function safeClose() {
+  nextTick(() => emit('close'))
+}
 
 const colors = ['#ffd700','#ffc847','#ffe066','#fff']
 

@@ -211,6 +211,13 @@ export function useQuizFlow(hudData, levelWordsRef, gameStore) {
     }
     if (onAchievementUpdate) onAchievementUpdate()
 
+    // Cycle 2: 追踪学习度量（双轨展示数据源）
+    levelManager.trackLearningQuality({
+      isRecall: QUESTION_TYPES[currentQuestionType.value]?.isChoice === false,
+      isDowngraded: wasDowngraded.value,
+      answerQuality
+    })
+
     // 提交答题记录
     submitQuizRecordAsync(isCorrect, responseTime, answer, answerQuality, editDistance, similarity, scoreRatio, fuzzyFeedback, correctAnswerForType)
 

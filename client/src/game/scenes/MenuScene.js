@@ -12,6 +12,8 @@ export default class MenuScene extends Phaser.Scene {
 
   create() {
     const { width, height } = this.cameras.main
+    this._dailyAdventureCount = this._dailyAdventureCount || 0
+    this._advLabel = null
     // 田园绿色背景
     this.cameras.main.setBackgroundColor('#4a8c28')
 
@@ -92,7 +94,12 @@ export default class MenuScene extends Phaser.Scene {
       eventBus.emit(EVENTS.SHOW_DAILY_CHALLENGE)
     })
 
-    this.createWoodButton(width / 2, 500, '🛒 商 店', 0x7b5eb3, 0x5b3e93, () => {
+    // Cycle 3: 今日冒险 — SM-2 到期复习（文字由 _advLabel 动态更新 badge）
+    this._advLabel = this.createWoodButtonWithLabel(width / 2, 500, '📋 今 日 冒 险', 0x6b8e5e, 0x4a7a3e, () => {
+      eventBus.emit(EVENTS.SHOW_DAILY_ADVENTURE)
+    })
+
+    this.createWoodButton(width / 2, 558, '🛒 商 店', 0x7b5eb3, 0x5b3e93, () => {
       eventBus.emit(EVENTS.SHOW_SHOP)
     })
 
@@ -255,6 +262,73 @@ export default class MenuScene extends Phaser.Scene {
       audioManager.play('click')
       callback()
     })
+  }
+
+  /**
+   * Cycle 3: 创建木质按钮并返回文字引用（用于动态更新 badge）
+   */
+  createWoodButtonWithLabel(x, y, text, fillColor, strokeColor, callback) {
+    const btnW = 280
+    const btnH = 50
+
+    const bg = this.add.graphics()
+    bg.fillStyle(fillColor, 1)
+    bg.fillRoundedRect(x - btnW / 2, y - btnH / 2, btnW, btnH, 4)
+    bg.lineStyle(3, strokeColor)
+    bg.strokeRoundedRect(x - btnW / 2, y - btnH / 2, btnW, btnH, 4)
+    bg.lineStyle(1, 0xffffff, 0.15)
+    bg.lineBetween(x - btnW / 2 + 6, y - btnH / 2 + 3, x + btnW / 2 - 6, y - btnH / 2 + 3)
+
+    const label = this.add.text(x, y, text, {
+      fontSize: '18px',
+      fontFamily: 'Microsoft YaHei',
+      color: '#f5edd6',
+      fontStyle: 'bold',
+      stroke: '#000',
+      strokeThickness: 1
+    }).setOrigin(0.5)
+
+    const hitArea = this.add.rectangle(x, y, btnW, btnH).setInteractive({ useHandCursor: true })
+    hitArea.setAlpha(0.001)
+
+    hitArea.on('pointerover', () => {
+      bg.clear()
+      bg.fillStyle(fillColor, 0.85)
+      bg.fillRoundedRect(x - btnW / 2 - 3, y - btnH / 2 - 2, btnW + 6, btnH + 4, 6)
+      bg.lineStyle(3, 0xffc847)
+      bg.strokeRoundedRect(x - btnW / 2 - 3, y - btnH / 2 - 2, btnW + 6, btnH + 4, 6)
+      label.setScale(1.05)
+    })
+
+    hitArea.on('pointerout', () => {
+      bg.clear()
+      bg.fillStyle(fillColor, 1)
+      bg.fillRoundedRect(x - btnW / 2, y - btnH / 2, btnW, btnH, 4)
+      bg.lineStyle(3, strokeColor)
+      bg.strokeRoundedRect(x - btnW / 2, y - btnH / 2, btnW, btnH, 4)
+      bg.lineStyle(1, 0xffffff, 0.15)
+      bg.lineBetween(x - btnW / 2 + 6, y - btnH / 2 + 3, x + btnW / 2 - 6, y - btnH / 2 + 3)
+      label.setScale(1)
+    })
+
+    hitArea.on('pointerdown', () => {
+      audioManager.play('click')
+      callback()
+    })
+
+    return label
+  }
+
+  /**
+   * Cycle 3: 更新今日冒险按钮的 badge 数字
+   */
+  updateDailyAdventureBadge(count) {
+    this._dailyAdventureCount = count || 0
+    // 防御：scene 已停止或 label 已被销毁时跳过更新
+    if (this._advLabel && this._advLabel.scene && this._advLabel.active && this.scene.isActive()) {
+      const badge = count > 0 ? ` ${count}` : ''
+      this._advLabel.setText(`📋 今 日 冒 险${badge}`)
+    }
   }
 
   /**

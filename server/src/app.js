@@ -12,6 +12,8 @@ import chatRoutes from './routes/chat.js'
 import socialRoutes from './routes/social.js'
 import pronunciationRoutes from './routes/pronunciation.js'
 import dailyChallengeRoutes from './routes/dailyChallenge.js'
+import dailyAdventureRoutes from './routes/dailyAdventure.js'
+import leaderboardRoutes from './routes/leaderboard.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import {
   globalLimiter,
@@ -45,6 +47,8 @@ app.use('/api/learning', learningRoutes)
 app.use('/api/social', socialRoutes)
 app.use('/api/pronunciation', pronunciationLimiter, auditLogger('pronunciation'), pronunciationRoutes)
 app.use('/api/daily-challenge', dailyChallengeRoutes)
+app.use('/api/daily-adventure', dailyAdventureRoutes)
+app.use('/api/leaderboard', leaderboardRoutes)
 app.use('/api/chat', chatLimiter, auditLogger('chat'), chatRoutes)
 
 // 健康检查

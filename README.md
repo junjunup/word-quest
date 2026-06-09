@@ -8,32 +8,84 @@
 
 ## 本轮更新说明（2026-06-09）
 
-本次更新围绕“关卡切换稳定性”和“自适应学习数据闭环”做集中优化，重点解决人工测试中发现的白屏问题，并补齐后续个性化学习所需的数据记录。
+### 最终盲审修复（2 个 bug）
 
-### 已修复的问题
+| # | Bug | 严重度 | 修复 |
+|---|-----|--------|------|
+| 1 | `require()` 在 ESM 模块中不可用，排行榜 API 启动崩溃 | 🔴 致命 | `import User from '../models/User.js'` 替代 `require()` |
+| 2 | `myUserId` 未初始化，排行榜无法高亮当前用户 | 🟡 中等 | 从 `useUserStore()` 获取当前用户 ID |
+| 3 | 全时排行榜缺少用户去重，理论可重复 | 🟢 轻微 | 添加 `Set` 去重逻辑 |
+
+| 改动 | 文件 | 说明 |
+|------|------|------|
+| 排行榜 API | `server/src/routes/leaderboard.js` | 周榜(QuizRecord聚合) + 全时榜(GameProgress排名) |
+| 防刷分中间件 | `server/src/middleware/antiCheat.js` | 速度/分数/连续全对检测，服务端独立计分 |
+| 排行榜 UI | `client/src/components/LeaderboardView.vue` | 周榜/总榜 Tab 切换，金/银/铜牌，当前排名高亮 |
+| 游戏集成 | `server/src/app.js` + `GameView.vue` | 路由注册，排行榜浮窗替换为 LeaderboardView |
+
+### 第五轮更新（Cycle 5）— CET-4 词库选择 + 进度分化
+
+| 改动 | 文件 | 说明 |
+|------|------|------|
+| 词库选择器 | `client/src/components/WordbookSelect.vue` | 可视化词库列表（CET-4/CET-6/考研），显示词数+章节数，一键切换 |
+| 仪表盘集成 | `client/src/views/DashboardView.vue` | 仪表盘顶栏显示当前词库 📚，点击可切换词库 |
+| 游戏集成 | `client/src/views/GameView.vue` | 词库切换后自动刷新关卡数据，支持 uiState 管理 |
+
+### 第四轮更新（Cycle 4）— AI 教练事实校验 + LLM 优化
+
+| 改动 | 文件 | 说明 |
+|------|------|------|
+| 词源校验器 | `llm-service/services/etymology_validator.py` | 120+ 已知词根白名单，验证 AI 词源解释，标记可疑声明 |
+| Prompt 诚实规则 | `llm-service/services/prompt_manager.py` | 新增规则 7：不确定的词根必须诚实说明，禁止编造 |
+| 对话缓存 | `server/src/services/chatCacheService.js` | LRU 缓存(500条/24h)，同词同语境复用，降低 API 成本 |
+| 离线降级 | `server/src/services/chatFallbackService.js` | 6 种场景预置回复，LLM 不可用时自动切换 |
+| 聊天限流 | `server/src/routes/chat.js` | 每用户 10次/分钟，超限返回 429 + 友好提示 |
+| 降级集成 | `server/src/routes/chat.js` | 超时/连接失败自动降级到预置回复，用户无感知 |
+
+### 盲审修复（5 个 bug）
+
+| # | Bug | 严重度 | 修复 |
+|---|-----|--------|------|
+| 1 | `gotoSceneSafe` 未定义，今日冒险启动崩溃 | 🔴 致命 | 新增 `gotoSceneSafe()` 函数（安全停止+启动场景） |
+| 2 | `_isAdventure` 未在 `initLevel` 重置 | 🟡 中 | 在 `initLevel` 中重置为 false |
+| 3 | 网络错误时误提示"全部已复习" | 🟡 中 | 检查 `res.data.success`，失败时提示"网络开小差" |
+| 4 | MenuScene badge 更新可能操作已销毁对象 | 🟡 中 | 增加 `active && scene.isActive()` 守卫 |
+| 5 | 学习面板与奖励文字/按钮重叠 | 🟡 中 | 奖励位置和按钮 Y 动态跟随 mastery 面板 |
+
+### 第三轮更新（Cycle 3）— 今日冒险（SM-2 到期复习模式）
+
+| 改动 | 文件 | 说明 |
+|------|------|------|
+| 今日冒险 API | `server/src/routes/dailyAdventure.js` | 新增 `/api/daily-adventure/queue`（合并 SM-2 到期 + QuizRecord 聚合）和 `/count` 端点 |
+| 主菜单入口 | `MenuScene.js` | 新增 📋 今日冒险按钮，动态显示待复习单词 badge 数字 |
+| 冒险启动流程 | `GameView.vue` + `client/src/api/dailyAdventure.js` | 点击按钮获取复习队列→启动 WorldScene 冒险模式 |
+| 路由注册 | `server/src/app.js` | 注册 dailyAdventure 路由 |
+
+### 第二轮更新（Cycle 2 收尾）— 学习效果双轨展示 + 救援动画 + 单测补全
+
+| 改动 | 文件 | 说明 |
+|------|------|------|
+| 学习掌握度面板 | `ResultScene.js` + `LevelManager.js` | 结算页新增 🧠 学习掌握度迷你面板，展示主动回忆/再认选择/掌握质量/系统降级四项指标，区分”游戏分”与”学习分” |
+| Grace Life 全屏闪白 | `GameView.vue` | 恩赐生命触发时增加径向渐变全屏闪白动画（0.12s 进入/0.55s 淡出），让玩家清晰感知被救援 |
+| 学习度量追踪 | `LevelManager.js` + `useQuizFlow.js` | 新增 `trackLearningQuality()` 方法，每题追踪 recall/recognition/downgraded/quality |
+| T2/T3/T4 单测 | `tests/unit/cycle2.quality.test.mjs` | 8 个测试用例覆盖 speed_demon 非选择题限定、自适应记账分离、学习度量字段 |
+
+### 第一轮更新 — 关卡切换稳定性 + 自适应学习数据闭环
 
 | 问题 | 根因 | 解决方案 |
 | --- | --- | --- |
 | 第二关进入准备页后点击 Skip 白屏 | 教程提示条在准备页提前显示，遮挡并干扰 Phaser 场景切换 | 将教程提示延后到真正进入 WorldScene 后显示，准备页保持干净可点击 |
 | 退出一次关卡后再进入下一关白屏 | WorldScene 关闭时重复清理 Phaser 物理组，部分 group 已被 Phaser 内部释放，再调用 clear 会抛出异常 | 为 WorldScene 增加安全清理方法，半销毁状态下不再抛错，并统一处理 active/sleeping 场景停止 |
-| 死亡螺旋救援反馈不清晰 | 系统保留生命但玩家缺少明确反馈，容易误判为生命异常 | 新增“小智救援生效”顶部提示，说明系统保留 1 点生命并将该词纳入重点复习 |
+| 死亡螺旋救援反馈不清晰 | 系统保留生命但玩家缺少明确反馈，容易误判为生命异常 | 新增”小智救援生效”顶部提示，说明系统保留 1 点生命并将该词纳入重点复习 |
 | 降级题型影响真实能力评估 | 救援场景下的降级题与正常推荐题混在一起，容易污染自适应难度判断 | 记录推荐题型、实际题型、是否降级、回忆模式，并在自适应算法中优先使用非降级样本 |
-
-### 本次涉及的核心文件
-
-- `client/src/views/GameView.vue`：修复教程显示时机，新增救援提示 UI，统一关卡切换前的场景停止逻辑。
-- `client/src/game/scenes/WorldScene.js`：增强 shutdown 清理流程，避免 Phaser 物理组半销毁时抛错导致白屏。
-- `client/src/composables/useQuizFlow.js`：清理重复的恩赐生命触发，避免多处同时修改生命值。
-- `server/src/models/QuizRecord.js`：扩展答题记录字段，支持题型推荐、降级、回忆模式追踪。
-- `server/src/routes/learning.js`：保存新增学习数据字段，并同步写入学习日志。
-- `server/src/services/adaptiveEngine.js`：自适应难度评估优先过滤降级样本，提升能力判断准确性。
 
 ### 已完成验证
 
-- 前端生产构建：`npm run build` 通过。
+- 前端生产构建：`npm run build` 通过（718 模块，8.82s）。
 - 退出关卡后进入下一关自动回归：进入一关 -> 暂停返回菜单 -> 进入第二关 -> Skip -> 正常进入地图，无 pageerror。
 - 第二关 Skip 自动回归：准备页无教程遮挡，点击 Skip 后正常进入第 1 章第 2 关。
-- `git diff --check` 通过，仅存在 Windows 换行提示。
+- `node --check` 语法检查：全部修改文件通过。
+- `git diff --check` 通过。
 
 ---
 

@@ -3,6 +3,15 @@
     <!-- Phaser游戏容器 -->
     <div id="phaser-container" ref="phaserContainer"></div>
 
+    <!-- 统一点击阻断层：任何弹窗/浮窗打开时阻止点击穿透到 Phaser -->
+    <div
+      v-if="isModalOpen"
+      class="modal-click-blocker"
+      @click.stop
+      @mousedown.stop
+      @pointerdown.stop
+    />
+
     <!-- HUD + 暂停菜单 -->
     <GameHUD
       :visible="showHud && uiState === 'game'"
@@ -42,13 +51,18 @@
       @back="onCharacterBack"
     />
 
-    <!-- 排行榜浮窗 -->
-    <div class="leaderboard-overlay" v-if="uiState === 'leaderboard'" @click.self="closeLeaderboard">
-      <div class="leaderboard-panel">
-        <button class="leaderboard-close" @click="closeLeaderboard">✕</button>
-        <ScoreBoard />
-      </div>
-    </div>
+    <!-- Cycle 5: 词库选择 -->
+    <WordbookSelect
+      v-if="uiState === 'wordbookSelect'"
+      @close="uiState = 'game'; setPhaserInputEnabled(true)"
+      @changed="onWordbookChanged"
+    />
+
+    <!-- 排行榜浮窗 (Cycle 6: 升级为周榜+总榜) -->
+    <LeaderboardView
+      v-if="uiState === 'leaderboard'"
+      @close="closeLeaderboard"
+    />
 
     <!-- 商店 -->
     <ShopPanel v-if="showShop" @close="showShop = false; setPhaserInputEnabled(true)" />
@@ -112,6 +126,9 @@
     />
 
     <!-- 死亡螺旋救援提示 -->
+    <Transition name="grace-flash">
+      <div class="grace-rescue-overlay" v-if="graceRescueToast.visible" />
+    </Transition>
     <div class="grace-rescue-toast" v-if="graceRescueToast.visible">
       <div class="grace-icon">🛡️</div>
       <div class="grace-copy">
@@ -136,16 +153,19 @@ import BossQuizModal from '@/components/BossQuizModal.vue'
 import ChatPanel from '@/components/ChatPanel.vue'
 import AchievementPopup from '@/components/AchievementPopup.vue'
 import ScoreBoard from '@/components/ScoreBoard.vue'
+import LeaderboardView from '@/components/LeaderboardView.vue'
 import LevelSelect from '@/components/LevelSelect.vue'
 import DailyChallengeCard from '@/components/DailyChallengeCard.vue'
 import ShopPanel from '@/components/ShopPanel.vue'
 import GameIntro from '@/components/GameIntro.vue'
 import CharacterSelect from '@/components/CharacterSelect.vue'
+import WordbookSelect from '@/components/WordbookSelect.vue'
 import GameHUD from '@/components/GameHUD.vue'
 import { submitQuizRecord } from '@/api/learning'
 import { saveAchievement, getAdaptiveWords, updateWordMastery } from '@/api/game'
 import { getChapterLevelWords, getChapterWords, getSelectedWordbook } from '@/api/vocabulary'
 import { getInventory } from '@/api/dailyChallenge'
+import { getDailyAdventureQueue, getDailyAdventureCount } from '@/api/dailyAdventure'
 import { STORAGE_KEYS } from '@/game/config/gameConstants'
 import { safeGetJSON, safeSetJSON, safeGetItem, safeSetItem } from '@/utils/helpers'
 import { flushQueue, getQueueSize } from '@/utils/offlineQueue'
@@ -221,6 +241,17 @@ const levelWords = ref([])
 const quiz = useQuizFlow(hudData, levelWords, gameStore)
 
 const virtualDirection = reactive({ up: false, down: false, left: false, right: false })
+// 任何弹窗/浮窗打开时阻断 Phaser 点击穿透
+const isModalOpen = computed(() =>
+  uiState.value !== 'game' ||
+  showDailyChallenge.value ||
+  showShop.value ||
+  showPauseMenu.value ||
+  !!achievementData.value ||
+  showBossQuiz.value ||
+  showChatPanel.value
+)
+
 const showVirtualControls = computed(() => uiState.value === 'game' && inGameLevel.value && !quiz.showQuiz && !showBossQuiz.value && !showChatPanel.value && !showPauseMenu.value)
 
 // 音效
@@ -386,6 +417,22 @@ function stopSceneIfRunning(sceneName) {
   }
 }
 
+/** Cycle 3: 安全切换 Phaser 场景（先停旧再启新） */
+async function gotoSceneSafe(sceneKey, data) {
+  if (!game) return
+  stopSceneIfRunning('WorldScene')
+  stopSceneIfRunning('PreparationScene')
+  stopSceneIfRunning('ResultScene')
+  await new Promise(resolve => setTimeout(resolve, 50))
+  // 清理 ResultScene 残留
+  const rs = game.scene.getScene('ResultScene')
+  if (rs) {
+    rs.children.removeAll(true)
+    rs.tweens.killAll()
+  }
+  game.scene.start(sceneKey, data || {})
+}
+
 function onShowLevelSelect(data) {
   uiState.value = 'levelSelect'
   setPhaserInputEnabled(false)
@@ -395,6 +442,15 @@ function onShowCharacterSelect() {
   uiState.value = 'characterSelect'
   setPhaserInputEnabled(false)
 }
+
+// Cycle 5: 词库切换
+function onWordbookChanged(wordbookId) {
+  console.log('词库已切换:', wordbookId)
+  uiState.value = 'game'
+  setPhaserInputEnabled(true)
+  // 词库变化后刷新关卡数据（下次进关生效）
+}
+
 
 function onShowLeaderboard() {
   uiState.value = 'leaderboard'
@@ -409,6 +465,61 @@ function closeLeaderboard() {
 function onShowDailyChallenge() {
   showDailyChallenge.value = true
   setPhaserInputEnabled(false)
+}
+
+// Cycle 3: 今日冒险 — SM-2 到期复习队列
+async function onShowDailyAdventure() {
+  try {
+    const res = await getDailyAdventureQueue(20)
+    if (!res?.success) {
+      console.warn('今日冒险 API 返回异常:', res)
+      eventBus.emit(EVENTS.SHOW_ACHIEVEMENT, {
+        id: 'adventure_error',
+        name: '网络开小差',
+        description: '⚠️ 获取复习队列失败，请稍后重试',
+        icon: '⚠️'
+      })
+      return
+    }
+    const words = res.data?.words || []
+    if (words.length === 0) {
+      // 无到期词，提示用户
+      eventBus.emit(EVENTS.SHOW_ACHIEVEMENT, {
+        id: 'all_reviewed',
+        name: '全部已复习',
+        description: '🎉 没有待复习的单词，太棒了！',
+        icon: '🎉'
+      })
+      return
+    }
+    // 将今日冒险单词转为 level words 格式
+    const levelWords = words.map(w => ({
+      _id: w.wordId,
+      word: w.word,
+      meaning: w.meaning,
+      phonetic: w.phonetic,
+      example: w.example,
+      exampleTranslation: w.exampleTranslation,
+      difficulty: w.difficulty || 1,
+      chapter: w.chapter || 1,
+      level: w.level || 1
+    }))
+    // 使用普通难度启动冒险（2命，适中挑战）
+    levelManager.initLevel(0, 0, levelWords, 'easy') // chapter=0/level=0 标记为冒险模式
+    levelManager._isAdventure = true
+
+    setPhaserInputEnabled(true)
+    uiState.value = 'game'
+    inGameLevel.value = true
+    showTutorial.value = false
+    showDailyChallenge.value = false
+    showShop.value = false
+
+    // 切换到 WorldScene
+    await gotoSceneSafe('WorldScene', { chapter: 0, level: 0, difficulty: 'easy', isAdventure: true })
+  } catch (err) {
+    console.error('今日冒险启动失败:', err)
+  }
 }
 
 function onShowShop() {
@@ -614,6 +725,15 @@ function onShowMainMenu() {
   showChatPanel.value = false
   uiState.value = 'game'
   setPhaserInputEnabled(true)
+
+  // Cycle 3: 异步获取今日冒险待复习数并更新 badge
+  getDailyAdventureCount().then(res => {
+    const count = res?.data?.count || 0
+    const menuScene = game?.scene?.getScene('MenuScene')
+    if (menuScene && menuScene.updateDailyAdventureBadge) {
+      menuScene.updateDailyAdventureBadge(count)
+    }
+  }).catch(() => {})
 }
 
 onMounted(async () => {
@@ -669,6 +789,7 @@ onMounted(async () => {
   eventBus.on(EVENTS.SHOW_BOSS_QUIZ, onShowBossQuiz)
   eventBus.on(EVENTS.TOGGLE_PAUSE, onTogglePause)
   eventBus.on(EVENTS.SHOW_DAILY_CHALLENGE, onShowDailyChallenge)
+  eventBus.on(EVENTS.SHOW_DAILY_ADVENTURE, onShowDailyAdventure)
   eventBus.on(EVENTS.SHOW_SHOP, onShowShop)
   eventBus.on(EVENTS.SHOW_MAIN_MENU, onShowMainMenu)
 
@@ -724,6 +845,7 @@ onUnmounted(() => {
   eventBus.off(EVENTS.SHOW_BOSS_QUIZ, onShowBossQuiz)
   eventBus.off(EVENTS.TOGGLE_PAUSE, onTogglePause)
   eventBus.off(EVENTS.SHOW_DAILY_CHALLENGE, onShowDailyChallenge)
+  eventBus.off(EVENTS.SHOW_DAILY_ADVENTURE, onShowDailyAdventure)
   eventBus.off(EVENTS.SHOW_SHOP, onShowShop)
   eventBus.off(EVENTS.SHOW_MAIN_MENU, onShowMainMenu)
 
@@ -985,6 +1107,12 @@ function handleLogout() {
 </script>
 
 <style scoped lang="scss">
+/* 统一点击阻断层：弹窗打开时覆盖 Phaser canvas，阻止点击穿透 */
+.modal-click-blocker {
+  position: absolute; inset: 0; z-index: 500;
+  /* z-index: 500 在 Phaser canvas (z-index: 0) 之上，但在弹窗 (z-index: 1000+) 之下 */
+}
+
 .game-view {
   width: 100%;
   height: 100%;
@@ -1027,6 +1155,27 @@ function handleLogout() {
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.42);
   animation: graceDrop 0.22s ease-out;
   pointer-events: none;
+}
+
+.grace-rescue-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1799;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.55) 0%, rgba(255,200,71,0.25) 45%, transparent 75%);
+  pointer-events: none;
+}
+
+.grace-flash-enter-active {
+  transition: opacity 0.12s ease-out;
+}
+
+.grace-flash-leave-active {
+  transition: opacity 0.55s ease-out;
+}
+
+.grace-flash-enter-from,
+.grace-flash-leave-to {
+  opacity: 0;
 }
 
 .grace-icon {

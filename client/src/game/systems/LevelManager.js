@@ -28,6 +28,11 @@ class LevelManager {
     this.difficultyConfig = DIFFICULTY_CONFIGS.normal
     this.bossDefeated = false
     this.graceLifeUsed = false
+    // Cycle 2: 学习度量追踪（双轨展示用）
+    this.recallCount = 0        // 主动回忆题数（拼写/翻译）
+    this.recognitionCount = 0   // 再认题数（选择）
+    this.downgradedCount = 0    // 降级题数
+    this.answerQualityScores = [] // 每题 quality 值（0-1），用于计算掌握度
   }
 
   /**
@@ -77,6 +82,11 @@ class LevelManager {
     this.bossDefeated = false
     this.graceLifeUsed = false
     this.isTutorial = false
+    this.recallCount = 0
+    this.recognitionCount = 0
+    this.downgradedCount = 0
+    this.answerQualityScores = []
+    this._isAdventure = false
     this.sessionId = `session_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
   }
 
@@ -184,6 +194,18 @@ class LevelManager {
   /**
    * 获取关卡结果
    */
+  /**
+   * Cycle 2: 追踪每题的学习度量（由 useQuizFlow 调用）
+   */
+  trackLearningQuality({ isRecall, isDowngraded, answerQuality }) {
+    if (isRecall) this.recallCount++
+    else this.recognitionCount++
+    if (isDowngraded) this.downgradedCount++
+    // answerQuality: 'exact'=1, 'near'=0.72, 'wrong'=0
+    const scoreMap = { exact: 1, near: 0.72, wrong: 0 }
+    this.answerQualityScores.push(scoreMap[answerQuality] ?? (answerQuality === 'correct' ? 0.8 : 0))
+  }
+
   getLevelResult() {
     const totalTime = Date.now() - this.startTime
     const totalAnswered = this.correctCount + this.wrongCount
@@ -219,7 +241,14 @@ class LevelManager {
       difficulty: this.difficulty,
       scoreMultiplier: this.difficultyConfig.scoreMultiplier,
       bossDefeated: this.bossDefeated,
-      isTutorial: !!this.isTutorial
+      isTutorial: !!this.isTutorial,
+      // Cycle 2: 学习度量数据（双轨展示）
+      recallCount: this.recallCount,
+      recognitionCount: this.recognitionCount,
+      downgradedCount: this.downgradedCount,
+      avgAnswerQuality: this.answerQualityScores.length > 0
+        ? Math.round(this.answerQualityScores.reduce((a, b) => a + b, 0) / this.answerQualityScores.length * 100)
+        : 0
     }
   }
 }

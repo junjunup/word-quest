@@ -6,9 +6,20 @@
         <h1>学习数据仪表盘</h1>
       </div>
       <div class="header-right">
+        <!-- Cycle 5: 当前词库指示器 -->
+        <span class="wordbook-indicator" @click="showWordbookSelect = true" title="点击切换词库">
+          📚 {{ currentWordbookName }}
+        </span>
         <span class="user-info">{{ userStore.userInfo?.nickname || '勇者' }} | Lv.{{ userStore.userInfo?.level || 1 }}</span>
       </div>
     </header>
+
+    <!-- Cycle 5: 词库选择浮窗 -->
+    <WordbookSelect
+      v-if="showWordbookSelect"
+      @close="showWordbookSelect = false"
+      @changed="onWordbookChanged"
+    />
 
     <main class="dashboard-content">
       <!-- 部分数据加载失败提示 -->
@@ -56,6 +67,8 @@ import LearningReport from '@/components/LearningReport.vue'
 import ScoreBoard from '@/components/ScoreBoard.vue'
 import VChart from 'vue-echarts'
 import { getStats, getDailyStats, getChapterStats, getTopMistakes, getHeatmap } from '@/api/learning'
+import { getSelectedWordbook, getWordbooks } from '@/api/vocabulary'
+import WordbookSelect from '@/components/WordbookSelect.vue'
 
 const userStore = useUserStore()
 const stats = ref(null)
@@ -64,6 +77,10 @@ const chapterData = ref([])
 const topMistakes = ref([])
 const heatmapData = ref([])
 const loadErrors = ref([])
+// Cycle 5: 词库选择
+const showWordbookSelect = ref(false)
+const currentWordbookName = ref('CET-4')
+const currentWordbookId = ref(getSelectedWordbook())
 
 onMounted(async () => {
   loadErrors.value = []
@@ -90,7 +107,27 @@ onMounted(async () => {
       loadErrors.value.push(task.name)
     }
   }))
+
+  // Cycle 5: 加载当前词库名称
+  loadWordbookName()
 })
+
+async function loadWordbookName() {
+  try {
+    const res = await getWordbooks()
+    if (res?.success) {
+      const wbs = res.data || []
+      const current = wbs.find(w => w.wordbookId === currentWordbookId.value)
+      if (current) currentWordbookName.value = current.name || current.wordbookId || 'CET-4'
+    }
+  } catch (_) { /* 非关键 */ }
+}
+
+// Cycle 5: 词库切换回调
+function onWordbookChanged() {
+  currentWordbookId.value = getSelectedWordbook()
+  loadWordbookName()
+}
 
 const heatmapOption = computed(() => {
   const year = new Date().getFullYear()
@@ -161,6 +198,23 @@ const heatmapOption = computed(() => {
 .user-info {
   color: #b8b8d4;
   font-size: 14px;
+}
+
+/* Cycle 5: 词库指示器 */
+.wordbook-indicator {
+  background: rgba(255,200,71,0.15);
+  border: 1px solid rgba(255,200,71,0.4);
+  border-radius: 6px;
+  padding: 4px 14px;
+  margin-right: 14px;
+  color: #ffc847;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background .2s;
+}
+.wordbook-indicator:hover {
+  background: rgba(255,200,71,0.28);
 }
 
 .dashboard-content {

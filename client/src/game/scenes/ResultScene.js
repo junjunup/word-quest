@@ -61,7 +61,10 @@ export default class ResultScene extends Phaser.Scene {
       correctRate = 0, maxCombo = 0, totalTime = 0,
       difficulty = 'normal', scoreMultiplier = 1.0,
       bossDefeated = false, livesRemaining = 0,
-      isTutorial = false
+      isTutorial = false,
+      // Cycle 2: 学习度量字段
+      recallCount = 0, recognitionCount = 0,
+      downgradedCount = 0, avgAnswerQuality = 0
     } = this.result
 
     // 田园背景
@@ -175,11 +178,53 @@ export default class ResultScene extends Phaser.Scene {
       })
     })
 
-    // 经验获取动画
+    // Cycle 2: 学习掌握度迷你面板（双轨展示）
+    const masteryPanelY = panelY + panelH + 10
+    const masteryPanelH = 72
+    const hasLearningData = (recallCount + recognitionCount) > 0
+    if (hasLearningData && !isGameOver) {
+      const mPanelBg = this.add.graphics().setDepth(200)
+      mPanelBg.fillStyle(0xc4d998, 0.88)
+      mPanelBg.fillRoundedRect(width / 2 - panelW / 2, masteryPanelY, panelW, masteryPanelH, 6)
+      mPanelBg.lineStyle(2, 0x6b8e23)
+      mPanelBg.strokeRoundedRect(width / 2 - panelW / 2, masteryPanelY, panelW, masteryPanelH, 6)
+
+      const mTitle = this.add.text(width / 2 - 190, masteryPanelY + 8, '🧠 学习掌握度', {
+        fontSize: '11px', fontFamily: 'Microsoft YaHei', color: '#3a5a1e', fontStyle: 'bold'
+      }).setDepth(210)
+
+      const totalQ = recallCount + recognitionCount
+      const masteryPct = avgAnswerQuality || Math.round(correctRate * (recallCount / Math.max(totalQ, 1)) + correctRate * 0.3 * (recognitionCount / Math.max(totalQ, 1)))
+      const mStats = [
+        { label: '📝 主动回忆', value: `${recallCount} 题`, color: '#2d5016' },
+        { label: '👁️ 再认选择', value: `${recognitionCount} 题`, color: '#8b6914' },
+        { label: '📊 掌握质量', value: `${masteryPct}%`, color: masteryPct >= 80 ? '#2d5016' : masteryPct >= 50 ? '#b8832e' : '#c94a3a' }
+      ]
+      if (downgradedCount > 0) {
+        mStats.push({ label: '🔻 系统降级', value: `${downgradedCount} 题`, color: '#8b6914' })
+      }
+
+      mStats.forEach((stat, i) => {
+        const cols = Math.min(mStats.length, 4)
+        const colW = panelW / cols
+        const sx = width / 2 - panelW / 2 + 12 + i * colW
+        const sy = masteryPanelY + 28
+        this.add.text(sx, sy - 10, stat.label, {
+          fontSize: '9px', fontFamily: 'Microsoft YaHei', color: '#5b7a3a'
+        }).setDepth(210)
+        this.add.text(sx, sy + 10, stat.value, {
+          fontSize: '13px', fontFamily: '"Press Start 2P", monospace', color: stat.color, fontStyle: 'bold'
+        }).setDepth(210)
+      })
+    }
+
+    // 经验获取动画（Cycle 2: 位置随学习面板动态调整）
     const expGain = Math.floor(score / 2)
     const diffMult = difficulty === 'hard' ? 1.5 : difficulty === 'easy' ? 0.8 : 1.0
     const goldGain = Math.floor(stars * 30 * diffMult)
-    const rewardsText = this.add.text(width / 2, 485, `+${expGain} EXP ✨  |  +${goldGain} 🪙`, {
+    const rewardStartY = hasLearningData ? masteryPanelY + masteryPanelH + 14 : 485
+    const rewardEndY = hasLearningData ? masteryPanelY + masteryPanelH + 8 : 475
+    const rewardsText = this.add.text(width / 2, rewardStartY, `+${expGain} EXP ✨  |  +${goldGain} 🪙`, {
       fontSize: '18px', fontFamily: '"Press Start 2P", Arial', color: '#ffc847', fontStyle: 'bold',
       stroke: '#5b3a1a', strokeThickness: 4
     }).setOrigin(0.5).setAlpha(0).setDepth(200)
@@ -187,14 +232,15 @@ export default class ResultScene extends Phaser.Scene {
     this.tweens.add({
       targets: rewardsText,
       alpha: 1,
-      y: 475,
+      y: rewardEndY,
       duration: 600,
       delay: 2500,
       ease: 'Power2'
     })
 
-    // 按钮区域
-    const btnY = 530
+    // 按钮区域 (Cycle 2: 动态位置以适应学习面板)
+    const btnY = hasLearningData ? masteryPanelY + masteryPanelH + 50 : 530
+    const menuLinkY = hasLearningData ? btnY + 70 : 590
     const MAX_LEVELS = 5
     const MAX_CHAPTERS = 6
 
@@ -230,7 +276,7 @@ export default class ResultScene extends Phaser.Scene {
     }, 3200)
 
     // 返回菜单（depth=200）
-    this.add.text(width / 2, 590, '🏠 Main Menu', {
+    this.add.text(width / 2, menuLinkY, '🏠 Main Menu', {
       fontSize: '13px', fontFamily: '"Press Start 2P", monospace', color: '#c4b99a',
       stroke: '#2d5016', strokeThickness: 2
     }).setOrigin(0.5).setDepth(200).setInteractive({ useHandCursor: true })

@@ -1,8 +1,27 @@
 import express from 'express'
 import { authMiddleware } from '../middleware/auth.js'
 import config from '../config/index.js'
+import { getCachedReply, setCachedReply } from '../services/chatCacheService.js'
+import { getFallbackReply } from '../services/chatFallbackService.js'
 
 const router = express.Router()
+
+// Cycle 4: 每用户每分钟最多 10 次 AI 对话
+const chatRateLimit = new Map() // userId → { count, windowStart }
+const CHAT_RATE_WINDOW = 60 * 1000  // 1 分钟
+const CHAT_RATE_MAX = 10
+
+function checkChatRateLimit(userId) {
+  const now = Date.now()
+  const entry = chatRateLimit.get(userId)
+  if (!entry || now - entry.windowStart > CHAT_RATE_WINDOW) {
+    chatRateLimit.set(userId, { count: 1, windowStart: now })
+    return true
+  }
+  if (entry.count >= CHAT_RATE_MAX) return false
+  entry.count++
+  return true
+}
 
 // 输入校验
 function validateChatInput(body) {
@@ -12,14 +31,33 @@ function validateChatInput(body) {
   return null
 }
 
-// 非流式对话
+// 非流式对话（Cycle 4: +缓存 +限流 +降级）
 router.post('/message', authMiddleware, async (req, res) => {
   try {
     const err = validateChatInput(req.body)
     if (err) return res.status(400).json({ success: false, message: err })
 
+    // 速率限制检查
+    if (!checkChatRateLimit(req.userId)) {
+      return res.status(429).json({
+        success: false,
+        message: '对话太频繁了，请稍等片刻再找小智聊天吧~',
+        retryAfter: 60
+      })
+    }
+
+    const context = req.body.context || {}
+    const triggerType = context.triggerType || 'manual'
+    const currentWord = context.currentWord || ''
+
+    // 缓存检查（仅缓存特定类型的对话）
+    const cached = getCachedReply(currentWord, triggerType, req.body.message)
+    if (cached) {
+      return res.json({ success: true, data: { reply: cached, source: 'cache' } })
+    }
+
     const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 30000) // 30秒超时
+    const timeout = setTimeout(() => controller.abort(), 30000)
 
     try {
       const response = await fetch(`${config.llmServiceUrl}/api/llm/chat`, {
@@ -27,7 +65,7 @@ router.post('/message', authMiddleware, async (req, res) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: req.body.message,
-          context: req.body.context || {},
+          context,
           userId: req.userId
         }),
         signal: controller.signal
@@ -35,25 +73,48 @@ router.post('/message', authMiddleware, async (req, res) => {
       clearTimeout(timeout)
 
       const data = await response.json()
+      // 缓存成功回复
+      if (data?.reply || data?.data?.reply) {
+        const reply = data.reply || data.data.reply
+        setCachedReply(currentWord, triggerType, req.body.message, reply)
+      }
       res.json({ success: true, data })
     } catch (fetchErr) {
       clearTimeout(timeout)
       if (fetchErr.name === 'AbortError') {
-        res.status(504).json({ success: false, message: 'LLM服务响应超时' })
-      } else {
-        throw fetchErr
+        // 超时降级
+        const fallback = getFallbackReply(context)
+        return res.status(504).json({
+          success: true,
+          data: { reply: fallback, source: 'fallback', fallbackReason: 'timeout' }
+        })
       }
+      throw fetchErr
     }
   } catch (err) {
-    res.status(500).json({ success: false, message: 'LLM服务连接失败' })
+    // 连接失败降级
+    const fallback = getFallbackReply(req.body.context || {})
+    res.status(200).json({
+      success: true,
+      data: { reply: fallback, source: 'fallback', fallbackReason: 'connection' }
+    })
   }
 })
 
-// 流式对话 (SSE)
+// 流式对话 (SSE) (Cycle 4: +限流 +降级)
 router.post('/stream', authMiddleware, async (req, res) => {
   const err = validateChatInput(req.body)
   if (err) {
     res.status(400).json({ success: false, message: err })
+    return
+  }
+
+  // 速率限制
+  if (!checkChatRateLimit(req.userId)) {
+    res.setHeader('Content-Type', 'text/event-stream')
+    res.write(`data: ${JSON.stringify({ error: '对话太频繁了，请稍等片刻~', retryAfter: 60 })}\n\n`)
+    res.write('data: [DONE]\n\n')
+    res.end()
     return
   }
 
@@ -117,10 +178,11 @@ router.post('/stream', authMiddleware, async (req, res) => {
     res.end()
   } catch (err) {
     if (!clientDisconnected) {
+      const fallback = getFallbackReply(req.body.context || {})
       if (err.name === 'AbortError') {
-        res.write(`data: ${JSON.stringify({ error: 'LLM服务响应超时' })}\n\n`)
+        res.write(`data: ${JSON.stringify({ reply: fallback, source: 'fallback', fallbackReason: 'timeout' })}\n\n`)
       } else {
-        res.write(`data: ${JSON.stringify({ error: '连接异常' })}\n\n`)
+        res.write(`data: ${JSON.stringify({ reply: fallback, source: 'fallback', fallbackReason: 'connection' })}\n\n`)
       }
       res.write('data: [DONE]\n\n')
       res.end()
