@@ -1,0 +1,4 @@
+interface:
+  display_name: "Unity API Contract"
+  short_description: "Keep Unity API DTOs aligned with the existing Express routes"
+  default_prompt: "Use $unity-api-contract to verify a Unity client API change against the repository’s real Express and web-client contracts."

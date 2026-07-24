@@ -1,0 +1,9 @@
+{
+  "name": "WordQuest.Runtime",
+  "rootNamespace": "WordQuest",
+  "references": [
+    "WordQuest.Domain",
+    "Unity.InputSystem"
+  ],
+  "autoReferenced": true
+}

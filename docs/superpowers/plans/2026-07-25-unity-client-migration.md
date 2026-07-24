@@ -31,7 +31,9 @@
 - `unity-client/ProjectSettings/EditorBuildSettings.asset`: bootstrap scene registration.
 - `unity-client/Assets/WordQuest/Scenes/Bootstrap.unity`: single startup scene.
 - `.gitignore`: Unity-generated directory exclusions.
-- `.agents/skills/*`: project-specific workflows and validators.
+- `AGENTS.md`: project-specific architectural and verification guidance.
+- `.agents/skills/*`: only non-obvious project workflows that fail a no-Skill
+  pressure test; deterministic checks remain scripts.
 
 ### Domain
 
@@ -68,7 +70,7 @@
 
 ---
 
-### Task 1: Create the Unity project boundary and repository Skills
+### Task 1: Create the Unity project boundary and repository workflows
 
 **Files:**
 - Create: `unity-client/Packages/manifest.json`
@@ -77,10 +79,9 @@
 - Create: `unity-client/Assets/WordQuest/Domain/WordQuest.Domain.asmdef`
 - Create: `unity-client/Assets/WordQuest/Runtime/WordQuest.Runtime.asmdef`
 - Create: `unity-client/Tools/validate-project.sh`
-- Create: `.agents/skills/unity-client-workflow/SKILL.md`
-- Create: `.agents/skills/unity-api-contract/SKILL.md`
-- Create: `.agents/skills/unity-feature-parity/SKILL.md`
-- Create: `.agents/skills/unity-validation/SKILL.md`
+- Create: `AGENTS.md`
+- Create: `.agents/skills/*` only where a no-Skill pressure test demonstrates
+  missing non-obvious judgment
 - Modify: `.gitignore`
 
 **Interfaces:**
@@ -158,9 +159,13 @@ m_EditorVersion: 6000.5.3f1
 }
 ```
 
-- [ ] **Step 4: Add repository Skills with executable validation routes**
+- [ ] **Step 4: Add repository guidance and pressure-test Skill candidates**
 
-Each `SKILL.md` must state its trigger, exact files in scope, forbidden generated directories, and exact validation command. `unity-api-contract` must compare route literals under `server/src/routes` with constants under `Runtime/Infrastructure/Api/ApiRoutes.cs`. `unity-feature-parity` must read `docs/unity/feature-parity.md`.
+Put mechanical project conventions in `AGENTS.md` and executable validators.
+Create a repository Skill only when a baseline pressure test without the Skill
+fails to apply non-obvious project knowledge. Any created Skill must state its
+trigger, exact files in scope, forbidden generated directories, and exact
+validation command.
 
 - [ ] **Step 5: Run the validator and inspect the project boundary**
 
@@ -170,7 +175,7 @@ Expected: PASS with exit code 0.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add .gitignore .agents unity-client
+git add .gitignore AGENTS.md .agents unity-client
 git commit -m "chore: scaffold Unity client and project workflows"
 ```
 

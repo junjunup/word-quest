@@ -1,0 +1,7 @@
+{
+  "name": "WordQuest.Domain",
+  "rootNamespace": "WordQuest.Domain",
+  "autoReferenced": true,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}

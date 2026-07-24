@@ -14,3 +14,20 @@ __pycache__/
 audit-full.json
 client/test-results/
 client/playwright-report/
+
+# Unity client generated content
+unity-client/[Ll]ibrary/
+unity-client/[Tt]emp/
+unity-client/[Oo]bj/
+unity-client/[Ll]ogs/
+unity-client/[Uu]ser[Ss]ettings/
+unity-client/[Mm]emoryCaptures/
+unity-client/[Rr]ecordings/
+unity-client/[Bb]uild/
+unity-client/[Bb]uilds/
+unity-client/[Tt]est[Rr]esults/
+unity-client/*.csproj
+unity-client/*.sln
+unity-client/*.suo
+unity-client/*.user
+unity-client/*.userprefs
