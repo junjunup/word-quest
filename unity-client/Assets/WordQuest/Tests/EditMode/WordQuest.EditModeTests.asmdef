@@ -1,0 +1,15 @@
+{
+  "name": "WordQuest.EditModeTests",
+  "rootNamespace": "WordQuest.Tests",
+  "references": [
+    "WordQuest.Domain",
+    "WordQuest.Runtime"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": false
+}
