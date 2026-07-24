@@ -6,6 +6,36 @@ namespace WordQuest.Tests
 {
     public sealed class GameSessionTests
     {
+        [TestCase(SessionStatus.GameOver, true, false)]
+        [TestCase(SessionStatus.Continue, false, false)]
+        [TestCase(SessionStatus.Continue, true, true)]
+        public void Progress_is_saved_only_for_a_live_completed_run(
+            SessionStatus status,
+            bool objectivesComplete,
+            bool expected)
+        {
+            Assert.That(
+                LevelSettlementPolicy.ShouldPersistProgress(
+                    status,
+                    objectivesComplete),
+                Is.EqualTo(expected));
+        }
+
+        [TestCase(true, false, false)]
+        [TestCase(false, true, false)]
+        [TestCase(true, true, true)]
+        public void Achievements_wait_for_confirmed_progress_save(
+            bool levelCompleted,
+            bool progressSaved,
+            bool expected)
+        {
+            Assert.That(
+                LevelSettlementPolicy.ShouldSyncAchievements(
+                    levelCompleted,
+                    progressSaved),
+                Is.EqualTo(expected));
+        }
+
         [TestCase(DifficultyKind.Easy, 4)]
         [TestCase(DifficultyKind.Normal, 3)]
         [TestCase(DifficultyKind.Hard, 2)]

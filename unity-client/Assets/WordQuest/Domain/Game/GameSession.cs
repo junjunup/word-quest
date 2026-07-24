@@ -11,6 +11,24 @@ namespace WordQuest.Domain.Game
         Completed
     }
 
+    public static class LevelSettlementPolicy
+    {
+        public static bool ShouldPersistProgress(
+            SessionStatus status,
+            bool objectivesComplete)
+        {
+            return status != SessionStatus.GameOver &&
+                   objectivesComplete;
+        }
+
+        public static bool ShouldSyncAchievements(
+            bool levelCompleted,
+            bool progressSaved)
+        {
+            return levelCompleted && progressSaved;
+        }
+    }
+
     public sealed class AnswerOutcome
     {
         public AnswerOutcome(SessionStatus status, GameSessionSnapshot snapshot)
@@ -89,6 +107,10 @@ namespace WordQuest.Domain.Game
         public string Difficulty { get; internal set; }
         public double ScoreMultiplier { get; internal set; }
         public bool BossDefeated { get; internal set; }
+        public bool LevelCompleted { get; internal set; }
+        public bool ProgressSaved { get; internal set; }
+        public bool ProgressPending { get; internal set; }
+        public string SettlementId { get; internal set; }
     }
 
     public sealed class GameSession
@@ -177,6 +199,20 @@ namespace WordQuest.Domain.Game
         {
             Lives = Math.Max(0, Lives - 1);
             return Lives <= 0 ? SessionStatus.GameOver : SessionStatus.Continue;
+        }
+
+        public SessionStatus ApplyLifeLosses(int count)
+        {
+            var status = Lives <= 0
+                ? SessionStatus.GameOver
+                : SessionStatus.Continue;
+            for (var index = 0; index < Math.Max(0, count); index++)
+            {
+                status = LoseLife();
+                if (status == SessionStatus.GameOver)
+                    break;
+            }
+            return status;
         }
 
         public bool TryGrantGraceLife()

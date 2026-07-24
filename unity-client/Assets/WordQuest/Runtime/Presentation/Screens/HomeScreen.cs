@@ -13,6 +13,7 @@ namespace WordQuest.Presentation.Screens
             WordQuestContext context,
             Action<ScreenId> navigate,
             IGameService game = null,
+            ILearningService learning = null,
             CancellationToken token = default)
         {
             if (view == null)
@@ -55,6 +56,26 @@ namespace WordQuest.Presentation.Screens
                     }
                 };
             }
+
+            if (learning != null)
+                LoadDailyProgress(view, learning, token);
+        }
+
+        private static async void LoadDailyProgress(
+            VisualElement view,
+            ILearningService learning,
+            CancellationToken token)
+        {
+            var result = await learning.GetDailyStatsAsync(1, token);
+            if (!result.IsSuccess || result.Data == null)
+                return;
+
+            var total = 0;
+            foreach (var day in result.Data)
+                total += Math.Max(0, day.total);
+            var progress = view.Q<ProgressBar>("daily-progress");
+            progress.value = Math.Min(total, 20);
+            progress.title = $"{total} / 20 个单词";
         }
     }
 }

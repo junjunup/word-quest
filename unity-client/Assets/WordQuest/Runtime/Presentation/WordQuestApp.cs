@@ -25,6 +25,7 @@ namespace WordQuest.Presentation
     public sealed class WordQuestApp : MonoBehaviour
     {
         private CancellationTokenSource lifetime;
+        private CancellationTokenSource sessionLifetime;
         private LoginScreen loginScreen;
         private ScreenRouter router;
         private ContentCatalog content;
@@ -46,6 +47,7 @@ namespace WordQuest.Presentation
         private VisualElement npcChatOverlay;
         private bool npcChatOpen;
         private bool tutorCountsNpc;
+        private PronunciationScreen pronunciationScreen;
 
         public WordQuestContext Context { get; private set; }
         public AppStateMachine StateMachine { get; private set; }
@@ -101,8 +103,10 @@ namespace WordQuest.Presentation
             gameFlow?.Dispose();
             aiTutorScreen?.Dispose();
             npcTutorScreen?.Dispose();
+            pronunciationScreen?.Dispose();
             audio?.Dispose();
             loginScreen?.Dispose();
+            EndSession();
             lifetime?.Cancel();
             lifetime?.Dispose();
         }
@@ -143,6 +147,23 @@ namespace WordQuest.Presentation
             socialController = new SocialController(Social);
         }
 
+        private CancellationToken SessionToken =>
+            sessionLifetime?.Token ?? lifetime.Token;
+
+        private void BeginSession()
+        {
+            EndSession();
+            sessionLifetime = CancellationTokenSource
+                .CreateLinkedTokenSource(lifetime.Token);
+        }
+
+        private void EndSession()
+        {
+            sessionLifetime?.Cancel();
+            sessionLifetime?.Dispose();
+            sessionLifetime = null;
+        }
+
         private void BuildUi()
         {
             var uiObject = new GameObject("WordQuest UI");
@@ -170,6 +191,7 @@ namespace WordQuest.Presentation
             if (result.IsSuccess)
             {
                 Context.SignIn(MapUser(result.Data));
+                BeginSession();
                 StateMachine.TryTransition(AppState.Home);
                 ShowHome();
                 return;
@@ -180,6 +202,7 @@ namespace WordQuest.Presentation
 
         private void ShowAuthentication()
         {
+            EndSession();
             CleanupGameplay();
             Context.SignOut();
             StateMachine.TryTransition(AppState.Authentication);
@@ -192,6 +215,7 @@ namespace WordQuest.Presentation
                 MapUser,
                 () =>
                 {
+                    BeginSession();
                     StateMachine.TryTransition(AppState.Home);
                     ShowHome();
                 });
@@ -207,15 +231,22 @@ namespace WordQuest.Presentation
                 Context,
                 Navigate,
                 Game,
-                lifetime.Token);
-            _ = audio.PlayMusicAsync(MusicId.Menu, lifetime.Token);
-            _ = new PendingSettlementSync(pendingSync, Game)
-                .FlushAsync(lifetime.Token);
+                Learning,
+                SessionToken);
+            _ = audio.PlayMusicAsync(MusicId.Menu, SessionToken);
+            var userId = Context.User?.Id;
+            var token = SessionToken;
+            _ = FlushPendingSettlementsAsync(userId, token);
         }
 
         public void Navigate(ScreenId screen)
         {
             audio?.Play(SoundId.Click);
+            if (screen != ScreenId.Pronunciation)
+            {
+                pronunciationScreen?.Dispose();
+                pronunciationScreen = null;
+            }
             if (screen != ScreenId.Game && screen != ScreenId.Result)
                 CleanupGameplay();
 
@@ -272,8 +303,8 @@ namespace WordQuest.Presentation
             var view = router.Show(ScreenId.LevelSelect);
             var statusTask = Game.GetLevelsStatusAsync(
                 Context.Settings.WordbookId,
-                lifetime.Token);
-            var wordbooksTask = Vocabulary.GetWordbooksAsync(lifetime.Token);
+                SessionToken);
+            var wordbooksTask = Vocabulary.GetWordbooksAsync(SessionToken);
             await System.Threading.Tasks.Task.WhenAll(
                 statusTask,
                 wordbooksTask);
@@ -361,7 +392,8 @@ namespace WordQuest.Presentation
                 Learning,
                 Game,
                 pendingSync,
-                world);
+                world,
+                Context.User?.Id);
             world.MonsterDefeated += () => audio.Play(SoundId.Coin);
             lastComboCue = 0;
             gameFlow.SessionChanged += snapshot =>
@@ -394,12 +426,10 @@ namespace WordQuest.Presentation
             gameFlow.NpcRequested += word =>
                 OpenNpcChat(word, selection);
             gameFlow.WrongAnswerTutorRequested +=
-                (word, playerAnswer, correctAnswer, feedback) =>
+                (word, context) =>
                     OpenWrongAnswerTutor(
                         word,
-                        playerAnswer,
-                        correctAnswer,
-                        feedback,
+                        context,
                         selection);
             gameFlow.CorrectAnswerFeedbackRequested += word =>
                 quiz.ShowCorrectFeedback(
@@ -409,13 +439,13 @@ namespace WordQuest.Presentation
             quiz.Submitted += answer =>
             {
                 activeTutorial?.AnswerObserved();
-                _ = gameFlow.SubmitAnswerAsync(answer, lifetime.Token);
+                _ = gameFlow.SubmitAnswerAsync(answer, SessionToken);
             };
 
             try
             {
-                await audio.PlayMusicAsync(MusicId.Game, lifetime.Token);
-                await gameFlow.StartLevelAsync(selection, lifetime.Token);
+                await audio.PlayMusicAsync(MusicId.Game, SessionToken);
+                await gameFlow.StartLevelAsync(selection, SessionToken);
             }
             catch (Exception exception)
             {
@@ -436,8 +466,21 @@ namespace WordQuest.Presentation
                 world.gameObject.SetActive(false);
             var view = router.Show(ScreenId.Result);
             audio.Play(SoundId.LevelComplete);
-            _ = audio.PlayMusicAsync(MusicId.Result, lifetime.Token);
-            _ = SyncAchievementsAsync(result);
+            _ = audio.PlayMusicAsync(MusicId.Result, SessionToken);
+            if (LevelSettlementPolicy.ShouldSyncAchievements(
+                    result.LevelCompleted,
+                    result.ProgressSaved))
+            {
+                var userId = Context.User?.Id;
+                var token = SessionToken;
+                _ = SyncAndConfirmAchievementsAsync(
+                    result.SettlementId,
+                    AchievementRunEvidence.From(
+                        result,
+                        activeSelection?.WordbookId),
+                    userId,
+                    token);
+            }
             _ = new ResultScreen(
                 view,
                 result,
@@ -446,30 +489,94 @@ namespace WordQuest.Presentation
                 () => Navigate(ScreenId.Reports));
         }
 
-        private async System.Threading.Tasks.Task SyncAchievementsAsync(
-            LevelResult result)
+        private async System.Threading.Tasks.Task
+            FlushPendingSettlementsAsync(
+                string userId,
+                CancellationToken token)
         {
-            var progressTask = Game.GetProgressAsync(lifetime.Token);
+            try
+            {
+                var work = await new PendingSettlementSync(
+                        pendingSync,
+                        Game,
+                        userId)
+                    .FlushAsync(token);
+                foreach (var item in work)
+                {
+                    await SyncAndConfirmAchievementsAsync(
+                        item.SubmissionId,
+                        item.Evidence,
+                        userId,
+                        token);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // A logout cancels work before another account can use it.
+            }
+        }
+
+        private async System.Threading.Tasks.Task
+            SyncAndConfirmAchievementsAsync(
+                string submissionId,
+                AchievementRunEvidence result,
+                string userId,
+                CancellationToken token)
+        {
+            if (!await SyncAchievementsAsync(result, userId, token))
+                return;
+            pendingSync.Remove(userId, submissionId);
+        }
+
+        private async System.Threading.Tasks.Task<bool>
+            SyncAchievementsAsync(
+                AchievementRunEvidence result,
+                string userId,
+                CancellationToken token)
+        {
+            if (result == null ||
+                string.IsNullOrWhiteSpace(userId) ||
+                token.IsCancellationRequested ||
+                !string.Equals(
+                    Context.User?.Id,
+                    userId,
+                    StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            var progressTask = Game.GetProgressAsync(token);
             var statsTask = Learning.GetStatsAsync(
-                Context.Settings.WordbookId,
-                lifetime.Token);
+                result.WordbookId,
+                token);
             var achievementsTask =
-                Game.GetAchievementsAsync(lifetime.Token);
+                Game.GetAchievementsAsync(token);
             await System.Threading.Tasks.Task.WhenAll(
                 progressTask,
                 statsTask,
                 achievementsTask);
+            if (token.IsCancellationRequested ||
+                !string.Equals(
+                    Context.User?.Id,
+                    userId,
+                    StringComparison.Ordinal))
+            {
+                return false;
+            }
+            if (!progressTask.Result.IsSuccess ||
+                progressTask.Result.Data == null ||
+                !statsTask.Result.IsSuccess ||
+                statsTask.Result.Data == null ||
+                !achievementsTask.Result.IsSuccess ||
+                achievementsTask.Result.Data == null)
+            {
+                return false;
+            }
 
-            var progress = progressTask.Result.IsSuccess
-                ? progressTask.Result.Data
-                : new ProgressDto();
-            var stats = statsTask.Result.IsSuccess
-                ? statsTask.Result.Data
-                : new LearningStatsDto();
+            var progress = progressTask.Result.Data;
+            var stats = statsTask.Result.Data;
             var existing = new HashSet<string>(
-                (achievementsTask.Result.IsSuccess
-                    ? achievementsTask.Result.Data
-                    : Array.Empty<AchievementDto>())
+                achievementsTask.Result.Data
                 .Select(item => item.id));
             var estimatedCompleted = Math.Max(
                 (progress.currentChapter - 1) * 30 +
@@ -511,10 +618,18 @@ namespace WordQuest.Presentation
                         name = achievement.Name,
                         description = achievement.Description
                     },
-                    lifetime.Token);
-                if (saved.IsSuccess)
+                    token);
+                if (!saved.IsSuccess)
+                    return false;
+                if (string.Equals(
+                        Context.User?.Id,
+                        userId,
+                        StringComparison.Ordinal))
+                {
                     achievementToast.Show(achievement);
+                }
             }
+            return true;
         }
 
         private void CleanupGameplay()
@@ -567,19 +682,18 @@ namespace WordQuest.Presentation
 
         private void OpenWrongAnswerTutor(
             WordDto word,
-            string playerAnswer,
-            string correctAnswer,
-            string feedback,
+            WrongAnswerTutorContext context,
             LevelSelection selection)
         {
             OpenGameTutor(
                 word,
                 selection,
                 "wrong_answer",
-                playerAnswer,
-                correctAnswer,
-                feedback,
-                false);
+                context?.PlayerAnswer ?? string.Empty,
+                context?.CorrectAnswer ?? string.Empty,
+                context?.FuzzyFeedback ?? string.Empty,
+                false,
+                context);
         }
 
         private void OpenGameTutor(
@@ -589,7 +703,8 @@ namespace WordQuest.Presentation
             string playerAnswer,
             string correctAnswer,
             string feedback,
-            bool countsNpc)
+            bool countsNpc,
+            WrongAnswerTutorContext answerContext = null)
         {
             if (npcChatOverlay == null)
             {
@@ -616,11 +731,17 @@ namespace WordQuest.Presentation
                     CorrectAnswer = correctAnswer ?? string.Empty,
                     PlayerAnswer = playerAnswer ?? string.Empty,
                     FuzzyFeedback = feedback ?? string.Empty,
+                    AnswerQuality =
+                        answerContext?.AnswerQuality ?? string.Empty,
+                    EditDistance = answerContext?.EditDistance ?? 0,
+                    Similarity = answerContext?.Similarity ?? 0f,
+                    CorrectStreak = answerContext?.CorrectStreak ?? 0,
+                    WrongStreak = answerContext?.WrongStreak ?? 0,
                     PlayerLevel = Context.User?.Level ?? 1,
                     ChapterName = $"第 {selection.Level.Chapter} 章",
                     TriggerType = triggerType
                 },
-                lifetime.Token);
+                SessionToken);
             if (!countsNpc)
             {
                 npcChatOverlay.Q<TextField>("tutor-input").value =
@@ -664,7 +785,7 @@ namespace WordQuest.Presentation
             _ = new CharacterScreen(
                 view,
                 Game,
-                lifetime.Token,
+                SessionToken,
                 index =>
                 {
                     if (Context.User != null)
@@ -688,7 +809,7 @@ namespace WordQuest.Presentation
                 Vocabulary,
                 content,
                 Context.Settings.WordbookId,
-                lifetime.Token);
+                SessionToken);
         }
 
         private void ShowReview()
@@ -699,7 +820,7 @@ namespace WordQuest.Presentation
                 new ReviewModeController(
                     Learning,
                     Context.Settings.WordbookId),
-                lifetime.Token);
+                SessionToken);
         }
 
         private void ShowDailyChallenge()
@@ -710,7 +831,7 @@ namespace WordQuest.Presentation
                 new DailyChallengeController(
                     DailyChallenge,
                     Context.Settings.WordbookId),
-                lifetime.Token);
+                SessionToken);
         }
 
         private void ShowReports()
@@ -720,7 +841,7 @@ namespace WordQuest.Presentation
                 view,
                 new ReportController(Learning),
                 Context.Settings.WordbookId,
-                lifetime.Token);
+                SessionToken);
         }
 
         private void ShowVocabulary()
@@ -730,7 +851,7 @@ namespace WordQuest.Presentation
                 view,
                 Vocabulary,
                 Context,
-                lifetime.Token,
+                SessionToken,
                 () => Navigate(ScreenId.Pronunciation),
                 SelectWordbook);
         }
@@ -738,12 +859,13 @@ namespace WordQuest.Presentation
         private void ShowPronunciation()
         {
             var view = router.Show(ScreenId.Pronunciation);
-            _ = new PronunciationScreen(
+            pronunciationScreen?.Dispose();
+            pronunciationScreen = new PronunciationScreen(
                 view,
                 Pronunciation,
-                new MicrophoneCaptureAdapter(),
+                SpeechRecognitionAdapter.Create(),
                 Context.Settings.WordbookId,
-                lifetime.Token);
+                SessionToken);
         }
 
         private void ShowProfile()
@@ -753,7 +875,7 @@ namespace WordQuest.Presentation
                 view,
                 Auth,
                 Game,
-                lifetime.Token,
+                SessionToken,
                 () => Navigate(ScreenId.Character),
                 () => Navigate(ScreenId.Leaderboard));
         }
@@ -765,7 +887,7 @@ namespace WordQuest.Presentation
                 view,
                 Game,
                 Context.User?.Id,
-                lifetime.Token);
+                SessionToken);
         }
 
         private void ShowSocial()
@@ -775,7 +897,7 @@ namespace WordQuest.Presentation
                 view,
                 socialController,
                 Context.Settings.WordbookId,
-                lifetime.Token,
+                SessionToken,
                 id =>
                 {
                     activeChallengeId = id;
@@ -796,7 +918,7 @@ namespace WordQuest.Presentation
                 view,
                 socialController,
                 activeChallengeId,
-                lifetime.Token);
+                SessionToken);
         }
 
         private void ShowAiTutor()
@@ -811,7 +933,7 @@ namespace WordQuest.Presentation
                     PlayerLevel = Context.User?.Level ?? 1,
                     TriggerType = "manual"
                 },
-                lifetime.Token);
+                SessionToken);
         }
 
         private static AppState MapState(ScreenId screen)

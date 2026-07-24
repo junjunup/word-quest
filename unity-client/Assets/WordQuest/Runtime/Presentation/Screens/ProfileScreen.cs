@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
 using UnityEngine.UIElements;
+using WordQuest.Domain.Game;
 using WordQuest.Infrastructure.Api.Dto;
 using WordQuest.Infrastructure.Api.Services;
 
@@ -60,8 +62,33 @@ namespace WordQuest.Presentation.Screens
             }
 
             var achievements = await achievementsTask;
+            var unlockedIds = new HashSet<string>(
+                StringComparer.Ordinal);
+            foreach (var achievement in achievements.Data ??
+                                        Array.Empty<AchievementDto>())
+            {
+                if (!string.IsNullOrWhiteSpace(achievement.id))
+                    unlockedIds.Add(achievement.id);
+            }
             view.Q<Label>("profile-achievement-label").text =
-                $"已解锁 {achievements.Data?.Length ?? 0} 项成就";
+                $"已解锁 {unlockedIds.Count} / {AchievementPolicy.All.Count} 项成就";
+            var achievementList =
+                view.Q<ScrollView>("profile-achievement-list");
+            achievementList.Clear();
+            foreach (var definition in AchievementPolicy.All)
+            {
+                var unlocked = unlockedIds.Contains(definition.Id);
+                var row = new Label(
+                    $"{(unlocked ? definition.Icon : "🔒")} " +
+                    $"{definition.Name}\n{definition.Description}");
+                row.AddToClassList("list-card");
+                row.AddToClassList(
+                    unlocked
+                        ? "achievement-unlocked"
+                        : "achievement-locked");
+                row.style.opacity = unlocked ? 1f : 0.55f;
+                achievementList.Add(row);
+            }
             var endless = await endlessTask;
             view.Q<Label>("profile-endless-label").text =
                 endless.IsSuccess

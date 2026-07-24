@@ -45,6 +45,11 @@ namespace WordQuest.Application.Reports
                 rows.Add(
                     $"chapter,{Escape(point.Label)},{point.Value},{point.SecondaryValue}");
             }
+            foreach (var point in report.ErrorTypes)
+            {
+                rows.Add(
+                    $"errorType,{Escape(point.Label)},{point.Value},{point.SecondaryValue}");
+            }
             foreach (var mistake in report.Mistakes)
             {
                 rows.Add(

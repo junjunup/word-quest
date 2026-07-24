@@ -5,6 +5,7 @@ using NUnit.Framework;
 using UnityEngine;
 using WordQuest.Infrastructure.Api;
 using WordQuest.Infrastructure.Api.Dto;
+using WordQuest.Presentation.Screens;
 
 namespace WordQuest.Tests
 {
@@ -65,6 +66,22 @@ namespace WordQuest.Tests
         {
             Assert.That(ApiRoutes.SaveProgress, Does.StartWith("/api/"));
             Assert.That(ApiRoutes.SaveProgress, Does.Not.Contain("://"));
+        }
+
+        [TestCase(
+            "[{\"word\":\"apple\",\"meaning\":\"苹果\"}]",
+            "apple")]
+        [TestCase(
+            "{\"wordbookId\":\"custom\",\"words\":[{\"word\":\"pear\",\"meaning\":\"梨\"}]}",
+            "pear")]
+        public void Vocabulary_import_accepts_array_or_wrapped_object(
+            string json,
+            string expectedWord)
+        {
+            var parsed = VocabularyImportParser.Parse(json);
+
+            Assert.That(parsed.words, Has.Length.EqualTo(1));
+            Assert.That(parsed.words[0].word, Is.EqualTo(expectedWord));
         }
     }
 }

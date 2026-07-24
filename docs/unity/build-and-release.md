@@ -17,9 +17,14 @@ Outputs:
 - `unity-client/TestResults/EditMode.xml`
 - `unity-client/TestResults/PlayMode.xml`
 
+The macOS Player and its speech-recognition bridge share a macOS 11.0 minimum
+deployment target.
+
 The macOS artifact must be codesigned/notarized and the Windows artifact must be
 signed in the distribution environment; signing credentials are intentionally
-not stored in this repository.
+not stored in this repository. The macOS build step compiles a Universal
+`libWordQuestSpeech.dylib` before distribution signing, so signing must happen
+after `BuildPipeline.BuildPlayer` completes.
 
 ## Release gate
 

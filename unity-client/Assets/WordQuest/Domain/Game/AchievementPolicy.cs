@@ -31,6 +31,38 @@ namespace WordQuest.Domain.Game
         public int NpcChats { get; set; }
     }
 
+    [Serializable]
+    public sealed class AchievementRunEvidence
+    {
+        public int Chapter;
+        public int Level;
+        public int CorrectCount;
+        public int WrongCount;
+        public int MaximumCombo;
+        public int FastestCorrectMs;
+        public string WordbookId;
+
+        public static AchievementRunEvidence From(
+            LevelResult result,
+            string wordbookId)
+        {
+            if (result == null)
+                throw new ArgumentNullException(nameof(result));
+            return new AchievementRunEvidence
+            {
+                Chapter = result.Chapter,
+                Level = result.Level,
+                CorrectCount = result.CorrectCount,
+                WrongCount = result.WrongCount,
+                MaximumCombo = result.MaximumCombo,
+                FastestCorrectMs = result.FastestCorrectMs,
+                WordbookId = string.IsNullOrWhiteSpace(wordbookId)
+                    ? "cet4"
+                    : wordbookId
+            };
+        }
+    }
+
     public static class AchievementPolicy
     {
         private static readonly Achievement[] Definitions =

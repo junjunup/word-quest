@@ -82,6 +82,7 @@ namespace WordQuest.Presentation
             AddNavigationButton(navigation, "报告", ScreenId.Reports);
             AddNavigationButton(navigation, "社交", ScreenId.Social);
             AddNavigationButton(navigation, "AI 导师", ScreenId.AiTutor);
+            AddNavigationButton(navigation, "退出登录", ScreenId.Login);
             root.Add(navigation);
 
             var content = new VisualElement { name = "screen-content" };

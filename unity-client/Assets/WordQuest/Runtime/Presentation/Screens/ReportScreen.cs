@@ -52,6 +52,22 @@ namespace WordQuest.Presentation.Screens
             chapterChart.SetData(report.Chapters);
             chapterSlot.Add(chapterChart);
 
+            var errorSlot = view.Q<VisualElement>("error-chart-slot");
+            errorSlot.Clear();
+            var errorChart = new BarChartElement();
+            errorChart.SetData(report.ErrorTypes);
+            errorSlot.Add(errorChart);
+            var errorLegend = new VisualElement();
+            errorLegend.AddToClassList("feature-grid");
+            foreach (var point in report.ErrorTypes)
+            {
+                var label = new Label(
+                    $"{ErrorTypeLabel(point.Label)} · {point.Value}");
+                label.AddToClassList("list-card");
+                errorLegend.Add(label);
+            }
+            errorSlot.Add(errorLegend);
+
             var heatmapSlot = view.Q<VisualElement>("heatmap-slot");
             heatmapSlot.Clear();
             var heatmap = new HeatmapElement();
@@ -79,6 +95,23 @@ namespace WordQuest.Presentation.Screens
                 return;
             view.Q<Label>("report-status-label").text =
                 $"已导出到 {ReportExporter.Export(report)}";
+        }
+
+        public static string ErrorTypeLabel(string value)
+        {
+            switch (value)
+            {
+                case "unknown": return "未知 / 正确";
+                case "spelling_near": return "拼写接近";
+                case "meaning_confusion": return "释义混淆";
+                case "timeout": return "超时未答";
+                case "pronunciation": return "发音问题";
+                case "other": return "其他错因";
+                default:
+                    return string.IsNullOrWhiteSpace(value)
+                        ? "未分类"
+                        : value;
+            }
         }
     }
 }

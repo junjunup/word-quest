@@ -12,6 +12,8 @@
         <ui:VisualElement name="daily-chart-slot" class="panel chart-slot" />
         <ui:Label text="章节正确率" class="section-title" />
         <ui:VisualElement name="chapter-chart-slot" class="panel chart-slot" />
+        <ui:Label text="近 30 天错因分布" class="section-title" />
+        <ui:VisualElement name="error-chart-slot" class="panel chart-slot" />
         <ui:Label text="全年学习热力图" class="section-title" />
         <ui:VisualElement name="heatmap-slot" class="panel" />
         <ui:Label text="易错词" class="section-title" />

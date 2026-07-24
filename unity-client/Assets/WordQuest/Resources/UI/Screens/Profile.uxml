@@ -6,6 +6,8 @@
             <ui:Label name="profile-achievement-label" text="已解锁 0 项成就" class="list-card" />
             <ui:Label name="profile-endless-label" text="无尽最佳 0" class="list-card" />
         </ui:VisualElement>
+        <ui:Label text="全部成就" class="section-title" />
+        <ui:ScrollView name="profile-achievement-list" class="bounded-list" />
         <ui:Button name="choose-character-button" text="选择角色" class="secondary-button" />
         <ui:Button name="open-leaderboard-button" text="查看排行榜" />
         <ui:VisualElement class="panel">

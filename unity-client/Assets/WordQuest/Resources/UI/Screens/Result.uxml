@@ -4,6 +4,7 @@
             <ui:Label name="result-title" text="关卡完成" class="hero-title" />
             <ui:Label name="stars-label" text="☆☆☆" class="stars-label" />
             <ui:Label name="result-summary" text="" class="subtitle" />
+            <ui:Label name="result-settlement-status" text="" class="status-label" />
             <ui:Button name="replay-button" text="再次挑战" class="primary-button" />
             <ui:Button name="result-reports-button" text="查看学习报告" />
             <ui:Button name="result-home-button" text="返回主页" />

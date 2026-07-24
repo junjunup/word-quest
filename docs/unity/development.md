@@ -28,7 +28,7 @@ templates are the runtime screen source.
 - `Runtime/Application`: navigation, modes, report/social projections, AI
   orchestration, and pending settlement synchronization.
 - `Runtime/Infrastructure`: REST/SSE, PlayerPrefs adapters, input, audio, and
-  microphone capability detection.
+  Windows/macOS system speech-recognition adapters.
 - `Runtime/Gameplay`: deterministic world generation, encounters, game flow,
   tutorial, and three Boss behaviors.
 - `Runtime/Presentation`: UI Toolkit composition and screen controllers.
@@ -54,3 +54,16 @@ UNITY_EDITOR_BIN="/path/to/Unity" bash unity-client/Tools/run-unity-tests.sh
 
 Generated `Library`, `Temp`, `Obj`, `Logs`, `TestResults`, and `Builds`
 directories must remain untracked.
+
+## Desktop speech recognition
+
+- Windows uses Unity's `DictationRecognizer`; Windows speech privacy must
+  allow dictation.
+- macOS builds compile the committed Objective-C++ bridge against Apple's
+  Speech and AVFoundation frameworks. The build processor adds microphone and
+  speech-recognition usage descriptions to `Info.plist`.
+- Recognition populates transcript and confidence automatically before the
+  existing `/api/pronunciation/score` request. Manual transcript entry remains
+  available only as an explicit fallback.
+- The macOS editor cannot load the Player dylib; validate that path in a built
+  `.app`, then codesign/notarize the final bundle after all native files exist.

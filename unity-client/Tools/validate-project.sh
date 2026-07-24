@@ -136,4 +136,24 @@ rg -F "using UnityEngine.UIElements;" \
   "$project_root/Assets/WordQuest/Editor/ProjectValidator.cs" >/dev/null ||
   fail "ProjectValidator must import VisualTreeAsset's namespace"
 
+rg -F "if (!completed)" \
+  "$project_root/Assets/WordQuest/Runtime/Gameplay/GameFlowController.cs" \
+  >/dev/null ||
+  fail "Failed levels must not be saved as completed"
+rg -F "ReadAll(userId)" \
+  "$project_root/Assets/WordQuest/Runtime/Application/PendingSettlementSync.cs" \
+  >/dev/null ||
+  fail "Pending settlements must be scoped to the signed-in user"
+rg -F 'name="profile-achievement-list"' \
+  "$project_root/Assets/WordQuest/Resources/UI/Screens/Profile.uxml" \
+  >/dev/null ||
+  fail "Profile must expose the full achievement list"
+rg -F "SpeechRecognitionAdapter.Create()" \
+  "$project_root/Assets/WordQuest/Runtime/Presentation/WordQuestApp.cs" \
+  >/dev/null ||
+  fail "Pronunciation must use the desktop speech recognizer"
+test -f \
+  "$project_root/Assets/WordQuest/Native/macOS/WordQuestSpeech.mm" ||
+  fail "Missing macOS Speech framework bridge"
+
 echo "Unity project validation PASS"

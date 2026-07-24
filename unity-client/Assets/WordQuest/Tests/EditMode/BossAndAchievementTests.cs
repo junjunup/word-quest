@@ -38,6 +38,27 @@ namespace WordQuest.Tests
             Assert.That(session.Snapshot.BossDefeated, Is.True);
         }
 
+        [Test]
+        public void Boss_defeat_is_preserved_before_deferred_wrong_answers_end_session()
+        {
+            var session = new GameSession(
+                1,
+                1,
+                new[] { new Word("1", "a", "甲", "", "", 1) },
+                Difficulty.For(DifficultyKind.Normal),
+                1000);
+            var state = new BossState(
+                new BossDefinition("Boss", 1, 1),
+                session);
+
+            Assert.That(state.ApplyQuizResult(true), Is.True);
+            var status = session.ApplyLifeLosses(3);
+
+            Assert.That(status, Is.EqualTo(SessionStatus.GameOver));
+            Assert.That(session.Snapshot.BossDefeated, Is.True);
+            Assert.That(session.Snapshot.Lives, Is.Zero);
+        }
+
         [TestCase(DifficultyKind.Easy, 2)]
         [TestCase(DifficultyKind.Normal, 3)]
         [TestCase(DifficultyKind.Hard, 5)]

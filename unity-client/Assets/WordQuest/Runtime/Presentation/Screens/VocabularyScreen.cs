@@ -10,11 +10,27 @@ using WordQuest.Infrastructure.Api.Services;
 namespace WordQuest.Presentation.Screens
 {
     [Serializable]
-    internal sealed class VocabularyImportFile
+    public sealed class VocabularyImportFile
     {
         public WordDto[] words;
         public string wordbookId;
         public string wordbookName;
+    }
+
+    public static class VocabularyImportParser
+    {
+        public static VocabularyImportFile Parse(string json)
+        {
+            if (string.IsNullOrWhiteSpace(json))
+                return null;
+            var trimmed = json.TrimStart();
+            var normalized = trimmed.StartsWith(
+                "[",
+                StringComparison.Ordinal)
+                    ? $"{{\"words\":{json}}}"
+                    : json;
+            return JsonUtility.FromJson<VocabularyImportFile>(normalized);
+        }
     }
 
     public sealed class VocabularyScreen
@@ -93,11 +109,12 @@ namespace WordQuest.Presentation.Screens
 
             try
             {
-                var source = JsonUtility.FromJson<VocabularyImportFile>(
+                var source = VocabularyImportParser.Parse(
                     File.ReadAllText(path));
                 if (source?.words == null || source.words.Length == 0)
                 {
-                    Status("导入文件必须是包含 words 数组的 JSON 对象。");
+                    Status(
+                        "导入文件必须是单词数组，或包含 words 数组的 JSON 对象。");
                     return;
                 }
 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using WordQuest.Domain.Game;
 
 namespace WordQuest.Infrastructure.Storage
 {
@@ -8,11 +9,14 @@ namespace WordQuest.Infrastructure.Storage
     public sealed class PendingSubmission
     {
         public string id;
+        public string userId;
         public string route;
         public string method;
         public string jsonBody;
         public long createdAtUnixMs;
         public int attempts;
+        public bool progressSaved;
+        public AchievementRunEvidence achievementEvidence;
     }
 
     [Serializable]
@@ -31,38 +35,80 @@ namespace WordQuest.Infrastructure.Storage
             this.store = store ?? throw new ArgumentNullException(nameof(store));
         }
 
-        public void Enqueue(PendingSubmission item)
+        public void Enqueue(string userId, PendingSubmission item)
         {
             if (item == null)
                 throw new ArgumentNullException(nameof(item));
+            userId = RequireUserId(userId);
+            if (!string.IsNullOrWhiteSpace(item.userId) &&
+                !string.Equals(
+                    item.userId,
+                    userId,
+                    StringComparison.Ordinal))
+            {
+                throw new ArgumentException(
+                    "Pending submission belongs to another user.",
+                    nameof(item));
+            }
 
-            var wrapper = ReadWrapper();
+            item.userId = userId;
+            var wrapper = ReadWrapper(userId);
             wrapper.items.Add(item);
-            Write(wrapper);
+            Write(userId, wrapper);
         }
 
-        public IReadOnlyList<PendingSubmission> ReadAll()
+        public IReadOnlyList<PendingSubmission> ReadAll(string userId)
         {
-            return ReadWrapper().items.AsReadOnly();
+            return ReadWrapper(RequireUserId(userId)).items.AsReadOnly();
         }
 
-        public void Replace(IReadOnlyList<PendingSubmission> items)
+        public void Replace(
+            string userId,
+            IReadOnlyList<PendingSubmission> items)
         {
+            userId = RequireUserId(userId);
             var wrapper = new PendingSubmissionList();
             if (items != null)
-                wrapper.items.AddRange(items);
-            Write(wrapper);
+            {
+                foreach (var item in items)
+                {
+                    if (item != null &&
+                        string.Equals(
+                            item.userId,
+                            userId,
+                            StringComparison.Ordinal))
+                    {
+                        wrapper.items.Add(item);
+                    }
+                }
+            }
+            Write(userId, wrapper);
         }
 
-        public void Clear()
+        public void Clear(string userId)
         {
-            store.DeleteKey(QueueKey);
+            store.DeleteKey(KeyFor(RequireUserId(userId)));
             store.Save();
         }
 
-        private PendingSubmissionList ReadWrapper()
+        public void Remove(string userId, string submissionId)
         {
-            var json = store.GetString(QueueKey, string.Empty);
+            userId = RequireUserId(userId);
+            if (string.IsNullOrWhiteSpace(submissionId))
+                return;
+            var wrapper = ReadWrapper(userId);
+            wrapper.items.RemoveAll(item =>
+                item != null &&
+                string.Equals(
+                    item.id,
+                    submissionId,
+                    StringComparison.Ordinal));
+            Write(userId, wrapper);
+        }
+
+        private PendingSubmissionList ReadWrapper(string userId)
+        {
+            var json = store.GetString(KeyFor(userId), string.Empty);
             if (string.IsNullOrWhiteSpace(json))
                 return new PendingSubmissionList();
 
@@ -77,10 +123,28 @@ namespace WordQuest.Infrastructure.Storage
             }
         }
 
-        private void Write(PendingSubmissionList wrapper)
+        private void Write(
+            string userId,
+            PendingSubmissionList wrapper)
         {
-            store.SetString(QueueKey, JsonUtility.ToJson(wrapper));
+            store.SetString(KeyFor(userId), JsonUtility.ToJson(wrapper));
             store.Save();
+        }
+
+        private static string KeyFor(string userId)
+        {
+            return $"{QueueKey}:{userId}";
+        }
+
+        private static string RequireUserId(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                throw new ArgumentException(
+                    "A signed-in user is required for pending sync.",
+                    nameof(userId));
+            }
+            return userId.Trim();
         }
     }
 }

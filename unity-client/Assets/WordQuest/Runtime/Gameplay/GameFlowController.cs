@@ -47,6 +47,18 @@ namespace WordQuest.Gameplay
         public QuestionType Type { get; set; }
     }
 
+    public sealed class WrongAnswerTutorContext
+    {
+        public string PlayerAnswer { get; set; } = string.Empty;
+        public string CorrectAnswer { get; set; } = string.Empty;
+        public string AnswerQuality { get; set; } = "wrong";
+        public int EditDistance { get; set; }
+        public float Similarity { get; set; }
+        public string FuzzyFeedback { get; set; } = string.Empty;
+        public int CorrectStreak { get; set; }
+        public int WrongStreak { get; set; }
+    }
+
     public sealed class GameFlowController : IDisposable
     {
         private readonly IVocabularyService vocabulary;
@@ -54,6 +66,7 @@ namespace WordQuest.Gameplay
         private readonly IGameService game;
         private readonly PendingSyncQueue pending;
         private readonly WorldController world;
+        private readonly string userId;
         private readonly AdaptiveQuizPolicy adaptive = new AdaptiveQuizPolicy();
         private readonly List<WordDto> words = new List<WordDto>();
         private LevelSelection selection;
@@ -62,6 +75,8 @@ namespace WordQuest.Gameplay
         private bool quizOpen;
         private BossController boss;
         private bool bossQuestion;
+        private bool continueBossBattle;
+        private int deferredBossWrongAnswers;
         private Encounter activeEncounter;
         private CancellationToken activeToken;
         private bool finishing;
@@ -72,7 +87,8 @@ namespace WordQuest.Gameplay
             ILearningService learning,
             IGameService game,
             PendingSyncQueue pending,
-            WorldController world)
+            WorldController world,
+            string userId)
         {
             this.vocabulary = vocabulary ??
                               throw new ArgumentNullException(nameof(vocabulary));
@@ -82,6 +98,11 @@ namespace WordQuest.Gameplay
             this.pending = pending ??
                            throw new ArgumentNullException(nameof(pending));
             this.world = world ?? throw new ArgumentNullException(nameof(world));
+            this.userId = string.IsNullOrWhiteSpace(userId)
+                ? throw new ArgumentException(
+                    "A signed-in user is required for game progress.",
+                    nameof(userId))
+                : userId.Trim();
             world.Encountered += OnEncountered;
             world.BossPlayerDamaged += OnBossPlayerDamaged;
         }
@@ -94,7 +115,7 @@ namespace WordQuest.Gameplay
         public event Action BossAppeared;
         public event Action BossDefeated;
         public event Action<WordDto> NpcRequested;
-        public event Action<WordDto, string, string, string>
+        public event Action<WordDto, WrongAnswerTutorContext>
             WrongAnswerTutorRequested;
         public event Action<WordDto> CorrectAnswerFeedbackRequested;
 
@@ -108,6 +129,12 @@ namespace WordQuest.Gameplay
                         throw new ArgumentNullException(nameof(levelSelection));
             activeToken = token;
             finishing = false;
+            paused = false;
+            quizOpen = false;
+            bossQuestion = false;
+            continueBossBattle = false;
+            deferredBossWrongAnswers = 0;
+            activeEncounter = null;
             suggestedQuestionType = null;
             var response = await vocabulary.GetLevelWordsAsync(
                 selection.Level.Chapter,
@@ -170,6 +197,7 @@ namespace WordQuest.Gameplay
             if (session?.CurrentWord == null)
                 return;
 
+            var answeredBoss = bossQuestion;
             var domainWord = session.CurrentWord;
             var word = words.FirstOrDefault(item =>
                 (string.IsNullOrEmpty(item._id) ? item.wordId : item._id) ==
@@ -191,7 +219,7 @@ namespace WordQuest.Gameplay
                     word = domainWord.Text,
                     wordbookId = word?.wordbookId ?? selection.WordbookId,
                     questionType = ToApiQuestionType(answer.Type),
-                    sourceMode = bossQuestion ? "boss" : "mainline",
+                    sourceMode = answeredBoss ? "boss" : "mainline",
                     isCorrect = answer.Correct,
                     responseTime = answer.ResponseMs,
                     timeLimit = session.Snapshot.TimerMs,
@@ -210,15 +238,17 @@ namespace WordQuest.Gameplay
                 },
                 token);
 
-            var correct = record.IsSuccess
+            var hasServerRecord =
+                record.IsSuccess && record.Data != null;
+            var correct = hasServerRecord
                 ? record.Data.serverIsCorrect
                 : answer.Correct;
             var score = ScoringPolicy.ApplyDifficulty(
-                record.IsSuccess
+                hasServerRecord
                     ? record.Data.serverScore
                     : localScore,
                 selection.Difficulty);
-            if (record.IsSuccess &&
+            if (hasServerRecord &&
                 record.Data.adaptiveDifficulty != null)
             {
                 suggestedQuestionType =
@@ -229,23 +259,46 @@ namespace WordQuest.Gameplay
             }
             AnswerEvaluated?.Invoke(correct);
             adaptive.Record(correct);
-            if (bossQuestion)
+            if (answeredBoss)
             {
                 boss?.SubmitQuizResult(correct);
                 bossQuestion = false;
+                if (!correct)
+                    deferredBossWrongAnswers++;
             }
             world.ResolveEncounter(activeEncounter, correct);
             activeEncounter = null;
 
-            var outcome = session.SubmitAnswer(correct, answer.ResponseMs, score);
+            var outcome = session.SubmitAnswer(
+                correct,
+                answer.ResponseMs,
+                score,
+                !answeredBoss);
             if (adaptive.ConsecutiveErrors >= 3)
                 session.TryGrantGraceLife();
 
-            SessionChanged?.Invoke(outcome.Snapshot);
-            if (outcome.Status == SessionStatus.GameOver ||
+            var status = outcome.Status;
+            continueBossBattle =
+                answeredBoss &&
+                boss != null &&
+                boss.CurrentHitPoints > 0;
+            if (answeredBoss && !continueBossBattle)
+            {
+                status = session.ApplyLifeLosses(
+                    deferredBossWrongAnswers);
+                deferredBossWrongAnswers = 0;
+            }
+
+            SessionChanged?.Invoke(session.Snapshot);
+            if (status == SessionStatus.GameOver ||
                 world.ObjectivesComplete)
             {
-                await FinishAsync(token);
+                continueBossBattle = false;
+                await FinishAsync(
+                    token,
+                    LevelSettlementPolicy.ShouldPersistProgress(
+                        status,
+                        world.ObjectivesComplete));
                 return;
             }
 
@@ -254,13 +307,10 @@ namespace WordQuest.Gameplay
                 quizOpen = true;
                 WrongAnswerTutorRequested.Invoke(
                     word,
-                    answer.Value,
-                    answer.Type == QuestionType.ChoiceEnglishToChinese
-                        ? word?.meaning ?? string.Empty
-                        : word?.word ?? string.Empty,
-                    record.IsSuccess
-                        ? record.Data.fuzzyFeedback
-                        : "这道题需要再巩固一次。");
+                    BuildWrongAnswerContext(
+                        answer,
+                        word,
+                        hasServerRecord ? record.Data : null));
                 return;
             }
 
@@ -271,8 +321,7 @@ namespace WordQuest.Gameplay
                 return;
             }
 
-            quizOpen = false;
-            world.SetSimulationEnabled(!paused);
+            ResumeAfterTutor();
         }
 
         public void TogglePause()
@@ -287,6 +336,7 @@ namespace WordQuest.Gameplay
             var npcEncounter = activeEncounter;
             activeEncounter = null;
             quizOpen = false;
+            continueBossBattle = false;
             world.SetSimulationEnabled(!paused);
             if (npcEncounter?.Kind == EncounterKind.Npc)
                 world.CooldownEncounter(npcEncounter, 2f);
@@ -296,6 +346,12 @@ namespace WordQuest.Gameplay
         {
             activeEncounter = null;
             quizOpen = false;
+            if (continueBossBattle)
+            {
+                continueBossBattle = false;
+                PresentQuestion(true);
+                return;
+            }
             world.SetSimulationEnabled(!paused);
         }
 
@@ -336,13 +392,26 @@ namespace WordQuest.Gameplay
                 return;
             }
 
-            bossQuestion = encounter.Kind == EncounterKind.Boss;
+            PresentQuestion(encounter.Kind == EncounterKind.Boss);
+        }
+
+        private void PresentQuestion(bool isBoss)
+        {
+            if (session?.CurrentWord == null)
+                return;
+
+            quizOpen = true;
+            bossQuestion = isBoss;
+            world.SetSimulationEnabled(false);
+            var dto = words.First(item =>
+                (string.IsNullOrEmpty(item._id) ? item.wordId : item._id) ==
+                session.CurrentWord.Id);
             var requested = suggestedQuestionType ??
                             QuizRotation.ForAnsweredCount(
                                 session.Snapshot.AnsweredCount);
             var question =
                 QuizFactory.Create(dto, adaptive.Select(requested), words);
-            if (bossQuestion && boss != null)
+            if (isBoss && boss != null)
             {
                 question = new QuizQuestion(
                     question.WordId,
@@ -354,7 +423,9 @@ namespace WordQuest.Gameplay
             QuestionReady?.Invoke(question);
         }
 
-        private async Task FinishAsync(CancellationToken token)
+        private async Task FinishAsync(
+            CancellationToken token,
+            bool completed)
         {
             if (finishing)
                 return;
@@ -362,6 +433,12 @@ namespace WordQuest.Gameplay
             world.SetSimulationEnabled(false);
             var result = session.Finish(
                 DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+            result.LevelCompleted = completed;
+            if (!completed)
+            {
+                Finished?.Invoke(result);
+                return;
+            }
             var request = new SaveProgressRequest
             {
                 chapter = result.Chapter,
@@ -372,17 +449,29 @@ namespace WordQuest.Gameplay
                 wordbookId = selection.WordbookId
             };
             var saved = await game.SaveProgressAsync(request, token);
-            if (!saved.IsSuccess)
+            result.ProgressSaved = saved.IsSuccess;
+            result.ProgressPending =
+                PendingSettlementSync.ShouldRetry(saved);
+            if (result.ProgressSaved || result.ProgressPending)
             {
-                pending.Enqueue(new PendingSubmission
-                {
-                    id = Guid.NewGuid().ToString("N"),
-                    route = ApiRoutes.SaveProgress,
-                    method = UnityWebRequest.kHttpVerbPOST,
-                    jsonBody = JsonUtility.ToJson(request),
-                    createdAtUnixMs =
-                        DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
-                });
+                result.SettlementId = Guid.NewGuid().ToString("N");
+                pending.Enqueue(
+                    userId,
+                    new PendingSubmission
+                    {
+                        id = result.SettlementId,
+                        userId = userId,
+                        route = ApiRoutes.SaveProgress,
+                        method = UnityWebRequest.kHttpVerbPOST,
+                        jsonBody = JsonUtility.ToJson(request),
+                        createdAtUnixMs =
+                            DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                        progressSaved = result.ProgressSaved,
+                        achievementEvidence =
+                            AchievementRunEvidence.From(
+                                result,
+                                selection.WordbookId)
+                    });
             }
 
             Finished?.Invoke(result);
@@ -396,7 +485,7 @@ namespace WordQuest.Gameplay
             var status = session.LoseLife();
             SessionChanged?.Invoke(session.Snapshot);
             if (status == SessionStatus.GameOver)
-                await FinishAsync(activeToken);
+                await FinishAsync(activeToken, false);
         }
 
         private static Word ToDomainWord(WordDto value)
@@ -408,6 +497,35 @@ namespace WordQuest.Gameplay
                 value.phonetic,
                 value.example,
                 value.difficulty);
+        }
+
+        private WrongAnswerTutorContext BuildWrongAnswerContext(
+            QuizAnswer answer,
+            WordDto word,
+            QuizRecordResultDto result)
+        {
+            var stats = result?.adaptiveDifficulty?.stats;
+            return new WrongAnswerTutorContext
+            {
+                PlayerAnswer = answer.Value ?? string.Empty,
+                CorrectAnswer =
+                    answer.Type == QuestionType.ChoiceEnglishToChinese
+                        ? word?.meaning ?? string.Empty
+                        : word?.word ?? string.Empty,
+                AnswerQuality = string.IsNullOrWhiteSpace(
+                    result?.answerQuality)
+                        ? "wrong"
+                        : result.answerQuality,
+                EditDistance = result?.editDistance ?? 0,
+                Similarity = result?.similarity ?? 0f,
+                FuzzyFeedback = string.IsNullOrWhiteSpace(
+                    result?.fuzzyFeedback)
+                        ? "这道题需要再巩固一次。"
+                        : result.fuzzyFeedback,
+                CorrectStreak = stats?.consecutiveCorrect ?? 0,
+                WrongStreak = stats?.consecutiveWrong ??
+                              adaptive.ConsecutiveErrors
+            };
         }
 
         private static string ToApiQuestionType(QuestionType type)

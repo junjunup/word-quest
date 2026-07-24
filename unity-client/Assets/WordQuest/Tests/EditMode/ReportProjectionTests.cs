@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using WordQuest.Application.Reports;
+using WordQuest.Presentation.Screens;
 using WordQuest.Infrastructure.Api.Dto;
 
 namespace WordQuest.Tests
@@ -43,6 +44,37 @@ namespace WordQuest.Tests
             Assert.That(
                 ReportExporter.Escape("a,\"b\"\nc"),
                 Is.EqualTo("\"a,\"\"b\"\"\nc\""));
+        }
+
+        [Test]
+        public void Csv_contains_error_type_section()
+        {
+            var report = new LearningReportViewModel
+            {
+                ErrorTypes = new[]
+                {
+                    new ChartPoint
+                    {
+                        Label = "spelling",
+                        Value = 3
+                    }
+                }
+            };
+
+            Assert.That(
+                ReportExporter.ToCsv(report),
+                Does.Contain("errorType,spelling,3"));
+        }
+
+        [Test]
+        public void Error_type_legend_uses_readable_labels()
+        {
+            Assert.That(
+                ReportScreen.ErrorTypeLabel("meaning_confusion"),
+                Is.EqualTo("释义混淆"));
+            Assert.That(
+                ReportScreen.ErrorTypeLabel("spelling_near"),
+                Is.EqualTo("拼写接近"));
         }
     }
 }

@@ -15,11 +15,13 @@ namespace WordQuest.Infrastructure.Api
             var operation = request.SendWebRequest();
             CancellationTokenRegistration registration = default;
 
-            operation.completed += _ =>
+            void Complete()
             {
                 registration.Dispose();
                 completion.TrySetResult(request);
-            };
+            }
+
+            operation.completed += _ => Complete();
 
             if (cancellationToken.CanBeCanceled)
             {
@@ -29,6 +31,11 @@ namespace WordQuest.Infrastructure.Api
                     completion.TrySetCanceled(cancellationToken);
                 });
             }
+
+            if (operation.isDone)
+                Complete();
+            if (completion.Task.IsCompleted)
+                registration.Dispose();
 
             return completion.Task;
         }

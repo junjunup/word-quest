@@ -34,6 +34,7 @@ server_routes=(
   "auth.js:/register"
   "auth.js:/login"
   "auth.js:/me"
+  "auth.js:/reminder-settings"
   "game.js:/progress"
   "game.js:/leaderboard"
   "game.js:/achievements"
@@ -46,6 +47,7 @@ server_routes=(
   "vocabulary.js:/wordbooks"
   "vocabulary.js:/source-manifest"
   "vocabulary.js:/chapter/:chapter"
+  "vocabulary.js:/chapter/:chapter/level/:level"
   "vocabulary.js:/quiz/:wordId"
   "vocabulary.js:/search"
   "learning.js:/review/today"
@@ -65,7 +67,11 @@ server_routes=(
   "social.js:/users/search"
   "social.js:/friends"
   "social.js:/friends/request"
+  "social.js:/friends/:id/respond"
+  "social.js:/friends/:id"
   "social.js:/challenges"
+  "social.js:/challenges/:id"
+  "social.js:/challenges/:id/submit"
   "pronunciation.js:/score"
   "pronunciation.js:/history"
   "chat.js:/message"
@@ -87,5 +93,13 @@ rg -F "AdaptiveDifficultyDto adaptiveDifficulty" "$learning_dtos" >/dev/null ||
   fail "quiz-record adaptiveDifficulty must remain an object DTO"
 rg -F "string[] feedback" "$pronunciation_dtos" >/dev/null ||
   fail "pronunciation details.feedback must remain a string array"
+rg -F '"/api/auth/reminder-settings"' "$routes_file" >/dev/null ||
+  fail "Unity reminder route is missing"
+rg -F '/level/{Math.Max(1, level)}' "$routes_file" >/dev/null ||
+  fail "Unity level-word route is missing"
+rg -F '/respond' "$routes_file" >/dev/null ||
+  fail "Unity friendship response route is missing"
+rg -F 'return $"{Challenge(id)}/submit";' "$routes_file" >/dev/null ||
+  fail "Unity challenge submission route is missing"
 
 echo "Unity API contract validation PASS"
