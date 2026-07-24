@@ -72,6 +72,25 @@ namespace WordQuest.Gameplay.Boss
                 return BossKind.Charging;
             return BossKind.Roaming;
         }
+
+        public static BossDefinition AdjustForDifficulty(
+            BossDefinition definition,
+            Difficulty difficulty)
+        {
+            if (definition == null)
+                throw new ArgumentNullException(nameof(definition));
+            difficulty = difficulty ??
+                         Difficulty.For(DifficultyKind.Normal);
+            var hitPoints = definition.BaseHitPoints;
+            if (difficulty.Kind == DifficultyKind.Easy)
+                hitPoints = Math.Max(2, hitPoints - 1);
+            else if (difficulty.Kind == DifficultyKind.Hard)
+                hitPoints += 2;
+            return new BossDefinition(
+                definition.Name,
+                hitPoints,
+                definition.Speed);
+        }
     }
 
     [RequireComponent(typeof(Collider2D))]
@@ -84,6 +103,10 @@ namespace WordQuest.Gameplay.Boss
         public event Action<BossEncounter> QuizRequested;
         public event Action Defeated;
         public event Action PlayerDamaged;
+        public int CurrentHitPoints => State?.HitPoints ?? 0;
+        public int MaximumHitPoints =>
+            State?.Definition.BaseHitPoints ?? 0;
+        internal bool IsSimulationActive => SimulationEnabled;
 
         public virtual void Configure(
             BossDefinition definition,
@@ -123,7 +146,12 @@ namespace WordQuest.Gameplay.Boss
             PlayerDamaged?.Invoke();
         }
 
-        private void OnTriggerEnter2D(Collider2D other)
+        internal void NotifyProjectileHit()
+        {
+            DamagePlayer();
+        }
+
+        protected virtual void OnTriggerEnter2D(Collider2D other)
         {
             if (other.GetComponent<PlayerController>() != null)
                 RequestQuiz();

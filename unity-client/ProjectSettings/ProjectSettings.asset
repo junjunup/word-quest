@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!129 &1
+PlayerSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 28
+  productGUID: 1ad3667618c842c3a7857563e5222b72
+  AndroidProfiler: 0
+  companyName: Word Quest
+  productName: Word Quest
+  defaultScreenWidth: 1440
+  defaultScreenHeight: 900
+  defaultScreenWidthWeb: 1440
+  defaultScreenHeightWeb: 900
+  m_ActiveColorSpace: 0
+  colorSpace: 0
+  runInBackground: 1
+  captureSingleScreen: 0
+  resizableWindow: 1
+  fullscreenMode: 3
+  visibleInBackground: 1
+  allowFullscreenSwitch: 1
+  forceSingleInstance: 0
+  usePlayerLog: 1
+  activeInputHandler: 1
+  macRetinaSupport: 1
+  macOSURLSchemes: []
+  applicationIdentifier:
+    Standalone: com.wordquest.desktop
+  buildNumber:
+    Standalone: 1
+  metroPackageVersion: 1.0.0.0
+  bundleVersion: 0.1.0

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -30,8 +29,6 @@ namespace WordQuest.Presentation
     {
         private readonly VisualElement root;
         private readonly VisualElement content;
-        private readonly Dictionary<ScreenId, VisualElement> cache =
-            new Dictionary<ScreenId, VisualElement>();
 
         public ScreenRouter(VisualElement root)
         {
@@ -42,30 +39,28 @@ namespace WordQuest.Presentation
 
         public ScreenId Current { get; private set; }
         public VisualElement CurrentView { get; private set; }
+        public VisualElement Root => root;
 
         public event Action<ScreenId> ScreenRequested;
 
         public VisualElement Show(ScreenId screen)
         {
             content.Clear();
-            if (!cache.TryGetValue(screen, out var view))
-            {
-                view = CreateView(screen);
-                cache[screen] = view;
-            }
+            var view = CreateView(screen);
 
             Current = screen;
             CurrentView = view;
             content.Add(view);
             var navigation = root.Q<VisualElement>("navigation");
             navigation.style.display =
-                screen == ScreenId.Login ? DisplayStyle.None : DisplayStyle.Flex;
+                screen == ScreenId.Login || screen == ScreenId.Game
+                    ? DisplayStyle.None
+                    : DisplayStyle.Flex;
             return view;
         }
 
         public void Refresh(ScreenId screen)
         {
-            cache.Remove(screen);
             if (Current == screen)
                 Show(screen);
         }
@@ -92,6 +87,12 @@ namespace WordQuest.Presentation
             var content = new VisualElement { name = "screen-content" };
             content.AddToClassList("screen-content");
             root.Add(content);
+
+            var toast = new VisualElement { name = "achievement-toast" };
+            toast.AddToClassList("achievement-toast");
+            toast.Add(new Label { name = "achievement-title" });
+            toast.Add(new Label { name = "achievement-description" });
+            root.Add(toast);
 
             var tokens = Resources.Load<StyleSheet>("UI/Styles/Tokens");
             var appStyle = Resources.Load<StyleSheet>("UI/Styles/App");
@@ -122,7 +123,8 @@ namespace WordQuest.Presentation
             if (asset != null)
             {
                 var cloned = asset.CloneTree();
-                cloned.AddToClassList("screen");
+                cloned.AddToClassList(
+                    screen == ScreenId.Game ? "game-layer" : "screen");
                 return cloned;
             }
 

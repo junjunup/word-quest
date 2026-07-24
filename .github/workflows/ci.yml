@@ -10,6 +10,17 @@ permissions:
   contents: read
 
 jobs:
+  unity-static:
+    name: Unity client static validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Validate Unity project boundary and parity
+        run: bash unity-client/Tools/validate-project.sh
+      - name: Validate Unity/Express API contracts
+        run: bash unity-client/Tools/check-api-contracts.sh
+
   server:
     name: Server validation
     runs-on: ubuntu-latest

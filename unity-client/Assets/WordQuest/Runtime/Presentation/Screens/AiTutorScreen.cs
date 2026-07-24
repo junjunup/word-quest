@@ -33,6 +33,9 @@ namespace WordQuest.Presentation.Screens
 
         public void Dispose()
         {
+            view.Q<Button>("tutor-send-button").clicked -= Send;
+            view.Q<Button>("tutor-cancel-button").clicked -= Cancel;
+            view.Q<Button>("tutor-retry-button").clicked -= Retry;
             request?.Cancel();
             request?.Dispose();
         }

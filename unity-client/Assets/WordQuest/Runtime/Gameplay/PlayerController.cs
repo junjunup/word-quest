@@ -9,6 +9,7 @@ namespace WordQuest.Gameplay
         [SerializeField] private float speed = 4.5f;
         private Rigidbody2D body;
         private GameInput input;
+        private SpriteAnimationController animationController;
 
         public bool MovementEnabled { get; set; } = true;
 
@@ -22,6 +23,8 @@ namespace WordQuest.Gameplay
             body = GetComponent<Rigidbody2D>();
             body.gravityScale = 0f;
             body.freezeRotation = true;
+            animationController =
+                GetComponent<SpriteAnimationController>();
         }
 
         private void FixedUpdate()
@@ -30,6 +33,7 @@ namespace WordQuest.Gameplay
                 ? input.Move * speed
                 : Vector2.zero;
             body.linearVelocity = velocity;
+            animationController?.SetMotion(velocity);
         }
     }
 }

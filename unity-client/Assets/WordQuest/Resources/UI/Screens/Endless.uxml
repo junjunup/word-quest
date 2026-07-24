@@ -3,13 +3,12 @@
         <ui:Label text="无尽试炼" class="hero-title" />
         <ui:Label text="三条生命，连续答对会提升难度并缩短作答时间。" class="subtitle" />
         <ui:VisualElement class="panel">
-            <ui:Label name="endless-round-label" text="第 1 题" class="section-title" />
+            <ui:Label name="endless-round-label" text="正在加载词库…" class="section-title" />
             <ui:Label name="endless-status-label" text="" />
-            <ui:VisualElement class="action-row">
-                <ui:Button name="endless-correct-button" text="模拟答对 / 下一题" class="primary-button" />
-                <ui:Button name="endless-wrong-button" text="模拟答错 / 下一题" />
-                <ui:Button name="endless-finish-button" text="结束并提交" />
-            </ui:VisualElement>
+            <ui:ProgressBar name="endless-timer" title="剩余时间" value="100" high-value="100" />
+            <ui:VisualElement name="endless-question-host" class="mode-question-host" />
+            <ui:Label name="endless-feedback-label" text="" class="status-label" />
+            <ui:Button name="endless-finish-button" text="结束并提交" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

@@ -51,6 +51,7 @@ namespace WordQuest.Presentation.Screens
                     else
                     {
                         status.text = result.Message;
+                        reward.SetEnabled(true);
                     }
                 };
             }

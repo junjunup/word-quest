@@ -66,12 +66,8 @@ namespace WordQuest.Application.Quiz
                     return new QuizQuestion(
                         id,
                         type,
-                        string.IsNullOrWhiteSpace(word.example)
-                            ? word.meaning
-                            : word.example,
-                        string.IsNullOrWhiteSpace(word.exampleTranslation)
-                            ? word.word
-                            : word.exampleTranslation,
+                        $"翻译为英文：{word.meaning}",
+                        word.word,
                         Array.Empty<QuizOption>());
                 case QuestionType.Pronunciation:
                     return new QuizQuestion(
@@ -157,6 +153,38 @@ namespace WordQuest.Application.Quiz
                 foreach (var character in value ?? string.Empty)
                     hash = hash * 31 + character;
                 return hash;
+            }
+        }
+    }
+
+    public static class QuizRotation
+    {
+        private static readonly QuestionType[] Sequence =
+        {
+            QuestionType.ChoiceEnglishToChinese,
+            QuestionType.ChoiceChineseToEnglish,
+            QuestionType.SpellHint,
+            QuestionType.SpellFull,
+            QuestionType.Translate
+        };
+
+        public static QuestionType ForAnsweredCount(int answeredCount)
+        {
+            return Sequence[Math.Max(0, answeredCount) % Sequence.Length];
+        }
+
+        public static QuestionType ParseServerSuggestion(
+            string value,
+            QuestionType fallback)
+        {
+            switch (value)
+            {
+                case "choice_cn2en": return QuestionType.ChoiceChineseToEnglish;
+                case "spell_hint": return QuestionType.SpellHint;
+                case "spell_full": return QuestionType.SpellFull;
+                case "translate": return QuestionType.Translate;
+                case "choice_en2cn": return QuestionType.ChoiceEnglishToChinese;
+                default: return fallback;
             }
         }
     }

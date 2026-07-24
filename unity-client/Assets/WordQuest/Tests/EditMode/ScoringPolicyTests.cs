@@ -29,5 +29,20 @@ namespace WordQuest.Tests
                     scoreRatio),
                 Is.EqualTo(expected));
         }
+
+        [TestCase(DifficultyKind.Easy, 100, 80)]
+        [TestCase(DifficultyKind.Normal, 100, 100)]
+        [TestCase(DifficultyKind.Hard, 100, 150)]
+        public void Selected_difficulty_multiplier_matches_web_client(
+            DifficultyKind difficulty,
+            int score,
+            int expected)
+        {
+            Assert.That(
+                ScoringPolicy.ApplyDifficulty(
+                    score,
+                    Difficulty.For(difficulty)),
+                Is.EqualTo(expected));
+        }
     }
 }

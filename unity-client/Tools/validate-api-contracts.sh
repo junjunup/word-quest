@@ -4,6 +4,8 @@ set -euo pipefail
 project_root="$(cd "$(dirname "$0")/.." && pwd)"
 repo_root="$(cd "$project_root/.." && pwd)"
 routes_file="$project_root/Assets/WordQuest/Runtime/Infrastructure/Api/ApiRoutes.cs"
+learning_dtos="$project_root/Assets/WordQuest/Runtime/Infrastructure/Api/Dto/LearningDtos.cs"
+pronunciation_dtos="$project_root/Assets/WordQuest/Runtime/Infrastructure/Api/Dto/PronunciationDtos.cs"
 
 fail() {
   echo "ERROR: $1" >&2
@@ -80,5 +82,10 @@ done
 if rg -n 'https?://' "$routes_file" >/dev/null; then
   fail "ApiRoutes must not contain an environment-specific origin"
 fi
+
+rg -F "AdaptiveDifficultyDto adaptiveDifficulty" "$learning_dtos" >/dev/null ||
+  fail "quiz-record adaptiveDifficulty must remain an object DTO"
+rg -F "string[] feedback" "$pronunciation_dtos" >/dev/null ||
+  fail "pronunciation details.feedback must remain a string array"
 
 echo "Unity API contract validation PASS"

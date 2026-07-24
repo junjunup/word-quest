@@ -5,12 +5,18 @@
             <ui:Label name="score-label" text="分数 0" />
             <ui:Label name="combo-label" text="保持专注" />
             <ui:ProgressBar name="level-progress" title="0/0" value="0" high-value="100" />
+            <ui:Button name="game-tutor-button" text="小智" />
             <ui:Button name="pause-button" text="暂停" />
+        </ui:VisualElement>
+        <ui:VisualElement name="tutorial-banner" class="tutorial-banner panel">
+            <ui:Label name="tutorial-label" text="使用 WASD、方向键或手柄左摇杆移动。" />
+            <ui:Button name="tutorial-skip-button" text="跳过引导" />
         </ui:VisualElement>
         <ui:VisualElement name="quiz-overlay" class="modal-layer">
             <ui:VisualElement class="quiz-card panel">
                 <ui:Label name="question-type-label" text="英译中选择" class="eyebrow" />
                 <ui:Label name="question-prompt" text="" class="question-title" />
+                <ui:ProgressBar name="quiz-timer" title="剩余时间" value="100" high-value="100" />
                 <ui:VisualElement name="option-list" />
                 <ui:TextField name="answer-field" label="你的答案" />
                 <ui:Button name="submit-answer-button" text="提交答案" class="primary-button" />
@@ -23,6 +29,25 @@
                 <ui:Button name="mute-button" text="切换声音" />
                 <ui:Button name="pause-home-button" text="返回主页" />
                 <ui:Button name="pause-logout-button" text="退出登录" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="npc-chat-overlay" class="modal-layer">
+            <ui:VisualElement class="npc-chat-card panel">
+                <ui:VisualElement class="action-row">
+                    <ui:Label text="小智 · 场景辅导" class="hero-title" />
+                    <ui:Button name="npc-chat-close-button" text="返回冒险" />
+                </ui:VisualElement>
+                <ui:Label text="AI 仅用于词汇学习辅助，可能出错；重要知识请结合教材与教师反馈核对。" class="subtitle" />
+                <ui:Label name="tutor-context-chip" text="上下文：当前单词" class="context-chip" />
+                <ui:ScrollView name="tutor-messages" class="chat-list" />
+                <ui:VisualElement class="chat-compose">
+                    <ui:TextField name="tutor-input" multiline="true" max-length="1000" label="询问当前单词、例句或记忆方法" />
+                    <ui:VisualElement class="action-row">
+                        <ui:Button name="tutor-send-button" text="发送" class="primary-button" />
+                        <ui:Button name="tutor-cancel-button" text="取消回答" />
+                        <ui:Button name="tutor-retry-button" text="重试上个问题" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

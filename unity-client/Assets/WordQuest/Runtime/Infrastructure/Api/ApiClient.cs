@@ -55,6 +55,60 @@ namespace WordQuest.Infrastructure.Api
                 false);
         }
 
+        public async Task<ApiResult<string>> GetRawAsync(
+            string route,
+            CancellationToken cancellationToken)
+        {
+            for (var attempt = 0; attempt < 2; attempt++)
+            {
+                using (var request = CreateRequest(
+                           UnityWebRequest.kHttpVerbGET,
+                           route))
+                {
+                    try
+                    {
+                        await request.SendAsync(cancellationToken);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        return ApiResult<string>.Failure(
+                            request.responseCode,
+                            "请求已取消",
+                            true);
+                    }
+
+                    if (request.responseCode == 401)
+                    {
+                        tokenStore.Clear();
+                        unauthorized?.Invoke();
+                    }
+
+                    if (request.result == UnityWebRequest.Result.Success &&
+                        request.responseCode >= 200 &&
+                        request.responseCode < 300)
+                    {
+                        return ApiResult<string>.Success(
+                            request.responseCode,
+                            request.downloadHandler?.text ?? string.Empty);
+                    }
+
+                    var transient =
+                        request.result == UnityWebRequest.Result.ConnectionError ||
+                        request.responseCode == 502 ||
+                        request.responseCode == 503 ||
+                        request.responseCode == 504;
+                    if (!transient || attempt == 1)
+                    {
+                        return ApiResult<string>.Failure(
+                            request.responseCode,
+                            request.error ?? "网络请求失败");
+                    }
+                }
+            }
+
+            return ApiResult<string>.Failure(0, "网络请求失败");
+        }
+
         public UnityWebRequest CreateRequest(
             string method,
             string route,

@@ -35,6 +35,7 @@ namespace WordQuest.Gameplay
         private bool active = true;
 
         public event Action<Encounter> Encountered;
+        public EncounterKind Kind => kind;
 
         public void Configure(string id, EncounterKind encounterKind)
         {

@@ -8,10 +8,15 @@ namespace WordQuest.Presentation.Screens
     {
         private readonly VisualElement root;
 
-        public HudScreen(VisualElement root, Action pause)
+        public HudScreen(
+            VisualElement root,
+            Action pause,
+            Action tutor = null)
         {
             this.root = root ?? throw new ArgumentNullException(nameof(root));
             root.Q<Button>("pause-button").clicked += () => pause?.Invoke();
+            root.Q<Button>("game-tutor-button").clicked += () =>
+                tutor?.Invoke();
         }
 
         public void Render(GameSessionSnapshot snapshot)

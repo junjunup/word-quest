@@ -65,7 +65,9 @@ namespace WordQuest.Domain.Game
         public int ProgressPercent =>
             WordCount == 0
                 ? 0
-                : (int)Math.Round(AnsweredCount * 100d / WordCount);
+                : Math.Min(
+                    100,
+                    (int)Math.Round(AnsweredCount * 100d / WordCount));
     }
 
     public sealed class LevelResult
@@ -81,6 +83,7 @@ namespace WordQuest.Domain.Game
         public int MaximumCombo { get; internal set; }
         public long TotalTimeMs { get; internal set; }
         public int AverageTimeMs { get; internal set; }
+        public int FastestCorrectMs { get; internal set; }
         public int LivesRemaining { get; internal set; }
         public string SessionId { get; internal set; }
         public string Difficulty { get; internal set; }
@@ -121,6 +124,7 @@ namespace WordQuest.Domain.Game
         internal int MaximumCombo { get; private set; }
         internal int CorrectCount { get; private set; }
         internal int WrongCount { get; private set; }
+        internal int FastestCorrectMs { get; private set; }
         internal int CurrentWordIndex { get; private set; }
         internal bool BossDefeated { get; private set; }
         internal bool GraceLifeUsed { get; private set; }
@@ -150,6 +154,9 @@ namespace WordQuest.Domain.Game
                 Combo++;
                 MaximumCombo = Math.Max(MaximumCombo, Combo);
                 Score += Math.Max(0, earnedScore);
+                if (responseMs > 0 &&
+                    (FastestCorrectMs == 0 || responseMs < FastestCorrectMs))
+                    FastestCorrectMs = responseMs;
             }
             else
             {
@@ -243,6 +250,7 @@ namespace WordQuest.Domain.Game
                 MaximumCombo = MaximumCombo,
                 TotalTimeMs = totalTime,
                 AverageTimeMs = (int)Math.Round(averageTime),
+                FastestCorrectMs = FastestCorrectMs,
                 LivesRemaining = Lives,
                 SessionId = SessionId,
                 Difficulty = Difficulty.Id,

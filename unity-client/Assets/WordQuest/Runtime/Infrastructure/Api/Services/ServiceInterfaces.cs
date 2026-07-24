@@ -124,7 +124,7 @@ namespace WordQuest.Infrastructure.Api.Services
         Task<ApiResult<MistakeDto[]>> GetTopMistakesAsync(
             int limit,
             CancellationToken token);
-        Task<ApiResult<string[][]>> GetHeatmapAsync(
+        Task<ApiResult<HeatmapEntryDto[]>> GetHeatmapAsync(
             int year,
             CancellationToken token);
     }

@@ -3,7 +3,7 @@
 > AI 辅助游戏化英语词汇学习系统 — 毕业设计项目
 
 <p align="center">
-  <strong>Phaser 3 像素风游戏 + Vue 3 前端 + Node.js 后端 + 百度文心一言 AI 学伴</strong>
+  <strong>Unity 6 桌面客户端 + Vue/Phaser 兼容客户端 + Node.js 后端 + 百度文心一言 AI 学伴</strong>
 </p>
 
 ---
@@ -30,6 +30,28 @@
 ## 🌾 项目简介
 
 **词汇大冒险**是一款面向 CET-4 英语词汇学习的 2D 像素风 RPG 教育游戏。玩家在田园风格的游戏世界中探索、与怪物战斗（答题）、收集金币、解锁成就，同时由 AI 学伴"小智"提供个性化辅导。
+
+## Unity 桌面客户端
+
+新的 Windows/macOS 客户端位于 `unity-client/`，目标版本固定为 Unity
+`6000.5.3f1`。它复用现有 Express、MongoDB 与 FastAPI 服务，并迁移了主线
+冒险、三类 Boss、多题型、无尽/复习/每日挑战、学习报告、词库、发音、角色、
+成就、排行榜、好友 PK 和 AI SSE 对话。旧 `client/` 继续保留，作为迁移期的
+行为对照和 Web 入口。
+
+```bash
+# 不依赖 Unity Editor 的校验
+bash unity-client/Tools/validate-project.sh
+bash unity-client/Tools/check-api-contracts.sh
+
+# 安装 Unity 6000.5.3f1 后
+UNITY_EDITOR_BIN="/path/to/Unity" bash unity-client/Tools/run-unity-tests.sh
+UNITY_EDITOR_BIN="/path/to/Unity" bash unity-client/Tools/build-players.sh
+```
+
+本机尚未安装目标 Unity Editor，因此当前 Unity 功能状态为
+`implemented-unverified`，不能视为已经通过编译、PlayMode 或 Player 构建。
+开发、构建和逐项验收见 `docs/unity/`。
 
 ### 核心玩法
 1. **探索** — 在田园像素风地图中自由移动
@@ -88,10 +110,10 @@
 
 ```
 ┌─────────────────────────────────────────────┐
-│                   Client                     │
-│  Vue 3 + Phaser 3 + Pinia + Vue Router      │
-│  Sprout Lands 像素素材 + SCSS 田园主题        │
-│                   :3000                      │
+│                  Clients                     │
+│  Unity 6000.5 desktop + Vue 3/Phaser web    │
+│  UI Toolkit + 2D world / compatibility SPA  │
+│             Windows / macOS / :3000          │
 └──────────────────┬──────────────────────────┘
                    │ HTTP / SSE
 ┌──────────────────▼──────────────────────────┐
@@ -110,7 +132,8 @@
 
 | 层级 | 技术栈 | 说明 |
 |------|--------|------|
-| **前端** | Vue 3 + Phaser 3 + Pinia | SPA + 2D 游戏引擎 + 状态管理 |
+| **桌面客户端** | Unity 6000.5 + UI Toolkit + Input System | Windows/macOS 原生 2D 客户端 |
+| **兼容 Web 客户端** | Vue 3 + Phaser 3 + Pinia | 迁移期行为对照与浏览器入口 |
 | **后端** | Express.js + Mongoose | RESTful API + MongoDB ODM |
 | **AI 服务** | FastAPI + 百度文心一言 | Python 微服务 + LLM 代理 |
 | **数据库** | MongoDB 7.0 | 用户/进度/词库/学习记录 |
@@ -265,6 +288,12 @@ ai-gamified-learning/
 │   │   ├── stores/             # Pinia 状态管理
 │   │   └── styles/             # 全局 SCSS 田园主题
 │   └── Dockerfile              # 多阶段构建 (Vite → Nginx)
+│
+├── unity-client/               # Unity 6000.5 Windows/macOS 客户端
+│   ├── Assets/WordQuest/Domain # 不依赖 UnityEngine 的领域规则
+│   ├── Assets/WordQuest/Runtime# 应用、API、玩法与 UI Toolkit
+│   ├── Assets/WordQuest/Editor # 校验及双平台构建入口
+│   └── Tools/                  # 静态校验、测试和构建脚本
 │
 ├── server/                     # 后端 (Express.js)
 │   ├── src/

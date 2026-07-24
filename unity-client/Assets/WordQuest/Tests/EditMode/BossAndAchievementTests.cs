@@ -38,6 +38,20 @@ namespace WordQuest.Tests
             Assert.That(session.Snapshot.BossDefeated, Is.True);
         }
 
+        [TestCase(DifficultyKind.Easy, 2)]
+        [TestCase(DifficultyKind.Normal, 3)]
+        [TestCase(DifficultyKind.Hard, 5)]
+        public void Boss_hp_tracks_selected_difficulty(
+            DifficultyKind difficulty,
+            int expectedHitPoints)
+        {
+            var adjusted = BossState.AdjustForDifficulty(
+                new BossDefinition("Boss", 3, 1),
+                Difficulty.For(difficulty));
+
+            Assert.That(adjusted.BaseHitPoints, Is.EqualTo(expectedHitPoints));
+        }
+
         [Test]
         public void Achievement_catalog_preserves_all_sixteen_ids()
         {

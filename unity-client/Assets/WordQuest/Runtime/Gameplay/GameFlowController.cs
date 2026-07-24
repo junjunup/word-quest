@@ -19,15 +19,22 @@ namespace WordQuest.Gameplay
 {
     public sealed class LevelSelection
     {
-        public LevelSelection(LevelDefinition level, Difficulty difficulty)
+        public LevelSelection(
+            LevelDefinition level,
+            Difficulty difficulty,
+            string wordbookId = "cet4")
         {
             Level = level ?? throw new ArgumentNullException(nameof(level));
             Difficulty = difficulty ??
                          throw new ArgumentNullException(nameof(difficulty));
+            WordbookId = string.IsNullOrWhiteSpace(wordbookId)
+                ? "cet4"
+                : wordbookId;
         }
 
         public LevelDefinition Level { get; }
         public Difficulty Difficulty { get; }
+        public string WordbookId { get; }
     }
 
     public sealed class QuizAnswer
@@ -55,6 +62,10 @@ namespace WordQuest.Gameplay
         private bool quizOpen;
         private BossController boss;
         private bool bossQuestion;
+        private Encounter activeEncounter;
+        private CancellationToken activeToken;
+        private bool finishing;
+        private QuestionType? suggestedQuestionType;
 
         public GameFlowController(
             IVocabularyService vocabulary,
@@ -72,12 +83,20 @@ namespace WordQuest.Gameplay
                            throw new ArgumentNullException(nameof(pending));
             this.world = world ?? throw new ArgumentNullException(nameof(world));
             world.Encountered += OnEncountered;
+            world.BossPlayerDamaged += OnBossPlayerDamaged;
         }
 
         public event Action<GameSessionSnapshot> SessionChanged;
         public event Action<QuizQuestion> QuestionReady;
         public event Action<LevelResult> Finished;
         public event Action<bool> PauseChanged;
+        public event Action<bool> AnswerEvaluated;
+        public event Action BossAppeared;
+        public event Action BossDefeated;
+        public event Action<WordDto> NpcRequested;
+        public event Action<WordDto, string, string, string>
+            WrongAnswerTutorRequested;
+        public event Action<WordDto> CorrectAnswerFeedbackRequested;
 
         public GameSessionSnapshot Snapshot => session?.Snapshot;
 
@@ -87,17 +106,38 @@ namespace WordQuest.Gameplay
         {
             selection = levelSelection ??
                         throw new ArgumentNullException(nameof(levelSelection));
+            activeToken = token;
+            finishing = false;
+            suggestedQuestionType = null;
             var response = await vocabulary.GetLevelWordsAsync(
                 selection.Level.Chapter,
                 selection.Level.Id,
-                "cet4",
+                selection.WordbookId,
                 token);
             if (!response.IsSuccess)
                 throw new InvalidOperationException(response.Message);
 
             words.Clear();
             words.AddRange(response.Data ?? Array.Empty<WordDto>());
-            var domainWords = words.Select(ToDomainWord).ToArray();
+            if (words.Count == 0)
+            {
+                throw new InvalidOperationException(
+                    "当前关卡没有可用词汇，请检查词库导入状态。");
+            }
+            var baseMonsterCount = Math.Min(words.Count, 10);
+            var objectiveCount =
+                selection.Difficulty.MonsterCount(baseMonsterCount);
+            if (selection.Level.Boss != null &&
+                !selection.Level.IsTutorial)
+            {
+                objectiveCount += BossState.AdjustForDifficulty(
+                    selection.Level.Boss,
+                    selection.Difficulty).BaseHitPoints;
+            }
+            var domainWords = words
+                .Take(Math.Max(1, Math.Min(words.Count, objectiveCount)))
+                .Select(ToDomainWord)
+                .ToArray();
             session = new GameSession(
                 selection.Level.Chapter,
                 selection.Level.Id,
@@ -109,8 +149,14 @@ namespace WordQuest.Gameplay
 
             world.Build(
                 selection.Level,
-                selection.Level.Chapter * 10000 + selection.Level.Id);
+                selection.Level.Chapter * 10000 + selection.Level.Id,
+                selection.Difficulty);
             boss = world.ConfigureBoss(selection.Level, session);
+            if (boss != null)
+            {
+                boss.Defeated += () => BossDefeated?.Invoke();
+                BossAppeared?.Invoke();
+            }
             world.SetSimulationEnabled(true);
             SessionChanged?.Invoke(session.Snapshot);
         }
@@ -143,9 +189,9 @@ namespace WordQuest.Gameplay
                 {
                     wordId = domainWord.Id,
                     word = domainWord.Text,
-                    wordbookId = word?.wordbookId ?? "cet4",
+                    wordbookId = word?.wordbookId ?? selection.WordbookId,
                     questionType = ToApiQuestionType(answer.Type),
-                    sourceMode = "mainline",
+                    sourceMode = bossQuestion ? "boss" : "mainline",
                     isCorrect = answer.Correct,
                     responseTime = answer.ResponseMs,
                     timeLimit = session.Snapshot.TimerMs,
@@ -155,7 +201,10 @@ namespace WordQuest.Gameplay
                     chapter = session.Snapshot.Chapter,
                     level = session.Snapshot.Level,
                     playerAnswer = answer.Value,
-                    correctAnswer = domainWord.Text,
+                    correctAnswer =
+                        answer.Type == QuestionType.ChoiceEnglishToChinese
+                            ? domainWord.Meaning
+                            : domainWord.Text,
                     combo = session.Snapshot.Combo,
                     scoreRatio = (float)answer.ScoreRatio
                 },
@@ -164,29 +213,65 @@ namespace WordQuest.Gameplay
             var correct = record.IsSuccess
                 ? record.Data.serverIsCorrect
                 : answer.Correct;
-            var score = record.IsSuccess
-                ? record.Data.serverScore
-                : localScore;
+            var score = ScoringPolicy.ApplyDifficulty(
+                record.IsSuccess
+                    ? record.Data.serverScore
+                    : localScore,
+                selection.Difficulty);
+            if (record.IsSuccess &&
+                record.Data.adaptiveDifficulty != null)
+            {
+                suggestedQuestionType =
+                    QuizRotation.ParseServerSuggestion(
+                        record.Data.adaptiveDifficulty.questionType,
+                        QuizRotation.ForAnsweredCount(
+                            session.Snapshot.AnsweredCount + 1));
+            }
+            AnswerEvaluated?.Invoke(correct);
             adaptive.Record(correct);
             if (bossQuestion)
             {
                 boss?.SubmitQuizResult(correct);
                 bossQuestion = false;
             }
+            world.ResolveEncounter(activeEncounter, correct);
+            activeEncounter = null;
 
             var outcome = session.SubmitAnswer(correct, answer.ResponseMs, score);
             if (adaptive.ConsecutiveErrors >= 3)
                 session.TryGrantGraceLife();
 
-            quizOpen = false;
             SessionChanged?.Invoke(outcome.Snapshot);
             if (outcome.Status == SessionStatus.GameOver ||
-                outcome.Snapshot.AnsweredCount >= outcome.Snapshot.WordCount)
+                world.ObjectivesComplete)
             {
                 await FinishAsync(token);
                 return;
             }
 
+            if (!correct && WrongAnswerTutorRequested != null)
+            {
+                quizOpen = true;
+                WrongAnswerTutorRequested.Invoke(
+                    word,
+                    answer.Value,
+                    answer.Type == QuestionType.ChoiceEnglishToChinese
+                        ? word?.meaning ?? string.Empty
+                        : word?.word ?? string.Empty,
+                    record.IsSuccess
+                        ? record.Data.fuzzyFeedback
+                        : "这道题需要再巩固一次。");
+                return;
+            }
+
+            if (correct && CorrectAnswerFeedbackRequested != null)
+            {
+                quizOpen = true;
+                CorrectAnswerFeedbackRequested.Invoke(word);
+                return;
+            }
+
+            quizOpen = false;
             world.SetSimulationEnabled(!paused);
         }
 
@@ -197,9 +282,41 @@ namespace WordQuest.Gameplay
             PauseChanged?.Invoke(paused);
         }
 
+        public void ResumeAfterNpc()
+        {
+            var npcEncounter = activeEncounter;
+            activeEncounter = null;
+            quizOpen = false;
+            world.SetSimulationEnabled(!paused);
+            if (npcEncounter?.Kind == EncounterKind.Npc)
+                world.CooldownEncounter(npcEncounter, 2f);
+        }
+
+        public void ResumeAfterTutor()
+        {
+            activeEncounter = null;
+            quizOpen = false;
+            world.SetSimulationEnabled(!paused);
+        }
+
+        public WordDto TryPauseForManualTutor()
+        {
+            if (paused || quizOpen || session?.CurrentWord == null)
+                return null;
+            var word = words.FirstOrDefault(item =>
+                (string.IsNullOrEmpty(item._id) ? item.wordId : item._id) ==
+                session.CurrentWord.Id);
+            if (word == null)
+                return null;
+            quizOpen = true;
+            world.SetSimulationEnabled(false);
+            return word;
+        }
+
         public void Dispose()
         {
             world.Encountered -= OnEncountered;
+            world.BossPlayerDamaged -= OnBossPlayerDamaged;
         }
 
         private void OnEncountered(Encounter encounter)
@@ -208,20 +325,40 @@ namespace WordQuest.Gameplay
                 return;
 
             quizOpen = true;
-            bossQuestion = encounter.Kind == EncounterKind.Boss;
+            activeEncounter = encounter;
             world.SetSimulationEnabled(false);
             var dto = words.First(item =>
                 (string.IsNullOrEmpty(item._id) ? item.wordId : item._id) ==
                 session.CurrentWord.Id);
-            var requested = session.Snapshot.Combo >= 5
-                ? QuestionType.SpellFull
-                : QuestionType.ChoiceEnglishToChinese;
-            QuestionReady?.Invoke(
-                QuizFactory.Create(dto, adaptive.Select(requested), words));
+            if (encounter.Kind == EncounterKind.Npc)
+            {
+                NpcRequested?.Invoke(dto);
+                return;
+            }
+
+            bossQuestion = encounter.Kind == EncounterKind.Boss;
+            var requested = suggestedQuestionType ??
+                            QuizRotation.ForAnsweredCount(
+                                session.Snapshot.AnsweredCount);
+            var question =
+                QuizFactory.Create(dto, adaptive.Select(requested), words);
+            if (bossQuestion && boss != null)
+            {
+                question = new QuizQuestion(
+                    question.WordId,
+                    question.Type,
+                    $"Boss HP {boss.CurrentHitPoints}/{boss.MaximumHitPoints} · {question.Prompt}",
+                    question.CorrectAnswer,
+                    question.Options);
+            }
+            QuestionReady?.Invoke(question);
         }
 
         private async Task FinishAsync(CancellationToken token)
         {
+            if (finishing)
+                return;
+            finishing = true;
             world.SetSimulationEnabled(false);
             var result = session.Finish(
                 DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
@@ -232,7 +369,7 @@ namespace WordQuest.Gameplay
                 stars = result.Stars,
                 score = result.Score,
                 sessionId = result.SessionId,
-                wordbookId = "cet4"
+                wordbookId = selection.WordbookId
             };
             var saved = await game.SaveProgressAsync(request, token);
             if (!saved.IsSuccess)
@@ -249,6 +386,17 @@ namespace WordQuest.Gameplay
             }
 
             Finished?.Invoke(result);
+        }
+
+        private async void OnBossPlayerDamaged()
+        {
+            if (finishing || paused || quizOpen || session == null)
+                return;
+
+            var status = session.LoseLife();
+            SessionChanged?.Invoke(session.Snapshot);
+            if (status == SessionStatus.GameOver)
+                await FinishAsync(activeToken);
         }
 
         private static Word ToDomainWord(WordDto value)

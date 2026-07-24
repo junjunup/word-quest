@@ -52,6 +52,12 @@ namespace WordQuest.Presentation.Screens
             chapterChart.SetData(report.Chapters);
             chapterSlot.Add(chapterChart);
 
+            var heatmapSlot = view.Q<VisualElement>("heatmap-slot");
+            heatmapSlot.Clear();
+            var heatmap = new HeatmapElement();
+            heatmap.SetData(report.Heatmap);
+            heatmapSlot.Add(heatmap);
+
             var mistakes = view.Q<ScrollView>("mistake-list");
             mistakes.Clear();
             foreach (var item in report.Mistakes)

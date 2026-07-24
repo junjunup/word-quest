@@ -219,6 +219,11 @@ TextField > TextInput {
     background-color: rgba(0, 0, 0, 0);
 }
 
+.game-layer {
+    flex-grow: 1;
+    background-color: rgba(0, 0, 0, 0);
+}
+
 .hud {
     position: absolute;
     left: 18px;
@@ -238,6 +243,18 @@ TextField > TextInput {
     flex-grow: 1;
 }
 
+.tutorial-banner {
+    position: absolute;
+    left: 260px;
+    right: 260px;
+    bottom: 22px;
+    min-height: 70px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    border-color: var(--gold);
+}
+
 .modal-layer {
     position: absolute;
     left: 0;
@@ -253,6 +270,11 @@ TextField > TextInput {
 .pause-card,
 .result-card {
     width: 560px;
+}
+
+.npc-chat-card {
+    width: 760px;
+    max-height: 760px;
 }
 
 .question-title {
@@ -289,6 +311,51 @@ TextField > TextInput {
     border-radius: 10px;
     white-space: normal;
     font-size: 16px;
+}
+
+.mode-question-host {
+    max-width: 720px;
+    margin-top: 14px;
+}
+
+.mode-question-host > Button {
+    min-height: 48px;
+    margin-top: 8px;
+    white-space: normal;
+    border-radius: 10px;
+}
+
+.mode-feedback-correct {
+    color: var(--success);
+}
+
+.mode-feedback-wrong {
+    color: var(--error);
+}
+
+.mode-selected {
+    border-width: 3px;
+    border-color: var(--forest-500);
+    background-color: rgb(224, 240, 215);
+}
+
+.achievement-toast {
+    position: absolute;
+    right: 24px;
+    top: 24px;
+    width: 360px;
+    padding: 16px;
+    border-width: 2px;
+    border-color: var(--gold);
+    border-radius: 12px;
+    background-color: var(--forest-800);
+    color: white;
+}
+
+.achievement-toast #achievement-title {
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: var(--gold);
 }
 
 .chart-slot {

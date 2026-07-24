@@ -2,7 +2,9 @@ using System;
 using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
+using UnityEngine;
 using WordQuest.Infrastructure.Api;
+using WordQuest.Infrastructure.Api.Dto;
 
 namespace WordQuest.Tests
 {
@@ -38,6 +40,24 @@ namespace WordQuest.Tests
                     Is.True,
                     $"Missing route group {prefix}");
             }
+        }
+
+        [Test]
+        public void Quiz_record_parses_adaptive_object_from_server()
+        {
+            const string json =
+                "{\"success\":true,\"data\":{\"adaptiveDifficulty\":{\"difficulty\":3,\"questionType\":\"spell_hint\",\"abilityScore\":0.62},\"serverIsCorrect\":true,\"serverScore\":120}}";
+
+            var envelope =
+                JsonUtility.FromJson<ApiEnvelope<QuizRecordResultDto>>(json);
+
+            Assert.That(envelope.success, Is.True);
+            Assert.That(
+                envelope.data.adaptiveDifficulty.difficulty,
+                Is.EqualTo(3));
+            Assert.That(
+                envelope.data.adaptiveDifficulty.questionType,
+                Is.EqualTo("spell_hint"));
         }
 
         [Test]

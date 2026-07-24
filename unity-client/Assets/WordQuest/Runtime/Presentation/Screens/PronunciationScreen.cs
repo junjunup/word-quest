@@ -14,6 +14,8 @@ namespace WordQuest.Presentation.Screens
         private readonly ISpeechCaptureAdapter capture;
         private readonly string wordbookId;
         private readonly CancellationToken token;
+        private readonly Button recordButton;
+        private bool recording;
 
         public PronunciationScreen(
             VisualElement view,
@@ -30,22 +32,36 @@ namespace WordQuest.Presentation.Screens
             this.wordbookId = wordbookId;
             this.token = token;
 
-            var record = view.Q<Button>("record-pronunciation-button");
-            record.SetEnabled(capture.IsAvailable);
+            recordButton = view.Q<Button>("record-pronunciation-button");
+            recordButton.SetEnabled(capture.IsAvailable);
             if (!capture.IsAvailable)
                 Status(capture.UnavailableReason);
-            record.clicked += ToggleRecording;
+            recordButton.clicked += ToggleRecording;
             view.Q<Button>("score-pronunciation-button").clicked += Score;
             view.Q<Button>("pronunciation-history-button").clicked += History;
         }
 
         private void ToggleRecording()
         {
-            if (capture.Start())
+            if (!recording && capture.Start())
             {
+                recording = true;
+                recordButton.text = "停止录音";
                 Status(
                     "录音已开始。当前桌面版不内置语音转写，请把系统识别结果填入下方后评分。");
+                return;
             }
+
+            if (!recording)
+                return;
+
+            var clip = capture.Stop();
+            recording = false;
+            recordButton.text = "开始录音";
+            Status(
+                clip == null
+                    ? "没有捕获到有效音频，请检查麦克风权限后重试。"
+                    : $"已录制 {clip.length:0.0} 秒。请填入系统转写文本后提交评分。");
         }
 
         private async void Score()
@@ -65,7 +81,7 @@ namespace WordQuest.Presentation.Screens
                 },
                 token);
             Status(result.IsSuccess
-                ? $"评分 {result.Data.score} · {result.Data.grade}\n{result.Data.details?.feedback}"
+                ? $"评分 {result.Data.score} · {result.Data.grade}\n{string.Join("；", result.Data.details?.feedback ?? Array.Empty<string>())}"
                 : result.Message);
         }
 

@@ -84,13 +84,17 @@ namespace WordQuest.Application.Reports
                 wordbookId,
                 30,
                 token);
+            var heatmapTask = learning.GetHeatmapAsync(
+                DateTime.UtcNow.Year,
+                token);
 
             await Task.WhenAll(
                 overviewTask,
                 dailyTask,
                 chaptersTask,
                 mistakesTask,
-                errorsTask);
+                errorsTask,
+                heatmapTask);
 
             var warnings = new List<string>();
             var overview = await overviewTask;
@@ -98,12 +102,14 @@ namespace WordQuest.Application.Reports
             var chapters = await chaptersTask;
             var mistakes = await mistakesTask;
             var errors = await errorsTask;
+            var heatmap = await heatmapTask;
 
             AddWarning(overview.IsSuccess, "学习概览暂时不可用", warnings);
             AddWarning(daily.IsSuccess, "每日趋势暂时不可用", warnings);
             AddWarning(chapters.IsSuccess, "章节统计暂时不可用", warnings);
             AddWarning(mistakes.IsSuccess, "易错词暂时不可用", warnings);
             AddWarning(errors.IsSuccess, "错因统计暂时不可用", warnings);
+            AddWarning(heatmap.IsSuccess, "学习热力图暂时不可用", warnings);
 
             return new LearningReportViewModel
             {
@@ -126,6 +132,13 @@ namespace WordQuest.Application.Reports
                     {
                         Label = row.errorType,
                         Value = row.count
+                    })
+                    .ToArray(),
+                Heatmap = (heatmap.Data ?? Array.Empty<HeatmapEntryDto>())
+                    .Select(row => new HeatmapDay
+                    {
+                        Date = row.date,
+                        Count = row.count
                     })
                     .ToArray(),
                 Warnings = warnings.AsReadOnly()

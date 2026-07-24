@@ -34,6 +34,7 @@ namespace WordQuest.Infrastructure.Api.Dto
     {
         public float wordSimilarity;
         public float phoneticSimilarity;
-        public string feedback;
+        public float confidenceScore;
+        public string[] feedback;
     }
 }

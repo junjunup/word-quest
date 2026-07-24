@@ -2,6 +2,8 @@ using System;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine.Networking;
 using WordQuest.Infrastructure.Api.Dto;
 
@@ -123,14 +125,42 @@ namespace WordQuest.Infrastructure.Api.Services
                     limit.ToString(CultureInfo.InvariantCulture)),
                 token);
 
-        public Task<ApiResult<string[][]>> GetHeatmapAsync(
+        public async Task<ApiResult<HeatmapEntryDto[]>> GetHeatmapAsync(
             int year,
-            CancellationToken token) =>
-            client.GetAsync<string[][]>(
+            CancellationToken token)
+        {
+            var raw = await client.GetRawAsync(
                 ApiRoutes.WithQuery(
                     ApiRoutes.Heatmap,
                     "year",
                     year.ToString(CultureInfo.InvariantCulture)),
                 token);
+            if (!raw.IsSuccess)
+            {
+                return ApiResult<HeatmapEntryDto[]>.Failure(
+                    raw.StatusCode,
+                    raw.Message,
+                    raw.IsCancelled,
+                    raw.IsTimedOut);
+            }
+
+            var entries = new List<HeatmapEntryDto>();
+            foreach (Match match in Regex.Matches(
+                         raw.Data,
+                         "\\[\\s*\"(?<date>\\d{4}-\\d{2}-\\d{2})\"\\s*,\\s*(?<count>\\d+)\\s*\\]"))
+            {
+                entries.Add(new HeatmapEntryDto
+                {
+                    date = match.Groups["date"].Value,
+                    count = int.Parse(
+                        match.Groups["count"].Value,
+                        CultureInfo.InvariantCulture)
+                });
+            }
+
+            return ApiResult<HeatmapEntryDto[]>.Success(
+                raw.StatusCode,
+                entries.ToArray());
+        }
     }
 }

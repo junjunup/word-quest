@@ -8,6 +8,7 @@
             <ui:Button name="social-refresh-button" text="刷新" />
         </ui:VisualElement>
         <ui:Label name="social-status-label" text="" class="status-label" />
+        <ui:IntegerField name="pk-question-count-field" label="PK 题数（3-20）" value="10" />
         <ui:ScrollView name="user-search-results" class="bounded-list" />
         <ui:Label text="好友与请求" class="section-title" />
         <ui:ScrollView name="friend-list" class="bounded-list" />

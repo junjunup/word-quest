@@ -68,9 +68,9 @@ namespace WordQuest.Application.Modes
             var localBest = int.TryParse(store.GetString(BestKey, "0"), out var value)
                 ? value
                 : 0;
-            if (score > localBest)
+            if (maximumStreak > localBest)
             {
-                store.SetString(BestKey, score.ToString());
+                store.SetString(BestKey, maximumStreak.ToString());
                 store.Save();
             }
 

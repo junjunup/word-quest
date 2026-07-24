@@ -65,6 +65,11 @@ namespace WordQuest.Application.Social
             return !string.IsNullOrWhiteSpace(currentId) &&
                    string.Equals(currentId, rowId, StringComparison.Ordinal);
         }
+
+        public static int NormalizeQuestionCount(int value)
+        {
+            return Math.Max(3, Math.Min(value, 20));
+        }
     }
 
     public sealed class SocialController
@@ -131,13 +136,15 @@ namespace WordQuest.Application.Social
         public Task<ApiResult<ChallengeDto>> CreateChallengeAsync(
             string opponentId,
             string wordbookId,
+            int questionCount,
             CancellationToken token) =>
             social.CreateChallengeAsync(
                 new CreateChallengeRequest
                 {
                     opponentId = opponentId,
                     wordbookId = wordbookId,
-                    questionCount = 10
+                    questionCount =
+                        SocialProjection.NormalizeQuestionCount(questionCount)
                 },
                 token);
 

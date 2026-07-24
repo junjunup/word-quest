@@ -56,7 +56,9 @@ namespace WordQuest.Presentation.Screens
                 list.Add(Card(
                     $"{Name(friend.friend)} · Lv.{friend.friend?.level ?? 0}",
                     "发起 PK",
-                    () => CreateChallenge(friendId)));
+                    () => CreateChallenge(friendId),
+                    "删除好友",
+                    () => DeleteFriend(friend.id)));
             }
 
             var challenges = view.Q<ScrollView>("challenge-list");
@@ -109,8 +111,16 @@ namespace WordQuest.Presentation.Screens
             var result = await controller.CreateChallengeAsync(
                 opponentId,
                 wordbookId,
+                view.Q<IntegerField>("pk-question-count-field").value,
                 token);
             Status(result.IsSuccess ? "PK 已创建" : result.Message);
+            Refresh();
+        }
+
+        private async void DeleteFriend(string id)
+        {
+            var result = await controller.DeleteAsync(id, token);
+            Status(result.IsSuccess ? "好友关系已删除" : result.Message);
             Refresh();
         }
 

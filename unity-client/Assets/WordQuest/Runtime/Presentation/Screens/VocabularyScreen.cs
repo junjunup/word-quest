@@ -23,6 +23,7 @@ namespace WordQuest.Presentation.Screens
         private readonly IVocabularyService vocabulary;
         private readonly WordQuestContext context;
         private readonly CancellationToken token;
+        private readonly Action<string> wordbookSelected;
         private VocabularyImportRequest pendingImport;
 
         public VocabularyScreen(
@@ -30,7 +31,8 @@ namespace WordQuest.Presentation.Screens
             IVocabularyService vocabulary,
             WordQuestContext context,
             CancellationToken token,
-            Action pronunciation = null)
+            Action pronunciation = null,
+            Action<string> wordbookSelected = null)
         {
             this.view = view ?? throw new ArgumentNullException(nameof(view));
             this.vocabulary = vocabulary ??
@@ -38,6 +40,7 @@ namespace WordQuest.Presentation.Screens
             this.context = context ??
                            throw new ArgumentNullException(nameof(context));
             this.token = token;
+            this.wordbookSelected = wordbookSelected;
             view.Q<Button>("vocab-refresh-button").clicked += Load;
             view.Q<Button>("vocab-dry-run-button").clicked += DryRun;
             view.Q<Button>("vocab-confirm-button").clicked += Confirm;
@@ -65,6 +68,8 @@ namespace WordQuest.Presentation.Screens
                 var button = new Button(() =>
                 {
                     context.Settings.WordbookId = captured.wordbookId;
+                    context.NotifySettingsChanged();
+                    this.wordbookSelected?.Invoke(captured.wordbookId);
                     view.Q<Label>("vocab-status-label").text =
                         $"已选择 {captured.name}";
                 })

@@ -32,7 +32,7 @@ namespace WordQuest.Infrastructure.Api.Dto
     [Serializable]
     public sealed class QuizRecordResultDto
     {
-        public int adaptiveDifficulty;
+        public AdaptiveDifficultyDto adaptiveDifficulty;
         public bool serverVerified;
         public bool serverIsCorrect;
         public int serverScore;
@@ -44,6 +44,28 @@ namespace WordQuest.Infrastructure.Api.Dto
         public string fuzzyFeedback;
         public MasteryWordDto mastery;
         public float masteryDelta;
+    }
+
+    [Serializable]
+    public sealed class AdaptiveDifficultyDto
+    {
+        public int difficulty;
+        public string questionType;
+        public float abilityScore;
+        public AdaptiveStatsDto stats;
+    }
+
+    [Serializable]
+    public sealed class AdaptiveStatsDto
+    {
+        public int consecutiveCorrect;
+        public int consecutiveWrong;
+        public string recentCorrectRate;
+        public string qualityScore;
+        public string speedScore;
+        public string streakScore;
+        public int avgResponseTime;
+        public int targetDifficulty;
     }
 
     [Serializable]
@@ -180,5 +202,12 @@ namespace WordQuest.Infrastructure.Api.Dto
         public int wrongCount;
         public int totalCount;
         public float errorRate;
+    }
+
+    [Serializable]
+    public sealed class HeatmapEntryDto
+    {
+        public string date;
+        public int count;
     }
 }

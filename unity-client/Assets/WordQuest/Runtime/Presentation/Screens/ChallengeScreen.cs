@@ -60,9 +60,7 @@ namespace WordQuest.Presentation.Screens
                     alreadySubmitted,
                     DateTimeOffset.UtcNow));
             Status(
-                alreadySubmitted
-                    ? $"已提交 {result.Data.mySubmission.score} 分，等待对手"
-                    : result.Data.status);
+                Summary(result.Data, alreadySubmitted));
         }
 
         private async void Submit()
@@ -83,8 +81,29 @@ namespace WordQuest.Presentation.Screens
                 payload,
                 token);
             Status(result.IsSuccess ? "PK 答案已提交" : result.Message);
-            if (!result.IsSuccess && result.StatusCode == 0)
+            if (result.IsSuccess)
+                Load();
+            else if (result.StatusCode == 0)
                 button.SetEnabled(true);
+        }
+
+        private static string Summary(
+            ChallengeDto challenge,
+            bool alreadySubmitted)
+        {
+            if (challenge.status == "completed")
+            {
+                var winner = string.IsNullOrWhiteSpace(challenge.winner)
+                    ? "平局"
+                    : challenge.challenger?.id == challenge.winner
+                        ? challenge.challenger?.nickname
+                        : challenge.opponent?.nickname;
+                return
+                    $"PK 已完成 · 我的 {challenge.mySubmission?.score ?? 0} 分 · 对手 {challenge.opponentSubmission?.score ?? 0} 分 · 结果：{winner}";
+            }
+            return alreadySubmitted
+                ? $"已提交 {challenge.mySubmission.score} 分，等待对手"
+                : challenge.status;
         }
 
         private void Status(string text)

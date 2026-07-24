@@ -7,6 +7,7 @@ namespace WordQuest.Application
         public string Id { get; set; } = string.Empty;
         public string Username { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
+        public int Level { get; set; } = 1;
         public int TotalScore { get; set; }
         public int Coins { get; set; }
         public string CharacterId { get; set; } = "default";

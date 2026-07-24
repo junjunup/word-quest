@@ -41,8 +41,22 @@ namespace WordQuest.Tests
 
             var question = QuizFactory.Create(pool[0], type, pool);
 
-            Assert.That(question.CorrectAnswer, Is.Not.Empty);
+            Assert.That(question.CorrectAnswer, Is.EqualTo(pool[0].word));
             Assert.That(question.Options, Is.Empty);
+        }
+
+        [TestCase(0, QuestionType.ChoiceEnglishToChinese)]
+        [TestCase(1, QuestionType.ChoiceChineseToEnglish)]
+        [TestCase(2, QuestionType.SpellHint)]
+        [TestCase(3, QuestionType.SpellFull)]
+        [TestCase(4, QuestionType.Translate)]
+        public void Mainline_rotation_exercises_all_legacy_question_types(
+            int answered,
+            QuestionType expected)
+        {
+            Assert.That(
+                QuizRotation.ForAnsweredCount(answered),
+                Is.EqualTo(expected));
         }
 
         private static List<WordDto> Pool()
