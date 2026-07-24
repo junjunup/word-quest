@@ -1,0 +1,2219 @@
+{
+  "chapters": [
+    {
+      "id": 1,
+      "name": "初入大陆",
+      "theme": "CET-4 高频基础",
+      "description": "从四级核心高频词出发，建立稳定的词义与拼写基础。",
+      "color": "#4a90d9",
+      "levels": [
+        {
+          "id": 1,
+          "name": "第1关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "巡游守卫·1",
+            "baseHp": 3,
+            "speed": 31
+          },
+          "isTutorial": true
+        },
+        {
+          "id": 2,
+          "name": "第2关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "符文炮台·2",
+            "baseHp": 3,
+            "speed": 0
+          }
+        },
+        {
+          "id": 3,
+          "name": "第3关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "冲锋牛魔·3",
+            "baseHp": 3,
+            "speed": 203
+          }
+        },
+        {
+          "id": 4,
+          "name": "第4关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "巡游守卫·4",
+            "baseHp": 3,
+            "speed": 32
+          }
+        },
+        {
+          "id": 5,
+          "name": "第5关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "符文炮台·5",
+            "baseHp": 3,
+            "speed": 0
+          }
+        },
+        {
+          "id": 6,
+          "name": "第6关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "冲锋牛魔·6",
+            "baseHp": 3,
+            "speed": 206
+          }
+        },
+        {
+          "id": 7,
+          "name": "第7关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "巡游守卫·7",
+            "baseHp": 4,
+            "speed": 33
+          }
+        },
+        {
+          "id": 8,
+          "name": "第8关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "符文炮台·8",
+            "baseHp": 4,
+            "speed": 0
+          }
+        },
+        {
+          "id": 9,
+          "name": "第9关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "冲锋牛魔·9",
+            "baseHp": 4,
+            "speed": 209
+          }
+        },
+        {
+          "id": 10,
+          "name": "第10关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "巡游守卫·10",
+            "baseHp": 4,
+            "speed": 34
+          }
+        },
+        {
+          "id": 11,
+          "name": "第11关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "符文炮台·11",
+            "baseHp": 4,
+            "speed": 0
+          }
+        },
+        {
+          "id": 12,
+          "name": "第12关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "冲锋牛魔·12",
+            "baseHp": 4,
+            "speed": 212
+          }
+        },
+        {
+          "id": 13,
+          "name": "第13关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "巡游守卫·13",
+            "baseHp": 4,
+            "speed": 35
+          }
+        },
+        {
+          "id": 14,
+          "name": "第14关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "符文炮台·14",
+            "baseHp": 4,
+            "speed": 0
+          }
+        },
+        {
+          "id": 15,
+          "name": "第15关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "冲锋牛魔·15",
+            "baseHp": 5,
+            "speed": 215
+          }
+        },
+        {
+          "id": 16,
+          "name": "第16关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "巡游守卫·16",
+            "baseHp": 5,
+            "speed": 36
+          }
+        },
+        {
+          "id": 17,
+          "name": "第17关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "符文炮台·17",
+            "baseHp": 5,
+            "speed": 0
+          }
+        },
+        {
+          "id": 18,
+          "name": "第18关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "冲锋牛魔·18",
+            "baseHp": 5,
+            "speed": 218
+          }
+        },
+        {
+          "id": 19,
+          "name": "第19关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "巡游守卫·19",
+            "baseHp": 5,
+            "speed": 37
+          }
+        },
+        {
+          "id": 20,
+          "name": "第20关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "符文炮台·20",
+            "baseHp": 5,
+            "speed": 0
+          }
+        },
+        {
+          "id": 21,
+          "name": "第21关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "冲锋牛魔·21",
+            "baseHp": 5,
+            "speed": 221
+          }
+        },
+        {
+          "id": 22,
+          "name": "第22关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "巡游守卫·22",
+            "baseHp": 5,
+            "speed": 38
+          }
+        },
+        {
+          "id": 23,
+          "name": "第23关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "符文炮台·23",
+            "baseHp": 6,
+            "speed": 0
+          }
+        },
+        {
+          "id": 24,
+          "name": "第24关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "冲锋牛魔·24",
+            "baseHp": 6,
+            "speed": 224
+          }
+        },
+        {
+          "id": 25,
+          "name": "第25关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "巡游守卫·25",
+            "baseHp": 6,
+            "speed": 39
+          }
+        },
+        {
+          "id": 26,
+          "name": "第26关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "符文炮台·26",
+            "baseHp": 6,
+            "speed": 0
+          }
+        },
+        {
+          "id": 27,
+          "name": "第27关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "冲锋牛魔·27",
+            "baseHp": 6,
+            "speed": 227
+          }
+        },
+        {
+          "id": 28,
+          "name": "第28关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "巡游守卫·28",
+            "baseHp": 6,
+            "speed": 40
+          }
+        },
+        {
+          "id": 29,
+          "name": "第29关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "符文炮台·29",
+            "baseHp": 6,
+            "speed": 0
+          }
+        },
+        {
+          "id": 30,
+          "name": "第30关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "冲锋牛魔·30",
+            "baseHp": 6,
+            "speed": 230
+          }
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "森林迷踪",
+      "theme": "场景语义拓展",
+      "description": "进入自然、生活与语境化词汇区域，提升词义辨析能力。",
+      "color": "#7ed321",
+      "levels": [
+        {
+          "id": 1,
+          "name": "第1关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "迷踪猎手·1",
+            "baseHp": 3,
+            "speed": 34
+          }
+        },
+        {
+          "id": 2,
+          "name": "第2关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "孢子炮台·2",
+            "baseHp": 3,
+            "speed": 0
+          }
+        },
+        {
+          "id": 3,
+          "name": "第3关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "风暴冲锋·3",
+            "baseHp": 3,
+            "speed": 213
+          }
+        },
+        {
+          "id": 4,
+          "name": "第4关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "迷踪猎手·4",
+            "baseHp": 3,
+            "speed": 35
+          }
+        },
+        {
+          "id": 5,
+          "name": "第5关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "孢子炮台·5",
+            "baseHp": 3,
+            "speed": 0
+          }
+        },
+        {
+          "id": 6,
+          "name": "第6关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "风暴冲锋·6",
+            "baseHp": 4,
+            "speed": 216
+          }
+        },
+        {
+          "id": 7,
+          "name": "第7关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "迷踪猎手·7",
+            "baseHp": 4,
+            "speed": 36
+          }
+        },
+        {
+          "id": 8,
+          "name": "第8关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "孢子炮台·8",
+            "baseHp": 4,
+            "speed": 0
+          }
+        },
+        {
+          "id": 9,
+          "name": "第9关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "风暴冲锋·9",
+            "baseHp": 4,
+            "speed": 219
+          }
+        },
+        {
+          "id": 10,
+          "name": "第10关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "迷踪猎手·10",
+            "baseHp": 4,
+            "speed": 37
+          }
+        },
+        {
+          "id": 11,
+          "name": "第11关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "孢子炮台·11",
+            "baseHp": 4,
+            "speed": 0
+          }
+        },
+        {
+          "id": 12,
+          "name": "第12关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "风暴冲锋·12",
+            "baseHp": 4,
+            "speed": 222
+          }
+        },
+        {
+          "id": 13,
+          "name": "第13关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "迷踪猎手·13",
+            "baseHp": 4,
+            "speed": 38
+          }
+        },
+        {
+          "id": 14,
+          "name": "第14关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "孢子炮台·14",
+            "baseHp": 5,
+            "speed": 0
+          }
+        },
+        {
+          "id": 15,
+          "name": "第15关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "风暴冲锋·15",
+            "baseHp": 5,
+            "speed": 225
+          }
+        },
+        {
+          "id": 16,
+          "name": "第16关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "迷踪猎手·16",
+            "baseHp": 5,
+            "speed": 39
+          }
+        },
+        {
+          "id": 17,
+          "name": "第17关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "孢子炮台·17",
+            "baseHp": 5,
+            "speed": 0
+          }
+        },
+        {
+          "id": 18,
+          "name": "第18关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "风暴冲锋·18",
+            "baseHp": 5,
+            "speed": 228
+          }
+        },
+        {
+          "id": 19,
+          "name": "第19关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "迷踪猎手·19",
+            "baseHp": 5,
+            "speed": 40
+          }
+        },
+        {
+          "id": 20,
+          "name": "第20关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "孢子炮台·20",
+            "baseHp": 5,
+            "speed": 0
+          }
+        },
+        {
+          "id": 21,
+          "name": "第21关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "风暴冲锋·21",
+            "baseHp": 5,
+            "speed": 231
+          }
+        },
+        {
+          "id": 22,
+          "name": "第22关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "迷踪猎手·22",
+            "baseHp": 6,
+            "speed": 41
+          }
+        },
+        {
+          "id": 23,
+          "name": "第23关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "孢子炮台·23",
+            "baseHp": 6,
+            "speed": 0
+          }
+        },
+        {
+          "id": 24,
+          "name": "第24关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "风暴冲锋·24",
+            "baseHp": 6,
+            "speed": 234
+          }
+        },
+        {
+          "id": 25,
+          "name": "第25关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "迷踪猎手·25",
+            "baseHp": 6,
+            "speed": 42
+          }
+        },
+        {
+          "id": 26,
+          "name": "第26关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "孢子炮台·26",
+            "baseHp": 6,
+            "speed": 0
+          }
+        },
+        {
+          "id": 27,
+          "name": "第27关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "风暴冲锋·27",
+            "baseHp": 6,
+            "speed": 237
+          }
+        },
+        {
+          "id": 28,
+          "name": "第28关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "迷踪猎手·28",
+            "baseHp": 6,
+            "speed": 43
+          }
+        },
+        {
+          "id": 29,
+          "name": "第29关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "孢子炮台·29",
+            "baseHp": 6,
+            "speed": 0
+          }
+        },
+        {
+          "id": 30,
+          "name": "第30关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "风暴冲锋·30",
+            "baseHp": 7,
+            "speed": 240
+          }
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "商贸集市",
+      "theme": "校园商务社交",
+      "description": "覆盖校园、商务、社交沟通中的四级重点表达。",
+      "color": "#f5a623",
+      "levels": [
+        {
+          "id": 1,
+          "name": "第1关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "集市游侠·1",
+            "baseHp": 3,
+            "speed": 37
+          }
+        },
+        {
+          "id": 2,
+          "name": "第2关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "金币炮台·2",
+            "baseHp": 3,
+            "speed": 0
+          }
+        },
+        {
+          "id": 3,
+          "name": "第3关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "社交暴徒·3",
+            "baseHp": 3,
+            "speed": 223
+          }
+        },
+        {
+          "id": 4,
+          "name": "第4关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "集市游侠·4",
+            "baseHp": 3,
+            "speed": 38
+          }
+        },
+        {
+          "id": 5,
+          "name": "第5关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "金币炮台·5",
+            "baseHp": 4,
+            "speed": 0
+          }
+        },
+        {
+          "id": 6,
+          "name": "第6关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "社交暴徒·6",
+            "baseHp": 4,
+            "speed": 226
+          }
+        },
+        {
+          "id": 7,
+          "name": "第7关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "集市游侠·7",
+            "baseHp": 4,
+            "speed": 39
+          }
+        },
+        {
+          "id": 8,
+          "name": "第8关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "金币炮台·8",
+            "baseHp": 4,
+            "speed": 0
+          }
+        },
+        {
+          "id": 9,
+          "name": "第9关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "社交暴徒·9",
+            "baseHp": 4,
+            "speed": 229
+          }
+        },
+        {
+          "id": 10,
+          "name": "第10关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "集市游侠·10",
+            "baseHp": 4,
+            "speed": 40
+          }
+        },
+        {
+          "id": 11,
+          "name": "第11关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "金币炮台·11",
+            "baseHp": 4,
+            "speed": 0
+          }
+        },
+        {
+          "id": 12,
+          "name": "第12关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "社交暴徒·12",
+            "baseHp": 4,
+            "speed": 232
+          }
+        },
+        {
+          "id": 13,
+          "name": "第13关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "集市游侠·13",
+            "baseHp": 5,
+            "speed": 41
+          }
+        },
+        {
+          "id": 14,
+          "name": "第14关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "金币炮台·14",
+            "baseHp": 5,
+            "speed": 0
+          }
+        },
+        {
+          "id": 15,
+          "name": "第15关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "社交暴徒·15",
+            "baseHp": 5,
+            "speed": 235
+          }
+        },
+        {
+          "id": 16,
+          "name": "第16关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "集市游侠·16",
+            "baseHp": 5,
+            "speed": 42
+          }
+        },
+        {
+          "id": 17,
+          "name": "第17关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "金币炮台·17",
+            "baseHp": 5,
+            "speed": 0
+          }
+        },
+        {
+          "id": 18,
+          "name": "第18关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "社交暴徒·18",
+            "baseHp": 5,
+            "speed": 238
+          }
+        },
+        {
+          "id": 19,
+          "name": "第19关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "集市游侠·19",
+            "baseHp": 5,
+            "speed": 43
+          }
+        },
+        {
+          "id": 20,
+          "name": "第20关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "金币炮台·20",
+            "baseHp": 5,
+            "speed": 0
+          }
+        },
+        {
+          "id": 21,
+          "name": "第21关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "社交暴徒·21",
+            "baseHp": 6,
+            "speed": 241
+          }
+        },
+        {
+          "id": 22,
+          "name": "第22关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "集市游侠·22",
+            "baseHp": 6,
+            "speed": 44
+          }
+        },
+        {
+          "id": 23,
+          "name": "第23关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "金币炮台·23",
+            "baseHp": 6,
+            "speed": 0
+          }
+        },
+        {
+          "id": 24,
+          "name": "第24关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "社交暴徒·24",
+            "baseHp": 6,
+            "speed": 244
+          }
+        },
+        {
+          "id": 25,
+          "name": "第25关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "集市游侠·25",
+            "baseHp": 6,
+            "speed": 45
+          }
+        },
+        {
+          "id": 26,
+          "name": "第26关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "金币炮台·26",
+            "baseHp": 6,
+            "speed": 0
+          }
+        },
+        {
+          "id": 27,
+          "name": "第27关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "社交暴徒·27",
+            "baseHp": 6,
+            "speed": 247
+          }
+        },
+        {
+          "id": 28,
+          "name": "第28关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "集市游侠·28",
+            "baseHp": 6,
+            "speed": 46
+          }
+        },
+        {
+          "id": 29,
+          "name": "第29关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "金币炮台·29",
+            "baseHp": 7,
+            "speed": 0
+          }
+        },
+        {
+          "id": 30,
+          "name": "第30关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "社交暴徒·30",
+            "baseHp": 7,
+            "speed": 250
+          }
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "学者塔楼",
+      "theme": "学术科技表达",
+      "description": "挑战学术、科技、抽象概念等较高难度词汇。",
+      "color": "#9b59b6",
+      "levels": [
+        {
+          "id": 1,
+          "name": "第1关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "塔楼看守·1",
+            "baseHp": 3,
+            "speed": 40
+          }
+        },
+        {
+          "id": 2,
+          "name": "第2关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "激光书塔·2",
+            "baseHp": 3,
+            "speed": 0
+          }
+        },
+        {
+          "id": 3,
+          "name": "第3关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "电磁冲锋·3",
+            "baseHp": 3,
+            "speed": 233
+          }
+        },
+        {
+          "id": 4,
+          "name": "第4关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "塔楼看守·4",
+            "baseHp": 4,
+            "speed": 41
+          }
+        },
+        {
+          "id": 5,
+          "name": "第5关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "激光书塔·5",
+            "baseHp": 4,
+            "speed": 0
+          }
+        },
+        {
+          "id": 6,
+          "name": "第6关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "电磁冲锋·6",
+            "baseHp": 4,
+            "speed": 236
+          }
+        },
+        {
+          "id": 7,
+          "name": "第7关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "塔楼看守·7",
+            "baseHp": 4,
+            "speed": 42
+          }
+        },
+        {
+          "id": 8,
+          "name": "第8关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "激光书塔·8",
+            "baseHp": 4,
+            "speed": 0
+          }
+        },
+        {
+          "id": 9,
+          "name": "第9关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "电磁冲锋·9",
+            "baseHp": 4,
+            "speed": 239
+          }
+        },
+        {
+          "id": 10,
+          "name": "第10关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "塔楼看守·10",
+            "baseHp": 4,
+            "speed": 43
+          }
+        },
+        {
+          "id": 11,
+          "name": "第11关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "激光书塔·11",
+            "baseHp": 4,
+            "speed": 0
+          }
+        },
+        {
+          "id": 12,
+          "name": "第12关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "电磁冲锋·12",
+            "baseHp": 5,
+            "speed": 242
+          }
+        },
+        {
+          "id": 13,
+          "name": "第13关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "塔楼看守·13",
+            "baseHp": 5,
+            "speed": 44
+          }
+        },
+        {
+          "id": 14,
+          "name": "第14关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "激光书塔·14",
+            "baseHp": 5,
+            "speed": 0
+          }
+        },
+        {
+          "id": 15,
+          "name": "第15关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "电磁冲锋·15",
+            "baseHp": 5,
+            "speed": 245
+          }
+        },
+        {
+          "id": 16,
+          "name": "第16关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "塔楼看守·16",
+            "baseHp": 5,
+            "speed": 45
+          }
+        },
+        {
+          "id": 17,
+          "name": "第17关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "激光书塔·17",
+            "baseHp": 5,
+            "speed": 0
+          }
+        },
+        {
+          "id": 18,
+          "name": "第18关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "电磁冲锋·18",
+            "baseHp": 5,
+            "speed": 248
+          }
+        },
+        {
+          "id": 19,
+          "name": "第19关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "塔楼看守·19",
+            "baseHp": 5,
+            "speed": 46
+          }
+        },
+        {
+          "id": 20,
+          "name": "第20关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "激光书塔·20",
+            "baseHp": 6,
+            "speed": 0
+          }
+        },
+        {
+          "id": 21,
+          "name": "第21关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "电磁冲锋·21",
+            "baseHp": 6,
+            "speed": 251
+          }
+        },
+        {
+          "id": 22,
+          "name": "第22关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "塔楼看守·22",
+            "baseHp": 6,
+            "speed": 47
+          }
+        },
+        {
+          "id": 23,
+          "name": "第23关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "激光书塔·23",
+            "baseHp": 6,
+            "speed": 0
+          }
+        },
+        {
+          "id": 24,
+          "name": "第24关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "电磁冲锋·24",
+            "baseHp": 6,
+            "speed": 254
+          }
+        },
+        {
+          "id": 25,
+          "name": "第25关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "塔楼看守·25",
+            "baseHp": 6,
+            "speed": 48
+          }
+        },
+        {
+          "id": 26,
+          "name": "第26关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "激光书塔·26",
+            "baseHp": 6,
+            "speed": 0
+          }
+        },
+        {
+          "id": 27,
+          "name": "第27关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "电磁冲锋·27",
+            "baseHp": 6,
+            "speed": 257
+          }
+        },
+        {
+          "id": 28,
+          "name": "第28关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "塔楼看守·28",
+            "baseHp": 7,
+            "speed": 49
+          }
+        },
+        {
+          "id": 29,
+          "name": "第29关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "激光书塔·29",
+            "baseHp": 7,
+            "speed": 0
+          }
+        },
+        {
+          "id": 30,
+          "name": "第30关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "电磁冲锋·30",
+            "baseHp": 7,
+            "speed": 260
+          }
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "暗影深渊",
+      "theme": "易混与进阶词",
+      "description": "聚焦形近、义近和容易误判的四级核心词汇。",
+      "color": "#d0021b",
+      "levels": [
+        {
+          "id": 1,
+          "name": "第1关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "暗影行者·1",
+            "baseHp": 3,
+            "speed": 43
+          }
+        },
+        {
+          "id": 2,
+          "name": "第2关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "混淆炮台·2",
+            "baseHp": 3,
+            "speed": 0
+          }
+        },
+        {
+          "id": 3,
+          "name": "第3关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "深渊狂奔·3",
+            "baseHp": 4,
+            "speed": 243
+          }
+        },
+        {
+          "id": 4,
+          "name": "第4关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "暗影行者·4",
+            "baseHp": 4,
+            "speed": 44
+          }
+        },
+        {
+          "id": 5,
+          "name": "第5关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "混淆炮台·5",
+            "baseHp": 4,
+            "speed": 0
+          }
+        },
+        {
+          "id": 6,
+          "name": "第6关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "深渊狂奔·6",
+            "baseHp": 4,
+            "speed": 246
+          }
+        },
+        {
+          "id": 7,
+          "name": "第7关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "暗影行者·7",
+            "baseHp": 4,
+            "speed": 45
+          }
+        },
+        {
+          "id": 8,
+          "name": "第8关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "混淆炮台·8",
+            "baseHp": 4,
+            "speed": 0
+          }
+        },
+        {
+          "id": 9,
+          "name": "第9关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "深渊狂奔·9",
+            "baseHp": 4,
+            "speed": 249
+          }
+        },
+        {
+          "id": 10,
+          "name": "第10关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "暗影行者·10",
+            "baseHp": 4,
+            "speed": 46
+          }
+        },
+        {
+          "id": 11,
+          "name": "第11关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "混淆炮台·11",
+            "baseHp": 5,
+            "speed": 0
+          }
+        },
+        {
+          "id": 12,
+          "name": "第12关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "深渊狂奔·12",
+            "baseHp": 5,
+            "speed": 252
+          }
+        },
+        {
+          "id": 13,
+          "name": "第13关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "暗影行者·13",
+            "baseHp": 5,
+            "speed": 47
+          }
+        },
+        {
+          "id": 14,
+          "name": "第14关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "混淆炮台·14",
+            "baseHp": 5,
+            "speed": 0
+          }
+        },
+        {
+          "id": 15,
+          "name": "第15关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "深渊狂奔·15",
+            "baseHp": 5,
+            "speed": 255
+          }
+        },
+        {
+          "id": 16,
+          "name": "第16关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "暗影行者·16",
+            "baseHp": 5,
+            "speed": 48
+          }
+        },
+        {
+          "id": 17,
+          "name": "第17关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "混淆炮台·17",
+            "baseHp": 5,
+            "speed": 0
+          }
+        },
+        {
+          "id": 18,
+          "name": "第18关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "深渊狂奔·18",
+            "baseHp": 5,
+            "speed": 258
+          }
+        },
+        {
+          "id": 19,
+          "name": "第19关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "暗影行者·19",
+            "baseHp": 6,
+            "speed": 49
+          }
+        },
+        {
+          "id": 20,
+          "name": "第20关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "混淆炮台·20",
+            "baseHp": 6,
+            "speed": 0
+          }
+        },
+        {
+          "id": 21,
+          "name": "第21关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "深渊狂奔·21",
+            "baseHp": 6,
+            "speed": 261
+          }
+        },
+        {
+          "id": 22,
+          "name": "第22关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "暗影行者·22",
+            "baseHp": 6,
+            "speed": 50
+          }
+        },
+        {
+          "id": 23,
+          "name": "第23关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "混淆炮台·23",
+            "baseHp": 6,
+            "speed": 0
+          }
+        },
+        {
+          "id": 24,
+          "name": "第24关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "深渊狂奔·24",
+            "baseHp": 6,
+            "speed": 264
+          }
+        },
+        {
+          "id": 25,
+          "name": "第25关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "暗影行者·25",
+            "baseHp": 6,
+            "speed": 51
+          }
+        },
+        {
+          "id": 26,
+          "name": "第26关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "混淆炮台·26",
+            "baseHp": 6,
+            "speed": 0
+          }
+        },
+        {
+          "id": 27,
+          "name": "第27关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "深渊狂奔·27",
+            "baseHp": 7,
+            "speed": 267
+          }
+        },
+        {
+          "id": 28,
+          "name": "第28关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "暗影行者·28",
+            "baseHp": 7,
+            "speed": 52
+          }
+        },
+        {
+          "id": 29,
+          "name": "第29关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "混淆炮台·29",
+            "baseHp": 7,
+            "speed": 0
+          }
+        },
+        {
+          "id": 30,
+          "name": "第30关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "深渊狂奔·30",
+            "baseHp": 7,
+            "speed": 270
+          }
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "最终考验",
+      "theme": "综合冲刺复习",
+      "description": "按考试强度综合复习全词书知识，完成最终闭环。",
+      "color": "#ffd700",
+      "levels": [
+        {
+          "id": 1,
+          "name": "第1关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "终局巡游者·1",
+            "baseHp": 3,
+            "speed": 46
+          }
+        },
+        {
+          "id": 2,
+          "name": "第2关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "终局炮台·2",
+            "baseHp": 4,
+            "speed": 0
+          }
+        },
+        {
+          "id": 3,
+          "name": "第3关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "终局冲锋者·3",
+            "baseHp": 4,
+            "speed": 253
+          }
+        },
+        {
+          "id": 4,
+          "name": "第4关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "终局巡游者·4",
+            "baseHp": 4,
+            "speed": 47
+          }
+        },
+        {
+          "id": 5,
+          "name": "第5关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "终局炮台·5",
+            "baseHp": 4,
+            "speed": 0
+          }
+        },
+        {
+          "id": 6,
+          "name": "第6关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "终局冲锋者·6",
+            "baseHp": 4,
+            "speed": 256
+          }
+        },
+        {
+          "id": 7,
+          "name": "第7关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "终局巡游者·7",
+            "baseHp": 4,
+            "speed": 48
+          }
+        },
+        {
+          "id": 8,
+          "name": "第8关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "终局炮台·8",
+            "baseHp": 4,
+            "speed": 0
+          }
+        },
+        {
+          "id": 9,
+          "name": "第9关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "终局冲锋者·9",
+            "baseHp": 4,
+            "speed": 259
+          }
+        },
+        {
+          "id": 10,
+          "name": "第10关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "终局巡游者·10",
+            "baseHp": 5,
+            "speed": 49
+          }
+        },
+        {
+          "id": 11,
+          "name": "第11关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "终局炮台·11",
+            "baseHp": 5,
+            "speed": 0
+          }
+        },
+        {
+          "id": 12,
+          "name": "第12关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "终局冲锋者·12",
+            "baseHp": 5,
+            "speed": 262
+          }
+        },
+        {
+          "id": 13,
+          "name": "第13关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "终局巡游者·13",
+            "baseHp": 5,
+            "speed": 50
+          }
+        },
+        {
+          "id": 14,
+          "name": "第14关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "终局炮台·14",
+            "baseHp": 5,
+            "speed": 0
+          }
+        },
+        {
+          "id": 15,
+          "name": "第15关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "终局冲锋者·15",
+            "baseHp": 5,
+            "speed": 265
+          }
+        },
+        {
+          "id": 16,
+          "name": "第16关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "终局巡游者·16",
+            "baseHp": 5,
+            "speed": 51
+          }
+        },
+        {
+          "id": 17,
+          "name": "第17关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "终局炮台·17",
+            "baseHp": 5,
+            "speed": 0
+          }
+        },
+        {
+          "id": 18,
+          "name": "第18关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "终局冲锋者·18",
+            "baseHp": 6,
+            "speed": 268
+          }
+        },
+        {
+          "id": 19,
+          "name": "第19关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "终局巡游者·19",
+            "baseHp": 6,
+            "speed": 52
+          }
+        },
+        {
+          "id": 20,
+          "name": "第20关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "终局炮台·20",
+            "baseHp": 6,
+            "speed": 0
+          }
+        },
+        {
+          "id": 21,
+          "name": "第21关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "终局冲锋者·21",
+            "baseHp": 6,
+            "speed": 271
+          }
+        },
+        {
+          "id": 22,
+          "name": "第22关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "终局巡游者·22",
+            "baseHp": 6,
+            "speed": 53
+          }
+        },
+        {
+          "id": 23,
+          "name": "第23关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "终局炮台·23",
+            "baseHp": 6,
+            "speed": 0
+          }
+        },
+        {
+          "id": 24,
+          "name": "第24关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "终局冲锋者·24",
+            "baseHp": 6,
+            "speed": 274
+          }
+        },
+        {
+          "id": 25,
+          "name": "第25关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "终局巡游者·25",
+            "baseHp": 6,
+            "speed": 54
+          }
+        },
+        {
+          "id": 26,
+          "name": "第26关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "终局炮台·26",
+            "baseHp": 7,
+            "speed": 0
+          }
+        },
+        {
+          "id": 27,
+          "name": "第27关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "终局冲锋者·27",
+            "baseHp": 7,
+            "speed": 277
+          }
+        },
+        {
+          "id": 28,
+          "name": "第28关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "roaming",
+          "bossConfig": {
+            "name": "终局巡游者·28",
+            "baseHp": 7,
+            "speed": 55
+          }
+        },
+        {
+          "id": 29,
+          "name": "第29关 · cet4",
+          "wordsCount": 25,
+          "category": "cet4",
+          "bossType": "turret",
+          "bossConfig": {
+            "name": "终局炮台·29",
+            "baseHp": 7,
+            "speed": 0
+          }
+        },
+        {
+          "id": 30,
+          "name": "第30关 · cet4",
+          "wordsCount": 26,
+          "category": "cet4",
+          "bossType": "charging",
+          "bossConfig": {
+            "name": "终局冲锋者·30",
+            "baseHp": 7,
+            "speed": 280
+          }
+        }
+      ]
+    }
+  ]
+}

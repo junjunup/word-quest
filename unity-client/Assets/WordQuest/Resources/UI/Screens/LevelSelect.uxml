@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="level-select-screen" class="screen">
+        <ui:Label text="选择你的下一段旅程" class="hero-title" />
+        <ui:Label text="六个章节、180 个关卡；完成前一关会解锁下一关。" class="subtitle" />
+        <ui:VisualElement class="filter-row panel">
+            <ui:DropdownField name="wordbook-field" label="词书" choices="CET-4" value="CET-4" />
+            <ui:DropdownField name="difficulty-field" label="难度" choices="简单,普通,困难" value="普通" />
+        </ui:VisualElement>
+        <ui:ScrollView name="level-list" class="level-list" />
+    </ui:VisualElement>
+</ui:UXML>

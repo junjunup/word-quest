@@ -1,0 +1,12 @@
+{
+  "name": "WordQuest.Editor",
+  "rootNamespace": "WordQuest.Editor",
+  "references": [
+    "WordQuest.Runtime",
+    "WordQuest.Domain"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": true
+}

@@ -168,6 +168,40 @@
     margin-top: 12px;
 }
 
+.filter-row {
+    flex-direction: row;
+    margin-bottom: 16px;
+}
+
+.filter-row > * {
+    min-width: 220px;
+    margin-right: 16px;
+}
+
+.section-title {
+    margin-top: 18px;
+    margin-bottom: 10px;
+    color: var(--forest-800);
+    font-size: 22px;
+    -unity-font-style: bold;
+}
+
+.level-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.level-button {
+    width: 136px;
+    min-height: 76px;
+    margin-right: 8px;
+    margin-bottom: 8px;
+    white-space: normal;
+    border-radius: 10px;
+    background-color: var(--parchment-50);
+    border-color: var(--parchment-300);
+}
+
 TextField {
     margin-top: 8px;
     margin-bottom: 8px;
