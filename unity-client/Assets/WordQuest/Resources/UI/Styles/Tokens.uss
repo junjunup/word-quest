@@ -1,0 +1,13 @@
+:root {
+    --forest-950: rgb(18, 42, 31);
+    --forest-800: rgb(35, 73, 50);
+    --forest-650: rgb(52, 104, 68);
+    --forest-500: rgb(80, 139, 87);
+    --parchment-50: rgb(255, 250, 235);
+    --parchment-100: rgb(246, 235, 205);
+    --parchment-300: rgb(219, 194, 143);
+    --ink: rgb(49, 44, 33);
+    --gold: rgb(232, 177, 64);
+    --error: rgb(177, 65, 55);
+    --success: rgb(48, 130, 80);
+}

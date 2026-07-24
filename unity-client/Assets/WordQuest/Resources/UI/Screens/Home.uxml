@@ -1,0 +1,26 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="home-screen" class="screen">
+        <ui:VisualElement class="hero panel">
+            <ui:Label name="greeting-label" text="欢迎回来，冒险者" class="hero-title" />
+            <ui:Label text="今天也从一个单词开始，继续你的知识大陆旅程。" class="subtitle" />
+            <ui:VisualElement class="progress-row">
+                <ui:Label text="今日目标" class="eyebrow" />
+                <ui:ProgressBar name="daily-progress" title="0 / 20 个单词" value="0" high-value="20" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement class="feature-grid">
+            <ui:Button text="开始冒险&#10;章节地图与关卡" view-data-key="LevelSelect" class="feature-button primary-tile" />
+            <ui:Button text="今日复习&#10;强化薄弱词汇" view-data-key="Review" class="feature-button" />
+            <ui:Button text="每日挑战&#10;固定题组与排行" view-data-key="DailyChallenge" class="feature-button" />
+            <ui:Button text="无尽试炼&#10;挑战连续答对" view-data-key="Endless" class="feature-button" />
+            <ui:Button text="学习报告&#10;掌握度与错因" view-data-key="Reports" class="feature-button" />
+            <ui:Button text="词库管理&#10;切换与导入词书" view-data-key="Vocabulary" class="feature-button" />
+            <ui:Button text="好友与 PK&#10;异步公平挑战" view-data-key="Social" class="feature-button" />
+            <ui:Button text="AI 学习导师&#10;获得上下文提示" view-data-key="AiTutor" class="feature-button" />
+        </ui:VisualElement>
+        <ui:VisualElement class="action-row">
+            <ui:Button name="daily-reward-button" text="领取每日学习奖励" class="secondary-button" />
+            <ui:Button text="角色与个人资料" view-data-key="Profile" class="feature-button ghost-button" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,181 @@
+.app-root {
+    flex-grow: 1;
+    flex-direction: row;
+    background-color: var(--forest-950);
+    color: var(--ink);
+}
+
+.navigation {
+    width: 196px;
+    padding: 24px 14px;
+    background-color: var(--forest-800);
+    border-right-width: 2px;
+    border-right-color: var(--gold);
+}
+
+.brand {
+    font-size: 24px;
+    -unity-font-style: bold;
+    color: var(--parchment-50);
+    margin-bottom: 28px;
+    -unity-text-align: middle-center;
+}
+
+.nav-button {
+    min-height: 44px;
+    margin-bottom: 8px;
+    border-width: 0;
+    border-radius: 10px;
+    color: var(--parchment-50);
+    background-color: rgba(255, 255, 255, 0.06);
+    font-size: 16px;
+}
+
+.nav-button:hover,
+.nav-button:focus {
+    background-color: var(--forest-650);
+    border-left-width: 4px;
+    border-left-color: var(--gold);
+}
+
+.screen-content {
+    flex-grow: 1;
+}
+
+.screen {
+    flex-grow: 1;
+    padding: 32px;
+    background-color: var(--parchment-100);
+    overflow: scroll;
+}
+
+.centered-screen {
+    align-items: center;
+    justify-content: center;
+    background-color: var(--forest-950);
+}
+
+.panel {
+    padding: 24px;
+    background-color: var(--parchment-50);
+    border-width: 2px;
+    border-color: var(--parchment-300);
+    border-radius: 18px;
+}
+
+.auth-card {
+    width: 480px;
+}
+
+.hero {
+    margin-bottom: 20px;
+}
+
+.hero-title {
+    font-size: 32px;
+    -unity-font-style: bold;
+    color: var(--forest-800);
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    font-size: 16px;
+    color: rgb(92, 79, 55);
+    margin-bottom: 18px;
+    white-space: normal;
+}
+
+.eyebrow {
+    font-size: 13px;
+    -unity-font-style: bold;
+    color: var(--forest-650);
+    margin-bottom: 6px;
+}
+
+.feature-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.feature-button {
+    width: 230px;
+    min-height: 108px;
+    margin-right: 12px;
+    margin-bottom: 12px;
+    padding: 16px;
+    white-space: normal;
+    font-size: 17px;
+    -unity-text-align: middle-left;
+    background-color: var(--parchment-50);
+    border-width: 2px;
+    border-color: var(--parchment-300);
+    border-radius: 12px;
+    color: var(--ink);
+}
+
+.feature-button:hover,
+.feature-button:focus {
+    border-color: var(--forest-500);
+    translate: 0 -2px;
+}
+
+.primary-tile {
+    background-color: var(--forest-650);
+    color: var(--parchment-50);
+    border-color: var(--gold);
+}
+
+.primary-button,
+.secondary-button,
+.ghost-button {
+    min-height: 46px;
+    margin-top: 10px;
+    border-radius: 12px;
+    font-size: 16px;
+    -unity-font-style: bold;
+}
+
+.primary-button {
+    color: white;
+    background-color: var(--forest-650);
+    border-color: var(--forest-800);
+}
+
+.secondary-button {
+    color: var(--forest-950);
+    background-color: var(--gold);
+    border-color: rgb(175, 124, 28);
+}
+
+.ghost-button {
+    min-height: 46px;
+    background-color: transparent;
+}
+
+.status-label {
+    min-height: 24px;
+    color: var(--error);
+    margin-top: 8px;
+    white-space: normal;
+}
+
+.progress-row {
+    max-width: 520px;
+}
+
+.action-row {
+    flex-direction: row;
+    margin-top: 12px;
+}
+
+TextField {
+    margin-top: 8px;
+    margin-bottom: 8px;
+    font-size: 16px;
+}
+
+TextField > TextInput {
+    min-height: 42px;
+    background-color: white;
+    border-radius: 8px;
+}

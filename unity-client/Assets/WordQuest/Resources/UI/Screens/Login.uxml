@@ -1,0 +1,14 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="login-screen" class="screen centered-screen">
+        <ui:VisualElement class="auth-card panel">
+            <ui:Label text="WORD QUEST" class="hero-title" />
+            <ui:Label text="把每一个单词变成一段冒险" class="subtitle" />
+            <ui:TextField name="username-field" label="用户名" max-length="30" />
+            <ui:TextField name="password-field" label="密码" is-password-field="true" max-length="100" />
+            <ui:TextField name="nickname-field" label="昵称（注册时填写）" max-length="20" />
+            <ui:Button name="login-button" text="登录并继续冒险" class="primary-button" />
+            <ui:Button name="register-button" text="创建学习账号" class="secondary-button" />
+            <ui:Label name="status-label" text="" class="status-label" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

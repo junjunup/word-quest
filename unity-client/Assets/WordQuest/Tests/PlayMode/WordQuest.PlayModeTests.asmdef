@@ -1,0 +1,12 @@
+{
+  "name": "WordQuest.PlayModeTests",
+  "rootNamespace": "WordQuest.Tests",
+  "references": [
+    "WordQuest.Domain",
+    "WordQuest.Runtime"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "autoReferenced": false
+}
