@@ -1,0 +1,29 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="game-screen" class="game-screen">
+        <ui:VisualElement name="hud" class="hud panel">
+            <ui:Label name="lives-label" text="生命 3/3" />
+            <ui:Label name="score-label" text="分数 0" />
+            <ui:Label name="combo-label" text="保持专注" />
+            <ui:ProgressBar name="level-progress" title="0/0" value="0" high-value="100" />
+            <ui:Button name="pause-button" text="暂停" />
+        </ui:VisualElement>
+        <ui:VisualElement name="quiz-overlay" class="modal-layer">
+            <ui:VisualElement class="quiz-card panel">
+                <ui:Label name="question-type-label" text="英译中选择" class="eyebrow" />
+                <ui:Label name="question-prompt" text="" class="question-title" />
+                <ui:VisualElement name="option-list" />
+                <ui:TextField name="answer-field" label="你的答案" />
+                <ui:Button name="submit-answer-button" text="提交答案" class="primary-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="pause-overlay" class="modal-layer">
+            <ui:VisualElement class="pause-card panel">
+                <ui:Label text="冒险暂停" class="hero-title" />
+                <ui:Button name="resume-button" text="继续冒险" class="primary-button" />
+                <ui:Button name="mute-button" text="切换声音" />
+                <ui:Button name="pause-home-button" text="返回主页" />
+                <ui:Button name="pause-logout-button" text="退出登录" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

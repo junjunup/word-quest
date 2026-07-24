@@ -1,0 +1,18 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="pronunciation-screen" class="screen">
+        <ui:Label text="发音练习" class="hero-title" />
+        <ui:Label text="朗读目标单词并提交识别文本，服务端会给出相似度、等级与反馈。" class="subtitle" />
+        <ui:VisualElement class="panel">
+            <ui:TextField name="pronunciation-word-field" label="目标单词" />
+            <ui:TextField name="pronunciation-phonetic-field" label="音标（可选）" />
+            <ui:TextField name="pronunciation-transcript-field" label="系统识别文本" />
+            <ui:VisualElement class="action-row">
+                <ui:Button name="record-pronunciation-button" text="开始录音" />
+                <ui:Button name="score-pronunciation-button" text="提交评分" class="primary-button" />
+                <ui:Button name="pronunciation-history-button" text="查看历史" />
+            </ui:VisualElement>
+            <ui:Label name="pronunciation-status-label" text="" class="status-label" />
+        </ui:VisualElement>
+        <ui:ScrollView name="pronunciation-history-list" class="bounded-list" />
+    </ui:VisualElement>
+</ui:UXML>

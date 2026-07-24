@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="challenge-screen" class="screen">
+        <ui:Label text="异步 PK" class="hero-title" />
+        <ui:Label text="根据中文释义拼写英文；服务器统一判分，每场只能提交一次。" class="subtitle" />
+        <ui:Label name="challenge-status-label" text="" class="status-label" />
+        <ui:ScrollView name="challenge-word-list" />
+        <ui:Button name="submit-challenge-button" text="提交本场答案" class="primary-button" />
+    </ui:VisualElement>
+</ui:UXML>

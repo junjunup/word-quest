@@ -213,3 +213,138 @@ TextField > TextInput {
     background-color: white;
     border-radius: 8px;
 }
+
+.game-screen {
+    flex-grow: 1;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.hud {
+    position: absolute;
+    left: 18px;
+    right: 18px;
+    top: 18px;
+    min-height: 58px;
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 14px;
+}
+
+.hud > * {
+    margin-right: 18px;
+}
+
+.hud ProgressBar {
+    flex-grow: 1;
+}
+
+.modal-layer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(10, 24, 17, 0.72);
+}
+
+.quiz-card,
+.pause-card,
+.result-card {
+    width: 560px;
+}
+
+.question-title {
+    font-size: 28px;
+    -unity-font-style: bold;
+    color: var(--forest-800);
+    margin-bottom: 18px;
+    white-space: normal;
+}
+
+.quiz-option {
+    min-height: 48px;
+    margin-bottom: 8px;
+    border-radius: 10px;
+    background-color: white;
+    border-color: var(--parchment-300);
+    white-space: normal;
+}
+
+.stars-label {
+    font-size: 52px;
+    color: var(--gold);
+    -unity-text-align: middle-center;
+    margin-top: 10px;
+    margin-bottom: 18px;
+}
+
+.list-card {
+    margin-bottom: 8px;
+    padding: 14px;
+    background-color: var(--parchment-50);
+    border-width: 1px;
+    border-color: var(--parchment-300);
+    border-radius: 10px;
+    white-space: normal;
+    font-size: 16px;
+}
+
+.chart-slot {
+    min-height: 240px;
+}
+
+.bounded-list {
+    max-height: 360px;
+    margin-top: 12px;
+    margin-bottom: 18px;
+}
+
+.current-user-row {
+    border-width: 2px;
+    border-color: var(--gold);
+    background-color: rgb(255, 246, 205);
+}
+
+.context-chip {
+    align-self: flex-start;
+    padding: 6px 12px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    background-color: var(--forest-650);
+    color: white;
+}
+
+.chat-list {
+    flex-grow: 1;
+    min-height: 320px;
+    max-height: 560px;
+    margin-bottom: 12px;
+}
+
+.chat-message {
+    max-width: 720px;
+    margin-bottom: 10px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background-color: var(--parchment-50);
+}
+
+.user-message {
+    align-self: flex-end;
+    background-color: var(--forest-650);
+    color: white;
+}
+
+.assistant-message {
+    align-self: flex-start;
+    border-width: 1px;
+    border-color: var(--parchment-300);
+}
+
+.chat-body {
+    margin-top: 4px;
+    white-space: normal;
+    font-size: 16px;
+}

@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="daily-challenge-screen" class="screen">
+        <ui:Label text="每日挑战" class="hero-title" />
+        <ui:Label text="所有玩家面对同一天的固定题组，成绩按分数与用时排名。" class="subtitle" />
+        <ui:Button name="load-daily-button" text="刷新今日挑战" class="primary-button" />
+        <ui:Label name="daily-status-label" text="" class="status-label" />
+        <ui:ScrollView name="daily-question-list" />
+    </ui:VisualElement>
+</ui:UXML>

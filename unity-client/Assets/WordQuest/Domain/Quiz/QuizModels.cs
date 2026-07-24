@@ -7,7 +7,9 @@ namespace WordQuest.Domain.Quiz
     {
         ChoiceEnglishToChinese,
         ChoiceChineseToEnglish,
-        Spelling,
+        SpellHint,
+        SpellFull,
+        Translate,
         Pronunciation
     }
 

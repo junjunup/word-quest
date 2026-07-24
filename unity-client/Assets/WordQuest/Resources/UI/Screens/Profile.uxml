@@ -1,0 +1,19 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="profile-screen" class="screen">
+        <ui:Label name="profile-name-label" text="个人资料" class="hero-title" />
+        <ui:Label name="profile-stats-label" text="" class="subtitle" />
+        <ui:VisualElement class="feature-grid">
+            <ui:Label name="profile-achievement-label" text="已解锁 0 项成就" class="list-card" />
+            <ui:Label name="profile-endless-label" text="无尽最佳 0" class="list-card" />
+        </ui:VisualElement>
+        <ui:Button name="choose-character-button" text="选择角色" class="secondary-button" />
+        <ui:Button name="open-leaderboard-button" text="查看排行榜" />
+        <ui:VisualElement class="panel">
+            <ui:Label text="学习提醒" class="section-title" />
+            <ui:Toggle name="reminder-enabled-toggle" label="启用学习提醒偏好" />
+            <ui:TextField name="reminder-time-field" label="提醒时间（HH:mm）" value="20:00" />
+            <ui:Button name="save-reminder-button" text="保存提醒" class="primary-button" />
+            <ui:Label name="profile-status-label" text="" class="status-label" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

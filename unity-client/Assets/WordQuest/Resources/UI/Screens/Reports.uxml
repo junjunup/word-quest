@@ -1,0 +1,18 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:ScrollView name="reports-screen" class="screen">
+        <ui:Label text="学习报告" class="hero-title" />
+        <ui:Label text="把答题、掌握度、错因和复习数据整理成可行动的反馈。" class="subtitle" />
+        <ui:VisualElement class="action-row">
+            <ui:Button name="refresh-report-button" text="刷新报告" class="primary-button" />
+            <ui:Button name="export-report-button" text="导出 CSV" class="secondary-button" />
+        </ui:VisualElement>
+        <ui:Label name="report-status-label" text="" class="status-label" />
+        <ui:Label name="report-overview-label" text="" class="panel" />
+        <ui:Label text="30 天答题趋势" class="section-title" />
+        <ui:VisualElement name="daily-chart-slot" class="panel chart-slot" />
+        <ui:Label text="章节正确率" class="section-title" />
+        <ui:VisualElement name="chapter-chart-slot" class="panel chart-slot" />
+        <ui:Label text="易错词" class="section-title" />
+        <ui:ScrollView name="mistake-list" class="bounded-list" />
+    </ui:ScrollView>
+</ui:UXML>

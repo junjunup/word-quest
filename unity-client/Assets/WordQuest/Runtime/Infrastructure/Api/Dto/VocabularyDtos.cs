@@ -74,4 +74,24 @@ namespace WordQuest.Infrastructure.Api.Dto
         public int modified;
         public int upserted;
     }
+
+    [Serializable]
+    public sealed class VocabularySourceManifestDto
+    {
+        public string generatedAt;
+        public string generator;
+        public string sourceRepository;
+        public string sourceNote;
+        public SourceWordbookDto[] wordbooks;
+    }
+
+    [Serializable]
+    public sealed class SourceWordbookDto
+    {
+        public string wordbookId;
+        public string wordbookName;
+        public int wordCount;
+        public string outputFile;
+        public string outputSha256;
+    }
 }

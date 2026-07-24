@@ -20,6 +20,9 @@ namespace WordQuest.Infrastructure.Api.Dto
         public string status;
         public string direction;
         public PublicUserDto user;
+        public PublicUserDto friend;
+        public string requestedAt;
+        public string respondedAt;
         public string createdAt;
         public string updatedAt;
     }
@@ -62,7 +65,11 @@ namespace WordQuest.Infrastructure.Api.Dto
         public ChallengeWordDto[] words;
         public ChallengeSubmissionDto[] submissions;
         public string winnerId;
+        public string winner;
+        public ChallengeSubmissionDto mySubmission;
+        public ChallengeSubmissionDto opponentSubmission;
         public string createdAt;
+        public string updatedAt;
         public string expiresAt;
     }
 

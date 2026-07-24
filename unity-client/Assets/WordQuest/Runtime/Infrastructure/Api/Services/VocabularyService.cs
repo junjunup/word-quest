@@ -78,5 +78,11 @@ namespace WordQuest.Infrastructure.Api.Services
                 ApiRoutes.VocabularyImport,
                 request,
                 token);
+
+        public Task<ApiResult<VocabularySourceManifestDto>>
+            GetSourceManifestAsync(CancellationToken token) =>
+            client.GetAsync<VocabularySourceManifestDto>(
+                ApiRoutes.VocabularySourceManifest,
+                token);
     }
 }

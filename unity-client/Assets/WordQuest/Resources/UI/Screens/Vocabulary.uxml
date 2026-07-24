@@ -1,0 +1,20 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:ScrollView name="vocabulary-screen" class="screen">
+        <ui:Label text="词库管理" class="hero-title" />
+        <ui:Label text="选择 CET-4/CET-6/考研词书，审计数据来源，或导入自己的学习内容。" class="subtitle" />
+        <ui:VisualElement class="action-row">
+            <ui:Button name="vocab-refresh-button" text="刷新词书" class="primary-button" />
+            <ui:Button name="source-manifest-button" text="查看数据来源" />
+            <ui:Button name="open-pronunciation-button" text="进入发音练习" />
+        </ui:VisualElement>
+        <ui:ScrollView name="wordbook-list" class="bounded-list" />
+        <ui:Label text="导入自定义词书" class="section-title" />
+        <ui:Label text="JSON 顶层需包含 words 数组；先校验，确认后才写入服务端。" class="subtitle" />
+        <ui:TextField name="import-path-field" label="JSON 文件完整路径" />
+        <ui:VisualElement class="action-row">
+            <ui:Button name="vocab-dry-run-button" text="仅校验" class="primary-button" />
+            <ui:Button name="vocab-confirm-button" text="确认导入" enabled="false" class="secondary-button" />
+        </ui:VisualElement>
+        <ui:Label name="vocab-status-label" text="" class="status-label" />
+    </ui:ScrollView>
+</ui:UXML>

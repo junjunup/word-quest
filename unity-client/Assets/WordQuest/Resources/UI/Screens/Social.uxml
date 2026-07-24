@@ -1,0 +1,17 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:ScrollView name="social-screen" class="screen">
+        <ui:Label text="好友与异步 PK" class="hero-title" />
+        <ui:Label text="添加学习伙伴，向已接受的好友发起同题公平挑战。" class="subtitle" />
+        <ui:VisualElement class="action-row">
+            <ui:TextField name="user-search-field" label="搜索用户名或昵称" />
+            <ui:Button name="user-search-button" text="搜索" class="primary-button" />
+            <ui:Button name="social-refresh-button" text="刷新" />
+        </ui:VisualElement>
+        <ui:Label name="social-status-label" text="" class="status-label" />
+        <ui:ScrollView name="user-search-results" class="bounded-list" />
+        <ui:Label text="好友与请求" class="section-title" />
+        <ui:ScrollView name="friend-list" class="bounded-list" />
+        <ui:Label text="我的 PK" class="section-title" />
+        <ui:ScrollView name="challenge-list" class="bounded-list" />
+    </ui:ScrollView>
+</ui:UXML>

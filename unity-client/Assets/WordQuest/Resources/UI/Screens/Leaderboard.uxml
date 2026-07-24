@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="leaderboard-screen" class="screen">
+        <ui:Label text="冒险者排行榜" class="hero-title" />
+        <ui:VisualElement class="action-row">
+            <ui:Button name="total-ranking-button" text="总分榜" class="primary-button" />
+            <ui:Button name="exp-ranking-button" text="经验榜" />
+        </ui:VisualElement>
+        <ui:ScrollView name="leaderboard-list" />
+    </ui:VisualElement>
+</ui:UXML>

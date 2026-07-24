@@ -22,5 +22,6 @@
             <ui:Button name="daily-reward-button" text="领取每日学习奖励" class="secondary-button" />
             <ui:Button text="角色与个人资料" view-data-key="Profile" class="feature-button ghost-button" />
         </ui:VisualElement>
+        <ui:Label name="reward-status-label" text="" class="status-label" />
     </ui:VisualElement>
 </ui:UXML>

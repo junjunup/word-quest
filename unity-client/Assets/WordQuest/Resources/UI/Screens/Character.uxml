@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="character-screen" class="screen">
+        <ui:Label text="选择你的冒险者" class="hero-title" />
+        <ui:Label text="八种装扮共享相同能力，不影响学习公平性。" class="subtitle" />
+        <ui:VisualElement name="character-list" class="feature-grid" />
+    </ui:VisualElement>
+</ui:UXML>

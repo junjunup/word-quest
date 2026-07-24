@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="result-screen" class="screen centered-screen">
+        <ui:VisualElement class="result-card panel">
+            <ui:Label name="result-title" text="关卡完成" class="hero-title" />
+            <ui:Label name="stars-label" text="☆☆☆" class="stars-label" />
+            <ui:Label name="result-summary" text="" class="subtitle" />
+            <ui:Button name="replay-button" text="再次挑战" class="primary-button" />
+            <ui:Button name="result-reports-button" text="查看学习报告" />
+            <ui:Button name="result-home-button" text="返回主页" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -81,6 +81,8 @@ namespace WordQuest.Infrastructure.Api.Services
         Task<ApiResult<VocabularyImportDto>> ImportAsync(
             VocabularyImportRequest request,
             CancellationToken token);
+        Task<ApiResult<VocabularySourceManifestDto>> GetSourceManifestAsync(
+            CancellationToken token);
     }
 
     public interface ILearningService

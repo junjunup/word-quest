@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="review-screen" class="screen">
+        <ui:Label text="今日复习" class="hero-title" />
+        <ui:Label text="优先安排已到期、掌握度较低和近期易错的词汇。" class="subtitle" />
+        <ui:Button name="start-review-button" text="创建 20 词复习会话" class="primary-button" />
+        <ui:Label name="review-status-label" text="" class="status-label" />
+        <ui:ScrollView name="review-word-list" />
+    </ui:VisualElement>
+</ui:UXML>

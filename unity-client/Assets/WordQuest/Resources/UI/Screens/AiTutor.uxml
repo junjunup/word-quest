@@ -1,0 +1,16 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="ai-tutor-screen" class="screen">
+        <ui:Label text="AI 学习导师" class="hero-title" />
+        <ui:Label text="AI 仅用于词汇学习辅助，可能出错；重要知识请结合教材与教师反馈核对。" class="subtitle" />
+        <ui:Label name="tutor-context-chip" text="上下文：自由提问" class="context-chip" />
+        <ui:ScrollView name="tutor-messages" class="chat-list" />
+        <ui:VisualElement class="chat-compose panel">
+            <ui:TextField name="tutor-input" multiline="true" max-length="1000" label="输入你的学习问题" />
+            <ui:VisualElement class="action-row">
+                <ui:Button name="tutor-send-button" text="发送" class="primary-button" />
+                <ui:Button name="tutor-cancel-button" text="取消回答" />
+                <ui:Button name="tutor-retry-button" text="重试上个问题" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
