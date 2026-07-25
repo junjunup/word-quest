@@ -72,8 +72,7 @@ namespace WordQuest.Presentation
 
         private void Awake()
         {
-            var apps = FindObjectsByType<WordQuestApp>(
-                FindObjectsSortMode.None);
+            var apps = FindObjectsByType<WordQuestApp>();
             if (apps.Length > 1)
             {
                 Destroy(gameObject);
@@ -170,12 +169,11 @@ namespace WordQuest.Presentation
             uiObject.SetActive(false);
             uiObject.transform.SetParent(transform, false);
             var document = uiObject.AddComponent<UIDocument>();
-            var settings = ScriptableObject.CreateInstance<PanelSettings>();
-            settings.name = "WordQuest Runtime Panel";
-            settings.scaleMode = PanelScaleMode.ScaleWithScreenSize;
-            settings.referenceResolution = new Vector2Int(1440, 900);
-            settings.screenMatchMode = PanelScreenMatchMode.MatchWidthOrHeight;
-            settings.match = 0.5f;
+            var settings =
+                Resources.Load<PanelSettings>(
+                    "UI/WordQuestPanelSettings") ??
+                throw new InvalidOperationException(
+                    "Word Quest PanelSettings asset is missing.");
             document.panelSettings = settings;
             uiObject.SetActive(true);
 
@@ -183,6 +181,7 @@ namespace WordQuest.Presentation
             router.ScreenRequested += Navigate;
             achievementToast = new AchievementToast(
                 router.Root.Q<VisualElement>("achievement-toast"));
+            Debug.Log("WORDQUEST_BOOTSTRAP_READY");
         }
 
         private async System.Threading.Tasks.Task RestoreSessionAsync()

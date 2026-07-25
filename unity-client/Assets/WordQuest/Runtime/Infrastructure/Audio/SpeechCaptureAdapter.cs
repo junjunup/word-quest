@@ -55,8 +55,8 @@ namespace WordQuest.Infrastructure.Audio
         private string pendingError;
 
         public bool IsAvailable =>
-            Application.platform == RuntimePlatform.WindowsPlayer ||
-            Application.platform == RuntimePlatform.WindowsEditor;
+            UnityEngine.Application.platform == RuntimePlatform.WindowsPlayer ||
+            UnityEngine.Application.platform == RuntimePlatform.WindowsEditor;
         public string UnavailableReason =>
             IsAvailable
                 ? string.Empty
@@ -183,7 +183,7 @@ namespace WordQuest.Infrastructure.Audio
         {
             get
             {
-                if (Application.platform != RuntimePlatform.OSXPlayer)
+                if (UnityEngine.Application.platform != RuntimePlatform.OSXPlayer)
                     return false;
                 try
                 {
@@ -201,7 +201,7 @@ namespace WordQuest.Infrastructure.Audio
         }
 
         public string UnavailableReason =>
-            Application.platform == RuntimePlatform.OSXEditor
+            UnityEngine.Application.platform == RuntimePlatform.OSXEditor
                 ? "macOS 系统语音识别桥接在桌面 Player 构建中启用；编辑器内可使用手动文本兜底。"
                 : "macOS Speech 服务不可用，或麦克风/语音识别权限未授权。";
 

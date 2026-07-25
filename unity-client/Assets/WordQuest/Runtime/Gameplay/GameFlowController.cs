@@ -4,12 +4,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Networking;
+using WordQuest.Application;
 using WordQuest.Application.Quiz;
 using WordQuest.Content;
 using WordQuest.Domain.Game;
 using WordQuest.Domain.Quiz;
-using WordQuest.Infrastructure.Api;
 using WordQuest.Infrastructure.Api.Dto;
 using WordQuest.Infrastructure.Api.Services;
 using WordQuest.Infrastructure.Storage;
@@ -63,8 +62,7 @@ namespace WordQuest.Gameplay
     {
         private readonly IVocabularyService vocabulary;
         private readonly ILearningService learning;
-        private readonly IGameService game;
-        private readonly PendingSyncQueue pending;
+        private readonly LevelSettlementController settlement;
         private readonly WorldController world;
         private readonly string userId;
         private readonly AdaptiveQuizPolicy adaptive = new AdaptiveQuizPolicy();
@@ -94,9 +92,13 @@ namespace WordQuest.Gameplay
                               throw new ArgumentNullException(nameof(vocabulary));
             this.learning = learning ??
                             throw new ArgumentNullException(nameof(learning));
-            this.game = game ?? throw new ArgumentNullException(nameof(game));
-            this.pending = pending ??
-                           throw new ArgumentNullException(nameof(pending));
+            if (game == null)
+                throw new ArgumentNullException(nameof(game));
+            if (pending == null)
+                throw new ArgumentNullException(nameof(pending));
+            settlement = new LevelSettlementController(
+                game.SaveProgressAsync,
+                pending);
             this.world = world ?? throw new ArgumentNullException(nameof(world));
             this.userId = string.IsNullOrWhiteSpace(userId)
                 ? throw new ArgumentException(
@@ -433,47 +435,12 @@ namespace WordQuest.Gameplay
             world.SetSimulationEnabled(false);
             var result = session.Finish(
                 DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
-            result.LevelCompleted = completed;
-            if (!completed)
-            {
-                Finished?.Invoke(result);
-                return;
-            }
-            var request = new SaveProgressRequest
-            {
-                chapter = result.Chapter,
-                level = result.Level,
-                stars = result.Stars,
-                score = result.Score,
-                sessionId = result.SessionId,
-                wordbookId = selection.WordbookId
-            };
-            var saved = await game.SaveProgressAsync(request, token);
-            result.ProgressSaved = saved.IsSuccess;
-            result.ProgressPending =
-                PendingSettlementSync.ShouldRetry(saved);
-            if (result.ProgressSaved || result.ProgressPending)
-            {
-                result.SettlementId = Guid.NewGuid().ToString("N");
-                pending.Enqueue(
-                    userId,
-                    new PendingSubmission
-                    {
-                        id = result.SettlementId,
-                        userId = userId,
-                        route = ApiRoutes.SaveProgress,
-                        method = UnityWebRequest.kHttpVerbPOST,
-                        jsonBody = JsonUtility.ToJson(request),
-                        createdAtUnixMs =
-                            DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                        progressSaved = result.ProgressSaved,
-                        achievementEvidence =
-                            AchievementRunEvidence.From(
-                                result,
-                                selection.WordbookId)
-                    });
-            }
-
+            await settlement.SettleAsync(
+                result,
+                completed,
+                selection.WordbookId,
+                userId,
+                token);
             Finished?.Invoke(result);
         }
 

@@ -111,6 +111,34 @@ namespace WordQuest.Domain.Game
         public bool ProgressSaved { get; internal set; }
         public bool ProgressPending { get; internal set; }
         public string SettlementId { get; internal set; }
+
+        public void RecordSettlement(
+            bool levelCompleted,
+            bool progressSaved,
+            bool progressPending,
+            string settlementId)
+        {
+            var saved = levelCompleted && progressSaved;
+            var pending =
+                levelCompleted &&
+                !saved &&
+                progressPending;
+            if ((saved || pending) &&
+                string.IsNullOrWhiteSpace(settlementId))
+            {
+                throw new ArgumentException(
+                    "A persisted settlement requires an identity.",
+                    nameof(settlementId));
+            }
+
+            LevelCompleted = levelCompleted;
+            ProgressSaved = saved;
+            ProgressPending = pending;
+            SettlementId =
+                saved || pending
+                    ? settlementId.Trim()
+                    : string.Empty;
+        }
     }
 
     public sealed class GameSession
@@ -138,6 +166,7 @@ namespace WordQuest.Domain.Game
         internal IReadOnlyList<Word> Words { get; }
         internal Difficulty Difficulty { get; }
         internal long StartedAtUnixMs { get; }
+        internal string SessionId { get; }
         internal int Lives { get; private set; }
         internal int MaximumLives { get; private set; }
         internal int TimerMs { get; private set; }

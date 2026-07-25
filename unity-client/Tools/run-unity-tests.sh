@@ -19,8 +19,7 @@ run_suite() {
     -projectPath "$project_root" \
     -runTests \
     -testPlatform "$platform" \
-    -testResults "$project_root/TestResults/${platform}.xml" \
-    -quit
+    -testResults "$project_root/TestResults/${platform}.xml"
 }
 
 case "${1:-all}" in

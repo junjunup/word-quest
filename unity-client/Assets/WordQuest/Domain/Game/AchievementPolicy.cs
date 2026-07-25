@@ -41,6 +41,7 @@ namespace WordQuest.Domain.Game
         public int MaximumCombo;
         public int FastestCorrectMs;
         public string WordbookId;
+        public string SessionId;
 
         public static AchievementRunEvidence From(
             LevelResult result,
@@ -58,7 +59,8 @@ namespace WordQuest.Domain.Game
                 FastestCorrectMs = result.FastestCorrectMs,
                 WordbookId = string.IsNullOrWhiteSpace(wordbookId)
                     ? "cet4"
-                    : wordbookId
+                    : wordbookId,
+                SessionId = result.SessionId
             };
         }
     }

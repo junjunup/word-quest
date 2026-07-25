@@ -18,9 +18,10 @@ verified.
 6. In PlayerPrefs, the API origin defaults to `http://localhost:4000`. Change
    `wordquest:api-origin` only when the API is hosted elsewhere.
 
-The app is installed before scene load, constructs a runtime UI Toolkit panel,
-and validates a stored token against `/api/auth/me`. The `Resources/UI`
-templates are the runtime screen source.
+The app is installed before scene load, loads the committed UI Toolkit
+`WordQuestPanelSettings` asset (including Unity's ICU data), and validates a
+stored token against `/api/auth/me`. The `Resources/UI` templates are the
+runtime screen source.
 
 ## Architecture
 
@@ -43,7 +44,7 @@ Run editor-independent checks:
 
 ```bash
 bash unity-client/Tools/validate-project.sh
-bash unity-client/Tools/check-api-contracts.sh
+bash unity-client/Tools/validate-api-contracts.sh
 ```
 
 Run Unity tests:
@@ -51,6 +52,18 @@ Run Unity tests:
 ```bash
 UNITY_EDITOR_BIN="/path/to/Unity" bash unity-client/Tools/run-unity-tests.sh
 ```
+
+Build and validate both desktop Players:
+
+```bash
+UNITY_EDITOR_BIN="/path/to/Unity" bash unity-client/Tools/build-players.sh
+```
+
+The build script validates the complete Windows Player layout and x86_64
+native binaries, macOS Universal architectures, speech bridge, privacy plist,
+audio-input entitlement, nested signatures, and a real headless macOS Player
+startup through LaunchServices that reaches the Word Quest UI bootstrap marker
+without exceptions.
 
 Generated `Library`, `Temp`, `Obj`, `Logs`, `TestResults`, and `Builds`
 directories must remain untracked.
@@ -61,9 +74,12 @@ directories must remain untracked.
   allow dictation.
 - macOS builds compile the committed Objective-C++ bridge against Apple's
   Speech and AVFoundation frameworks. The build processor adds microphone and
-  speech-recognition usage descriptions to `Info.plist`.
+  speech-recognition usage descriptions to `Info.plist` and embeds the
+  `com.apple.security.device.audio-input` entitlement in the app signature.
 - Recognition populates transcript and confidence automatically before the
   existing `/api/pronunciation/score` request. Manual transcript entry remains
   available only as an explicit fallback.
 - The macOS editor cannot load the Player dylib; validate that path in a built
-  `.app`, then codesign/notarize the final bundle after all native files exist.
+  `.app`. Development builds are signed ad hoc. Set
+  `WORDQUEST_MAC_SIGNING_IDENTITY` to a Developer ID Application identity for
+  hardened-runtime distribution signing, then notarize that final bundle.

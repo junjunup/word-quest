@@ -33,7 +33,7 @@ namespace WordQuest.Tests
             var service = new CancellingChatService();
             var controller = new AiTutorController(service);
 
-            Assert.ThrowsAsync<OperationCanceledException>(() =>
+            Assert.CatchAsync<OperationCanceledException>(() =>
                 controller.SendAsync(
                     "问题",
                     new ChatContext(),

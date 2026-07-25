@@ -22,3 +22,5 @@ fi
   -projectPath "$project_root" \
   -executeMethod WordQuest.Editor.BuildCommand.BuildMacOS \
   -quit
+
+bash "$project_root/Tools/validate-build-artifacts.sh"

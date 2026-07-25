@@ -33,7 +33,7 @@ namespace WordQuest.Tests
 
             var points = ReportProjection.Daily(rows);
 
-            Assert.That(points, Has.Count.EqualTo(30));
+            Assert.That(points.Count, Is.EqualTo(30));
             Assert.That(points[0].Label, Is.EqualTo("07-01"));
             Assert.That(points[29].Label, Is.EqualTo("07-30"));
         }

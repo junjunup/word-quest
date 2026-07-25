@@ -17,10 +17,13 @@ namespace WordQuest.Tests
             var pool = Pool();
             var question = QuizFactory.Create(pool[0], type, pool);
 
-            Assert.That(question.Options, Has.Count.EqualTo(4));
+            Assert.That(question.Options.Count, Is.EqualTo(4));
             Assert.That(
-                question.Options.Select(option => option.Text).Distinct(),
-                Has.Count.EqualTo(4));
+                question.Options
+                    .Select(option => option.Text)
+                    .Distinct()
+                    .Count(),
+                Is.EqualTo(4));
             Assert.That(
                 question.Options.All(option =>
                     !string.IsNullOrWhiteSpace(option.Text)),

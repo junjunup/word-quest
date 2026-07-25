@@ -24,7 +24,7 @@ namespace WordQuest.Editor
         public static void BuildMacOS()
         {
             PlayerSettings.SetArchitecture(
-                BuildTargetGroup.Standalone,
+                NamedBuildTarget.Standalone,
                 2);
             Build(
                 BuildTarget.StandaloneOSX,

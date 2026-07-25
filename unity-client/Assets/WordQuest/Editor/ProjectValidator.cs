@@ -34,10 +34,11 @@ namespace WordQuest.Editor
         [MenuItem("Word Quest/Validate Project")]
         public static void ValidateOrThrow()
         {
-            if (Application.unityVersion != "6000.5.3f1")
+            if (UnityEngine.Application.unityVersion != "6000.5.3f1")
             {
                 throw new BuildFailedException(
-                    $"Expected Unity 6000.5.3f1, found {Application.unityVersion}.");
+                    "Expected Unity 6000.5.3f1, found " +
+                    $"{UnityEngine.Application.unityVersion}.");
             }
 
             var bootstrap = EditorBuildSettings.scenes.FirstOrDefault(
@@ -56,8 +57,20 @@ namespace WordQuest.Editor
                     throw new BuildFailedException($"Missing UI screen: {path}");
             }
 
+            const string panelPath =
+                "Assets/WordQuest/Resources/UI/" +
+                "WordQuestPanelSettings.asset";
+            var panelSettings =
+                AssetDatabase.LoadAssetAtPath<PanelSettings>(panelPath);
+            if (panelSettings == null ||
+                panelSettings.themeStyleSheet == null)
+            {
+                throw new BuildFailedException(
+                    $"Missing configured PanelSettings: {panelPath}");
+            }
+
             var domain = Path.Combine(
-                Application.dataPath,
+                UnityEngine.Application.dataPath,
                 "WordQuest",
                 "Domain");
             foreach (var file in Directory.GetFiles(

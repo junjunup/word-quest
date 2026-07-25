@@ -2,11 +2,11 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Xml.Linq;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEditor.Callbacks;
+using UnityEditor.iOS.Xcode;
 using UnityEngine;
 
 namespace WordQuest.Editor
@@ -22,7 +22,7 @@ namespace WordQuest.Editor
                 return;
 
             var source = Path.Combine(
-                Application.dataPath,
+                UnityEngine.Application.dataPath,
                 "WordQuest",
                 "Native",
                 "macOS",
@@ -31,6 +31,12 @@ namespace WordQuest.Editor
             {
                 throw new BuildFailedException(
                     $"Missing macOS speech source: {source}");
+            }
+            var entitlements = EntitlementsPath();
+            if (!File.Exists(entitlements))
+            {
+                throw new BuildFailedException(
+                    $"Missing macOS entitlements: {entitlements}");
             }
         }
 
@@ -43,7 +49,7 @@ namespace WordQuest.Editor
                 return;
 
             var source = Path.Combine(
-                Application.dataPath,
+                UnityEngine.Application.dataPath,
                 "WordQuest",
                 "Native",
                 "macOS",
@@ -62,7 +68,8 @@ namespace WordQuest.Editor
                 "-framework Foundation -framework AVFoundation " +
                 "-framework Speech -arch arm64 -arch x86_64 " +
                 "-mmacosx-version-min=11.0 " +
-                $"-o \"{library}\" \"{source}\"");
+                $"-o \"{library}\" \"{source}\"",
+                "macOS speech bridge compilation");
 
             var infoPath = Path.Combine(
                 builtProjectPath,
@@ -80,6 +87,7 @@ namespace WordQuest.Editor
                 infoPath,
                 "NSSpeechRecognitionUsageDescription",
                 "Word Quest 使用系统语音识别评估英语发音。");
+            SignBundle(builtProjectPath);
         }
 
         private static void SetPlistString(
@@ -87,27 +95,16 @@ namespace WordQuest.Editor
             string key,
             string value)
         {
-            var document = XDocument.Load(infoPath);
-            var dictionary = document.Root?.Element("dict") ??
-                             throw new BuildFailedException(
-                                 "Invalid macOS Info.plist.");
-            var existing = dictionary
-                .Elements("key")
-                .FirstOrDefault(element => element.Value == key);
-            if (existing != null)
-            {
-                var currentValue = existing.ElementsAfterSelf().FirstOrDefault();
-                currentValue?.SetValue(value);
-            }
-            else
-            {
-                dictionary.Add(new XElement("key", key));
-                dictionary.Add(new XElement("string", value));
-            }
-            document.Save(infoPath);
+            var document = new PlistDocument();
+            document.ReadFromFile(infoPath);
+            document.root.SetString(key, value);
+            document.WriteToFile(infoPath);
         }
 
-        private static void Run(string fileName, string arguments)
+        private static void Run(
+            string fileName,
+            string arguments,
+            string description)
         {
             using var process = Process.Start(new ProcessStartInfo
             {
@@ -123,12 +120,66 @@ namespace WordQuest.Editor
                 throw new BuildFailedException(
                     $"Unable to start {fileName}.");
             }
+            var stdout = process.StandardOutput.ReadToEndAsync();
+            var stderr = process.StandardError.ReadToEndAsync();
             process.WaitForExit();
+            var standardOutput = stdout.GetAwaiter().GetResult();
+            var standardError = stderr.GetAwaiter().GetResult();
             if (process.ExitCode == 0)
                 return;
             throw new BuildFailedException(
-                $"macOS speech bridge compilation failed: " +
-                process.StandardError.ReadToEnd());
+                $"{description} failed: " +
+                (string.IsNullOrWhiteSpace(standardError)
+                    ? standardOutput
+                    : standardError));
+        }
+
+        private static void SignBundle(string appPath)
+        {
+            var identity = Environment.GetEnvironmentVariable(
+                "WORDQUEST_MAC_SIGNING_IDENTITY");
+            if (string.IsNullOrWhiteSpace(identity))
+                identity = "-";
+            var timestamp =
+                identity == "-"
+                    ? "--timestamp=none"
+                    : "--timestamp";
+            var contents = Path.Combine(appPath, "Contents");
+            foreach (var nestedCode in Directory
+                         .GetFiles(
+                             contents,
+                             "*.dylib",
+                             SearchOption.AllDirectories)
+                         .OrderByDescending(path => path.Length))
+            {
+                Run(
+                    "/usr/bin/codesign",
+                    $"--force {timestamp} " +
+                    $"--sign \"{identity}\" \"{nestedCode}\"",
+                    $"macOS nested code signing ({nestedCode})");
+            }
+
+            var runtimeOption =
+                identity == "-"
+                    ? string.Empty
+                    : "--options runtime ";
+            Run(
+                "/usr/bin/codesign",
+                "--force " +
+                runtimeOption +
+                $"{timestamp} " +
+                $"--entitlements \"{EntitlementsPath()}\" " +
+                $"--sign \"{identity}\" \"{appPath}\"",
+                "macOS app signing");
+        }
+
+        private static string EntitlementsPath()
+        {
+            return Path.Combine(
+                UnityEngine.Application.dataPath,
+                "WordQuest",
+                "Editor",
+                "macOS.entitlements");
         }
     }
 }

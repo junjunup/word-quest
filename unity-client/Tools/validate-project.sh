@@ -12,6 +12,7 @@ fail() {
 version_file="$project_root/ProjectSettings/ProjectVersion.txt"
 manifest_file="$project_root/Packages/manifest.json"
 scene_file="$project_root/Assets/WordQuest/Scenes/Bootstrap.unity"
+panel_settings_file="$project_root/Assets/WordQuest/Resources/UI/WordQuestPanelSettings.asset"
 domain_asmdef="$project_root/Assets/WordQuest/Domain/WordQuest.Domain.asmdef"
 runtime_asmdef="$project_root/Assets/WordQuest/Runtime/WordQuest.Runtime.asmdef"
 parity_file="$repo_root/docs/unity/feature-parity.md"
@@ -22,16 +23,12 @@ test "$editor_version" = "6000.5.3f1" || fail "Expected Unity 6000.5.3f1, found 
 
 test -f "$manifest_file" || fail "Missing Packages/manifest.json"
 test -f "$scene_file" || fail "Missing Bootstrap.unity"
+test -f "$panel_settings_file" || fail "Missing WordQuestPanelSettings.asset"
+rg -F 'm_ICUDataAsset: {fileID: 20204' "$panel_settings_file" >/dev/null ||
+  fail "WordQuestPanelSettings.asset is missing Unity ICU data"
 test -f "$domain_asmdef" || fail "Missing WordQuest.Domain.asmdef"
 test -f "$runtime_asmdef" || fail "Missing WordQuest.Runtime.asmdef"
 test -f "$parity_file" || fail "Missing docs/unity/feature-parity.md"
-
-generated_dir="$(
-  find "$project_root" -type d \
-    \( -name Library -o -name Temp -o -name Logs -o -name Obj -o -name Builds -o -name TestResults \) \
-    -print -quit
-)"
-test -z "$generated_dir" || fail "Generated Unity directory found: $generated_dir"
 
 tracked_generated="$(
   git -C "$repo_root" ls-files 'unity-client/Library/**' 'unity-client/Temp/**' \
@@ -137,9 +134,17 @@ rg -F "using UnityEngine.UIElements;" \
   fail "ProjectValidator must import VisualTreeAsset's namespace"
 
 rg -F "if (!completed)" \
-  "$project_root/Assets/WordQuest/Runtime/Gameplay/GameFlowController.cs" \
+  "$project_root/Assets/WordQuest/Runtime/Application/LevelSettlementController.cs" \
   >/dev/null ||
   fail "Failed levels must not be saved as completed"
+rg -F "WORDQUEST_BOOTSTRAP_READY" \
+  "$project_root/Assets/WordQuest/Runtime/Presentation/WordQuestApp.cs" \
+  >/dev/null ||
+  fail "Player smoke test is missing the deterministic bootstrap marker"
+rg -F "com.apple.security.device.audio-input" \
+  "$project_root/Assets/WordQuest/Editor/macOS.entitlements" \
+  >/dev/null ||
+  fail "macOS audio-input entitlement is missing"
 rg -F "ReadAll(userId)" \
   "$project_root/Assets/WordQuest/Runtime/Application/PendingSettlementSync.cs" \
   >/dev/null ||

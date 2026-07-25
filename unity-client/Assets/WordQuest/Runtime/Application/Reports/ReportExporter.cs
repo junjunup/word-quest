@@ -14,7 +14,7 @@ namespace WordQuest.Application.Reports
                 throw new ArgumentNullException(nameof(report));
 
             var directory = Path.Combine(
-                Application.persistentDataPath,
+                UnityEngine.Application.persistentDataPath,
                 "Exports");
             Directory.CreateDirectory(directory);
             var path = Path.Combine(

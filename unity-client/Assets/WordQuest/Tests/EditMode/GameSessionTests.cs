@@ -85,6 +85,73 @@ namespace WordQuest.Tests
             Assert.That(session.Snapshot.TimerMs, Is.EqualTo(60000));
         }
 
+        [Test]
+        public void Session_identity_is_stable_from_snapshot_to_result()
+        {
+            var session = NewSession(DifficultyKind.Normal);
+
+            var snapshotId = session.Snapshot.SessionId;
+            var resultId = session.Finish(2000).SessionId;
+
+            Assert.That(snapshotId, Is.Not.Empty);
+            Assert.That(resultId, Is.EqualTo(snapshotId));
+        }
+
+        [Test]
+        public void Failed_run_cannot_report_saved_or_pending_progress()
+        {
+            var result = NewSession(DifficultyKind.Normal).Finish(2000);
+
+            result.RecordSettlement(
+                false,
+                true,
+                true,
+                "must-not-survive");
+
+            Assert.That(result.LevelCompleted, Is.False);
+            Assert.That(result.ProgressSaved, Is.False);
+            Assert.That(result.ProgressPending, Is.False);
+            Assert.That(result.SettlementId, Is.Empty);
+        }
+
+        [Test]
+        public void Confirmed_save_takes_precedence_over_pending_retry()
+        {
+            var result = NewSession(DifficultyKind.Normal).Finish(2000);
+
+            result.RecordSettlement(
+                true,
+                true,
+                true,
+                "settlement-1");
+
+            Assert.That(result.LevelCompleted, Is.True);
+            Assert.That(result.ProgressSaved, Is.True);
+            Assert.That(result.ProgressPending, Is.False);
+            Assert.That(result.SettlementId, Is.EqualTo("settlement-1"));
+        }
+
+        [TestCase(true, false, null)]
+        [TestCase(true, false, "")]
+        [TestCase(true, false, "  ")]
+        [TestCase(false, true, null)]
+        [TestCase(false, true, "")]
+        [TestCase(false, true, "  ")]
+        public void Persisted_settlement_requires_a_non_blank_identity(
+            bool progressSaved,
+            bool progressPending,
+            string settlementId)
+        {
+            var result = NewSession(DifficultyKind.Normal).Finish(2000);
+
+            Assert.Throws<System.ArgumentException>(() =>
+                result.RecordSettlement(
+                    true,
+                    progressSaved,
+                    progressPending,
+                    settlementId));
+        }
+
         [TestCase(20, 0, 100000, 3)]
         [TestCase(16, 4, 160000, 2)]
         [TestCase(10, 10, 200000, 1)]

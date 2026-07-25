@@ -3,6 +3,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+using UnityEngine.UIElements;
 using WordQuest.Presentation;
 
 namespace WordQuest.Tests
@@ -16,10 +17,23 @@ namespace WordQuest.Tests
             yield return null;
 
             Assert.That(
-                Object.FindObjectsByType<WordQuestApp>(
-                    FindObjectsSortMode.None),
+                Object.FindObjectsByType<WordQuestApp>(),
                 Has.Length.EqualTo(1));
-            Assert.That(GameObject.Find("WordQuest UI"), Is.Not.Null);
+            var ui = GameObject.Find("WordQuest UI");
+            Assert.That(ui, Is.Not.Null);
+            var panelSettings =
+                ui.GetComponent<UIDocument>().panelSettings;
+            Assert.That(
+                panelSettings,
+                Is.SameAs(
+                    Resources.Load<PanelSettings>(
+                        "UI/WordQuestPanelSettings")));
+            Assert.That(
+                panelSettings.themeStyleSheet,
+                Is.Not.Null);
+            Assert.That(
+                Object.FindAnyObjectByType<AudioListener>(),
+                Is.Not.Null);
         }
     }
 }
