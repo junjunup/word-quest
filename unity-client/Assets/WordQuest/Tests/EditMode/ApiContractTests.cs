@@ -5,6 +5,7 @@ using NUnit.Framework;
 using UnityEngine;
 using WordQuest.Infrastructure.Api;
 using WordQuest.Infrastructure.Api.Dto;
+using WordQuest.Infrastructure.Storage;
 using WordQuest.Presentation.Screens;
 
 namespace WordQuest.Tests
@@ -68,6 +69,39 @@ namespace WordQuest.Tests
             Assert.That(ApiRoutes.SaveProgress, Does.Not.Contain("://"));
         }
 
+        [TestCase("/api/auth/login")]
+        [TestCase("api/auth/login")]
+        public void Api_client_roots_relative_routes_at_configured_origin(
+            string route)
+        {
+            var client = new ApiClient(
+                "http://localhost:4000/",
+                new MemoryTokenStore(),
+                null);
+
+            using (var request = client.CreateRequest("GET", route))
+            {
+                Assert.That(
+                    request.url,
+                    Is.EqualTo("http://localhost:4000/api/auth/login"));
+            }
+        }
+
+        [Test]
+        public void Api_client_rejects_cross_origin_absolute_routes()
+        {
+            var client = new ApiClient(
+                "http://localhost:4000",
+                new MemoryTokenStore(),
+                null);
+
+            Assert.That(
+                () => client.CreateRequest(
+                    "GET",
+                    "https://attacker.example/api/auth/me"),
+                Throws.TypeOf<ArgumentException>());
+        }
+
         [TestCase(
             "[{\"word\":\"apple\",\"meaning\":\"苹果\"}]",
             "apple")]
@@ -82,6 +116,26 @@ namespace WordQuest.Tests
 
             Assert.That(parsed.words, Has.Length.EqualTo(1));
             Assert.That(parsed.words[0].word, Is.EqualTo(expectedWord));
+        }
+
+        private sealed class MemoryTokenStore : ITokenStore
+        {
+            private string token = string.Empty;
+
+            public string Load()
+            {
+                return token;
+            }
+
+            public void Save(string value)
+            {
+                token = value ?? string.Empty;
+            }
+
+            public void Clear()
+            {
+                token = string.Empty;
+            }
         }
     }
 }

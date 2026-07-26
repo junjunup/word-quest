@@ -228,12 +228,29 @@ namespace WordQuest.Infrastructure.Api
 
         private string BuildUrl(string route)
         {
-            if (Uri.TryCreate(route, UriKind.Absolute, out _))
+            var normalized = (route ?? string.Empty).Trim();
+            if (normalized.Length == 0)
+                throw new ArgumentException(
+                    "API route cannot be empty.",
+                    nameof(route));
+
+            if (Uri.TryCreate(
+                    normalized,
+                    UriKind.Absolute,
+                    out var absolute) &&
+                (string.Equals(
+                     absolute.Scheme,
+                     Uri.UriSchemeHttp,
+                     StringComparison.OrdinalIgnoreCase) ||
+                 string.Equals(
+                     absolute.Scheme,
+                     Uri.UriSchemeHttps,
+                     StringComparison.OrdinalIgnoreCase)))
                 throw new ArgumentException(
                     "API routes must be relative to the configured origin.",
                     nameof(route));
 
-            return baseUrl + "/" + (route ?? string.Empty).TrimStart('/');
+            return baseUrl + "/" + normalized.TrimStart('/');
         }
     }
 }
