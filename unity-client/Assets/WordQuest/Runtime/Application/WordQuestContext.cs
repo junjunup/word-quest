@@ -20,6 +20,7 @@ namespace WordQuest.Application
         public float EffectsVolume { get; set; } = 0.9f;
         public string Difficulty { get; set; } = "normal";
         public string WordbookId { get; set; } = "cet4";
+        public string LearnerStageId { get; set; } = "junior";
         public bool ReducedMotion { get; set; }
         public bool HighContrast { get; set; }
         public bool ReminderEnabled { get; set; }

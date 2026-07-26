@@ -42,6 +42,10 @@ namespace WordQuest.Infrastructure.Api.Dto
         public string name;
         public int total;
         public int[] chapters;
+        public string stageId;
+        public int gradeMin;
+        public int gradeMax;
+        public string curriculum;
     }
 
     [Serializable]
