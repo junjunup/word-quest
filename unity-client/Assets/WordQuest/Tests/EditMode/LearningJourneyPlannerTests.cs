@@ -62,6 +62,54 @@ namespace WordQuest.Tests
         }
 
         [Test]
+        public void Plan_with_mismatched_level_keys_uses_safe_fallback()
+        {
+            var status = new LevelsStatusDto
+            {
+                chapters = new[]
+                {
+                    new ChapterStatusDto
+                    {
+                        id = 1,
+                        unlocked = true,
+                        levels = new[]
+                        {
+                            Level(1, true, true),
+                            Level(2, true, true)
+                        }
+                    },
+                    new ChapterStatusDto
+                    {
+                        id = 2,
+                        unlocked = true,
+                        levels = new[]
+                        {
+                            Level(1, true, true)
+                        }
+                    },
+                    new ChapterStatusDto
+                    {
+                        id = 99,
+                        unlocked = true,
+                        levels = new[]
+                        {
+                            Level(99, true, true)
+                        }
+                    }
+                }
+            };
+
+            var plan = LearningJourneyPlanner.Create(
+                CreateCatalog(),
+                status);
+
+            Assert.That(plan.RecommendedLevel.Chapter, Is.EqualTo(1));
+            Assert.That(plan.RecommendedLevel.Id, Is.EqualTo(1));
+            Assert.That(plan.CompletedLevels, Is.EqualTo(0));
+            Assert.That(plan.HasReliableProgress, Is.False);
+        }
+
+        [Test]
         public void Plan_with_all_unlocked_levels_complete_recommends_last_one()
         {
             var catalog = CreateCatalog();

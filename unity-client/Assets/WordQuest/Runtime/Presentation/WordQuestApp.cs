@@ -257,17 +257,81 @@ namespace WordQuest.Presentation
             loginScreen?.Dispose();
             loginScreen = null;
             var view = router.Show(ScreenId.Home);
-            _ = new HomeScreen(
+            var journey = LearningJourneyPlanner.Create(content, null);
+            var screen = new HomeScreen(
                 view,
                 Context,
                 Navigate,
                 Game,
                 Learning,
+                SessionToken,
+                journey,
+                StartCurrentLevel);
+            _ = LoadHomeJourneyAsync(
+                view,
+                screen,
+                Context.Settings.WordbookId,
                 SessionToken);
             _ = audio.PlayMusicAsync(MusicId.Menu, SessionToken);
             var userId = Context.User?.Id;
             var token = SessionToken;
             _ = FlushPendingSettlementsAsync(userId, token);
+        }
+
+        private async System.Threading.Tasks.Task LoadHomeJourneyAsync(
+            VisualElement requestedView,
+            HomeScreen screen,
+            string wordbookId,
+            CancellationToken token)
+        {
+            try
+            {
+                var result = await Game.GetLevelsStatusAsync(
+                    wordbookId,
+                    token);
+                if (!result.IsSuccess ||
+                    !ShouldApplyHomeJourney(
+                        requestedView,
+                        router.CurrentView,
+                        router.Current,
+                        token.IsCancellationRequested))
+                {
+                    return;
+                }
+
+                screen.RenderJourney(
+                    LearningJourneyPlanner.Create(content, result.Data));
+            }
+            catch (OperationCanceledException) when (token.IsCancellationRequested)
+            {
+                // Navigation or logout owns this cancellation.
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning(
+                    "Home journey refresh failed (" +
+                    $"{exception.GetType().Name}).");
+            }
+        }
+
+        private static bool ShouldApplyHomeJourney(
+            VisualElement requestedView,
+            VisualElement currentView,
+            ScreenId currentScreen,
+            bool cancelled)
+        {
+            return !cancelled &&
+                   currentScreen == ScreenId.Home &&
+                   ReferenceEquals(requestedView, currentView);
+        }
+
+        private void StartCurrentLevel(LevelDefinition level)
+        {
+            StartLevel(
+                new LevelSelection(
+                    level,
+                    Difficulty.Parse(Context.Settings.Difficulty),
+                    Context.Settings.WordbookId));
         }
 
         public void Navigate(ScreenId screen)
@@ -341,14 +405,13 @@ namespace WordQuest.Presentation
                 wordbooksTask);
             var status = statusTask.Result;
             var wordbooks = wordbooksTask.Result;
+            var journey = LearningJourneyPlanner.Create(
+                content,
+                status.IsSuccess ? status.Data : null);
             _ = new LevelSelectScreen(
                 view,
                 content,
-                level => StartLevel(
-                    new LevelSelection(
-                        level,
-                        Difficulty.Parse(Context.Settings.Difficulty),
-                        Context.Settings.WordbookId)),
+                StartCurrentLevel,
                 SetDifficulty,
                 status.IsSuccess ? status.Data : null,
                 wordbooks.IsSuccess ? wordbooks.Data : null,
@@ -358,7 +421,8 @@ namespace WordQuest.Presentation
                 {
                     SelectWordbook(wordbookId);
                     ShowLevelSelect();
-                });
+                },
+                journey);
         }
 
         private async void StartLevel(LevelSelection selection)
@@ -512,12 +576,42 @@ namespace WordQuest.Presentation
                     userId,
                     token);
             }
+            var nextLevel = NextLevelAfterResult(
+                content,
+                activeSelection?.Level,
+                result);
+            var nextSelection = nextLevel == null ||
+                                activeSelection == null
+                ? null
+                : new LevelSelection(
+                    nextLevel,
+                    activeSelection.Difficulty,
+                    activeSelection.WordbookId);
             _ = new ResultScreen(
                 view,
                 result,
                 () => StartLevel(activeSelection),
                 () => Navigate(ScreenId.Home),
-                () => Navigate(ScreenId.Reports));
+                () => Navigate(ScreenId.Reports),
+                nextSelection == null
+                    ? null
+                    : () => StartLevel(nextSelection),
+                () => Navigate(ScreenId.LevelSelect));
+        }
+
+        private static LevelDefinition NextLevelAfterResult(
+            ContentCatalog catalog,
+            LevelDefinition current,
+            LevelResult result)
+        {
+            if (result == null ||
+                !result.LevelCompleted ||
+                (!result.ProgressSaved && !result.ProgressPending))
+            {
+                return null;
+            }
+
+            return LearningJourneyPlanner.NextLevel(catalog, current);
         }
 
         private async System.Threading.Tasks.Task

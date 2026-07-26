@@ -40,7 +40,7 @@ namespace WordQuest.Application
             var states = ReadStates(status);
             var reliable =
                 status?.chapters != null &&
-                states.Count == catalog.Levels.Count;
+                HasCompleteCatalogCoverage(catalog, states);
             if (!reliable)
             {
                 return new LearningJourneyPlan(
@@ -75,6 +75,24 @@ namespace WordQuest.Application
                 completed,
                 catalog.Levels.Count,
                 true);
+        }
+
+        private static bool HasCompleteCatalogCoverage(
+            ContentCatalog catalog,
+            IReadOnlyDictionary<
+                (int chapter, int level),
+                (bool unlocked, bool completed)> states)
+        {
+            if (states.Count != catalog.Levels.Count)
+                return false;
+
+            foreach (var level in catalog.Levels)
+            {
+                if (!states.ContainsKey((level.Chapter, level.Id)))
+                    return false;
+            }
+
+            return true;
         }
 
         public static LevelDefinition NextLevel(
