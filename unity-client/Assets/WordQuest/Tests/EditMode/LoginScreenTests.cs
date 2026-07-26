@@ -65,6 +65,34 @@ namespace WordQuest.Tests
             }
         }
 
+        [Test]
+        public async Task Transport_failure_uses_a_learner_friendly_message()
+        {
+            var view = CreateView();
+            view.Q<TextField>("username-field").value = "learner";
+            view.Q<TextField>("password-field").value = "not-a-real-secret";
+
+            using (var screen = CreateScreen(view, new FailedAuthService()))
+            {
+                var method = typeof(LoginScreen).GetMethod(
+                    "AuthenticateAsync",
+                    BindingFlags.Instance | BindingFlags.NonPublic);
+                Assert.That(method, Is.Not.Null);
+
+                await (Task)method.Invoke(screen, new object[] { false });
+
+                Assert.That(
+                    view.Q<Label>("status-label").text,
+                    Is.EqualTo("暂时无法连接学习服务，请稍后重试"));
+                Assert.That(
+                    view.Q<Button>("login-button").enabledSelf,
+                    Is.True);
+                Assert.That(
+                    view.Q<Button>("register-button").enabledSelf,
+                    Is.True);
+            }
+        }
+
         private static LoginScreen CreateScreen(
             VisualElement view,
             IAuthService auth)
@@ -108,6 +136,49 @@ namespace WordQuest.Tests
             {
                 return Task.FromException<ApiResult<AuthDataDto>>(
                     new InvalidOperationException("simulated transport fault"));
+            }
+
+            public Task<ApiResult<UserDto>> GetCurrentUserAsync(
+                CancellationToken cancellationToken)
+            {
+                return Task.FromResult(
+                    ApiResult<UserDto>.Failure(0, "offline"));
+            }
+
+            public Task<ApiResult<ReminderSettingsDto>> UpdateReminderAsync(
+                bool enabled,
+                string time,
+                CancellationToken cancellationToken)
+            {
+                return Task.FromResult(
+                    ApiResult<ReminderSettingsDto>.Failure(0, "offline"));
+            }
+
+            public void SignOut()
+            {
+            }
+        }
+
+        private sealed class FailedAuthService : IAuthService
+        {
+            public Task<ApiResult<AuthDataDto>> LoginAsync(
+                string username,
+                string password,
+                CancellationToken cancellationToken)
+            {
+                return Task.FromResult(
+                    ApiResult<AuthDataDto>.Failure(
+                        0,
+                        "Cannot connect to destination host"));
+            }
+
+            public Task<ApiResult<AuthDataDto>> RegisterAsync(
+                string username,
+                string password,
+                string nickname,
+                CancellationToken cancellationToken)
+            {
+                return LoginAsync(username, password, cancellationToken);
             }
 
             public Task<ApiResult<UserDto>> GetCurrentUserAsync(

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
 using WordQuest.Application;
+using WordQuest.Infrastructure.Api;
 using WordQuest.Infrastructure.Api.Dto;
 using WordQuest.Infrastructure.Api.Services;
 
@@ -94,7 +95,7 @@ namespace WordQuest.Presentation.Screens
 
                 if (!result.IsSuccess)
                 {
-                    status.text = result.Message;
+                    status.text = FailureMessage(result);
                     return;
                 }
 
@@ -117,6 +118,22 @@ namespace WordQuest.Presentation.Screens
                 login.SetEnabled(true);
                 registerButton.SetEnabled(true);
             }
+        }
+
+        private static string FailureMessage(ApiResult<AuthDataDto> result)
+        {
+            if (result.IsCancelled)
+                return "操作已取消";
+            if (result.IsTimedOut ||
+                result.StatusCode == 0 ||
+                result.StatusCode >= 500)
+            {
+                return "暂时无法连接学习服务，请稍后重试";
+            }
+
+            return string.IsNullOrWhiteSpace(result.Message)
+                ? "操作失败，请稍后重试"
+                : result.Message;
         }
     }
 }
