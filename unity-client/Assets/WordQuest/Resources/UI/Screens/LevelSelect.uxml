@@ -1,7 +1,17 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <ui:VisualElement name="level-select-screen" class="screen">
         <ui:Label text="选择你的下一段旅程" class="hero-title" />
-        <ui:Label text="六个章节、180 个关卡；完成前一关会解锁下一关。" class="subtitle" />
+        <ui:Label text="沿推荐路径前进，也可以回到已经完成的关卡巩固。" class="subtitle" />
+        <ui:VisualElement class="journey-summary panel">
+            <ui:VisualElement class="journey-summary-item">
+                <ui:Label text="学习进度" class="eyebrow" />
+                <ui:Label name="level-progress-label" text="学习进度暂不可用" class="journey-summary-value" />
+            </ui:VisualElement>
+            <ui:VisualElement class="journey-summary-item">
+                <ui:Label text="下一步" class="eyebrow" />
+                <ui:Label name="level-recommendation-label" text="推荐路径准备中" class="journey-summary-value" />
+            </ui:VisualElement>
+        </ui:VisualElement>
         <ui:VisualElement class="filter-row panel">
             <ui:DropdownField name="wordbook-field" label="词书" />
             <ui:DropdownField name="difficulty-field" label="难度" />

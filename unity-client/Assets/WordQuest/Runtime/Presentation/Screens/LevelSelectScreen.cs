@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine.UIElements;
+using WordQuest.Application;
 using WordQuest.Content;
 using WordQuest.Infrastructure.Api.Dto;
 
@@ -17,13 +18,15 @@ namespace WordQuest.Presentation.Screens
             IReadOnlyList<WordbookDto> wordbooks = null,
             string currentWordbookId = "cet4",
             string currentDifficulty = "normal",
-            Action<string> wordbookChanged = null)
+            Action<string> wordbookChanged = null,
+            LearningJourneyPlan journey = null)
         {
             if (view == null)
                 throw new ArgumentNullException(nameof(view));
             if (catalog == null)
                 throw new ArgumentNullException(nameof(catalog));
 
+            RenderJourneySummary(view, journey);
             var list = view.Q<ScrollView>("level-list");
             if (list == null)
                 return;
@@ -98,7 +101,10 @@ namespace WordQuest.Presentation.Screens
                     var captured = level;
                     var button = new Button(() => selected?.Invoke(captured))
                     {
-                        text = $"{level.Id}\n{level.Name}"
+                        text = $"{level.Id}\n{level.Name}",
+                        name = $"level-{level.Chapter}-{level.Id}",
+                        tooltip =
+                            $"第 {level.Chapter} 章第 {level.Id} 关，{level.Name}"
                     };
                     button.AddToClassList("level-button");
                     var state = FindStatus(
@@ -108,14 +114,69 @@ namespace WordQuest.Presentation.Screens
                     if (state != null)
                     {
                         var stars = Math.Max(0, Math.Min(3, state.stars));
-                        button.text =
-                            $"{level.Id}\n{level.Name}\n{new string('★', stars)}{new string('☆', 3 - stars)}";
+                        var rating =
+                            $"{new string('★', stars)}{new string('☆', 3 - stars)}";
+                        if (!state.unlocked)
+                        {
+                            button.text =
+                                $"{level.Id}\n{level.Name}\n完成前一关后解锁";
+                            button.tooltip =
+                                $"第 {level.Chapter} 章第 {level.Id} 关，完成前一关后解锁";
+                        }
+                        else if (state.completed)
+                        {
+                            button.text =
+                                $"{level.Id}\n{level.Name}\n{rating} · 已完成";
+                        }
+                        else
+                        {
+                            button.text =
+                                $"{level.Id}\n{level.Name}\n{rating}";
+                        }
                         button.SetEnabled(state.unlocked);
+                    }
+                    if (IsRecommended(journey, level))
+                    {
+                        if (!button.text.Contains("推荐"))
+                            button.text += "\n推荐";
+                        button.AddToClassList("recommended-level");
+                        button.tooltip += "，推荐下一步学习";
                     }
                     row.Add(button);
                 }
                 list.Add(row);
             }
+        }
+
+        private static void RenderJourneySummary(
+            VisualElement view,
+            LearningJourneyPlan journey)
+        {
+            var progress = view.Q<Label>("level-progress-label");
+            var recommendation =
+                view.Q<Label>("level-recommendation-label");
+            if (progress != null)
+            {
+                progress.text = journey?.HasReliableProgress == true
+                    ? $"已完成 {journey.CompletedLevels} / {journey.TotalLevels} 关"
+                    : "学习进度暂不可用";
+            }
+            if (recommendation != null)
+            {
+                var level = journey?.RecommendedLevel;
+                recommendation.text = level == null
+                    ? "推荐路径准备中"
+                    : $"推荐：第 {level.Chapter} 章 · 第 {level.Id} 关";
+            }
+        }
+
+        private static bool IsRecommended(
+            LearningJourneyPlan journey,
+            LevelDefinition level)
+        {
+            return journey?.RecommendedLevel != null &&
+                   journey.RecommendedLevel.Chapter == level.Chapter &&
+                   journey.RecommendedLevel.Id == level.Id;
         }
 
         private static LevelStatusDto FindStatus(

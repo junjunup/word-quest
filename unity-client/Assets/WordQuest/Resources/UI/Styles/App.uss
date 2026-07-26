@@ -304,6 +304,24 @@
     margin-bottom: 16px;
 }
 
+.journey-summary {
+    flex-direction: row;
+    margin-bottom: 12px;
+    padding: 16px 20px;
+    background-color: var(--parchment-50);
+}
+
+.journey-summary-item {
+    min-width: 260px;
+    margin-right: 32px;
+}
+
+.journey-summary-value {
+    color: var(--forest-950);
+    font-size: 17px;
+    -unity-font-style: bold;
+}
+
 .filter-row > * {
     min-width: 220px;
     margin-right: 16px;
@@ -324,13 +342,26 @@
 
 .level-button {
     width: 136px;
-    min-height: 76px;
+    min-height: 92px;
     margin-right: 8px;
     margin-bottom: 8px;
     white-space: normal;
     border-radius: 10px;
     background-color: var(--parchment-50);
     border-color: var(--parchment-300);
+}
+
+.recommended-level {
+    border-width: 3px;
+    border-color: var(--gold);
+    background-color: rgb(255, 245, 210);
+    -unity-font-style: bold;
+}
+
+.level-button:disabled {
+    color: rgb(104, 96, 80);
+    background-color: rgb(225, 217, 196);
+    border-color: rgb(178, 168, 145);
 }
 
 TextField {
