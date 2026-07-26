@@ -75,6 +75,37 @@ for screen in "${screens[@]}"; do
     fail "Invalid UXML: $screen.uxml"
 done
 
+p1_sources=(
+  "Assets/WordQuest/Runtime/Application/LearningJourneyPlanner.cs"
+  "Assets/WordQuest/Tests/EditMode/LearningJourneyPlannerTests.cs"
+  "Assets/WordQuest/Tests/EditMode/HomeScreenTests.cs"
+  "Assets/WordQuest/Tests/EditMode/LevelSelectScreenTests.cs"
+  "Assets/WordQuest/Tests/EditMode/ResultScreenTests.cs"
+)
+
+for source in "${p1_sources[@]}"; do
+  test -f "$project_root/$source" ||
+    fail "Missing P1 learning-loop source: $source"
+done
+
+required_p1_controls=(
+  "Home.uxml|name=\"continue-learning-button\""
+  "Home.uxml|name=\"recommended-level-label\""
+  "LevelSelect.uxml|name=\"level-progress-label\""
+  "LevelSelect.uxml|name=\"level-recommendation-label\""
+  "Result.uxml|name=\"result-primary-button\""
+  "Result.uxml|name=\"result-learning-summary\""
+)
+
+for requirement in "${required_p1_controls[@]}"; do
+  screen="${requirement%%|*}"
+  marker="${requirement#*|}"
+  rg -F "$marker" \
+    "$project_root/Assets/WordQuest/Resources/UI/Screens/$screen" \
+    >/dev/null ||
+    fail "Missing P1 learning-loop control in $screen: $marker"
+done
+
 if rg -n '模拟答对|模拟答错' \
   "$project_root/Assets/WordQuest/Resources/UI/Screens" >/dev/null; then
   fail "Placeholder mode controls remain in runtime screens"

@@ -78,5 +78,49 @@ namespace WordQuest.Tests
 
             Object.Destroy(uiObject);
         }
+
+        [UnityTest]
+        public IEnumerator Learning_loop_primary_controls_are_rendered_and_focusable()
+        {
+            Screen.SetResolution(1280, 720, false);
+            var uiObject = new GameObject("Learning Loop UI");
+            var document = uiObject.AddComponent<UIDocument>();
+            document.panelSettings = Resources.Load<PanelSettings>(
+                "UI/WordQuestPanelSettings");
+            var router = new ScreenRouter(document.rootVisualElement);
+            yield return null;
+
+            var cases = new[]
+            {
+                (ScreenId.Home, "continue-learning-button"),
+                (ScreenId.LevelSelect, "difficulty-field"),
+                (ScreenId.Result, "result-primary-button")
+            };
+            foreach (var item in cases)
+            {
+                var view = router.Show(item.Item1);
+                yield return null;
+
+                var control = view.Q<VisualElement>(item.Item2);
+                Assert.That(
+                    control,
+                    Is.Not.Null,
+                    $"{item.Item1} must expose {item.Item2}.");
+                Assert.That(
+                    control.focusable,
+                    Is.True,
+                    $"{item.Item2} must support keyboard focus.");
+                Assert.That(
+                    control.resolvedStyle.width,
+                    Is.GreaterThan(0f),
+                    $"{item.Item2} must have a visible width at 1280x720.");
+                Assert.That(
+                    control.resolvedStyle.height,
+                    Is.GreaterThan(0f),
+                    $"{item.Item2} must have a visible height at 1280x720.");
+            }
+
+            Object.Destroy(uiObject);
+        }
     }
 }
