@@ -11,7 +11,7 @@
             <ui:VisualElement class="home-task-layout">
                 <ui:VisualElement class="home-task-copy">
                     <ui:Label text="今日主任务" class="eyebrow" />
-                    <ui:Label name="learning-stage-label" text="初中 · 7–9 年级学习路径 · 当前为拓展词书" class="helper-text learning-stage-label" />
+                    <ui:Label name="learning-stage-label" text="初中 · 7–9 年级学习路径 · 词书匹配请在关卡地图确认" class="helper-text learning-stage-label" />
                     <ui:Label name="recommended-level-label" text="第 1 章 · 第 1 关" class="task-title" />
                     <ui:Label name="recommended-meta-label" text="学习内容准备中" class="task-meta" />
                     <ui:Label name="journey-progress-label" text="学习进度暂不可用" class="journey-progress-label" />

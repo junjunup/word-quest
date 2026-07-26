@@ -93,12 +93,12 @@ namespace WordQuest.Tests
         }
 
         [Test]
-        public void Path_description_is_honest_for_existing_exam_content()
+        public void Path_description_defers_fit_without_wordbook_metadata()
         {
             Assert.That(
-                LearnerStageCatalog.DescribePath("junior", "cet4"),
+                LearnerStageCatalog.DescribePath("junior"),
                 Is.EqualTo(
-                    "初中 · 7–9 年级学习路径 · 当前为拓展词书"));
+                    "初中 · 7–9 年级学习路径 · 词书匹配请在关卡地图确认"));
         }
     }
 }

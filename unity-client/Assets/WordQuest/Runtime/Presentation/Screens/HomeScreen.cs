@@ -52,8 +52,7 @@ namespace WordQuest.Presentation.Screens
             if (learningStage != null)
             {
                 learningStage.text = LearnerStageCatalog.DescribePath(
-                    context.Settings.LearnerStageId,
-                    context.Settings.WordbookId);
+                    context.Settings.LearnerStageId);
             }
 
             foreach (var button in view.Query<Button>(

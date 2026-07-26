@@ -96,18 +96,11 @@ namespace WordQuest.Application
             return new WordbookCompatibility(compatible);
         }
 
-        public static string DescribePath(
-            string learnerStageId,
-            string wordbookId)
+        public static string DescribePath(string learnerStageId)
         {
             var stage = Resolve(learnerStageId);
-            var fit = Evaluate(
-                stage.Id,
-                new WordbookDto { wordbookId = wordbookId });
-            var content = fit.IsCompatible
-                ? "当前词书适合本学段"
-                : "当前为拓展词书";
-            return $"{stage.DisplayName} · {stage.GradeRange}学习路径 · {content}";
+            return $"{stage.DisplayName} · {stage.GradeRange}学习路径 · " +
+                   "词书匹配请在关卡地图确认";
         }
 
         private static LearnerStageDefinition FindKnown(string stageId)

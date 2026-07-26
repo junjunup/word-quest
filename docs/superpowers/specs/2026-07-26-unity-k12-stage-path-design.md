@@ -87,12 +87,14 @@ It therefore survives relaunch but can be changed without an account mutation.
 
 Add a compact stage label to the primary task card:
 
-`初中 · 7–9 年级学习路径 · 当前为拓展词书`
+`初中 · 7–9 年级学习路径 · 词书匹配请在关卡地图确认`
 
-The message uses only the saved stage and selected wordbook id, so it is
-available before network responses arrive. The existing direct-start,
-recommendation, progress, rewards, and feature navigation behavior does not
-change.
+The message uses only the saved stage, so it is available before network
+responses arrive. Home must not infer compatibility from an id because it does
+not hold the API's authoritative wordbook metadata. Compatibility is disclosed
+on Level Select after the full `WordbookDto` is available. The existing
+direct-start, recommendation, progress, rewards, and feature navigation
+behavior does not change.
 
 ### Level Select
 

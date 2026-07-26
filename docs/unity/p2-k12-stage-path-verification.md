@@ -43,6 +43,18 @@ Results:
 - macOS deterministic Player smoke test, signing, privacy keys, audio-input
   entitlement, and artifact validation: passed.
 
+## Independent review
+
+The review found one Important inconsistency: Home originally inferred
+wordbook fit from the id while Level Select correctly gave explicit API
+`stageId` metadata priority. A conflicting id/metadata pair could therefore
+produce opposite labels.
+
+Home now makes no compatibility claim without full wordbook metadata and
+directs learners to Level Select for confirmation. The fix was developed with
+a failing regression test and the 154/154 EditMode suite passed afterward. No
+other Critical or Important findings were reported.
+
 ## Remaining K12 work
 
 - Author or import real grade-banded wordbooks with provenance and curriculum

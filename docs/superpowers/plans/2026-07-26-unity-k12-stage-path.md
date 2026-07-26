@@ -409,3 +409,11 @@ Ask a reviewer to inspect the full P2 diff for:
 
 Address every Critical or Important finding with a fresh RED/GREEN test cycle,
 then repeat complete verification.
+
+## Post-review adjustment
+
+The independent review found that Home cannot safely infer compatibility from
+`wordbookId` alone because explicit API `stageId` metadata has higher
+authority. The final implementation therefore uses `DescribePath(string)` and
+shows a neutral Home prompt to confirm wordbook fit on Level Select. Only Level
+Select, which has the full `WordbookDto`, emits compatible/extension labels.

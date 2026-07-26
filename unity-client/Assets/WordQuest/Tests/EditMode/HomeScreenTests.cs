@@ -80,11 +80,11 @@ namespace WordQuest.Tests
         }
 
         [Test]
-        public void Home_discloses_stage_and_extension_content()
+        public void Home_does_not_infer_fit_without_wordbook_metadata()
         {
             var context = SignedInContext();
             context.Settings.LearnerStageId = "primary";
-            context.Settings.WordbookId = "cet4";
+            context.Settings.WordbookId = "k12-primary-core";
             var view = CreateView();
 
             _ = new HomeScreen(
@@ -98,7 +98,7 @@ namespace WordQuest.Tests
             Assert.That(
                 view.Q<Label>("learning-stage-label").text,
                 Is.EqualTo(
-                    "小学 · 1–6 年级学习路径 · 当前为拓展词书"));
+                    "小学 · 1–6 年级学习路径 · 词书匹配请在关卡地图确认"));
         }
 
         private static Button FindFeature(
