@@ -214,6 +214,16 @@ TextField > TextInput {
     border-radius: 8px;
 }
 
+TextField:focus {
+    border-width: 5px;
+    border-color: var(--gold);
+}
+
+Button:focus {
+    border-width: 5px;
+    border-color: var(--gold);
+}
+
 .game-screen {
     flex-grow: 1;
     background-color: rgba(0, 0, 0, 0);

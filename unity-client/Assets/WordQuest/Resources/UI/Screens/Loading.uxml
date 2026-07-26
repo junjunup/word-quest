@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="loading-screen" class="screen centered-screen">
+        <ui:VisualElement class="auth-card panel">
+            <ui:Label text="WORD QUEST" class="hero-title" />
+            <ui:Label text="知识大陆正在苏醒" class="subtitle" />
+            <ui:Label name="status-label" text="正在准备你的学习冒险…" class="loading-status" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -13,6 +13,7 @@ version_file="$project_root/ProjectSettings/ProjectVersion.txt"
 manifest_file="$project_root/Packages/manifest.json"
 scene_file="$project_root/Assets/WordQuest/Scenes/Bootstrap.unity"
 panel_settings_file="$project_root/Assets/WordQuest/Resources/UI/WordQuestPanelSettings.asset"
+tag_manager_file="$project_root/ProjectSettings/TagManager.asset"
 domain_asmdef="$project_root/Assets/WordQuest/Domain/WordQuest.Domain.asmdef"
 runtime_asmdef="$project_root/Assets/WordQuest/Runtime/WordQuest.Runtime.asmdef"
 parity_file="$repo_root/docs/unity/feature-parity.md"
@@ -29,6 +30,9 @@ rg -F 'm_ICUDataAsset: {fileID: 20204' "$panel_settings_file" >/dev/null ||
 test -f "$domain_asmdef" || fail "Missing WordQuest.Domain.asmdef"
 test -f "$runtime_asmdef" || fail "Missing WordQuest.Runtime.asmdef"
 test -f "$parity_file" || fail "Missing docs/unity/feature-parity.md"
+if rg -n '^  - *$' "$tag_manager_file" >/dev/null; then
+  fail "TagManager has empty layer entries Unity 6 cannot parse"
+fi
 
 tracked_generated="$(
   git -C "$repo_root" ls-files 'unity-client/Library/**' 'unity-client/Temp/**' \
@@ -42,6 +46,7 @@ if rg -n 'using UnityEngine|UnityEngine\.' "$project_root/Assets/WordQuest/Domai
 fi
 
 screens=(
+  Loading
   Login
   Home
   LevelSelect

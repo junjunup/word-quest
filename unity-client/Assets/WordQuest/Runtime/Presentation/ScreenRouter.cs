@@ -6,6 +6,7 @@ namespace WordQuest.Presentation
 {
     public enum ScreenId
     {
+        Loading,
         Login,
         Home,
         LevelSelect,
@@ -35,6 +36,7 @@ namespace WordQuest.Presentation
             this.root = root ?? throw new ArgumentNullException(nameof(root));
             BuildShell();
             content = root.Q<VisualElement>("screen-content");
+            Show(ScreenId.Loading);
         }
 
         public ScreenId Current { get; private set; }
@@ -53,7 +55,9 @@ namespace WordQuest.Presentation
             content.Add(view);
             var navigation = root.Q<VisualElement>("navigation");
             navigation.style.display =
-                screen == ScreenId.Login || screen == ScreenId.Game
+                screen == ScreenId.Loading ||
+                screen == ScreenId.Login ||
+                screen == ScreenId.Game
                     ? DisplayStyle.None
                     : DisplayStyle.Flex;
             return view;

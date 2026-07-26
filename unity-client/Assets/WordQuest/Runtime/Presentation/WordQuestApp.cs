@@ -186,20 +186,39 @@ namespace WordQuest.Presentation
 
         private async System.Threading.Tasks.Task RestoreSessionAsync()
         {
-            var result = await Auth.GetCurrentUserAsync(lifetime.Token);
-            if (result.IsSuccess)
+            try
             {
-                Context.SignIn(MapUser(result.Data));
-                BeginSession();
-                StateMachine.TryTransition(AppState.Home);
-                ShowHome();
-                return;
-            }
+                var result = await Auth.GetCurrentUserAsync(lifetime.Token);
+                if (result.IsSuccess)
+                {
+                    Context.SignIn(MapUser(result.Data));
+                    BeginSession();
+                    StateMachine.TryTransition(AppState.Home);
+                    ShowHome();
+                    return;
+                }
 
-            ShowAuthentication();
+                ShowAuthentication(
+                    result.IsUnauthorized
+                        ? "登录状态已失效，请重新登录"
+                        : "暂时无法连接学习服务，请稍后重试");
+            }
+            catch (OperationCanceledException)
+                when (lifetime.IsCancellationRequested)
+            {
+                // App teardown owns this cancellation.
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning(
+                    "Session restoration failed (" +
+                    $"{exception.GetType().Name}).");
+                ShowAuthentication(
+                    "暂时无法连接学习服务，请稍后重试");
+            }
         }
 
-        private void ShowAuthentication()
+        private void ShowAuthentication(string statusMessage = null)
         {
             EndSession();
             CleanupGameplay();
@@ -218,6 +237,8 @@ namespace WordQuest.Presentation
                     StateMachine.TryTransition(AppState.Home);
                     ShowHome();
                 });
+            if (!string.IsNullOrWhiteSpace(statusMessage))
+                view.Q<Label>("status-label").text = statusMessage;
         }
 
         private void ShowHome()

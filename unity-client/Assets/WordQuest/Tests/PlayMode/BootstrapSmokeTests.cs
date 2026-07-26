@@ -34,6 +34,45 @@ namespace WordQuest.Tests
             Assert.That(
                 Object.FindAnyObjectByType<AudioListener>(),
                 Is.Not.Null);
+            var content = ui
+                .GetComponent<UIDocument>()
+                .rootVisualElement
+                .Q<VisualElement>("screen-content");
+            Assert.That(content, Is.Not.Null);
+            Assert.That(
+                content.childCount,
+                Is.GreaterThan(0),
+                "Bootstrap must never expose an empty application shell.");
+        }
+
+        [UnityTest]
+        public IEnumerator Login_keyboard_focus_has_a_visible_ring()
+        {
+            var uiObject = new GameObject("Focus Test UI");
+            var document = uiObject.AddComponent<UIDocument>();
+            document.panelSettings = Resources.Load<PanelSettings>(
+                "UI/WordQuestPanelSettings");
+            var router = new ScreenRouter(document.rootVisualElement);
+            var view = router.Show(ScreenId.Login);
+            yield return null;
+
+            var username = view.Q<TextField>("username-field");
+            Assert.That(username, Is.Not.Null);
+            username.Focus();
+            yield return null;
+
+            var input = username.panel.focusController.focusedElement
+                as VisualElement;
+            Assert.That(input, Is.Not.Null);
+            Assert.That(
+                username.Contains(input) || ReferenceEquals(username, input),
+                Is.True);
+            Assert.That(
+                input.resolvedStyle.borderTopWidth,
+                Is.GreaterThanOrEqualTo(3f),
+                "Keyboard focus must have a persistent visible border.");
+
+            Object.Destroy(uiObject);
         }
     }
 }
