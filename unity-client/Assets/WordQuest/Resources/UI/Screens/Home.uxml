@@ -1,27 +1,48 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <ui:VisualElement name="home-screen" class="screen">
-        <ui:VisualElement class="hero panel">
-            <ui:Label name="greeting-label" text="欢迎回来，冒险者" class="hero-title" />
-            <ui:Label text="今天也从一个单词开始，继续你的知识大陆旅程。" class="subtitle" />
-            <ui:VisualElement class="progress-row">
-                <ui:Label text="今日目标" class="eyebrow" />
-                <ui:ProgressBar name="daily-progress" title="0 / 20 个单词" value="0" high-value="20" />
+        <ui:VisualElement class="home-hero panel">
+            <ui:VisualElement class="home-hero-heading">
+                <ui:VisualElement class="home-hero-copy">
+                    <ui:Label name="greeting-label" text="欢迎回来，小冒险家" class="hero-title" />
+                    <ui:Label text="今天只做一件事：完成下一段学习旅程。" class="subtitle home-subtitle" />
+                </ui:VisualElement>
+                <ui:Label name="streak-label" text="今天是新旅程的第 1 天" class="streak-badge" />
+            </ui:VisualElement>
+            <ui:VisualElement class="home-task-layout">
+                <ui:VisualElement class="home-task-copy">
+                    <ui:Label text="今日主任务" class="eyebrow" />
+                    <ui:Label name="recommended-level-label" text="第 1 章 · 第 1 关" class="task-title" />
+                    <ui:Label name="recommended-meta-label" text="学习内容准备中" class="task-meta" />
+                    <ui:Label name="journey-progress-label" text="学习进度暂不可用" class="journey-progress-label" />
+                    <ui:Button name="continue-learning-button" text="继续学习" class="primary-button continue-learning-button" />
+                </ui:VisualElement>
+                <ui:VisualElement class="daily-goal-card">
+                    <ui:Label text="今日目标" class="eyebrow" />
+                    <ui:ProgressBar name="daily-progress" title="0 / 20 个单词" value="0" high-value="20" />
+                    <ui:Label name="daily-progress-label" text="从第一个单词开始吧" class="helper-text" />
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
-        <ui:VisualElement class="feature-grid">
-            <ui:Button text="开始冒险&#10;章节地图与关卡" view-data-key="LevelSelect" class="feature-button primary-tile" />
-            <ui:Button text="今日复习&#10;强化薄弱词汇" view-data-key="Review" class="feature-button" />
-            <ui:Button text="每日挑战&#10;固定题组与排行" view-data-key="DailyChallenge" class="feature-button" />
-            <ui:Button text="无尽试炼&#10;挑战连续答对" view-data-key="Endless" class="feature-button" />
-            <ui:Button text="学习报告&#10;掌握度与错因" view-data-key="Reports" class="feature-button" />
-            <ui:Button text="词库管理&#10;切换与导入词书" view-data-key="Vocabulary" class="feature-button" />
-            <ui:Button text="好友与 PK&#10;异步公平挑战" view-data-key="Social" class="feature-button" />
-            <ui:Button text="AI 学习导师&#10;获得上下文提示" view-data-key="AiTutor" class="feature-button" />
+        <ui:Label text="今天还可以" class="section-title home-section-title" />
+        <ui:VisualElement class="feature-grid learning-action-grid">
+            <ui:Button text="复习薄弱词&#10;用短练习巩固错词" view-data-key="Review" class="feature-button learning-action-button" />
+            <ui:Button text="参加每日挑战&#10;完成固定题组并看排名" view-data-key="DailyChallenge" class="feature-button learning-action-button" />
+            <ui:VisualElement class="reward-card panel">
+                <ui:Label text="每日学习奖励" class="eyebrow" />
+                <ui:Label text="保持连续学习，积累成长经验。" class="helper-text" />
+                <ui:Button name="daily-reward-button" text="领取奖励" class="secondary-button reward-button" />
+                <ui:Label name="reward-status-label" text="" class="status-label compact-status" />
+            </ui:VisualElement>
         </ui:VisualElement>
-        <ui:VisualElement class="action-row">
-            <ui:Button name="daily-reward-button" text="领取每日学习奖励" class="secondary-button" />
-            <ui:Button text="角色与个人资料" view-data-key="Profile" class="feature-button ghost-button" />
+        <ui:Label text="更多学习工具" class="section-title home-section-title" />
+        <ui:VisualElement class="feature-grid tool-grid">
+            <ui:Button text="关卡地图&#10;浏览全部章节" view-data-key="LevelSelect" class="feature-button tool-button" />
+            <ui:Button text="无尽试炼&#10;挑战连续答对" view-data-key="Endless" class="feature-button tool-button" />
+            <ui:Button text="学习报告&#10;查看掌握与错因" view-data-key="Reports" class="feature-button tool-button" />
+            <ui:Button text="词库管理&#10;切换学习范围" view-data-key="Vocabulary" class="feature-button tool-button" />
+            <ui:Button text="好友与 PK&#10;一起完成挑战" view-data-key="Social" class="feature-button tool-button" />
+            <ui:Button text="AI 学习导师&#10;获得学习提示" view-data-key="AiTutor" class="feature-button tool-button" />
+            <ui:Button text="角色与资料&#10;调整学习设置" view-data-key="Profile" class="feature-button tool-button" />
         </ui:VisualElement>
-        <ui:Label name="reward-status-label" text="" class="status-label" />
     </ui:VisualElement>
 </ui:UXML>

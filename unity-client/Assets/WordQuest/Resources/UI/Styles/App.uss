@@ -71,6 +71,137 @@
     margin-bottom: 20px;
 }
 
+.home-hero {
+    margin-bottom: 12px;
+    border-color: var(--forest-500);
+}
+
+.home-hero-heading,
+.home-task-layout {
+    flex-direction: row;
+}
+
+.home-hero-heading {
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.home-hero-copy,
+.home-task-copy {
+    flex-grow: 1;
+}
+
+.home-subtitle {
+    margin-bottom: 12px;
+}
+
+.streak-badge {
+    min-width: 172px;
+    min-height: 36px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background-color: var(--parchment-100);
+    color: var(--forest-800);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.home-task-layout {
+    align-items: stretch;
+}
+
+.home-task-copy {
+    padding-right: 24px;
+}
+
+.task-title {
+    font-size: 26px;
+    -unity-font-style: bold;
+    color: var(--forest-950);
+    margin-bottom: 4px;
+}
+
+.task-meta,
+.journey-progress-label,
+.helper-text {
+    color: rgb(92, 79, 55);
+    white-space: normal;
+}
+
+.task-meta {
+    font-size: 15px;
+    margin-bottom: 8px;
+}
+
+.journey-progress-label {
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.continue-learning-button {
+    width: 230px;
+    min-height: 52px;
+}
+
+.daily-goal-card {
+    width: 300px;
+    min-height: 132px;
+    padding: 16px;
+    border-left-width: 2px;
+    border-left-color: var(--parchment-300);
+}
+
+.daily-goal-card ProgressBar {
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.home-section-title {
+    margin-top: 14px;
+    font-size: 19px;
+}
+
+.learning-action-grid {
+    align-items: stretch;
+}
+
+.learning-action-button,
+.reward-card {
+    width: 260px;
+    min-height: 116px;
+}
+
+.reward-card {
+    margin-right: 12px;
+    margin-bottom: 12px;
+    padding: 16px;
+}
+
+.reward-button {
+    min-height: 40px;
+    margin-top: 8px;
+}
+
+.compact-status {
+    min-height: 18px;
+    margin-top: 4px;
+}
+
+.success-status {
+    color: var(--success);
+}
+
+.error-status {
+    color: var(--error);
+}
+
+.tool-grid .feature-button {
+    width: 190px;
+    min-height: 74px;
+    padding: 12px;
+    font-size: 14px;
+}
+
 .hero-title {
     font-size: 32px;
     -unity-font-style: bold;
