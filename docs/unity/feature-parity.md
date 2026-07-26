@@ -8,17 +8,21 @@ passed.
 ## Verification run
 
 - Unity `6000.5.3f1` (changeset `c2eb47b3a2a9`) imported and compiled the project.
-- EditMode: 102/102 passed.
-- PlayMode: 4/4 passed, including Bootstrap, UI theme, world, and audio-listener smoke checks.
+- EditMode: 109/109 passed, including API routing, password masking,
+  authentication recovery, and non-empty startup-shell checks.
+- PlayMode: 5/5 passed, including Bootstrap, UI theme, visible keyboard focus,
+  world, and audio-listener smoke checks.
 - Windows Player: PE32+ x86-64 artifact validated.
 - macOS Player: Universal x86_64/arm64 app and speech bridge validated; privacy plist, audio-input entitlement, nested signatures, ICU data, and deterministic UI bootstrap passed.
+- macOS visible-window pass: password masking, gold focus ring, non-empty login
+  shell, localized offline recovery, and re-enabled login action passed.
 - Reproduce with `unity-client/Tools/run-unity-tests.sh`, `unity-client/Tools/build-players.sh`, and `unity-client/Tools/validate-build-artifacts.sh`.
 
 | Legacy feature | Legacy source | Unity implementation | Automated evidence | Manual evidence | Status |
 |---|---|---|---|---|---|
-| Authentication and stored session | `client/src/views/HomeView.vue`, `client/src/stores/user.js` | `unity-client/Assets/WordQuest/Runtime/Presentation/Screens/LoginScreen.cs` | `unity-client/Assets/WordQuest/Tests/PlayMode/BootstrapSmokeTests.cs` | Unity 6000.5.3f1 desktop pass pending | implemented-unverified |
+| Authentication and stored session | `client/src/views/HomeView.vue`, `client/src/stores/user.js` | `unity-client/Assets/WordQuest/Runtime/Presentation/Screens/LoginScreen.cs` | `unity-client/Assets/WordQuest/Tests/EditMode/LoginScreenTests.cs`, `unity-client/Assets/WordQuest/Tests/PlayMode/BootstrapSmokeTests.cs` | macOS password masking, focus, and offline recovery passed; online sign-in/session restore and Windows UI pass pending | implemented-unverified |
 | App navigation and protected features | `client/src/router/index.js` | `unity-client/Assets/WordQuest/Runtime/Application/AppStateMachine.cs` | `unity-client/Assets/WordQuest/Tests/EditMode/AppStateMachineTests.cs` | Unity 6000.5.3f1 desktop pass pending | implemented-unverified |
-| Desktop UI shell and responsive scaling | `client/src/App.vue`, `client/src/styles/global.scss` | `unity-client/Assets/WordQuest/Runtime/Presentation/ScreenRouter.cs` | `unity-client/Tools/validate-project.sh` | Windows/macOS layout pass pending | implemented-unverified |
+| Desktop UI shell and responsive scaling | `client/src/App.vue`, `client/src/styles/global.scss` | `unity-client/Assets/WordQuest/Runtime/Presentation/ScreenRouter.cs` | `unity-client/Assets/WordQuest/Tests/EditMode/ScreenRouterTests.cs`, `unity-client/Assets/WordQuest/Tests/PlayMode/BootstrapSmokeTests.cs`, `unity-client/Tools/validate-project.sh` | macOS non-empty startup shell and login layout passed; Windows layout pass pending | implemented-unverified |
 | Home dashboard | `client/src/views/DashboardView.vue` | `unity-client/Assets/WordQuest/Runtime/Presentation/Screens/HomeScreen.cs` | `unity-client/Tools/validate-project.sh` | Unity 6000.5.3f1 desktop pass pending | implemented-unverified |
 | Chapter/level selection and locks | `client/src/components/LevelSelect.vue` | `unity-client/Assets/WordQuest/Runtime/Presentation/Screens/LevelSelectScreen.cs` | `unity-client/Assets/WordQuest/Tests/EditMode/ContentCatalogTests.cs` | Staging progress pass pending | implemented-unverified |
 | Six chapters and 180 CET-4 levels | `client/src/game/data/levels.json` | `unity-client/Assets/WordQuest/Runtime/Content/ContentCatalog.cs` | `unity-client/Assets/WordQuest/Tests/EditMode/ContentCatalogTests.cs` | Content sampling pending | implemented-unverified |
