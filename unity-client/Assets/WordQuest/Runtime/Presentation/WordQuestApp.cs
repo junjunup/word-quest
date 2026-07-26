@@ -364,7 +364,7 @@ namespace WordQuest.Presentation
             if (screen == ScreenId.Home)
                 ShowHome();
             else if (screen == ScreenId.LevelSelect)
-                ShowLevelSelect();
+                _ = ShowLevelSelect();
             else if (screen == ScreenId.Character)
                 ShowCharacter();
             else if (screen == ScreenId.Endless)
@@ -393,36 +393,107 @@ namespace WordQuest.Presentation
                 router.Show(screen);
         }
 
-        private async void ShowLevelSelect()
+        private async System.Threading.Tasks.Task ShowLevelSelect()
         {
             var view = router.Show(ScreenId.LevelSelect);
-            var statusTask = Game.GetLevelsStatusAsync(
-                Context.Settings.WordbookId,
-                SessionToken);
-            var wordbooksTask = Vocabulary.GetWordbooksAsync(SessionToken);
-            await System.Threading.Tasks.Task.WhenAll(
-                statusTask,
-                wordbooksTask);
-            var status = statusTask.Result;
-            var wordbooks = wordbooksTask.Result;
-            var journey = LearningJourneyPlanner.Create(
-                content,
-                status.IsSuccess ? status.Data : null);
+            var token = SessionToken;
+            var currentWordbookId = Context.Settings.WordbookId;
+            var currentDifficulty = Context.Settings.Difficulty;
+            try
+            {
+                var statusTask = Game.GetLevelsStatusAsync(
+                    currentWordbookId,
+                    token);
+                var wordbooksTask =
+                    Vocabulary.GetWordbooksAsync(token);
+                await System.Threading.Tasks.Task.WhenAll(
+                    statusTask,
+                    wordbooksTask);
+                if (!ShouldApplyLevelSelect(
+                        view,
+                        router.CurrentView,
+                        router.Current,
+                        token.IsCancellationRequested))
+                {
+                    return;
+                }
+
+                var status = statusTask.Result;
+                var wordbooks = wordbooksTask.Result;
+                var journey = LearningJourneyPlanner.Create(
+                    content,
+                    status.IsSuccess ? status.Data : null);
+                RenderLevelSelect(
+                    view,
+                    status.IsSuccess ? status.Data : null,
+                    wordbooks.IsSuccess ? wordbooks.Data : null,
+                    currentWordbookId,
+                    currentDifficulty,
+                    journey);
+            }
+            catch (OperationCanceledException)
+                when (token.IsCancellationRequested)
+            {
+                // Navigation or logout owns this cancellation.
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning(
+                    "Level selection refresh failed (" +
+                    $"{exception.GetType().Name}).");
+                if (!ShouldApplyLevelSelect(
+                        view,
+                        router.CurrentView,
+                        router.Current,
+                        token.IsCancellationRequested))
+                {
+                    return;
+                }
+
+                RenderLevelSelect(
+                    view,
+                    null,
+                    null,
+                    currentWordbookId,
+                    currentDifficulty,
+                    LearningJourneyPlanner.Create(content, null));
+            }
+        }
+
+        private void RenderLevelSelect(
+            VisualElement view,
+            LevelsStatusDto status,
+            IReadOnlyList<WordbookDto> wordbooks,
+            string currentWordbookId,
+            string currentDifficulty,
+            LearningJourneyPlan journey)
+        {
             _ = new LevelSelectScreen(
                 view,
                 content,
                 StartCurrentLevel,
                 SetDifficulty,
-                status.IsSuccess ? status.Data : null,
-                wordbooks.IsSuccess ? wordbooks.Data : null,
-                Context.Settings.WordbookId,
-                Context.Settings.Difficulty,
+                status,
+                wordbooks,
+                currentWordbookId,
+                currentDifficulty,
                 wordbookId =>
                 {
                     SelectWordbook(wordbookId);
-                    ShowLevelSelect();
+                    _ = ShowLevelSelect();
                 },
                 journey);
+        }
+
+        private static bool ShouldApplyLevelSelect(
+            VisualElement requestedView,
+            VisualElement currentView,
+            ScreenId currentScreen,
+            bool cancelled)
+        {
+            return !cancelled &&
+                   currentScreen == ScreenId.LevelSelect &&
+                   ReferenceEquals(requestedView, currentView);
         }
 
         private async void StartLevel(LevelSelection selection)

@@ -27,6 +27,9 @@ namespace WordQuest.Presentation.Screens
                 throw new ArgumentNullException(nameof(catalog));
 
             RenderJourneySummary(view, journey);
+            var reliableStatus = journey?.HasReliableProgress == true
+                ? status
+                : null;
             var list = view.Q<ScrollView>("level-list");
             if (list == null)
                 return;
@@ -108,7 +111,7 @@ namespace WordQuest.Presentation.Screens
                     };
                     button.AddToClassList("level-button");
                     var state = FindStatus(
-                        status,
+                        reliableStatus,
                         level.Chapter,
                         level.Id);
                     if (state != null)

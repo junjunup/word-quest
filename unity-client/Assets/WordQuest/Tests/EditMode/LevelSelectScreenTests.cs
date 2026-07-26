@@ -62,6 +62,55 @@ namespace WordQuest.Tests
                 Does.Contain("暂不可用"));
         }
 
+        [Test]
+        public void Partial_status_is_not_used_to_lock_the_fallback_journey()
+        {
+            var catalog = CreateCatalog();
+            var status = new LevelsStatusDto
+            {
+                chapters = new[]
+                {
+                    new ChapterStatusDto
+                    {
+                        id = 1,
+                        unlocked = false,
+                        levels = new[]
+                        {
+                            new LevelStatusDto
+                            {
+                                id = 1,
+                                unlocked = false,
+                                completed = false
+                            }
+                        }
+                    }
+                }
+            };
+            var journey = LearningJourneyPlanner.Create(catalog, status);
+            var view = CreateView();
+
+            _ = new LevelSelectScreen(
+                view,
+                catalog,
+                null,
+                status: status,
+                journey: journey);
+
+            Assert.That(journey.HasReliableProgress, Is.False);
+            Assert.That(
+                view.Q<Label>("level-progress-label").text,
+                Does.Contain("暂不可用"));
+            Assert.That(
+                view.Q<Button>("level-1-1").text,
+                Does.Contain("推荐"));
+            Assert.That(
+                view.Q<Button>("level-1-1").enabledSelf,
+                Is.True);
+            Assert.That(
+                view.Q<Button>("level-1-1").text,
+                Does.Not.Contain("完成前一关后解锁"));
+        }
+
         private static VisualElement CreateView()
         {
             var asset =

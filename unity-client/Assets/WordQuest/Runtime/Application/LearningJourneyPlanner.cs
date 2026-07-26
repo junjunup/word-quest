@@ -51,12 +51,16 @@ namespace WordQuest.Application
             }
 
             var completed = 0;
+            foreach (var level in catalog.Levels)
+            {
+                if (states[(level.Chapter, level.Id)].completed)
+                    completed++;
+            }
+
             LevelDefinition lastUnlocked = null;
             foreach (var level in catalog.Levels)
             {
                 var state = states[(level.Chapter, level.Id)];
-                if (state.completed)
-                    completed++;
                 if (!state.unlocked)
                     continue;
                 lastUnlocked = level;
@@ -71,7 +75,7 @@ namespace WordQuest.Application
             }
 
             return new LearningJourneyPlan(
-                lastUnlocked ?? fallback,
+                lastUnlocked,
                 completed,
                 catalog.Levels.Count,
                 true);

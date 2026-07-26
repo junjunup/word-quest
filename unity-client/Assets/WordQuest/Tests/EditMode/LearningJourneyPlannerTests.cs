@@ -110,6 +110,84 @@ namespace WordQuest.Tests
         }
 
         [Test]
+        public void Plan_with_reliable_all_locked_status_has_no_direct_start()
+        {
+            var status = new LevelsStatusDto
+            {
+                chapters = new[]
+                {
+                    new ChapterStatusDto
+                    {
+                        id = 1,
+                        unlocked = false,
+                        levels = new[]
+                        {
+                            Level(1, false, false),
+                            Level(2, false, false)
+                        }
+                    },
+                    new ChapterStatusDto
+                    {
+                        id = 2,
+                        unlocked = false,
+                        levels = new[]
+                        {
+                            Level(1, false, false),
+                            Level(2, false, false)
+                        }
+                    }
+                }
+            };
+
+            var plan = LearningJourneyPlanner.Create(
+                CreateCatalog(),
+                status);
+
+            Assert.That(plan.RecommendedLevel, Is.Null);
+            Assert.That(plan.CompletedLevels, Is.EqualTo(0));
+            Assert.That(plan.HasReliableProgress, Is.True);
+        }
+
+        [Test]
+        public void Plan_counts_completed_levels_after_the_recommendation()
+        {
+            var status = new LevelsStatusDto
+            {
+                chapters = new[]
+                {
+                    new ChapterStatusDto
+                    {
+                        id = 1,
+                        unlocked = true,
+                        levels = new[]
+                        {
+                            Level(1, true, false),
+                            Level(2, true, true)
+                        }
+                    },
+                    new ChapterStatusDto
+                    {
+                        id = 2,
+                        unlocked = false,
+                        levels = new[]
+                        {
+                            Level(1, false, false),
+                            Level(2, false, false)
+                        }
+                    }
+                }
+            };
+
+            var plan = LearningJourneyPlanner.Create(
+                CreateCatalog(),
+                status);
+
+            Assert.That(plan.RecommendedLevel.Chapter, Is.EqualTo(1));
+            Assert.That(plan.RecommendedLevel.Id, Is.EqualTo(1));
+            Assert.That(plan.CompletedLevels, Is.EqualTo(1));
+        }
+
+        [Test]
         public void Plan_with_all_unlocked_levels_complete_recommends_last_one()
         {
             var catalog = CreateCatalog();

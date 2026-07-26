@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using UnityEngine.UIElements;
 using WordQuest.Content;
@@ -88,6 +89,68 @@ namespace WordQuest.Tests
                         requested,
                         ScreenId.LevelSelect,
                         false
+                    }),
+                Is.False);
+        }
+
+        [Test]
+        public void Level_select_loading_is_task_based_and_current_view_scoped()
+        {
+            var load = typeof(WordQuestApp).GetMethod(
+                "ShowLevelSelect",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(load, Is.Not.Null);
+            Assert.That(load.ReturnType, Is.EqualTo(typeof(Task)));
+
+            var guard = typeof(WordQuestApp).GetMethod(
+                "ShouldApplyLevelSelect",
+                BindingFlags.Static | BindingFlags.NonPublic);
+            Assert.That(guard, Is.Not.Null);
+            var requested = new VisualElement();
+            var other = new VisualElement();
+
+            Assert.That(
+                guard.Invoke(
+                    null,
+                    new object[]
+                    {
+                        requested,
+                        requested,
+                        ScreenId.LevelSelect,
+                        false
+                    }),
+                Is.True);
+            Assert.That(
+                guard.Invoke(
+                    null,
+                    new object[]
+                    {
+                        requested,
+                        other,
+                        ScreenId.LevelSelect,
+                        false
+                    }),
+                Is.False);
+            Assert.That(
+                guard.Invoke(
+                    null,
+                    new object[]
+                    {
+                        requested,
+                        requested,
+                        ScreenId.Home,
+                        false
+                    }),
+                Is.False);
+            Assert.That(
+                guard.Invoke(
+                    null,
+                    new object[]
+                    {
+                        requested,
+                        requested,
+                        ScreenId.LevelSelect,
+                        true
                     }),
                 Is.False);
         }
