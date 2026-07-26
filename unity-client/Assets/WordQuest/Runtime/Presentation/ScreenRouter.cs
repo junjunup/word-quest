@@ -52,6 +52,10 @@ namespace WordQuest.Presentation
 
             Current = screen;
             CurrentView = view;
+            if (screen == ScreenId.Game)
+                root.AddToClassList("game-active");
+            else
+                root.RemoveFromClassList("game-active");
             content.Add(view);
             var navigation = root.Q<VisualElement>("navigation");
             navigation.style.display =

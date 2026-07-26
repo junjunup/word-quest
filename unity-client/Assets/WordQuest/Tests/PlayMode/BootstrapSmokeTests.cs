@@ -122,5 +122,24 @@ namespace WordQuest.Tests
 
             Object.Destroy(uiObject);
         }
+
+        [UnityTest]
+        public IEnumerator Game_shell_is_transparent_so_the_world_can_render()
+        {
+            var uiObject = new GameObject("Transparent Game UI");
+            var document = uiObject.AddComponent<UIDocument>();
+            document.panelSettings = Resources.Load<PanelSettings>(
+                "UI/WordQuestPanelSettings");
+            var router = new ScreenRouter(document.rootVisualElement);
+            router.Show(ScreenId.Game);
+            yield return null;
+
+            Assert.That(
+                router.Root.resolvedStyle.backgroundColor.a,
+                Is.LessThan(0.01f),
+                "The app shell must not paint over the game camera.");
+
+            Object.Destroy(uiObject);
+        }
     }
 }
