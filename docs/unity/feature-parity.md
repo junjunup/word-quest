@@ -8,8 +8,9 @@ passed.
 ## Verification run
 
 - Unity `6000.5.3f1` (changeset `c2eb47b3a2a9`) imported and compiled the project.
-- EditMode: 109/109 passed, including API routing, password masking,
-  authentication recovery, and non-empty startup-shell checks.
+- EditMode: 115/115 passed, including API routing, public-auth 401 isolation,
+  session-cancellation policy, password masking, authentication recovery, and
+  non-empty startup-shell checks.
 - PlayMode: 5/5 passed, including Bootstrap, UI theme, visible keyboard focus,
   world, and audio-listener smoke checks.
 - Windows Player: PE32+ x86-64 artifact validated.

@@ -20,7 +20,7 @@ found during the blind review:
 ## Automated evidence
 
 - `bash unity-client/Tools/validate-project.sh`: pass.
-- `bash unity-client/Tools/run-unity-tests.sh all`: EditMode 109/109 and
+- `bash unity-client/Tools/run-unity-tests.sh all`: EditMode 115/115 and
   PlayMode 5/5 pass.
 - `bash unity-client/Tools/build-players.sh`: pass.
 - Windows Player is PE32+ x86-64.
@@ -41,6 +41,11 @@ offline. The following checks passed:
   `暂时无法连接学习服务，请稍后重试`;
 - login and registration actions return to enabled state after the failed
   request.
+
+Independent review additionally verified that public login/register 401
+responses do not trigger protected-session navigation, so server validation
+messages remain attached to the visible form. Cancelled startup restoration now
+abandons navigation during teardown.
 
 ## Remaining verification boundary
 
