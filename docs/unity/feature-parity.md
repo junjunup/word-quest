@@ -8,10 +8,11 @@ passed.
 ## Verification run
 
 - Unity `6000.5.3f1` (changeset `c2eb47b3a2a9`) imported and compiled the project.
-- EditMode: 138/138 passed, including shared learning-journey planning,
-  task-first Home actions, explicit level states, unreliable-status fallback,
-  stale Level Select response rejection, result next actions, API routing,
-  session cancellation, and authentication recovery.
+- EditMode: 154/154 passed, including K12 learner-stage normalization,
+  conservative wordbook compatibility, persistent stage selection, shared
+  learning-journey planning, task-first Home actions, explicit level states,
+  unreliable-status fallback, stale Level Select response rejection, result
+  next actions, API routing, session cancellation, and authentication recovery.
 - PlayMode: 7/7 passed, including Bootstrap, 1280×720 learning-loop controls,
   visible keyboard focus, transparent game shell, world, and audio-listener
   smoke checks.
@@ -22,6 +23,9 @@ passed.
   encounters, saved completion, two-star result, and next-level primary action
   passed. Screenshots and detailed evidence are in
   `docs/unity/p1-learning-loop-verification.md`.
+- K12 stage-path implementation, conservative content-fit policy, tests, and
+  build evidence are recorded in
+  `docs/unity/p2-k12-stage-path-verification.md`.
 - Reproduce with `unity-client/Tools/run-unity-tests.sh`, `unity-client/Tools/build-players.sh`, and `unity-client/Tools/validate-build-artifacts.sh`.
 
 | Legacy feature | Legacy source | Unity implementation | Automated evidence | Manual evidence | Status |
@@ -30,6 +34,7 @@ passed.
 | App navigation and protected features | `client/src/router/index.js` | `unity-client/Assets/WordQuest/Runtime/Application/AppStateMachine.cs` | `unity-client/Assets/WordQuest/Tests/EditMode/AppStateMachineTests.cs` | Unity 6000.5.3f1 desktop pass pending | implemented-unverified |
 | Desktop UI shell and responsive scaling | `client/src/App.vue`, `client/src/styles/global.scss` | `unity-client/Assets/WordQuest/Runtime/Presentation/ScreenRouter.cs` | `unity-client/Assets/WordQuest/Tests/EditMode/ScreenRouterTests.cs`, `unity-client/Assets/WordQuest/Tests/PlayMode/BootstrapSmokeTests.cs`, `unity-client/Tools/validate-project.sh` | macOS non-empty startup shell plus 1440×900 and 1280×720 Home passes; Windows layout pass pending | implemented-unverified |
 | Home dashboard | `client/src/views/DashboardView.vue` | `unity-client/Assets/WordQuest/Runtime/Presentation/Screens/HomeScreen.cs`, `unity-client/Assets/WordQuest/Runtime/Application/LearningJourneyPlanner.cs` | `unity-client/Assets/WordQuest/Tests/EditMode/HomeScreenTests.cs`, `unity-client/Assets/WordQuest/Tests/EditMode/LearningJourneyPlannerTests.cs`, `unity-client/Tools/validate-project.sh` | macOS local API recommendation, direct level start, progress summary, daily goal, and all feature entries passed; Windows pass pending | implemented-unverified |
+| K12 learner stages and content-fit disclosure | No equivalent stage model | `unity-client/Assets/WordQuest/Runtime/Application/LearnerStageCatalog.cs`, `unity-client/Assets/WordQuest/Runtime/Presentation/Screens/HomeScreen.cs`, `unity-client/Assets/WordQuest/Runtime/Presentation/Screens/LevelSelectScreen.cs` | `unity-client/Assets/WordQuest/Tests/EditMode/LearnerStageCatalogTests.cs`, `unity-client/Assets/WordQuest/Tests/EditMode/HomeScreenTests.cs`, `unity-client/Assets/WordQuest/Tests/EditMode/LevelSelectScreenTests.cs`, `unity-client/Assets/WordQuest/Tests/EditMode/WordQuestAppTests.cs`, `unity-client/Assets/WordQuest/Tests/PlayMode/BootstrapSmokeTests.cs` | macOS/Windows visible grade-stage switching and relaunch persistence pass pending; existing CET/custom wordbooks are deliberately disclosed as extension content | implemented-unverified |
 | Chapter/level selection and locks | `client/src/components/LevelSelect.vue` | `unity-client/Assets/WordQuest/Runtime/Presentation/Screens/LevelSelectScreen.cs` | `unity-client/Assets/WordQuest/Tests/EditMode/ContentCatalogTests.cs`, `unity-client/Assets/WordQuest/Tests/EditMode/LevelSelectScreenTests.cs` | macOS 1280×720 recommendation, completed/locked wording, keyboard-focusable controls, and scroll layout passed; shared staging account pass pending | implemented-unverified |
 | Six chapters and 180 CET-4 levels | `client/src/game/data/levels.json` | `unity-client/Assets/WordQuest/Runtime/Content/ContentCatalog.cs` | `unity-client/Assets/WordQuest/Tests/EditMode/ContentCatalogTests.cs` | Content sampling pending | implemented-unverified |
 | Explorable 2D world | `client/src/game/scenes/WorldScene.js` | `unity-client/Assets/WordQuest/Runtime/Gameplay/WorldGenerator.cs`, `unity-client/Assets/WordQuest/Runtime/Presentation/ScreenRouter.cs` | `unity-client/Assets/WordQuest/Tests/PlayMode/WorldSmokeTests.cs`, `unity-client/Assets/WordQuest/Tests/PlayMode/BootstrapSmokeTests.cs` | macOS 1280×720 rendered world, camera follow, movement, collision, NPC, and ten monster encounters passed; Windows pass pending | implemented-unverified |

@@ -94,6 +94,7 @@ namespace WordQuest.Tests
             {
                 (ScreenId.Home, "continue-learning-button"),
                 (ScreenId.LevelSelect, "difficulty-field"),
+                (ScreenId.LevelSelect, "learner-stage-field"),
                 (ScreenId.Result, "result-primary-button")
             };
             foreach (var item in cases)
@@ -118,6 +119,19 @@ namespace WordQuest.Tests
                     control.resolvedStyle.height,
                     Is.GreaterThan(0f),
                     $"{item.Item2} must have a visible height at 1280x720.");
+
+                if (item.Item2 != "learner-stage-field")
+                    continue;
+                var contentFit = view.Q<Label>("content-fit-label");
+                Assert.That(contentFit, Is.Not.Null);
+                Assert.That(
+                    contentFit.resolvedStyle.width,
+                    Is.GreaterThan(0f),
+                    "K12 content-fit disclosure must be visible.");
+                Assert.That(
+                    contentFit.resolvedStyle.height,
+                    Is.GreaterThan(0f),
+                    "K12 content-fit disclosure must be visible.");
             }
 
             Object.Destroy(uiObject);

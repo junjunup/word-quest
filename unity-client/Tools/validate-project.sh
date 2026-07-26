@@ -88,6 +88,16 @@ for source in "${p1_sources[@]}"; do
     fail "Missing P1 learning-loop source: $source"
 done
 
+p2_sources=(
+  "Assets/WordQuest/Runtime/Application/LearnerStageCatalog.cs"
+  "Assets/WordQuest/Tests/EditMode/LearnerStageCatalogTests.cs"
+)
+
+for source in "${p2_sources[@]}"; do
+  test -f "$project_root/$source" ||
+    fail "Missing P2 K12 stage-path source: $source"
+done
+
 required_p1_controls=(
   "Home.uxml|name=\"continue-learning-button\""
   "Home.uxml|name=\"recommended-level-label\""
@@ -106,6 +116,21 @@ for requirement in "${required_p1_controls[@]}"; do
     fail "Missing P1 learning-loop control in $screen: $marker"
 done
 
+required_p2_controls=(
+  "Home.uxml|name=\"learning-stage-label\""
+  "LevelSelect.uxml|name=\"learner-stage-field\""
+  "LevelSelect.uxml|name=\"content-fit-label\""
+)
+
+for requirement in "${required_p2_controls[@]}"; do
+  screen="${requirement%%|*}"
+  marker="${requirement#*|}"
+  rg -F "$marker" \
+    "$project_root/Assets/WordQuest/Resources/UI/Screens/$screen" \
+    >/dev/null ||
+    fail "Missing P2 K12 stage-path control in $screen: $marker"
+done
+
 if rg -n '模拟答对|模拟答错' \
   "$project_root/Assets/WordQuest/Resources/UI/Screens" >/dev/null; then
   fail "Placeholder mode controls remain in runtime screens"
@@ -113,6 +138,7 @@ fi
 
 required_features=(
   "Authentication and stored session"
+  "K12 learner stages and content-fit disclosure"
   "Explorable 2D world"
   "Score, combo, lives, grace life"
   "Roaming Boss"
