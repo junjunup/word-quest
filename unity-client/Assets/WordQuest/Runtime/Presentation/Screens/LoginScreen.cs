@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using UnityEngine;
 using UnityEngine.UIElements;
 using WordQuest.Application;
 using WordQuest.Infrastructure.Api.Dto;
@@ -32,6 +33,11 @@ namespace WordQuest.Presentation.Screens
             this.mapUser = mapUser ??
                            throw new ArgumentNullException(nameof(mapUser));
             this.signedIn = signedIn;
+
+            var password = view.Q<TextField>("password-field") ??
+                           throw new InvalidOperationException(
+                               "Login password field is missing.");
+            password.isPasswordField = true;
 
             view.Q<Button>("login-button").clicked += OnLogin;
             view.Q<Button>("register-button").clicked += OnRegister;
@@ -98,6 +104,13 @@ namespace WordQuest.Presentation.Screens
             catch (OperationCanceledException)
             {
                 status.text = "操作已取消";
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning(
+                    "Authentication request failed (" +
+                    $"{exception.GetType().Name}).");
+                status.text = "暂时无法连接学习服务，请稍后重试";
             }
             finally
             {
