@@ -71,6 +71,10 @@ namespace WordQuest.Tests
                 input.resolvedStyle.borderTopWidth,
                 Is.GreaterThanOrEqualTo(3f),
                 "Keyboard focus must have a persistent visible border.");
+            var focusColor = input.resolvedStyle.borderTopColor;
+            Assert.That(focusColor.r, Is.EqualTo(232f / 255f).Within(0.005f));
+            Assert.That(focusColor.g, Is.EqualTo(177f / 255f).Within(0.005f));
+            Assert.That(focusColor.b, Is.EqualTo(64f / 255f).Within(0.005f));
 
             Object.Destroy(uiObject);
         }

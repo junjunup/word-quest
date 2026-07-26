@@ -163,11 +163,7 @@ namespace WordQuest.Infrastructure.Api
                     }
 
                     last = Parse<T>(request);
-                    if (last.IsUnauthorized)
-                    {
-                        tokenStore.Clear();
-                        unauthorized?.Invoke();
-                    }
+                    HandleUnauthorized(route, last);
 
                     var transient =
                         request.result == UnityWebRequest.Result.ConnectionError ||
@@ -180,6 +176,32 @@ namespace WordQuest.Infrastructure.Api
             }
 
             return last ?? ApiResult<T>.Failure(0, "请求失败");
+        }
+
+        private void HandleUnauthorized<T>(
+            string route,
+            ApiResult<T> result)
+        {
+            if (!result.IsUnauthorized)
+                return;
+
+            tokenStore.Clear();
+            if (!IsPublicAuthenticationRoute(route))
+                unauthorized?.Invoke();
+        }
+
+        private static bool IsPublicAuthenticationRoute(string route)
+        {
+            var normalized =
+                "/" + (route ?? string.Empty).Trim().TrimStart('/');
+            return string.Equals(
+                       normalized,
+                       ApiRoutes.Login,
+                       StringComparison.Ordinal) ||
+                   string.Equals(
+                       normalized,
+                       ApiRoutes.Register,
+                       StringComparison.Ordinal);
         }
 
         private static ApiResult<T> Parse<T>(UnityWebRequest request)

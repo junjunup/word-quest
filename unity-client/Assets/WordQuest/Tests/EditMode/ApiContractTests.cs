@@ -102,6 +102,41 @@ namespace WordQuest.Tests
                 Throws.TypeOf<ArgumentException>());
         }
 
+        [TestCase(ApiRoutes.Login, 0)]
+        [TestCase(ApiRoutes.Register, 0)]
+        [TestCase(ApiRoutes.CurrentUser, 1)]
+        public void Unauthorized_callback_skips_public_auth_routes(
+            string route,
+            int expectedCallbacks)
+        {
+            var callbacks = 0;
+            var tokens = new MemoryTokenStore();
+            tokens.Save("stale-token");
+            var client = new ApiClient(
+                "http://localhost:4000",
+                tokens,
+                () => callbacks++);
+            var handler = typeof(ApiClient).GetMethod(
+                "HandleUnauthorized",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(handler, Is.Not.Null);
+
+            handler
+                .MakeGenericMethod(typeof(AuthDataDto))
+                .Invoke(
+                    client,
+                    new object[]
+                    {
+                        route,
+                        ApiResult<AuthDataDto>.Failure(
+                            401,
+                            "用户名或密码错误")
+                    });
+
+            Assert.That(callbacks, Is.EqualTo(expectedCallbacks));
+            Assert.That(tokens.HasToken, Is.False);
+        }
+
         [TestCase(
             "[{\"word\":\"apple\",\"meaning\":\"苹果\"}]",
             "apple")]
@@ -121,6 +156,8 @@ namespace WordQuest.Tests
         private sealed class MemoryTokenStore : ITokenStore
         {
             private string token = string.Empty;
+
+            public bool HasToken => !string.IsNullOrEmpty(token);
 
             public string Load()
             {

@@ -189,6 +189,10 @@ namespace WordQuest.Presentation
             try
             {
                 var result = await Auth.GetCurrentUserAsync(lifetime.Token);
+                if (ShouldAbandonSessionRestore(
+                        result,
+                        lifetime.IsCancellationRequested))
+                    return;
                 if (result.IsSuccess)
                 {
                     Context.SignIn(MapUser(result.Data));
@@ -216,6 +220,13 @@ namespace WordQuest.Presentation
                 ShowAuthentication(
                     "暂时无法连接学习服务，请稍后重试");
             }
+        }
+
+        private static bool ShouldAbandonSessionRestore(
+            ApiResult<UserDto> result,
+            bool lifetimeCancelled)
+        {
+            return lifetimeCancelled || (result?.IsCancelled ?? false);
         }
 
         private void ShowAuthentication(string statusMessage = null)
