@@ -48,6 +48,14 @@ namespace WordQuest.Presentation.Screens
                     : "今天是新旅程的第 1 天";
             }
 
+            var learningStage = view.Q<Label>("learning-stage-label");
+            if (learningStage != null)
+            {
+                learningStage.text = LearnerStageCatalog.DescribePath(
+                    context.Settings.LearnerStageId,
+                    context.Settings.WordbookId);
+            }
+
             foreach (var button in view.Query<Button>(
                          className: "feature-button").ToList())
             {

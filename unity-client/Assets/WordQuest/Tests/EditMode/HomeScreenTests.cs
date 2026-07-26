@@ -79,6 +79,28 @@ namespace WordQuest.Tests
                 Is.True);
         }
 
+        [Test]
+        public void Home_discloses_stage_and_extension_content()
+        {
+            var context = SignedInContext();
+            context.Settings.LearnerStageId = "primary";
+            context.Settings.WordbookId = "cet4";
+            var view = CreateView();
+
+            _ = new HomeScreen(
+                view,
+                context,
+                null,
+                journey: LearningJourneyPlanner.Create(
+                    CreateCatalog(),
+                    null));
+
+            Assert.That(
+                view.Q<Label>("learning-stage-label").text,
+                Is.EqualTo(
+                    "小学 · 1–6 年级学习路径 · 当前为拓展词书"));
+        }
+
         private static Button FindFeature(
             VisualElement view,
             ScreenId screen)
