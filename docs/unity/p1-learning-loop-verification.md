@@ -32,7 +32,7 @@ bash unity-client/Tools/validate-build-artifacts.sh
 Results:
 
 - Static project and C# structure validation: passed.
-- EditMode: 134/134 passed.
+- EditMode: 138/138 passed.
 - PlayMode: 7/7 passed.
 - Windows: `unity-client/Builds/Windows/WordQuest.exe` is PE32+ x86-64.
 - macOS: `unity-client/Builds/macOS/WordQuest.app` contains an x86_64/arm64
@@ -42,6 +42,15 @@ Results:
 The PlayMode suite checks the three primary learning-loop controls at a
 1280×720 render surface and prevents the app shell from becoming opaque over
 the gameplay camera again.
+
+An independent code review also verified the follow-up boundary fixes:
+
+- a fully locked progression no longer exposes a direct-start recommendation;
+- completed-level totals include the whole catalog;
+- Level Select discards stale asynchronous responses after navigation;
+- incomplete server status no longer applies contradictory partial locks.
+
+No Critical or Important findings remain in the reviewed learning-loop change.
 
 ## Visible macOS run
 

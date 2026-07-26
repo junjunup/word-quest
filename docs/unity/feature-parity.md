@@ -8,9 +8,10 @@ passed.
 ## Verification run
 
 - Unity `6000.5.3f1` (changeset `c2eb47b3a2a9`) imported and compiled the project.
-- EditMode: 134/134 passed, including shared learning-journey planning,
-  task-first Home actions, explicit level states, result next actions, API
-  routing, session cancellation, and authentication recovery.
+- EditMode: 138/138 passed, including shared learning-journey planning,
+  task-first Home actions, explicit level states, unreliable-status fallback,
+  stale Level Select response rejection, result next actions, API routing,
+  session cancellation, and authentication recovery.
 - PlayMode: 7/7 passed, including Bootstrap, 1280×720 learning-loop controls,
   visible keyboard focus, transparent game shell, world, and audio-listener
   smoke checks.
