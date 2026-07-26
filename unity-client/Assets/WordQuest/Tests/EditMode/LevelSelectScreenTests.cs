@@ -111,6 +111,73 @@ namespace WordQuest.Tests
                 Does.Not.Contain("完成前一关后解锁"));
         }
 
+        [Test]
+        public void Stage_controls_disclose_extension_content()
+        {
+            var catalog = CreateCatalog();
+            var view = CreateView();
+            var wordbooks = new[]
+            {
+                new WordbookDto
+                {
+                    wordbookId = "cet4",
+                    name = "大学英语四级",
+                    total = 4500
+                }
+            };
+
+            _ = new LevelSelectScreen(
+                view,
+                catalog,
+                null,
+                wordbooks: wordbooks,
+                currentWordbookId: "cet4",
+                journey: LearningJourneyPlanner.Create(catalog, null),
+                currentStageId: "primary");
+
+            var stage = view.Q<DropdownField>("learner-stage-field");
+            Assert.That(stage.value, Is.EqualTo("小学"));
+            Assert.That(stage.choices, Does.Contain("高中"));
+            Assert.That(
+                view.Q<Label>("content-fit-label").text,
+                Does.Contain("拓展内容"));
+            Assert.That(
+                view.Q<DropdownField>("wordbook-field").choices[0],
+                Does.Contain("拓展内容"));
+        }
+
+        [Test]
+        public void Explicit_matching_wordbook_is_marked_for_current_stage()
+        {
+            var catalog = CreateCatalog();
+            var view = CreateView();
+            var wordbooks = new[]
+            {
+                new WordbookDto
+                {
+                    wordbookId = "school",
+                    name = "校本词书",
+                    total = 120,
+                    stageId = "primary"
+                }
+            };
+
+            _ = new LevelSelectScreen(
+                view,
+                catalog,
+                null,
+                wordbooks: wordbooks,
+                currentWordbookId: "school",
+                currentStageId: "primary");
+
+            Assert.That(
+                view.Q<DropdownField>("wordbook-field").choices[0],
+                Does.Contain("适合当前学段"));
+            Assert.That(
+                view.Q<Label>("content-fit-label").text,
+                Does.Contain("适合所选学段"));
+        }
+
         private static VisualElement CreateView()
         {
             var asset =

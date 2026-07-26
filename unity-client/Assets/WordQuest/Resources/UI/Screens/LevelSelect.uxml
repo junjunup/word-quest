@@ -13,9 +13,11 @@
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement class="filter-row panel">
+            <ui:DropdownField name="learner-stage-field" label="学段" />
             <ui:DropdownField name="wordbook-field" label="词书" />
             <ui:DropdownField name="difficulty-field" label="难度" />
         </ui:VisualElement>
+        <ui:Label name="content-fit-label" text="当前词书属于拓展内容，可继续学习，但不代表 K12 课程标准匹配。" class="helper-text content-fit-label" />
         <ui:ScrollView name="level-list" class="level-list" />
     </ui:VisualElement>
 </ui:UXML>

@@ -19,7 +19,9 @@ namespace WordQuest.Presentation.Screens
             string currentWordbookId = "cet4",
             string currentDifficulty = "normal",
             Action<string> wordbookChanged = null,
-            LearningJourneyPlan journey = null)
+            LearningJourneyPlan journey = null,
+            string currentStageId = "junior",
+            Action<string> stageChanged = null)
         {
             if (view == null)
                 throw new ArgumentNullException(nameof(view));
@@ -34,6 +36,28 @@ namespace WordQuest.Presentation.Screens
             if (list == null)
                 return;
 
+            var resolvedStage =
+                LearnerStageCatalog.Resolve(currentStageId);
+            var stage = view.Q<DropdownField>("learner-stage-field");
+            if (stage != null)
+            {
+                var stageNames = new List<string>();
+                foreach (var item in LearnerStageCatalog.All)
+                    stageNames.Add(item.DisplayName);
+                stage.choices = stageNames;
+                stage.value = resolvedStage.DisplayName;
+                stage.RegisterValueChangedCallback(change =>
+                {
+                    foreach (var item in LearnerStageCatalog.All)
+                    {
+                        if (item.DisplayName != change.newValue)
+                            continue;
+                        stageChanged?.Invoke(item.Id);
+                        break;
+                    }
+                });
+            }
+
             var wordbook = view.Q<DropdownField>("wordbook-field");
             var available = wordbooks == null || wordbooks.Count == 0
                 ? new[]
@@ -47,32 +71,54 @@ namespace WordQuest.Presentation.Screens
                 : new List<WordbookDto>(wordbooks).ToArray();
             var wordbookNames = new List<string>();
             var selectedWordbookName = string.Empty;
+            WordbookDto selectedWordbook = null;
             foreach (var item in available)
             {
                 var name = string.IsNullOrWhiteSpace(item.name)
                     ? item.wordbookId.ToUpperInvariant()
                     : item.name;
-                wordbookNames.Add(name);
+                var fit = LearnerStageCatalog.Evaluate(
+                    resolvedStage.Id,
+                    item);
+                var choice =
+                    $"{name} · {Math.Max(0, item.total)} 词 · {fit.Label}";
+                wordbookNames.Add(choice);
                 if (string.Equals(
                         item.wordbookId,
                         currentWordbookId,
                         StringComparison.OrdinalIgnoreCase))
-                    selectedWordbookName = name;
-            }
-            wordbook.choices = wordbookNames;
-            wordbook.value = string.IsNullOrWhiteSpace(selectedWordbookName)
-                ? wordbookNames[0]
-                : selectedWordbookName;
-            wordbook.RegisterValueChangedCallback(change =>
-            {
-                for (var index = 0; index < wordbookNames.Count; index++)
                 {
-                    if (wordbookNames[index] != change.newValue)
-                        continue;
-                    wordbookChanged?.Invoke(available[index].wordbookId);
-                    break;
+                    selectedWordbookName = choice;
+                    selectedWordbook = item;
                 }
-            });
+            }
+            if (selectedWordbook == null && available.Length > 0)
+                selectedWordbook = available[0];
+            if (wordbook != null)
+            {
+                wordbook.choices = wordbookNames;
+                wordbook.value =
+                    string.IsNullOrWhiteSpace(selectedWordbookName)
+                        ? wordbookNames[0]
+                        : selectedWordbookName;
+                wordbook.RegisterValueChangedCallback(change =>
+                {
+                    for (var index = 0;
+                         index < wordbookNames.Count;
+                         index++)
+                    {
+                        if (wordbookNames[index] != change.newValue)
+                            continue;
+                        wordbookChanged?.Invoke(
+                            available[index].wordbookId);
+                        break;
+                    }
+                });
+            }
+            RenderContentFit(
+                view,
+                resolvedStage.Id,
+                selectedWordbook);
             var difficulty = view.Q<DropdownField>("difficulty-field");
             difficulty.choices = new List<string> { "简单", "普通", "困难" };
             difficulty.value = currentDifficulty == "easy"
@@ -149,6 +195,21 @@ namespace WordQuest.Presentation.Screens
                 }
                 list.Add(row);
             }
+        }
+
+        private static void RenderContentFit(
+            VisualElement view,
+            string stageId,
+            WordbookDto wordbook)
+        {
+            var contentFit = view.Q<Label>("content-fit-label");
+            if (contentFit == null)
+                return;
+
+            var fit = LearnerStageCatalog.Evaluate(stageId, wordbook);
+            contentFit.text = fit.IsCompatible
+                ? "当前词书适合所选学段；课程标准仍以词书来源说明为准。"
+                : "当前词书属于拓展内容，可继续学习，但不代表 K12 课程标准匹配。";
         }
 
         private static void RenderJourneySummary(

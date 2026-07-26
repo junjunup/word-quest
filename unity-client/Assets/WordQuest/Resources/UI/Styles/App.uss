@@ -305,6 +305,7 @@
 
 .filter-row {
     flex-direction: row;
+    flex-wrap: wrap;
     margin-bottom: 16px;
 }
 
@@ -327,8 +328,12 @@
 }
 
 .filter-row > * {
-    min-width: 220px;
+    min-width: 190px;
     margin-right: 16px;
+}
+
+.content-fit-label {
+    margin-bottom: 12px;
 }
 
 .section-title {
