@@ -120,6 +120,10 @@ namespace WordQuest.Presentation
             Context.Settings.WordbookId = preferences.GetString(
                 "wordquest:wordbook",
                 "cet4");
+            Context.Settings.LearnerStageId = NormalizeLearnerStage(
+                preferences.GetString(
+                    "wordquest:learner-stage",
+                    "junior"));
             Context.Settings.Difficulty = preferences.GetString(
                 "wordquest:difficulty",
                 "normal");
@@ -399,6 +403,8 @@ namespace WordQuest.Presentation
             var token = SessionToken;
             var currentWordbookId = Context.Settings.WordbookId;
             var currentDifficulty = Context.Settings.Difficulty;
+            var currentLearnerStageId =
+                Context.Settings.LearnerStageId;
             try
             {
                 var statusTask = Game.GetLevelsStatusAsync(
@@ -429,7 +435,8 @@ namespace WordQuest.Presentation
                     wordbooks.IsSuccess ? wordbooks.Data : null,
                     currentWordbookId,
                     currentDifficulty,
-                    journey);
+                    journey,
+                    currentLearnerStageId);
             }
             catch (OperationCanceledException)
                 when (token.IsCancellationRequested)
@@ -456,7 +463,8 @@ namespace WordQuest.Presentation
                     null,
                     currentWordbookId,
                     currentDifficulty,
-                    LearningJourneyPlanner.Create(content, null));
+                    LearningJourneyPlanner.Create(content, null),
+                    currentLearnerStageId);
             }
         }
 
@@ -466,7 +474,8 @@ namespace WordQuest.Presentation
             IReadOnlyList<WordbookDto> wordbooks,
             string currentWordbookId,
             string currentDifficulty,
-            LearningJourneyPlan journey)
+            LearningJourneyPlan journey,
+            string currentLearnerStageId)
         {
             _ = new LevelSelectScreen(
                 view,
@@ -482,7 +491,13 @@ namespace WordQuest.Presentation
                     SelectWordbook(wordbookId);
                     _ = ShowLevelSelect();
                 },
-                journey);
+                journey,
+                currentLearnerStageId,
+                stageId =>
+                {
+                    SelectLearnerStage(stageId);
+                    _ = ShowLevelSelect();
+                });
         }
 
         private static bool ShouldApplyLevelSelect(
@@ -1177,6 +1192,22 @@ namespace WordQuest.Presentation
             preferences.SetString(
                 "wordquest:wordbook",
                 Context.Settings.WordbookId);
+            preferences.Save();
+            Context.NotifySettingsChanged();
+        }
+
+        private static string NormalizeLearnerStage(string stageId)
+        {
+            return LearnerStageCatalog.Normalize(stageId);
+        }
+
+        private void SelectLearnerStage(string stageId)
+        {
+            Context.Settings.LearnerStageId =
+                NormalizeLearnerStage(stageId);
+            preferences.SetString(
+                "wordquest:learner-stage",
+                Context.Settings.LearnerStageId);
             preferences.Save();
             Context.NotifySettingsChanged();
         }

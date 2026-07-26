@@ -194,6 +194,33 @@ namespace WordQuest.Tests
                 Assert.That(next.Id, Is.EqualTo(2));
         }
 
+        [TestCase("senior", "senior")]
+        [TestCase("legacy", "junior")]
+        [TestCase(null, "junior")]
+        public void Learner_stage_persistence_normalizes_supported_values(
+            string stored,
+            string expected)
+        {
+            var method = typeof(WordQuestApp).GetMethod(
+                "NormalizeLearnerStage",
+                BindingFlags.Static | BindingFlags.NonPublic);
+            Assert.That(method, Is.Not.Null);
+
+            Assert.That(
+                method.Invoke(null, new object[] { stored }),
+                Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void Learner_stage_selection_has_a_persistence_entrypoint()
+        {
+            var method = typeof(WordQuestApp).GetMethod(
+                "SelectLearnerStage",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+
+            Assert.That(method, Is.Not.Null);
+        }
+
         private static LevelResult CreateResult()
         {
             var session = new GameSession(
