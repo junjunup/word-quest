@@ -1,13 +1,22 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <ui:VisualElement name="result-screen" class="screen centered-screen">
         <ui:VisualElement class="result-card panel">
+            <ui:Label text="学习结算" class="eyebrow" />
             <ui:Label name="result-title" text="关卡完成" class="hero-title" />
             <ui:Label name="stars-label" text="☆☆☆" class="stars-label" />
             <ui:Label name="result-summary" text="" class="subtitle" />
+            <ui:VisualElement class="learning-feedback-card">
+                <ui:Label text="本关学习反馈" class="eyebrow" />
+                <ui:Label name="result-learning-summary" text="" class="learning-summary" />
+                <ui:Label name="result-learning-cue" text="" class="helper-text" />
+            </ui:VisualElement>
             <ui:Label name="result-settlement-status" text="" class="status-label" />
-            <ui:Button name="replay-button" text="再次挑战" class="primary-button" />
-            <ui:Button name="result-reports-button" text="查看学习报告" />
-            <ui:Button name="result-home-button" text="返回主页" />
+            <ui:Button name="result-primary-button" text="继续" class="primary-button result-primary-button" />
+            <ui:VisualElement class="result-secondary-actions">
+                <ui:Button name="replay-button" text="再次挑战" class="result-secondary-button" />
+                <ui:Button name="result-reports-button" text="查看学习报告" class="result-secondary-button" />
+                <ui:Button name="result-home-button" text="返回主页" class="result-secondary-button" />
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

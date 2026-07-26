@@ -444,6 +444,42 @@ Button:focus {
     width: 560px;
 }
 
+.result-card {
+    border-color: var(--gold);
+}
+
+.learning-feedback-card {
+    margin-bottom: 10px;
+    padding: 14px 16px;
+    border-left-width: 4px;
+    border-left-color: var(--forest-500);
+    background-color: var(--parchment-100);
+}
+
+.learning-summary {
+    color: var(--forest-950);
+    font-size: 17px;
+    -unity-font-style: bold;
+    margin-bottom: 6px;
+}
+
+.result-primary-button {
+    min-height: 52px;
+}
+
+.result-secondary-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.result-secondary-button {
+    min-width: 158px;
+    min-height: 42px;
+    margin-right: 8px;
+    margin-bottom: 8px;
+}
+
 .npc-chat-card {
     width: 760px;
     max-height: 760px;
