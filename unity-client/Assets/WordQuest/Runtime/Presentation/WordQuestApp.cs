@@ -72,6 +72,8 @@ namespace WordQuest.Presentation
 
         private void Awake()
         {
+            WindowReadabilityPolicy.ApplyAtStartup();
+
             var apps = FindObjectsByType<WordQuestApp>();
             if (apps.Length > 1)
             {
