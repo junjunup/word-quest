@@ -96,6 +96,14 @@ namespace WordQuest.Presentation.Screens
             host.Q<Label>("review-question-title")
                 .AddToClassList("question-title");
 
+            if (question.Options.Count == 0)
+            {
+                host.Q<Label>("review-question-title").text = $"第 {currentIndex + 1}/{words.Count} 题 · 写出 {word.word} 的中文释义";
+                var input = new TextField("中文释义") { name = "review-answer-field" };
+                host.Add(input);
+                host.Add(new Button(() => Answer(input.value)) { text = "提交释义" });
+                input.Focus();
+            }
             foreach (var option in question.Options)
             {
                 var captured = option.Text;

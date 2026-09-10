@@ -5,7 +5,24 @@ exist, but the feature still needs the manual device, staging, or end-to-end pas
 listed in its row. `verified` means every listed automated and manual check has
 passed.
 
-## Verification run
+## 2026-09-10 P0/P1 learning closure
+
+The Unity client and matching Express API now implement attempt identity,
+account-scoped retry, separate correction evidence, delayed-recall reporting,
+and a fixed daily queue with durable feedback acknowledgement. See
+`docs/unity/2026-09-10-p0-p1-closure.md` for current commands, results, API
+contracts, compatibility and remaining manual device checks. Earlier rows below
+retain their original manual evidence; those passes do not certify the new UI.
+
+## 2026-09-10 automatic encounter update
+
+Unity 6000.5.3f1: EditMode 161/161 and PlayMode 18/18 passed. Ordinary
+encounters now select a nearby visible monster, pause the world, preserve first
+answer outcomes during a single correction, and require cooldown plus departure
+before retrying a cancelled target. macOS was rebuilt; full visible-window QA
+for this update remains pending. See `docs/unity/2026-09-10-auto-encounter.md`.
+
+## Earlier verification run
 
 - Unity `6000.5.3f1` (changeset `c2eb47b3a2a9`) imported and compiled the project.
 - EditMode: 154/154 passed, including K12 learner-stage normalization,
@@ -30,6 +47,7 @@ passed.
 
 | Legacy feature | Legacy source | Unity implementation | Automated evidence | Manual evidence | Status |
 |---|---|---|---|---|---|
+| Ordinary encounter, pause and correction | Automatic encounter product requirement | `unity-client/Assets/WordQuest/Runtime/Gameplay/WorldController.cs`, `unity-client/Assets/WordQuest/Runtime/Gameplay/GameFlowController.cs` | `unity-client/Assets/WordQuest/Tests/PlayMode/EncounterRegressionTests.cs`, `unity-client/Assets/WordQuest/Tests/PlayMode/GameFlowEncounterTests.cs`, `unity-client/Assets/WordQuest/Tests/EditMode/QuizEvidenceRegressionTests.cs` | Visible-window keyboard/gamepad, Chinese input and full-level walkthrough pending | implemented-unverified |
 | Authentication and stored session | `client/src/views/HomeView.vue`, `client/src/stores/user.js` | `unity-client/Assets/WordQuest/Runtime/Presentation/Screens/LoginScreen.cs` | `unity-client/Assets/WordQuest/Tests/EditMode/LoginScreenTests.cs`, `unity-client/Assets/WordQuest/Tests/PlayMode/BootstrapSmokeTests.cs` | macOS password masking, focus, offline recovery, online sign-in, and session restore passed; Windows UI pass pending | implemented-unverified |
 | App navigation and protected features | `client/src/router/index.js` | `unity-client/Assets/WordQuest/Runtime/Application/AppStateMachine.cs` | `unity-client/Assets/WordQuest/Tests/EditMode/AppStateMachineTests.cs` | Unity 6000.5.3f1 desktop pass pending | implemented-unverified |
 | Desktop UI shell and responsive scaling | `client/src/App.vue`, `client/src/styles/global.scss` | `unity-client/Assets/WordQuest/Runtime/Presentation/ScreenRouter.cs` | `unity-client/Assets/WordQuest/Tests/EditMode/ScreenRouterTests.cs`, `unity-client/Assets/WordQuest/Tests/PlayMode/BootstrapSmokeTests.cs`, `unity-client/Tools/validate-project.sh` | macOS non-empty startup shell plus 1440×900 and 1280×720 Home passes; Windows layout pass pending | implemented-unverified |

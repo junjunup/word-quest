@@ -11,7 +11,21 @@ namespace WordQuest.Gameplay
         private GameInput input;
         private SpriteAnimationController animationController;
 
-        public bool MovementEnabled { get; set; } = true;
+        private bool movementEnabled = true;
+        public bool MovementEnabled
+        {
+            get => movementEnabled;
+            set
+            {
+                movementEnabled = value;
+                if (!value) input?.RequireNeutral();
+                if (!value && body != null)
+                {
+                    body.linearVelocity = Vector2.zero;
+                    animationController?.SetMotion(Vector2.zero);
+                }
+            }
+        }
 
         public void Configure(GameInput gameInput)
         {

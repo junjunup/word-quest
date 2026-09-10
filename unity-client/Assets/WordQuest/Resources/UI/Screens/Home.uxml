@@ -4,7 +4,7 @@
             <ui:VisualElement class="home-hero-heading">
                 <ui:VisualElement class="home-hero-copy">
                     <ui:Label name="greeting-label" text="欢迎回来，小冒险家" class="hero-title" />
-                    <ui:Label text="今天只做一件事：完成下一段学习旅程。" class="subtitle home-subtitle" />
+                    <ui:Label text="今天先完成一小轮：复习到期词，再学新词。" class="subtitle home-subtitle" />
                 </ui:VisualElement>
                 <ui:Label name="streak-label" text="今天是新旅程的第 1 天" class="streak-badge" />
             </ui:VisualElement>

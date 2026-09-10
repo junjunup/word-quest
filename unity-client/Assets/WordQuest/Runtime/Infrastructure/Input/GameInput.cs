@@ -5,6 +5,8 @@ namespace WordQuest.Infrastructure.Input
 {
     public sealed class GameInput
     {
+        private readonly WordQuest.Domain.Game.InputResumeGate resumeGate = new WordQuest.Domain.Game.InputResumeGate();
+        public void RequireNeutral() => resumeGate.RequireNeutral();
         public bool UiHasFocus { get; set; }
 
         public Vector2 Move
@@ -35,7 +37,8 @@ namespace WordQuest.Infrastructure.Input
                 if (Gamepad.current != null)
                     value += Gamepad.current.leftStick.ReadValue();
 
-                return Vector2.ClampMagnitude(value, 1f);
+                if (!resumeGate.Accept(value.sqrMagnitude > 0.01f)) return Vector2.zero;
+                return value.sqrMagnitude <= 0.01f ? Vector2.zero : Vector2.ClampMagnitude(value, 1f);
             }
         }
 

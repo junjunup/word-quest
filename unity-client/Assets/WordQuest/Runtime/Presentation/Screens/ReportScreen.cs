@@ -1,5 +1,7 @@
 using System;
 using System.Threading;
+using WordQuest.Infrastructure.Api.Services;
+using WordQuest.Infrastructure.Api.Dto;
 using UnityEngine.UIElements;
 using WordQuest.Application.Reports;
 using WordQuest.Presentation.Controls;
@@ -13,18 +15,21 @@ namespace WordQuest.Presentation.Screens
         private readonly string wordbookId;
         private readonly CancellationToken token;
         private LearningReportViewModel report;
+        private readonly IDailyLearningService evidence;
+        private int loadGeneration;
 
         public ReportScreen(
             VisualElement view,
             ReportController controller,
             string wordbookId,
-            CancellationToken token)
+            CancellationToken token, IDailyLearningService evidence = null)
         {
             this.view = view ?? throw new ArgumentNullException(nameof(view));
             this.controller = controller ??
                               throw new ArgumentNullException(nameof(controller));
             this.wordbookId = wordbookId;
             this.token = token;
+            this.evidence = evidence;
             view.Q<Button>("refresh-report-button").clicked += Load;
             view.Q<Button>("export-report-button").clicked += Export;
             Load();
@@ -32,12 +37,15 @@ namespace WordQuest.Presentation.Screens
 
         private async void Load()
         {
+            var generation = ++loadGeneration;
             var status = view.Q<Label>("report-status-label");
             status.text = "正在汇总学习数据…";
-            report = await controller.LoadAsync(wordbookId, token);
+            var loaded = await controller.LoadAsync(wordbookId, token);
+            if (token.IsCancellationRequested || generation != loadGeneration) return;
+            report = loaded;
             view.Q<Label>("report-overview-label").text =
-                $"答题 {report.Overview.totalQuizzes} 次 · 正确率 {report.Overview.correctRate}% · " +
-                $"已学 {report.Overview.wordsLearned} 词 · 已掌握 {report.Overview.wordsMastered} 词 · " +
+                $"答题 {report.Overview.totalQuizzes} 次 · 全部练习正确率（含提示和纠正）{report.Overview.correctRate}% · " +
+                $"练习涉及 {report.Overview.wordsLearned} 词 · " +
                 $"学习 {report.Overview.totalStudyTime} 分钟";
 
             var dailySlot = view.Q<VisualElement>("daily-chart-slot");
@@ -87,7 +95,38 @@ namespace WordQuest.Presentation.Screens
             status.text = report.Warnings.Count == 0
                 ? "报告已更新"
                 : string.Join("；", report.Warnings);
+            if (evidence != null)
+            {
+                var result = await evidence.EvidenceAsync(wordbookId, token);
+                if (token.IsCancellationRequested || generation != loadGeneration) return;
+                view.Q<VisualElement>("learning-evidence")?.RemoveFromHierarchy();
+                var panel = new VisualElement { name = "learning-evidence" };
+                panel.AddToClassList("list-card");
+                var overview = view.Q<Label>("report-overview-label");
+                overview.parent.Insert(overview.parent.IndexOf(overview) + 1, panel);
+                if (!result.IsSuccess || result.Data == null) panel.Add(new Label("学习证据暂不可用，请刷新重试。"));
+                else
+                {
+                    var data = result.Data;
+                    report.Evidence = data;
+                    panel.Add(new Label("学习证据 · 不同答题方式分开统计"));
+                    panel.Add(new Label(EvidenceLine("无提示首答精确回忆", data.recall)));
+                    panel.Add(new Label(EvidenceLine("选项识别", data.recognition)));
+                    panel.Add(new Label(EvidenceLine("提示后作答", data.assisted)));
+                    panel.Add(new Label(EvidenceLine("看过答案后的纠正", data.correction)));
+                    panel.Add(new Label($"历史未知记录 {data.unknown?.total ?? 0} 次，无法判断当时是否使用提示。"));
+                    panel.Add(new Label($"已通过至少间隔 24 小时的无提示精确回忆：{data.delayedPassed} 词。持续记忆仍需后续复习。"));
+                    var words = new ScrollView(); words.style.maxHeight = 200;
+                    foreach (var word in data.words ?? Array.Empty<EvidenceWordDto>())
+                        words.Add(new Label($"{word.word} · {(word.state == "delayed_passed" ? "已通过延迟复习" : word.state == "consolidate" ? "待巩固" : "刚接触")} · 下次 {WordQuestApp.ReviewDate(word.nextReviewAt)}"));
+                    panel.Add(words);
+                }
+            }
         }
+
+        private static string EvidenceLine(string label, EvidenceCountDto count) => count == null || count.total == 0
+            ? label + "：数据不足"
+            : $"{label}：{count.correct}/{count.total} 次";
 
         private void Export()
         {

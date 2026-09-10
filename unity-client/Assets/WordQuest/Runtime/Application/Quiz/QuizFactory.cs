@@ -8,23 +8,15 @@ namespace WordQuest.Application.Quiz
 {
     public static class QuizFactory
     {
-        private static readonly string[] MeaningFallbacks =
+        public static QuizQuestion FromServer(WordDto word, QuestionType type, QuizDto response)
         {
-            "一种常见事物",
-            "描述某种变化",
-            "表示一个动作",
-            "与时间有关",
-            "与学习有关"
-        };
-
-        private static readonly string[] WordFallbacks =
-        {
-            "journey",
-            "memory",
-            "garden",
-            "wisdom",
-            "practice"
-        };
+            if (type != QuestionType.ChoiceEnglishToChinese && type != QuestionType.ChoiceChineseToEnglish)
+                return Create(word, type, new[] { word });
+            var pool = new List<WordDto> { word };
+            foreach (var distractor in response.distractors ?? Array.Empty<WordDto>())
+                if (distractor != null) pool.Add(distractor);
+            return Create(word, type, pool);
+        }
 
         public static QuizQuestion Create(
             WordDto word,
@@ -44,8 +36,7 @@ namespace WordQuest.Application.Quiz
                         word.meaning,
                         word.word,
                         pool,
-                        candidate => candidate.word,
-                        WordFallbacks);
+                        candidate => candidate.word);
                 case QuestionType.ChoiceEnglishToChinese:
                     return Choice(
                         id,
@@ -53,8 +44,7 @@ namespace WordQuest.Application.Quiz
                         word.word,
                         word.meaning,
                         pool,
-                        candidate => candidate.meaning,
-                        MeaningFallbacks);
+                        candidate => candidate.meaning);
                 case QuestionType.SpellHint:
                     return new QuizQuestion(
                         id,
@@ -92,8 +82,7 @@ namespace WordQuest.Application.Quiz
             string prompt,
             string correct,
             IReadOnlyList<WordDto> pool,
-            Func<WordDto, string> selector,
-            IEnumerable<string> fallbacks)
+            Func<WordDto, string> selector)
         {
             var values = new List<string>();
             AddUnique(values, correct);
@@ -102,14 +91,15 @@ namespace WordQuest.Application.Quiz
             {
                 if (values.Count >= 4)
                     break;
-                AddUnique(values, selector(candidate));
+                if (candidate != null) AddUnique(values, selector(candidate));
             }
 
-            foreach (var fallback in fallbacks)
+            if (values.Count < 4)
             {
-                if (values.Count >= 4)
-                    break;
-                AddUnique(values, fallback);
+                var meaning = type == QuestionType.ChoiceChineseToEnglish ? prompt : correct;
+                var text = type == QuestionType.ChoiceChineseToEnglish ? correct : prompt;
+                return new QuizQuestion(id, QuestionType.SpellFull, meaning, text,
+                    Array.Empty<QuizOption>());
             }
 
             var ordered = values

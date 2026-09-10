@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using UnityEngine;
 using WordQuest.Content;
 using WordQuest.Domain.Game;
@@ -13,6 +12,53 @@ namespace WordQuest.Gameplay
         public Color PlayerTint { get; set; } = Color.white;
         private int remainingMonsters;
         private bool bossDefeated = true;
+        private bool simulationEnabled = true;
+        private float protectedUntil;
+        private EncounterController[] encounters = Array.Empty<EncounterController>();
+        private PlayerController player;
+
+        public event Action PlayerMoved;
+        private Vector3 observedPosition;
+        public bool IsProtected => Time.unscaledTime < protectedUntil;
+
+        private void Update()
+        {
+            if (player == null || !simulationEnabled)
+                return;
+            if (Vector3.Distance(observedPosition, player.transform.position) > 0.05f)
+            { observedPosition = player.transform.position; PlayerMoved?.Invoke(); }
+            EncounterController nearest = null;
+            var nearestDistance = float.MaxValue;
+            foreach (var candidate in encounters)
+            {
+                if (candidate == null) continue;
+                candidate.ObservePlayer(player.transform.position);
+                if (IsProtected || candidate.Kind != EncounterKind.Monster ||
+                    !candidate.IsAvailable) continue;
+                var distance = Vector2.Distance(player.transform.position, candidate.transform.position);
+                if (distance > 1.5f || !HasLineOfSight(candidate)) continue;
+                if (distance < nearestDistance ||
+                    (Mathf.Approximately(distance, nearestDistance) &&
+                     string.CompareOrdinal(candidate.Id, nearest?.Id) < 0))
+                {
+                    nearest = candidate;
+                    nearestDistance = distance;
+                }
+            }
+            if (nearest != null)
+                HandleEncounter(new Encounter(nearest.Id, nearest.Kind, nearest.gameObject));
+        }
+
+        private bool HasLineOfSight(EncounterController candidate)
+        {
+            foreach (var hit in Physics2D.LinecastAll(player.transform.position, candidate.transform.position))
+            {
+                if (hit.collider == null || hit.collider.isTrigger ||
+                    hit.collider.GetComponent<PlayerController>() != null) continue;
+                return false;
+            }
+            return true;
+        }
 
         public event Action<Encounter> Encountered;
         public event Action BossPlayerDamaged;
@@ -36,6 +82,11 @@ namespace WordQuest.Gameplay
                 PlayerTint,
                 difficulty);
             generatedWorld.transform.SetParent(transform, false);
+            player = generatedWorld.GetComponentInChildren<PlayerController>();
+            observedPosition = player.transform.position;
+            encounters = generatedWorld.GetComponentsInChildren<EncounterController>();
+            simulationEnabled = true;
+            protectedUntil = 0;
             remainingMonsters = 0;
             foreach (var encounter in generatedWorld.GetComponentsInChildren<
                          EncounterController>())
@@ -49,6 +100,7 @@ namespace WordQuest.Gameplay
 
         public void SetSimulationEnabled(bool enabled)
         {
+            simulationEnabled = enabled;
             if (generatedWorld == null)
                 return;
 
@@ -59,11 +111,13 @@ namespace WordQuest.Gameplay
                          EncounterController>())
             {
                 if (encounter.Kind != EncounterKind.Boss)
-                    encounter.SetActive(enabled);
+                    encounter.SetSimulationEnabled(enabled);
             }
             foreach (var boss in generatedWorld.GetComponentsInChildren<
                          BossController>())
                 boss.SetSimulationEnabled(enabled);
+            foreach (var animation in generatedWorld.GetComponentsInChildren<SpriteAnimationController>())
+                animation.enabled = enabled;
         }
 
         public BossController ConfigureBoss(
@@ -104,11 +158,14 @@ namespace WordQuest.Gameplay
                 bossObject.GetComponent<EncounterController>();
             legacyEncounter?.SetActive(false);
             controller.QuizRequested += _ =>
-                Encountered?.Invoke(new Encounter(
+                HandleEncounter(new Encounter(
                     "boss",
                     EncounterKind.Boss,
                     bossObject));
-            controller.PlayerDamaged += () => BossPlayerDamaged?.Invoke();
+            controller.PlayerDamaged += () =>
+            {
+                if (simulationEnabled && !IsProtected) BossPlayerDamaged?.Invoke();
+            };
             controller.Defeated += () => bossDefeated = true;
             return controller;
         }
@@ -119,6 +176,13 @@ namespace WordQuest.Gameplay
                 encounter.Kind == EncounterKind.Boss)
                 return;
 
+            if (!correct)
+            {
+                CooldownEncounter(encounter, 1.5f);
+                return;
+            }
+            if (!encounter.Source.activeSelf) return;
+            protectedUntil = Time.unscaledTime + 1.5f;
             var controller =
                 encounter.Source.GetComponent<EncounterController>();
             controller?.SetActive(false);
@@ -128,8 +192,6 @@ namespace WordQuest.Gameplay
                 remainingMonsters = Math.Max(0, remainingMonsters - 1);
                 MonsterDefeated?.Invoke();
             }
-            if (!correct)
-                StartCoroutine(ReactivateEncounter(encounter.Source, 2f));
         }
 
         public void CooldownEncounter(Encounter encounter, float seconds)
@@ -140,34 +202,16 @@ namespace WordQuest.Gameplay
                 encounter.Source.GetComponent<EncounterController>();
             if (controller == null)
                 return;
-            controller.SetActive(false);
-            StartCoroutine(ReactivateController(controller, seconds));
+            controller.Suppress(seconds);
+            protectedUntil = Time.unscaledTime + Mathf.Max(0, seconds);
         }
 
         private void HandleEncounter(Encounter encounter)
         {
+            if (!simulationEnabled || IsProtected) return;
+            SetSimulationEnabled(false);
             Encountered?.Invoke(encounter);
         }
 
-        private static IEnumerator ReactivateEncounter(
-            GameObject source,
-            float delaySeconds)
-        {
-            yield return new WaitForSecondsRealtime(delaySeconds);
-            if (source == null)
-                yield break;
-
-            source.SetActive(true);
-            source.GetComponent<EncounterController>()?.SetActive(true);
-        }
-
-        private static IEnumerator ReactivateController(
-            EncounterController controller,
-            float delaySeconds)
-        {
-            yield return new WaitForSecondsRealtime(delaySeconds);
-            if (controller != null)
-                controller.SetActive(true);
-        }
     }
 }

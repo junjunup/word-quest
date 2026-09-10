@@ -5,6 +5,15 @@ namespace WordQuest.Infrastructure.Api.Dto
     [Serializable]
     public sealed class QuizRecordRequest
     {
+        public string attemptId;
+        public string encounterId;
+        public string attemptPhase;
+        public string assistance;
+        public string recommendedType;
+        public string presentedType;
+        public bool wasDowngraded;
+        public string recallMode;
+        public string dailySessionId;
         public string wordId;
         public string wordbookId;
         public string word;

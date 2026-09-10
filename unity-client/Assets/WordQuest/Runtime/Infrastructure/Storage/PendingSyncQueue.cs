@@ -35,6 +35,35 @@ namespace WordQuest.Infrastructure.Storage
             this.store = store ?? throw new ArgumentNullException(nameof(store));
         }
 
+        public void RememberQuiz(string userId, WordQuest.Infrastructure.Api.Dto.QuizRecordRequest request)
+        {
+            var rows = ReadQuizzes(userId);
+            if (rows.Exists(x => x.attemptId == request.attemptId)) return;
+            rows.Add(request);
+            WriteQuizzes(userId, rows);
+        }
+        public List<WordQuest.Infrastructure.Api.Dto.QuizRecordRequest> ReadQuizzes(string userId)
+        {
+            var json = store.GetString(KeyFor(RequireUserId(userId)) + ":quizzes", "");
+            return string.IsNullOrEmpty(json) ? new List<WordQuest.Infrastructure.Api.Dto.QuizRecordRequest>() :
+                JsonUtility.FromJson<PendingQuizList>(json)?.items ?? new List<WordQuest.Infrastructure.Api.Dto.QuizRecordRequest>();
+        }
+        public void RemoveQuiz(string userId, string attemptId)
+        {
+            var rows = ReadQuizzes(userId);
+            rows.RemoveAll(x => x.attemptId == attemptId);
+            WriteQuizzes(userId, rows);
+        }
+        private void WriteQuizzes(string userId, List<WordQuest.Infrastructure.Api.Dto.QuizRecordRequest> items)
+        {
+            store.SetString(KeyFor(RequireUserId(userId)) + ":quizzes", JsonUtility.ToJson(new PendingQuizList { items = items }));
+            store.Save();
+        }
+        [Serializable] private sealed class PendingQuizList
+        {
+            public List<WordQuest.Infrastructure.Api.Dto.QuizRecordRequest> items = new List<WordQuest.Infrastructure.Api.Dto.QuizRecordRequest>();
+        }
+
         public void Enqueue(string userId, PendingSubmission item)
         {
             if (item == null)

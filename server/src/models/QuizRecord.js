@@ -5,6 +5,16 @@ const errorTypes = ['unknown', 'spelling_near', 'meaning_confusion', 'timeout', 
 
 const quizRecordSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  attemptId: { type: String, maxlength: 100 },
+  encounterId: { type: String, maxlength: 100 },
+  attemptPhase: { type: String, enum: ['unknown', 'first', 'correction'], default: 'unknown' },
+  assistance: { type: String, enum: ['unknown', 'none', 'partial', 'answer_shown'], default: 'unknown' },
+  recommendedType: String,
+  presentedType: String,
+  wasDowngraded: { type: Boolean, default: false },
+  recallMode: { type: String, default: 'unknown' },
+  requestHash: String,
+  dailySessionId: { type: mongoose.Schema.Types.ObjectId, ref: 'DailyLearningSession', default: null },
   wordId: { type: mongoose.Schema.Types.Mixed, ref: 'VocabularyBank', required: true },
   wordbookId: { type: String, default: 'cet4', index: true, trim: true },
   word: { type: String, required: true },
@@ -45,5 +55,10 @@ quizRecordSchema.index({ userId: 1, chapter: 1 })
 quizRecordSchema.index({ userId: 1, wordbookId: 1, sourceMode: 1, createdAt: -1 })
 quizRecordSchema.index({ userId: 1, wordbookId: 1, errorType: 1, createdAt: -1 })
 quizRecordSchema.index({ sessionId: 1, sourceMode: 1 })
+
+quizRecordSchema.index({ userId: 1, attemptId: 1 }, { unique: true, partialFilterExpression: { attemptId: { $type: 'string' } } })
+quizRecordSchema.index({ userId: 1, encounterId: 1, attemptPhase: 1 }, { unique: true, partialFilterExpression: { encounterId: { $type: 'string' } } })
+
+quizRecordSchema.index({ userId: 1, dailySessionId: 1, wordId: 1 }, { unique: true, partialFilterExpression: { dailySessionId: { $type: 'objectId' }, attemptPhase: 'first' } })
 
 export default mongoose.model('QuizRecord', quizRecordSchema)

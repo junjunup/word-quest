@@ -84,7 +84,7 @@ function limitDifficultyJump(currentDifficulty, targetDifficulty, consecutiveCor
 
 export async function getAdaptiveDifficulty(userId) {
   // 获取最近20条答题记录，构成滑动观察窗口
-  const recentRecords = await QuizRecord.find({ userId })
+  const recentRecords = await QuizRecord.find({ userId, attemptPhase: { $ne: 'correction' } })
     .sort({ createdAt: -1 })
     .limit(20)
     .lean()
@@ -151,7 +151,7 @@ export async function getAdaptiveDifficulty(userId) {
  * 获取单词的掌握度评估
  */
 export async function getWordMastery(userId, wordId) {
-  const records = await QuizRecord.find({ userId, wordId }).sort({ createdAt: -1 }).limit(5).lean()
+  const records = await QuizRecord.find({ userId, wordId, attemptPhase: { $ne: 'correction' } }).sort({ createdAt: -1 }).limit(5).lean()
   if (records.length === 0) return { mastery: 0, status: 'new' }
 
   const qualityAverage = records.reduce((sum, record) => sum + qualityWeight(record), 0) / records.length

@@ -170,7 +170,8 @@ async function main() {
   }
 }
 
-main().catch(error => {
+// Route imports own background timers; exit only after main has awaited all fixture cleanup.
+main().then(() => process.exit(0)).catch(error => {
   console.error('Full-stack API E2E failed:', error)
   process.exit(1)
 })

@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import { passesDelayedReview } from './learningEvidencePolicy.js'
 import WordMastery from '../models/WordMastery.js'
 import VocabularyBank from '../models/VocabularyBank.js'
 import { sanitizeWordbookId } from './courseMapService.js'
@@ -55,7 +56,7 @@ async function resolveVocabularyInfo(record) {
 }
 
 function calculateTransition(mastery, record) {
-  const now = new Date()
+  const now = record.createdAt ? new Date(record.createdAt) : new Date()
   const quality = normalizeAnswerQuality(record)
   const errorType = normalizeErrorType(record.errorType)
   const previousScore = Number(mastery.masteryScore || 0)
@@ -104,65 +105,62 @@ function calculateTransition(mastery, record) {
  * @returns {Promise<{mastery: object, delta: number}>} Updated mastery and score delta.
  */
 export async function updateFromQuizRecord(record) {
-  if (!record || !record.userId) return { mastery: null, delta: 0 }
-
+  if (!record?.userId || !record._id) return { mastery: null, delta: 0 }
   const vocabInfo = await resolveVocabularyInfo(record)
-  const sourceMode = normalizeSourceMode(record.sourceMode)
-  const transitionBase = {
-    isCorrect: !!record.isCorrect,
-    answerQuality: record.answerQuality,
-    errorType: record.errorType,
-    sourceMode
+  const key = { userId: record.userId, wordId: vocabInfo.wordId }
+  try {
+    await WordMastery.updateOne(key, { $setOnInsert: { ...key, wordbookId: vocabInfo.wordbookId, word: vocabInfo.word } }, { upsert: true })
+  } catch (error) { if (error.code !== 11000) throw error }
+  const id = String(record._id)
+  for (let retry = 0; retry < 64; retry++) {
+    const mastery = await WordMastery.findOne(key)
+    const applied = mastery.appliedRecords.find(item => item.id === id)
+    if (applied) {
+      // Repair the projection after a crash between the atomic mastery update and fact save.
+      record.masteryDelta = applied.delta
+      record.reviewScheduledAt = applied.nextReviewAt
+      await record.save()
+      return { mastery, delta: applied.delta }
+    }
+    const source = normalizeSourceMode(record.sourceMode)
+    const correction = record.attemptPhase === 'correction'
+    const transition = calculateTransition(mastery, record)
+    const delta = correction ? 0 : transition.delta
+    const nextReviewAt = correction ? mastery.nextReviewAt : transition.nextReviewAt
+    const previous = mastery.lastReviewedAt
+    const set = {
+      evidenceRevision: (mastery.evidenceRevision || 0) + 1,
+      lastReviewedAt: new Date(Math.max(+(previous || 0), +transition.now))
+    }
+    const inc = {}
+    if (!correction) {
+      Object.assign(set, { wordbookId: vocabInfo.wordbookId, word: vocabInfo.word,
+        masteryScore: transition.nextScore, nextReviewAt, reviewInterval: transition.interval,
+        easeFactor: transition.easeFactor, lastAnswerQuality: transition.quality,
+        lastErrorType: transition.errorType })
+      inc.totalAttempts = 1
+      inc[`sourceStats.${source}`] = 1
+      if (transition.quality === 'exact' && record.isCorrect) inc.exactCount = 1
+      if (transition.quality === 'near') inc.nearCount = 1
+      if (!record.isCorrect) inc.wrongCount = 1
+      if (transition.errorType === 'timeout') inc.timeoutCount = 1
+      if (source === 'pronunciation') inc.pronunciationCount = 1
+      if (transition.errorType !== 'unknown') set.recentErrorTypes = [transition.errorType, ...mastery.recentErrorTypes].slice(0, 10)
+      if (passesDelayedReview(record, previous, transition.now)) set.delayedReviewPassedAt = transition.now
+      else if (!record.isCorrect) set.delayedReviewPassedAt = null
+    }
+    const revision = mastery.evidenceRevision || 0
+    const updated = await WordMastery.findOneAndUpdate({ _id: mastery._id,
+      $or: [{ evidenceRevision: revision }, ...(revision === 0 ? [{ evidenceRevision: { $exists: false } }] : [])],
+      'appliedRecords.id': { $ne: id }
+    }, { $set: set, $inc: inc, $push: { appliedRecords: { id, delta, nextReviewAt } } }, { new: true })
+    if (!updated) continue
+    record.masteryDelta = delta
+    record.reviewScheduledAt = nextReviewAt
+    await record.save()
+    return { mastery: updated, delta }
   }
-
-  let mastery = await WordMastery.findOne({ userId: record.userId, wordId: vocabInfo.wordId })
-  if (!mastery) {
-    mastery = new WordMastery({
-      userId: record.userId,
-      wordId: vocabInfo.wordId,
-      wordbookId: vocabInfo.wordbookId,
-      word: vocabInfo.word,
-      masteryScore: 0,
-      reviewInterval: 1,
-      easeFactor: 2.5,
-      recentErrorTypes: []
-    })
-  }
-
-  const transition = calculateTransition(mastery, transitionBase)
-  mastery.wordbookId = vocabInfo.wordbookId
-  mastery.word = vocabInfo.word
-  mastery.masteryScore = transition.nextScore
-  mastery.lastReviewedAt = transition.now
-  mastery.nextReviewAt = transition.nextReviewAt
-  mastery.reviewInterval = transition.interval
-  mastery.easeFactor = transition.easeFactor
-  mastery.totalAttempts += 1
-  mastery.lastAnswerQuality = transition.quality
-  mastery.lastErrorType = transition.errorType
-
-  if (transition.quality === 'exact' && record.isCorrect) mastery.exactCount += 1
-  if (transition.quality === 'near') mastery.nearCount += 1
-  if (transition.quality === 'wrong' && transition.errorType !== 'timeout' && transition.errorType !== 'pronunciation') mastery.wrongCount += 1
-  if (transition.errorType === 'timeout') mastery.timeoutCount += 1
-  if (transition.errorType === 'pronunciation' || sourceMode === 'pronunciation') mastery.pronunciationCount += 1
-
-  if (transition.errorType !== 'unknown') {
-    mastery.recentErrorTypes = [transition.errorType, ...(mastery.recentErrorTypes || [])].slice(0, 10)
-  }
-
-  const sourceStats = mastery.sourceStats || {}
-  sourceStats[sourceMode] = Number(sourceStats[sourceMode] || 0) + 1
-  mastery.sourceStats = sourceStats
-
-  await mastery.save()
-  if (record.reviewScheduledAt !== undefined || record.masteryDelta !== undefined) {
-    record.masteryDelta = transition.delta
-    record.reviewScheduledAt = transition.nextReviewAt
-    if (typeof record.save === 'function') await record.save()
-  }
-
-  return { mastery, delta: transition.delta }
+  throw new Error('Concurrent learning updates exceeded retry limit')
 }
 
 /**

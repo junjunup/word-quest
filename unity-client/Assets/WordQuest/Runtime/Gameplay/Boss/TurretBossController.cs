@@ -99,7 +99,8 @@ namespace WordQuest.Gameplay.Boss
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            if (!active || other.GetComponent<PlayerController>() == null)
+            if (!active || owner == null || !owner.IsSimulationActive ||
+                other.GetComponent<PlayerController>() == null)
                 return;
 
             owner?.NotifyProjectileHit();

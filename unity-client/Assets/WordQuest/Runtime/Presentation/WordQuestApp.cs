@@ -22,7 +22,7 @@ using WordQuest.Presentation.Screens;
 
 namespace WordQuest.Presentation
 {
-    public sealed class WordQuestApp : MonoBehaviour
+    public sealed partial class WordQuestApp : MonoBehaviour
     {
         private CancellationTokenSource lifetime;
         private CancellationTokenSource sessionLifetime;
@@ -31,6 +31,7 @@ namespace WordQuest.Presentation
         private ContentCatalog content;
         private PendingSyncQueue pendingSync;
         private GameFlowController gameFlow;
+        private QuizOverlay activeQuiz;
         private WorldController world;
         private LevelSelection activeSelection;
         private AudioService audio;
@@ -93,10 +94,13 @@ namespace WordQuest.Presentation
             if (router?.Current == ScreenId.Game &&
                 (shellInput?.PausePressed ?? false))
                 TogglePause();
-            if (router?.Current == ScreenId.Game &&
-                activeTutorial?.Step == TutorialStep.Move &&
-                shellInput.Move.sqrMagnitude > 0.01f)
-                activeTutorial.MovementObserved();
+
+        }
+
+        private void OnApplicationFocus(bool focused)
+        {
+            activeQuiz?.SetFocus(focused);
+            if (!focused) gameFlow?.PauseForFocusLoss();
         }
 
         private void OnDestroy()
@@ -143,6 +147,7 @@ namespace WordQuest.Presentation
             Game = new GameService(client);
             Vocabulary = new VocabularyService(client);
             Learning = new LearningService(client);
+            dailyLearning = new DailyLearningService(client);
             DailyChallenge = new DailyChallengeService(client);
             Social = new SocialService(client);
             Pronunciation = new PronunciationService(client);
@@ -272,7 +277,8 @@ namespace WordQuest.Presentation
                 Learning,
                 SessionToken,
                 journey,
-                StartCurrentLevel);
+                StartCurrentLevel,
+                () => _ = ShowDailyLearningAsync());
             _ = LoadHomeJourneyAsync(
                 view,
                 screen,
@@ -282,6 +288,7 @@ namespace WordQuest.Presentation
             var userId = Context.User?.Id;
             var token = SessionToken;
             _ = FlushPendingSettlementsAsync(userId, token);
+            _ = FlushQuizAnswersAsync(userId, token);
         }
 
         private async System.Threading.Tasks.Task LoadHomeJourneyAsync(
@@ -491,7 +498,6 @@ namespace WordQuest.Presentation
                 wordbookId =>
                 {
                     SelectWordbook(wordbookId);
-                    _ = ShowLevelSelect();
                 },
                 journey,
                 currentLearnerStageId,
@@ -513,7 +519,7 @@ namespace WordQuest.Presentation
                    ReferenceEquals(requestedView, currentView);
         }
 
-        private async void StartLevel(LevelSelection selection)
+        private async void StartLevel(LevelSelection selection, DailyLearningSessionDto daily = null)
         {
             activeSelection = selection;
             CleanupGameplay();
@@ -527,12 +533,22 @@ namespace WordQuest.Presentation
                 : 0;
             world.PlayerTint = CharacterCatalog.Get(characterIndex).Tint;
             var view = router.Show(ScreenId.Game);
+            var statusWorld = world;
+            view.schedule.Execute(() =>
+            {
+                var status = view.Q<Label>("encounter-status-label");
+                if (status != null && statusWorld != null)
+                    status.text = statusWorld.IsProtected
+                        ? "脱离保护中 · 拉开距离后再战"
+                        : "靠近怪物即可答题 · 答题时战场暂停";
+            }).Every(100);
             var hud = new HudScreen(
                 view.Q<VisualElement>("hud"),
                 TogglePause,
                 () => OpenManualGameTutor(selection));
             var quiz = new QuizOverlay(
                 view.Q<VisualElement>("quiz-overlay"));
+            activeQuiz = quiz;
             var pause = new PauseOverlay(
                 view.Q<VisualElement>("pause-overlay"),
                 TogglePause,
@@ -576,12 +592,20 @@ namespace WordQuest.Presentation
                 Game,
                 pendingSync,
                 world,
-                Context.User?.Id);
+                Context.User?.Id, dailyLearning);
+            world.PlayerMoved += () => activeTutorial?.MovementObserved();
             world.MonsterDefeated += () => audio.Play(SoundId.Coin);
             lastComboCue = 0;
             gameFlow.SessionChanged += snapshot =>
             {
                 hud.Render(snapshot);
+                if (daily != null)
+                {
+                    var progress = view.Q<ProgressBar>("level-progress");
+                    var count = daily.completedWordIds?.Length ?? 0;
+                    progress.value = count * 100f / daily.items.Length;
+                    progress.title = $"今日学习 {count}/{daily.items.Length}";
+                }
                 if (snapshot.Combo >= 5 &&
                     snapshot.Combo % 5 == 0 &&
                     snapshot.Combo != lastComboCue)
@@ -594,13 +618,15 @@ namespace WordQuest.Presentation
             {
                 if (activeTutorial != null)
                 {
-                    activeTutorial.MovementObserved();
                     activeTutorial.InteractionObserved();
                 }
                 quiz.Show(
                     question,
-                    gameFlow.Snapshot?.TimerMs ?? 30000);
+                    gameFlow.IsOrdinaryEncounter ? 0 : (gameFlow.Snapshot?.TimerMs ?? 30000));
             };
+            gameFlow.QuestionLoading += ordinary => quiz.ShowLoading(
+                ordinary ? new Action(gameFlow.SkipEncounter) : () => Navigate(ScreenId.Home));
+            gameFlow.DailyFinished += result => { Navigate(ScreenId.Home); ShowDailyPanel(result); };
             gameFlow.PauseChanged += pause.SetVisible;
             gameFlow.AnswerEvaluated += correct =>
                 audio.Play(correct ? SoundId.Correct : SoundId.Wrong);
@@ -610,10 +636,17 @@ namespace WordQuest.Presentation
                 OpenNpcChat(word, selection);
             gameFlow.WrongAnswerTutorRequested +=
                 (word, context) =>
-                    OpenWrongAnswerTutor(
-                        word,
-                        context,
-                        selection);
+                {
+                    if (gameFlow.IsOrdinaryEncounter)
+                        quiz.ShowWrongFeedback(word, value => gameFlow.CompleteCorrectionAsync(value), gameFlow.LeaveFeedback);
+                    else
+                        OpenWrongAnswerTutor(word, context, selection);
+                };
+            gameFlow.AnswerSaveFailed += message =>
+                quiz.ShowSaveFailure(message, gameFlow.RetryCurrentQuestion,
+                    gameFlow.IsOrdinaryEncounter && !gameFlow.IsDailyLearning ? new Action(gameFlow.SkipEncounter) : () => Navigate(ScreenId.Home),
+                    gameFlow.IsDailyLearning ? "返回主页" : gameFlow.IsOrdinaryEncounter ? "稍后复习" : "退出本关");
+            quiz.Skipped += () => gameFlow.SkipEncounter();
             gameFlow.CorrectAnswerFeedbackRequested += word =>
                 quiz.ShowCorrectFeedback(
                     word,
@@ -627,8 +660,11 @@ namespace WordQuest.Presentation
 
             try
             {
-                await audio.PlayMusicAsync(MusicId.Game, SessionToken);
-                await gameFlow.StartLevelAsync(selection, SessionToken);
+                var startingFlow = gameFlow;
+                var token = SessionToken;
+                await audio.PlayMusicAsync(MusicId.Game, token);
+                if (token.IsCancellationRequested || gameFlow != startingFlow || router.CurrentView != view) return;
+                await startingFlow.StartLevelAsync(selection, token, daily);
             }
             catch (Exception exception)
             {
@@ -849,6 +885,8 @@ namespace WordQuest.Presentation
         {
             gameFlow?.Dispose();
             gameFlow = null;
+            activeQuiz?.Hide();
+            activeQuiz = null;
             tutorialOverlay?.Dispose();
             tutorialOverlay = null;
             activeTutorial = null;
@@ -928,7 +966,6 @@ namespace WordQuest.Presentation
                 return;
             }
 
-            activeTutorial?.MovementObserved();
             activeTutorial?.InteractionObserved();
             npcTutorScreen?.Dispose();
             npcChatOverlay.Q<ScrollView>("tutor-messages").Clear();
@@ -1054,7 +1091,7 @@ namespace WordQuest.Presentation
                 view,
                 new ReportController(Learning),
                 Context.Settings.WordbookId,
-                SessionToken);
+                SessionToken, dailyLearning);
         }
 
         private void ShowVocabulary()
@@ -1186,7 +1223,7 @@ namespace WordQuest.Presentation
             Context.NotifySettingsChanged();
         }
 
-        private void SelectWordbook(string wordbookId)
+        private void ApplyWordbook(string wordbookId)
         {
             Context.Settings.WordbookId = string.IsNullOrWhiteSpace(wordbookId)
                 ? "cet4"

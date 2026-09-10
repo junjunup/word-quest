@@ -8,6 +8,7 @@
             <ui:Button name="game-tutor-button" text="小智" />
             <ui:Button name="pause-button" text="暂停" />
         </ui:VisualElement>
+        <ui:Label name="encounter-status-label" text="靠近怪物即可答题 · 答题时战场暂停" class="subtitle" />
         <ui:VisualElement name="tutorial-banner" class="tutorial-banner panel">
             <ui:Label name="tutorial-label" text="使用 WASD、方向键或手柄左摇杆移动。" />
             <ui:Button name="tutorial-skip-button" text="跳过引导" />
@@ -20,6 +21,7 @@
                 <ui:VisualElement name="option-list" />
                 <ui:TextField name="answer-field" label="你的答案" />
                 <ui:Button name="submit-answer-button" text="提交答案" class="primary-button" />
+                <ui:Button name="skip-encounter-button" text="稍后复习" />
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="pause-overlay" class="modal-layer">

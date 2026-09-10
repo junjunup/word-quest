@@ -32,9 +32,18 @@ namespace WordQuest.Application.Reports
                 $"overview,totalQuizzes,{report.Overview.totalQuizzes},",
                 $"overview,correctRate,{Escape(report.Overview.correctRate)},",
                 $"overview,wordsLearned,{report.Overview.wordsLearned},",
-                $"overview,wordsMastered,{report.Overview.wordsMastered},",
+                $"overview,legacyMasteryScoreThresholdWords,{report.Overview.wordsMastered},",
                 $"overview,totalStudyTimeMinutes,{report.Overview.totalStudyTime},"
             };
+            if (report.Evidence != null)
+            {
+                var evidence = report.Evidence;
+                var counts = new[] { evidence.recall, evidence.recognition, evidence.assisted, evidence.correction, evidence.unknown };
+                var labels = new[] { "unaidedExactRecall", "recognition", "assisted", "correction", "unknown" };
+                for (var index = 0; index < counts.Length; index++)
+                    rows.Add($"evidence,{labels[index]},{counts[index]?.correct ?? 0},{counts[index]?.total ?? 0}");
+                rows.Add($"evidence,delayedReviewPassedWords,{evidence.delayedPassed},");
+            }
             foreach (var point in report.Daily)
             {
                 rows.Add(

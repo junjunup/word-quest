@@ -10,6 +10,7 @@ namespace WordQuest.Presentation.Screens
     public sealed class HomeScreen
     {
         private readonly Action<LevelDefinition> startLevel;
+        private readonly Action startDaily;
         private readonly Action<ScreenId> navigate;
         private readonly VisualElement view;
         private LearningJourneyPlan journey;
@@ -22,7 +23,8 @@ namespace WordQuest.Presentation.Screens
             ILearningService learning = null,
             CancellationToken token = default,
             LearningJourneyPlan journey = null,
-            Action<LevelDefinition> startLevel = null)
+            Action<LevelDefinition> startLevel = null,
+            Action startDaily = null)
         {
             if (view == null)
                 throw new ArgumentNullException(nameof(view));
@@ -32,6 +34,7 @@ namespace WordQuest.Presentation.Screens
             this.view = view;
             this.navigate = navigate;
             this.startLevel = startLevel;
+            this.startDaily = startDaily;
 
             var greeting = view.Q<Label>("greeting-label");
             if (greeting != null)
@@ -69,6 +72,7 @@ namespace WordQuest.Presentation.Screens
             {
                 continueLearning.clicked += () =>
                 {
+                    if (this.startDaily != null) { this.startDaily(); return; }
                     if (this.journey?.RecommendedLevel != null &&
                         this.startLevel != null)
                     {
@@ -112,7 +116,7 @@ namespace WordQuest.Presentation.Screens
                 };
             }
 
-            if (learning != null)
+            if (learning != null && startDaily == null)
                 LoadDailyProgress(view, learning, token);
         }
 
@@ -125,6 +129,18 @@ namespace WordQuest.Presentation.Screens
             var progress = view.Q<Label>("journey-progress-label");
             var button = view.Q<Button>("continue-learning-button");
 
+            if (startDaily != null)
+            {
+                if (level != null) level.text = "今日学习 · 一次最多 10 词";
+                if (meta != null) meta.text = "优先到期复习，再学新词；中断后可以继续";
+                if (progress != null) progress.text = "固定本轮词数，首答与反馈都完成后计入进度";
+                if (button != null) button.text = "开始 / 继续今日学习";
+                var daily = view.Q<ProgressBar>("daily-progress");
+                if (daily != null) daily.style.display = DisplayStyle.None;
+                var label = view.Q<Label>("daily-progress-label");
+                if (label != null) label.text = "进入后查看本轮新词、复习词和剩余数量";
+                return;
+            }
             if (recommended == null)
             {
                 if (level != null)

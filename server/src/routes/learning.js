@@ -11,7 +11,20 @@ import { getTodayReviewQueue } from '../services/reviewQueueService.js'
 import { sanitizeWordbookId } from '../services/courseMapService.js'
 import { updateFromQuizRecord, updateFromQuizRecords, getMasterySummary, getMasteryWords } from '../services/masteryService.js'
 
+import { submitLearningAttempt, evidenceSummary } from '../services/learningAttemptService.js'
+import { createDailySession, readDailySession, endDailySession, currentDailySession, acknowledgeDailyFeedback } from '../services/dailyLearningService.js'
+
 const router = express.Router()
+const respondLearning = fn => async (req, res) => {
+  try { res.json({ success: true, data: await fn(req) }) }
+  catch (error) { res.status(error.status || 500).json({ success: false, message: error.status ? error.message : '学习服务暂不可用，请重试' }) }
+}
+router.get('/evidence', authMiddleware, respondLearning(req => evidenceSummary(req.userId, sanitizeWordbookId(req.query.wordbookId))))
+router.get('/daily-sessions', authMiddleware, respondLearning(req => currentDailySession(req.userId, req.query.wordbookId)))
+router.post('/daily-sessions', authMiddleware, respondLearning(req => createDailySession(req.userId, req.body.wordbookId)))
+router.get('/daily-sessions/:id', authMiddleware, respondLearning(req => readDailySession(req.userId, req.params.id)))
+router.post('/daily-sessions/:id/feedback', authMiddleware, respondLearning(req => acknowledgeDailyFeedback(req.userId, req.params.id, req.body.wordId)))
+router.post('/daily-sessions/:id/end', authMiddleware, respondLearning(req => endDailySession(req.userId, req.params.id)))
 const SOURCE_MODES = ['mainline', 'boss', 'review', 'daily', 'pk', 'pronunciation', 'endless']
 
 function normalizeSourceMode(value) {
@@ -87,6 +100,8 @@ router.get('/review/today', authMiddleware, async (req, res) => {
 // 提交答题记录
 // H-01 修复：服务端验证答案正确性和分数，不信任客户端上报值
 router.post('/quiz-record', authMiddleware, async (req, res) => {
+  if (req.body?.attemptId !== undefined || req.body?.attemptPhase !== undefined)
+    return respondLearning(r => submitLearningAttempt(r.userId, r.body))(req, res)
   try {
     if (!req.body || !req.body.word || !req.body.questionType) {
       return res.status(400).json({ error: '缺少必要的答题参数' })

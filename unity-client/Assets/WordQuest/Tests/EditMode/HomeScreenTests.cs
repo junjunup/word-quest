@@ -13,6 +13,18 @@ namespace WordQuest.Tests
     public sealed class HomeScreenTests
     {
         [Test]
+        public void Daily_action_stays_primary_after_asynchronous_journey_refresh()
+        {
+            var view = CreateView();
+            var daily = 0;
+            var screen = new HomeScreen(view, SignedInContext(), _ => { }, startDaily: () => daily++);
+            screen.RenderJourney(LearningJourneyPlanner.Create(CreateCatalog(), CompleteStatus()));
+            Submit(view.Q<Button>("continue-learning-button"));
+            Assert.That(daily, Is.EqualTo(1));
+            Assert.That(view.Q<Button>("continue-learning-button").text, Does.Contain("今日学习"));
+        }
+
+        [Test]
         public void Continue_action_starts_the_recommended_level()
         {
             var catalog = CreateCatalog();

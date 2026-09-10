@@ -65,11 +65,36 @@ namespace WordQuest.Gameplay
         private readonly LevelSettlementController settlement;
         private readonly WorldController world;
         private readonly string userId;
+        private readonly PendingSyncQueue pending;
+        private readonly IDailyLearningService dailyService;
+        private DailyLearningSessionDto dailySession;
+        private QuizQuestion activeQuestion;
+        private QuestionType recommendedType;
+        private bool questionDowngraded;
+        private string activeEncounterId;
+        private int questionGeneration;
+        private CancellationTokenSource questionLoad;
+        private QuizRecordRequest pendingRequest;
+        private QuizRecordRequest firstRequest;
+        private QuizRecordRequest correctionRequest;
+        private QuizAnswer pendingAnswer;
+        private bool firstSaved;
+        private bool feedbackSaving;
+        private bool feedbackPending;
+        private bool pendingDefeated;
+        private readonly CancellationTokenSource flowLifetime = new CancellationTokenSource();
         private readonly AdaptiveQuizPolicy adaptive = new AdaptiveQuizPolicy();
         private readonly List<WordDto> words = new List<WordDto>();
         private LevelSelection selection;
         private GameSession session;
         private bool paused;
+        private bool disposed;
+        private bool awaitingAnswer;
+        private bool submitting;
+        private bool ordinaryCorrect;
+        private WordDto feedbackWord;
+        private Word questionWord;
+        private readonly Dictionary<string, Word> encounterWords = new Dictionary<string, Word>();
         private bool quizOpen;
         private BossController boss;
         private bool bossQuestion;
@@ -86,7 +111,8 @@ namespace WordQuest.Gameplay
             IGameService game,
             PendingSyncQueue pending,
             WorldController world,
-            string userId)
+            string userId,
+            IDailyLearningService dailyService = null)
         {
             this.vocabulary = vocabulary ??
                               throw new ArgumentNullException(nameof(vocabulary));
@@ -96,6 +122,8 @@ namespace WordQuest.Gameplay
                 throw new ArgumentNullException(nameof(game));
             if (pending == null)
                 throw new ArgumentNullException(nameof(pending));
+            this.pending = pending;
+            this.dailyService = dailyService;
             settlement = new LevelSettlementController(
                 game.SaveProgressAsync,
                 pending);
@@ -109,6 +137,11 @@ namespace WordQuest.Gameplay
             world.BossPlayerDamaged += OnBossPlayerDamaged;
         }
 
+        public event Action<string> AnswerSaveFailed;
+        public event Action<bool> QuestionLoading;
+        public event Action<DailyLearningSessionDto> DailyFinished;
+        public bool IsDailyLearning => dailySession != null;
+        public bool IsOrdinaryEncounter => !bossQuestion && activeEncounter?.Kind == EncounterKind.Monster;
         public event Action<GameSessionSnapshot> SessionChanged;
         public event Action<QuizQuestion> QuestionReady;
         public event Action<LevelResult> Finished;
@@ -125,8 +158,12 @@ namespace WordQuest.Gameplay
 
         public async Task StartLevelAsync(
             LevelSelection levelSelection,
-            CancellationToken token)
+            CancellationToken token,
+            DailyLearningSessionDto daily = null)
         {
+            dailySession = daily;
+            if ((daily?.pendingFeedback?.Length ?? 0) > 0)
+                throw new InvalidOperationException("请先确认上次学习的反馈。");
             selection = levelSelection ??
                         throw new ArgumentNullException(nameof(levelSelection));
             activeToken = token;
@@ -138,14 +175,15 @@ namespace WordQuest.Gameplay
             deferredBossWrongAnswers = 0;
             activeEncounter = null;
             suggestedQuestionType = null;
-            var response = await vocabulary.GetLevelWordsAsync(
-                selection.Level.Chapter,
-                selection.Level.Id,
-                selection.WordbookId,
-                token);
+            var response = daily == null
+                ? await vocabulary.GetLevelWordsAsync(selection.Level.Chapter, selection.Level.Id, selection.WordbookId, token)
+                : WordQuest.Infrastructure.Api.ApiResult<WordDto[]>.Success(200, DailyLearningPlan.Remaining(daily));
+            if (disposed || token.IsCancellationRequested) return;
             if (!response.IsSuccess)
                 throw new InvalidOperationException(response.Message);
 
+            encounterWords.Clear();
+            questionWord = null;
             words.Clear();
             words.AddRange(response.Data ?? Array.Empty<WordDto>());
             if (words.Count == 0)
@@ -180,6 +218,13 @@ namespace WordQuest.Gameplay
                 selection.Level,
                 selection.Level.Chapter * 10000 + selection.Level.Id,
                 selection.Difficulty);
+            if (dailySession != null)
+            {
+                var targets = world.GetComponentsInChildren<EncounterController>()
+                    .Where(x => x.Kind == EncounterKind.Monster).OrderBy(x => x.Id).ToArray();
+                for (var index = 0; index < targets.Length; index++)
+                    encounterWords[targets[index].Id] = domainWords[index];
+            }
             boss = world.ConfigureBoss(selection.Level, session);
             if (boss != null)
             {
@@ -190,7 +235,24 @@ namespace WordQuest.Gameplay
             SessionChanged?.Invoke(session.Snapshot);
         }
 
-        public async Task SubmitAnswerAsync(
+        public async Task SubmitAnswerAsync(QuizAnswer answer, CancellationToken token)
+        {
+            if (disposed || finishing || submitting || !awaitingAnswer) return;
+            submitting = true;
+            awaitingAnswer = false;
+            try { await SubmitAnswerCoreAsync(answer, token); }
+            catch (Exception)
+            {
+                if (!disposed && !token.IsCancellationRequested)
+                {
+                    awaitingAnswer = true;
+                    AnswerSaveFailed?.Invoke("答案暂未保存，请重试或稍后复习。");
+                }
+            }
+            finally { submitting = false; }
+        }
+
+        private async Task SubmitAnswerCoreAsync(
             QuizAnswer answer,
             CancellationToken token)
         {
@@ -200,7 +262,7 @@ namespace WordQuest.Gameplay
                 return;
 
             var answeredBoss = bossQuestion;
-            var domainWord = session.CurrentWord;
+            var domainWord = questionWord ?? session.CurrentWord;
             var word = words.FirstOrDefault(item =>
                 (string.IsNullOrEmpty(item._id) ? item.wordId : item._id) ==
                 domainWord.Id);
@@ -214,32 +276,37 @@ namespace WordQuest.Gameplay
                 answer.HintUsed,
                 answer.ScoreRatio);
 
-            var record = await learning.SubmitQuizRecordAsync(
-                new QuizRecordRequest
-                {
-                    wordId = domainWord.Id,
-                    word = domainWord.Text,
-                    wordbookId = word?.wordbookId ?? selection.WordbookId,
-                    questionType = ToApiQuestionType(answer.Type),
-                    sourceMode = answeredBoss ? "boss" : "mainline",
-                    isCorrect = answer.Correct,
-                    responseTime = answer.ResponseMs,
-                    timeLimit = session.Snapshot.TimerMs,
-                    difficulty = effectiveDifficulty,
-                    hintUsed = answer.HintUsed,
-                    sessionId = session.Snapshot.SessionId,
-                    chapter = session.Snapshot.Chapter,
-                    level = session.Snapshot.Level,
-                    playerAnswer = answer.Value,
-                    correctAnswer =
-                        answer.Type == QuestionType.ChoiceEnglishToChinese
-                            ? domainWord.Meaning
-                            : domainWord.Text,
-                    combo = session.Snapshot.Combo,
-                    scoreRatio = (float)answer.ScoreRatio
-                },
-                token);
-
+            if (pendingRequest == null)
+            {
+                pendingRequest = LearningAttempt.Create(word, activeQuestion, activeEncounterId,
+                    session.Snapshot.SessionId, selection.WordbookId, session.Snapshot.Chapter,
+                    session.Snapshot.Level, answer.Value, answer.ResponseMs);
+                pendingRequest.recommendedType = LearningAttempt.ApiType(recommendedType);
+                pendingRequest.wasDowngraded = questionDowngraded;
+                pendingRequest.difficulty = effectiveDifficulty;
+                pendingRequest.combo = session.Snapshot.Combo;
+                pendingRequest.isCorrect = answer.Correct;
+                pendingRequest.sourceMode = dailySession != null ? "daily" : answeredBoss ? "boss" : "mainline";
+                pendingRequest.timeLimit = answeredBoss ? session.Snapshot.TimerMs : 0;
+                pendingRequest.dailySessionId = dailySession?.sessionId;
+                pendingAnswer = answer;
+            }
+            pending.RememberQuiz(userId, pendingRequest);
+            var record = await learning.SubmitQuizRecordAsync(pendingRequest, token);
+            if (record.IsSuccess && record.Data != null && record.Data.serverVerified)
+            {
+                pending.RemoveQuiz(userId, pendingRequest.attemptId);
+                firstRequest = pendingRequest;
+                pendingRequest = null;
+                firstSaved = true;
+            }
+            if (disposed || token.IsCancellationRequested) return;
+            if (!record.IsSuccess || record.Data == null || !record.Data.serverVerified)
+            {
+                awaitingAnswer = true;
+                AnswerSaveFailed?.Invoke("答案暂未保存，请重试或稍后复习。");
+                return;
+            }
             var hasServerRecord =
                 record.IsSuccess && record.Data != null;
             var correct = hasServerRecord
@@ -268,15 +335,23 @@ namespace WordQuest.Gameplay
                 if (!correct)
                     deferredBossWrongAnswers++;
             }
-            world.ResolveEncounter(activeEncounter, correct);
-            activeEncounter = null;
+            if (answeredBoss)
+            {
+                world.ResolveEncounter(activeEncounter, correct);
+                activeEncounter = null;
+            }
+            else
+            {
+                ordinaryCorrect = correct;
+                feedbackWord = word;
+            }
 
             var outcome = session.SubmitAnswer(
                 correct,
                 answer.ResponseMs,
                 score,
-                !answeredBoss);
-            if (adaptive.ConsecutiveErrors >= 3)
+                false);
+            if (answeredBoss && adaptive.ConsecutiveErrors >= 3)
                 session.TryGrantGraceLife();
 
             var status = outcome.Status;
@@ -326,8 +401,15 @@ namespace WordQuest.Gameplay
             ResumeAfterTutor();
         }
 
+        public void PauseForFocusLoss()
+        {
+            if (disposed || paused || quizOpen) return;
+            TogglePause();
+        }
+
         public void TogglePause()
         {
+            if (disposed || quizOpen || submitting) return;
             paused = !paused;
             world.SetSimulationEnabled(!paused && !quizOpen);
             PauseChanged?.Invoke(paused);
@@ -346,6 +428,12 @@ namespace WordQuest.Gameplay
 
         public void ResumeAfterTutor()
         {
+            if (disposed || finishing) return;
+            if (activeEncounter?.Kind == EncounterKind.Monster)
+            {
+                _ = CompleteOrdinaryEncounterAsync(ordinaryCorrect);
+                return;
+            }
             activeEncounter = null;
             quizOpen = false;
             if (continueBossBattle)
@@ -357,9 +445,94 @@ namespace WordQuest.Gameplay
             world.SetSimulationEnabled(!paused);
         }
 
+        public void RetryCurrentQuestion()
+        {
+            if (disposed || submitting || feedbackSaving) return;
+            if (feedbackPending) { _ = CompleteOrdinaryEncounterAsync(pendingDefeated); return; }
+            if (dailySession != null && world.ObjectivesComplete) { _ = FinishAsync(activeToken, true); return; }
+            if (!quizOpen) return;
+            if (pendingRequest != null)
+            {
+                awaitingAnswer = true;
+                _ = SubmitAnswerAsync(pendingAnswer, activeToken);
+            }
+            else PresentQuestion(bossQuestion);
+        }
+
+        public void SkipEncounter()
+        {
+            if (disposed || submitting || feedbackSaving || activeEncounter?.Kind != EncounterKind.Monster) return;
+            ordinaryCorrect = false;
+            _ = CompleteOrdinaryEncounterAsync(false);
+        }
+
+        public async Task<bool> CompleteCorrectionAsync(string answer, int responseMs = 0)
+        {
+            if (disposed || submitting || ordinaryCorrect || feedbackWord == null || firstRequest == null ||
+                activeEncounter?.Kind != EncounterKind.Monster) return false;
+            submitting = true;
+            try
+            {
+                if (correctionRequest == null) correctionRequest = LearningAttempt.Correction(firstRequest, answer, responseMs);
+                pending.RememberQuiz(userId, correctionRequest);
+                var response = await learning.SubmitQuizRecordAsync(correctionRequest, activeToken);
+                if (!response.IsSuccess || response.Data == null || !response.Data.serverVerified) throw new InvalidOperationException("纠正暂未保存，请重试");
+                pending.RemoveQuiz(userId, correctionRequest.attemptId);
+                if (disposed) return false;
+                var correct = response.Data.serverIsCorrect;
+                if (correct) await CompleteOrdinaryEncounterAsync(true);
+                return correct;
+            }
+            finally { submitting = false; }
+        }
+
+        public void LeaveFeedback() { if (!submitting) _ = CompleteOrdinaryEncounterAsync(false); }
+
+        private async Task CompleteOrdinaryEncounterAsync(bool defeated)
+        {
+            var encounter = activeEncounter;
+            if (encounter == null || feedbackSaving) return;
+            if (dailySession != null && firstSaved)
+            {
+                feedbackPending = true;
+                pendingDefeated = defeated;
+                feedbackSaving = true;
+                try
+                {
+                    var wordId = firstRequest.wordId;
+                    var response = await dailyService.AcknowledgeAsync(dailySession.sessionId, wordId, activeToken);
+                    if (disposed || activeToken.IsCancellationRequested) return;
+                    if (!response.IsSuccess || response.Data == null)
+                    {
+                        if (submitting) throw new InvalidOperationException("反馈进度暂未保存，请重试。");
+                        AnswerSaveFailed?.Invoke("首答已保存，反馈进度暂未同步。可重试保存或返回主页后继续。");
+                        return;
+                    }
+                    dailySession.completedWordIds = response.Data.completedWordIds;
+                    dailySession.pendingFeedback = response.Data.pendingFeedback;
+                    feedbackPending = false;
+                    SessionChanged?.Invoke(session.Snapshot);
+                }
+                finally { feedbackSaving = false; }
+            }
+            activeEncounter = null;
+            questionGeneration++;
+            questionLoad?.Cancel();
+            feedbackWord = null;
+            awaitingAnswer = false;
+            world.ResolveEncounter(encounter, defeated || (dailySession != null && firstSaved));
+            quizOpen = false;
+            if (world.ObjectivesComplete)
+            {
+                await FinishAsync(activeToken, true);
+                return;
+            }
+            world.SetSimulationEnabled(!paused);
+        }
+
         public WordDto TryPauseForManualTutor()
         {
-            if (paused || quizOpen || session?.CurrentWord == null)
+            if (disposed || finishing || paused || quizOpen || session?.CurrentWord == null)
                 return null;
             var word = words.FirstOrDefault(item =>
                 (string.IsNullOrEmpty(item._id) ? item.wordId : item._id) ==
@@ -373,17 +546,30 @@ namespace WordQuest.Gameplay
 
         public void Dispose()
         {
+            if (disposed) return;
+            disposed = true;
+            questionGeneration++;
+            questionLoad?.Cancel();
+            flowLifetime.Cancel();
+            awaitingAnswer = false;
+            world.SetSimulationEnabled(false);
             world.Encountered -= OnEncountered;
             world.BossPlayerDamaged -= OnBossPlayerDamaged;
         }
 
         private void OnEncountered(Encounter encounter)
         {
-            if (paused || quizOpen || session?.CurrentWord == null)
+            if (disposed || finishing || paused || quizOpen || session?.CurrentWord == null)
                 return;
 
             quizOpen = true;
             activeEncounter = encounter;
+            activeEncounterId = Guid.NewGuid().ToString("N");
+            firstSaved = false;
+            feedbackPending = false;
+            pendingRequest = null;
+            firstRequest = null;
+            correctionRequest = null;
             world.SetSimulationEnabled(false);
             var dto = words.First(item =>
                 (string.IsNullOrEmpty(item._id) ? item.wordId : item._id) ==
@@ -397,22 +583,61 @@ namespace WordQuest.Gameplay
             PresentQuestion(encounter.Kind == EncounterKind.Boss);
         }
 
-        private void PresentQuestion(bool isBoss)
+        private async void PresentQuestion(bool isBoss)
         {
-            if (session?.CurrentWord == null)
-                return;
-
+            if (disposed || session?.CurrentWord == null) return;
+            var generation = ++questionGeneration;
+            questionLoad?.Cancel();
+            questionLoad?.Dispose();
+            questionLoad = CancellationTokenSource.CreateLinkedTokenSource(activeToken, flowLifetime.Token);
+            if (isBoss) activeEncounterId = Guid.NewGuid().ToString("N");
+            pendingRequest = null;
+            firstRequest = null;
+            correctionRequest = null;
+            firstSaved = false;
             quizOpen = true;
             bossQuestion = isBoss;
             world.SetSimulationEnabled(false);
+            var selectedWord = session.CurrentWord;
+            if (!isBoss && activeEncounter?.Kind == EncounterKind.Monster)
+            {
+                if (!encounterWords.TryGetValue(activeEncounter.Id, out selectedWord))
+                {
+                    selectedWord = session.CurrentWord;
+                    encounterWords[activeEncounter.Id] = selectedWord;
+                }
+            }
+            questionWord = selectedWord;
             var dto = words.First(item =>
                 (string.IsNullOrEmpty(item._id) ? item.wordId : item._id) ==
-                session.CurrentWord.Id);
+                selectedWord.Id);
             var requested = suggestedQuestionType ??
                             QuizRotation.ForAnsweredCount(
                                 session.Snapshot.AnsweredCount);
-            var question =
-                QuizFactory.Create(dto, adaptive.Select(requested), words);
+            recommendedType = requested;
+            var presented = adaptive.Select(requested);
+            QuestionLoading?.Invoke(!isBoss);
+            QuizQuestion question;
+            try
+            {
+                using (var linked = CancellationTokenSource.CreateLinkedTokenSource(questionLoad.Token))
+                {
+                    var remote = await vocabulary.GetQuizAsync(selectedWord.Id, LearningAttempt.ApiType(presented), linked.Token);
+                    if (disposed || activeToken.IsCancellationRequested || generation != questionGeneration) return;
+                    question = remote.IsSuccess && remote.Data != null
+                        ? QuizFactory.FromServer(dto, presented, remote.Data)
+                        : QuizFactory.Create(dto, presented, words);
+                    questionDowngraded = !remote.IsSuccess || question.Type != requested;
+                }
+            }
+            catch (OperationCanceledException) { return; }
+            catch (Exception)
+            {
+                if (disposed || activeToken.IsCancellationRequested || generation != questionGeneration) return;
+                question = QuizFactory.Create(dto, presented, words);
+                questionDowngraded = true;
+            }
+            activeQuestion = question;
             if (isBoss && boss != null)
             {
                 question = new QuizQuestion(
@@ -422,6 +647,7 @@ namespace WordQuest.Gameplay
                     question.CorrectAnswer,
                     question.Options);
             }
+            awaitingAnswer = true;
             QuestionReady?.Invoke(question);
         }
 
@@ -433,6 +659,14 @@ namespace WordQuest.Gameplay
                 return;
             finishing = true;
             world.SetSimulationEnabled(false);
+            if (dailySession != null)
+            {
+                var response = await dailyService.ReadAsync(dailySession.sessionId, token);
+                if (disposed) return;
+                if (response.IsSuccess && response.Data != null) DailyFinished?.Invoke(response.Data);
+                else { finishing = false; AnswerSaveFailed?.Invoke("本轮答案已提交，完成状态暂未取回。返回主页可恢复。"); }
+                return;
+            }
             var result = session.Finish(
                 DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             await settlement.SettleAsync(
@@ -441,7 +675,7 @@ namespace WordQuest.Gameplay
                 selection.WordbookId,
                 userId,
                 token);
-            Finished?.Invoke(result);
+            if (!disposed && !token.IsCancellationRequested) Finished?.Invoke(result);
         }
 
         private async void OnBossPlayerDamaged()

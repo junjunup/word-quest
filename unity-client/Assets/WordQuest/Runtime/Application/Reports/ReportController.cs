@@ -23,6 +23,7 @@ namespace WordQuest.Application.Reports
 
     public sealed class LearningReportViewModel
     {
+        public LearningEvidenceDto Evidence { get; set; }
         public LearningStatsDto Overview { get; set; } = new LearningStatsDto();
         public IReadOnlyList<ChartPoint> Daily { get; set; } =
             Array.Empty<ChartPoint>();

@@ -5,6 +5,7 @@ namespace WordQuest.Infrastructure.Api.Dto
     [Serializable]
     public sealed class WordDto
     {
+        public string kind;
         public string _id;
         public string wordId;
         public string wordbookId;
@@ -31,7 +32,7 @@ namespace WordQuest.Infrastructure.Api.Dto
     public sealed class QuizDto
     {
         public WordDto question;
-        public string[] distractors;
+        public WordDto[] distractors;
         public string strategy;
     }
 

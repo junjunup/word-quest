@@ -80,9 +80,9 @@ namespace WordQuest.Presentation.Screens
             if (!result.LevelCompleted)
                 return "先稳住节奏，留意刚才的错题，再试一次就会更好。";
             if (result.CorrectRate >= 90)
-                return "掌握得很稳，保持这个节奏继续前进。";
+                return "本轮答题表现很好，之后通过延迟复习检验记忆。";
             if (result.CorrectRate >= 70)
-                return "基础已经掌握，下一关继续留意易错词。";
+                return "本轮答题表现不错，继续巩固易错词。";
             return "已经完成挑战，建议稍后复习本关错词。";
         }
 

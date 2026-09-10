@@ -64,6 +64,8 @@ jobs:
         run: npm run vocab:verify-db
       - name: Static syntax check
         run: npm run check
+      - name: Learning evidence and persistence regression
+        run: npm run test:learning
       - name: P0 acceptance validation
         run: npm run test:p0
       - name: Production safety validation
